@@ -14,6 +14,7 @@
 #    under the License.
 
 from ironicclient.common import http
+from ironicclient.v1 import chassis
 
 
 class Client(http.HTTPClient):
@@ -29,3 +30,4 @@ class Client(http.HTTPClient):
     def __init__(self, *args, **kwargs):
         """Initialize a new client for the Ironic v1 API."""
         super(Client, self).__init__(*args, **kwargs)
+        self.chassis = chassis.ChassisManager(self)
