@@ -52,8 +52,7 @@ class Manager(object):
         if body:
             return self.resource_class(self, body)
 
-    def _list(self, url, response_key=None, obj_class=None, body=None,
-              expect_single=False):
+    def _list(self, url, response_key=None, obj_class=None, body=None):
         resp, body = self.api.json_request('GET', url)
 
         if obj_class is None:
@@ -66,8 +65,9 @@ class Manager(object):
                 return []
         else:
             data = body
-        if expect_single:
+        if not isinstance(data, list):
             data = [data]
+
         return [obj_class(self, res, loaded=True) for res in data if res]
 
     def _update(self, url, body, response_key=None):
