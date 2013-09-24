@@ -30,7 +30,7 @@ class ChassisManager(base.Manager):
         return '/v1/chassis/%s' % id if id else '/v1/chassis'
 
     def list(self):
-        return self._list(self._path())
+        return self._list(self._path(), "chassis")
 
     def get(self, chassis_id):
         try:

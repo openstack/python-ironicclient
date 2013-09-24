@@ -23,7 +23,7 @@ from ironicclient.tests import utils
 import ironicclient.v1.chassis
 
 CHASSIS = {'id': 42,
-           'uuid': 'e74c40e0-d825-11e2-a28f-0800200c9a66',
+           'uuid': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
            'extra': {},
            'description': 'data-center-1-chassis'}
 
@@ -32,7 +32,14 @@ fixtures = {
     {
         'GET': (
             {},
-            [CHASSIS],
+            {"chassis": [CHASSIS]},
+        ),
+    },
+    '/v1/chassis/%s' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            CHASSIS,
         ),
     },
 }
@@ -45,11 +52,19 @@ class ChassisManagerTest(testtools.TestCase):
         self.api = utils.FakeAPI(fixtures)
         self.mgr = ironicclient.v1.chassis.ChassisManager(self.api)
 
-    def test_list_all(self):
-        chassis = list(self.mgr.list())
+    def test_chassis_list(self):
+        chassis = self.mgr.list()
         expect = [
             ('GET', '/v1/chassis', {}, None),
         ]
         self.assertEqual(self.api.calls, expect)
         self.assertEqual(len(chassis), 1)
-        self.assertEqual(chassis[0].description, 'data-center-1-chassis')
+
+    def test_chassis_show(self):
+        chassis = self.mgr.get(CHASSIS['uuid'])
+        expect = [
+            ('GET', '/v1/chassis/%s' % CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(chassis.uuid, CHASSIS['uuid'])
+        self.assertEqual(chassis.description, CHASSIS['description'])

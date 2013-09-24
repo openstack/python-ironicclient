@@ -25,3 +25,11 @@ def do_chassis_show(self, args):
         fields = ['uuid', 'description', 'extra']
         data = dict([(f, getattr(chassis, f, '')) for f in fields])
         utils.print_dict(data, wrap=72)
+
+
+def do_chassis_list(self, args):
+    """List chassis."""
+    chassis = self.chassis.list()
+    field_labels = ['UUID', 'Description']
+    fields = ['uuid', 'description']
+    utils.print_list(chassis, fields, field_labels, sortby=1)
