@@ -15,6 +15,7 @@
 
 from ironicclient.common import http
 from ironicclient.v1 import chassis
+from ironicclient.v1 import port
 
 
 class Client(http.HTTPClient):
@@ -31,3 +32,4 @@ class Client(http.HTTPClient):
         """Initialize a new client for the Ironic v1 API."""
         super(Client, self).__init__(*args, **kwargs)
         self.chassis = chassis.ChassisManager(self)
+        self.port = port.PortManager(self)

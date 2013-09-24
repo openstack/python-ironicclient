@@ -33,3 +33,24 @@ def do_chassis_list(self, args):
     field_labels = ['UUID', 'Description']
     fields = ['uuid', 'description']
     utils.print_list(chassis, fields, field_labels, sortby=1)
+
+
+@utils.arg('port', metavar='<port>', help="ID of port")
+def do_port_show(self, args):
+    """Show a port."""
+    try:
+        port = self.port.get(args.port)
+    except exc.HTTPNotFound:
+        raise exc.CommandError('Port not found: %s' % args.port)
+    else:
+        fields = ['uuid', 'address', 'extra']
+        data = dict([(f, getattr(port, f, '')) for f in fields])
+        utils.print_dict(data, wrap=72)
+
+
+def do_port_list(self, args):
+    """List ports."""
+    port = self.port.list()
+    field_labels = ['UUID', 'Address']
+    fields = ['uuid', 'address']
+    utils.print_list(port, fields, field_labels, sortby=1)
