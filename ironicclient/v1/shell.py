@@ -35,6 +35,36 @@ def do_chassis_list(self, args):
     utils.print_list(chassis, fields, field_labels, sortby=1)
 
 
+@utils.arg('--description',
+           metavar='<DESCRIPTION>',
+           help='Free text description of the chassis')
+@utils.arg('--extra',
+           metavar="<key=value>",
+           action='append',
+           help="Record arbitrary key/value metadata. "
+                "Can be specified multiple times.")
+def do_chassis_create(self, args):
+    """Create a new chassis."""
+    field_list = ['description', 'extra']
+    fields = dict((k, v) for (k, v) in vars(args).items()
+                  if k in field_list and not (v is None))
+    fields = utils.args_array_to_dict(fields, 'extra')
+    chassis = self.chassis.create(**fields)
+
+    field_list.append('uuid')
+    data = dict([(f, getattr(chassis, f, '')) for f in field_list])
+    utils.print_dict(data, wrap=72)
+
+
+@utils.arg('chassis', metavar='<chassis>', help="ID of chassis")
+def do_chassis_delete(self, args):
+    """Delete a chassis."""
+    try:
+        self.chassis.delete(args.chassis)
+    except exc.HTTPNotFound:
+        raise exc.CommandError('Chassis not found: %s' % args.chassis)
+
+
 @utils.arg('port', metavar='<port>', help="ID of port")
 def do_port_show(self, args):
     """Show a port."""
