@@ -17,6 +17,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
 import testtools
 
 from ironicclient.tests import utils
@@ -28,6 +29,10 @@ PORT = {'id': 987,
         'address': 'AA:BB:CC:DD:EE:FF',
         'extra': {}}
 
+CREATE_PORT = copy.deepcopy(PORT)
+del CREATE_PORT['id']
+del CREATE_PORT['uuid']
+
 fixtures = {
     '/v1/ports':
     {
@@ -35,12 +40,20 @@ fixtures = {
             {},
             {"ports": [PORT]},
         ),
+        'POST': (
+            {},
+            CREATE_PORT,
+        ),
     },
     '/v1/ports/%s' % PORT['uuid']:
     {
         'GET': (
             {},
             PORT,
+        ),
+        'DELETE': (
+            {},
+            None,
         ),
     },
 }
@@ -69,3 +82,19 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(self.api.calls, expect)
         self.assertEqual(port.uuid, PORT['uuid'])
         self.assertEqual(port.address, PORT['address'])
+
+    def test_create(self):
+        port = self.mgr.create(**CREATE_PORT)
+        expect = [
+            ('POST', '/v1/ports', {}, CREATE_PORT),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertTrue(port)
+
+    def test_delete(self):
+        port = self.mgr.delete(port_id=PORT['uuid'])
+        expect = [
+            ('DELETE', '/v1/ports/%s' % PORT['uuid'], {}, None),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertTrue(port is None)

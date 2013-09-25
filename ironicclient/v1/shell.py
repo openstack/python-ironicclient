@@ -84,3 +84,36 @@ def do_port_list(self, args):
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
     utils.print_list(port, fields, field_labels, sortby=1)
+
+
+@utils.arg('--address',
+           metavar='<ADDRESS>',
+           help='MAC Address for this port.')
+@utils.arg('--node_id',
+           metavar='<NODE_ID>',
+           help='ID of the node that this port belongs to.')
+@utils.arg('--extra',
+           metavar="<key=value>",
+           action='append',
+           help="Record arbitrary key/value metadata. "
+                "Can be specified multiple times.")
+def do_port_create(self, args):
+    """Create a new port."""
+    field_list = ['address', 'extra', 'node_id']
+    fields = dict((k, v) for (k, v) in vars(args).items()
+                  if k in field_list and not (v is None))
+    fields = utils.args_array_to_dict(fields, 'extra')
+    port = self.port.create(**fields)
+
+    field_list.append('uuid')
+    data = dict([(f, getattr(port, f, '')) for f in field_list])
+    utils.print_dict(data, wrap=72)
+
+
+@utils.arg('port', metavar='<port>', help="ID of port")
+def do_port_delete(self, args):
+    """Delete a port."""
+    try:
+        self.port.delete(args.port)
+    except exc.HTTPNotFound:
+        raise exc.CommandError('Port not found: %s' % args.port)
