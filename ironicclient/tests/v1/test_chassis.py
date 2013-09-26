@@ -17,6 +17,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
 import testtools
 
 from ironicclient.tests import utils
@@ -27,6 +28,10 @@ CHASSIS = {'id': 42,
            'extra': {},
            'description': 'data-center-1-chassis'}
 
+CREATE_CHASSIS = copy.deepcopy(CHASSIS)
+del CREATE_CHASSIS['id']
+del CREATE_CHASSIS['uuid']
+
 fixtures = {
     '/v1/chassis':
     {
@@ -34,12 +39,20 @@ fixtures = {
             {},
             {"chassis": [CHASSIS]},
         ),
+        'POST': (
+            {},
+            CREATE_CHASSIS,
+        ),
     },
     '/v1/chassis/%s' % CHASSIS['uuid']:
     {
         'GET': (
             {},
             CHASSIS,
+        ),
+        'DELETE': (
+            {},
+            None,
         ),
     },
 }
@@ -68,3 +81,19 @@ class ChassisManagerTest(testtools.TestCase):
         self.assertEqual(self.api.calls, expect)
         self.assertEqual(chassis.uuid, CHASSIS['uuid'])
         self.assertEqual(chassis.description, CHASSIS['description'])
+
+    def test_create(self):
+        chassis = self.mgr.create(**CREATE_CHASSIS)
+        expect = [
+            ('POST', '/v1/chassis', {}, CREATE_CHASSIS),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertTrue(chassis)
+
+    def test_delete(self):
+        chassis = self.mgr.delete(chassis_id=CHASSIS['uuid'])
+        expect = [
+            ('DELETE', '/v1/chassis/%s' % CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertTrue(chassis is None)
