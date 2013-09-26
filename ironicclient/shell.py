@@ -173,30 +173,9 @@ class IronicShell(object):
         self.subcommands = {}
         subparsers = parser.add_subparsers(metavar='<subcommand>')
         submodule = utils.import_versioned_module(version, 'shell')
-        self._find_actions(subparsers, submodule)
-        self._find_actions(subparsers, self)
-
+        submodule.enhance_parser(parser, subparsers, self.subcommands)
+        utils.define_commands_from_module(subparsers, self, self.subcommands)
         return parser
-
-    def _find_actions(self, subparsers, actions_module):
-        for attr in (a for a in dir(actions_module) if a.startswith('do_')):
-            # I prefer to be hypen-separated instead of underscores.
-            command = attr[3:].replace('_', '-')
-            callback = getattr(actions_module, attr)
-            desc = callback.__doc__ or ''
-            help = desc.strip().split('\n')[0]
-            arguments = getattr(callback, 'arguments', [])
-
-            subparser = subparsers.add_parser(command, help=help,
-                                              description=desc,
-                                              add_help=False,
-                                              formatter_class=HelpFormatter)
-            subparser.add_argument('-h', '--help', action='help',
-                                   help=argparse.SUPPRESS)
-            self.subcommands[command] = subparser
-            for (args, kwargs) in arguments:
-                subparser.add_argument(*args, **kwargs)
-            subparser.set_defaults(func=callback)
 
     def _setup_debugging(self, debug):
         if debug:
