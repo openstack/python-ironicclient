@@ -15,6 +15,9 @@
 #    under the License.
 
 from ironicclient.common import base
+from ironicclient import exc
+
+CREATION_ATTRIBUTES = ['address', 'extra', 'node_id']
 
 
 class Port(base.Resource):
@@ -37,3 +40,15 @@ class PortManager(base.Manager):
             return self._list(self._path(port_id))[0]
         except IndexError:
             return None
+
+    def create(self, **kwargs):
+        new = {}
+        for (key, value) in kwargs.items():
+            if key in CREATION_ATTRIBUTES:
+                new[key] = value
+            else:
+                raise exc.InvalidAttribute()
+        return self._create(self._path(), new)
+
+    def delete(self, port_id):
+        return self._delete(self._path(port_id))
