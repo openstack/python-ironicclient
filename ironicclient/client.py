@@ -35,7 +35,7 @@ def _get_ksclient(**kwargs):
 def _get_endpoint(client, **kwargs):
     """Get an endpoint using the provided keystone client."""
     return client.service_catalog.url_for(
-        service_type=kwargs.get('service_type') or 'ironic',
+        service_type=kwargs.get('service_type') or 'baremetal',
         endpoint_type=kwargs.get('endpoint_type') or 'publicURL')
 
 
