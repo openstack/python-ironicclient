@@ -54,3 +54,6 @@ class NodeManager(base.Manager):
 
     def delete(self, node_id):
         return self._delete(self._path(node_id))
+
+    def update(self, node_id, patch):
+        return self._update(self._path(node_id), patch)

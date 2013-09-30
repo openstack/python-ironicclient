@@ -32,6 +32,10 @@ CREATE_CHASSIS = copy.deepcopy(CHASSIS)
 del CREATE_CHASSIS['id']
 del CREATE_CHASSIS['uuid']
 
+UPDATED_CHASSIS = copy.deepcopy(CHASSIS)
+NEW_DESCR = 'new-description'
+UPDATED_CHASSIS['description'] = NEW_DESCR
+
 fixtures = {
     '/v1/chassis':
     {
@@ -54,6 +58,11 @@ fixtures = {
             {},
             None,
         ),
+        'PATCH': (
+            {},
+            UPDATED_CHASSIS,
+        ),
+
     },
 }
 
@@ -97,3 +106,14 @@ class ChassisManagerTest(testtools.TestCase):
         ]
         self.assertEqual(self.api.calls, expect)
         self.assertTrue(chassis is None)
+
+    def test_update(self):
+        patch = {'op': 'replace',
+                 'value': NEW_DESCR,
+                 'path': '/description'}
+        chassis = self.mgr.update(chassis_id=CHASSIS['uuid'], patch=patch)
+        expect = [
+            ('PATCH', '/v1/chassis/%s' % CHASSIS['uuid'], {}, patch),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(chassis.description, NEW_DESCR)

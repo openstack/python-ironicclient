@@ -53,3 +53,6 @@ class ChassisManager(base.Manager):
 
     def delete(self, chassis_id):
         return self._delete(self._path(chassis_id))
+
+    def update(self, chassis_id, patch):
+        return self._update(self._path(chassis_id), patch)

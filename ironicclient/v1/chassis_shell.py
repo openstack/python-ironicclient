@@ -20,6 +20,12 @@ from ironicclient.common import utils
 from ironicclient import exc
 
 
+def _print_chassis_show(chassis):
+    fields = ['uuid', 'description', 'extra']
+    data = dict([(f, getattr(chassis, f, '')) for f in fields])
+    utils.print_dict(data, wrap=72)
+
+
 @utils.arg('chassis', metavar='<chassis>', help="ID of chassis")
 def do_chassis_show(cc, args):
     """Show a chassis."""
@@ -28,9 +34,7 @@ def do_chassis_show(cc, args):
     except exc.HTTPNotFound:
         raise exc.CommandError('Chassis not found: %s' % args.chassis)
     else:
-        fields = ['uuid', 'description', 'extra']
-        data = dict([(f, getattr(chassis, f, '')) for f in fields])
-        utils.print_dict(data, wrap=72)
+        _print_chassis_show(chassis)
 
 
 def do_chassis_list(cc, args):
@@ -85,3 +89,27 @@ def do_node_show(cc, args):
                   'created_at', 'updated_at', 'reservation']
         data = dict([(f, getattr(node, f, '')) for f in fields])
         utils.print_dict(data, wrap=72)
+
+
+@utils.arg('chassis',
+           metavar='<CHASSIS>',
+           help="ID of chassis")
+@utils.arg('op',
+           metavar='<OP>',
+           choices=['add', 'replace', 'remove'],
+           help="Operations: 'add', 'replace' or 'remove'")
+@utils.arg('attributes',
+           metavar='<PATH=VALUE>',
+           nargs='+',
+           action='append',
+           default=[],
+           help="Attributes to add/replace or remove "
+                "(only PATH is necessary on remove)")
+def do_chassis_update(cc, args):
+    """Update a chassis."""
+    patch = utils.args_array_to_patch(args.op, args.attributes[0])
+    try:
+        chassis = cc.chassis.update(args.chassis, patch)
+    except exc.HTTPNotFound:
+        raise exc.CommandError('Chassis not found: %s' % args.chassis)
+    _print_chassis_show(chassis)

@@ -20,6 +20,15 @@ from ironicclient.common import utils
 from ironicclient import exc
 
 
+def _print_node_show(node):
+    fields = ['uuid', 'instance_uuid', 'power_state', 'target_power_state',
+              'provision_state', 'target_provision_state', 'driver',
+              'driver_info', 'properties', 'extra',
+              'created_at', 'updated_at', 'reservation']
+    data = dict([(f, getattr(node, f, '')) for f in fields])
+    utils.print_dict(data, wrap=72)
+
+
 @utils.arg('node', metavar='<node>', help="ID of node")
 def do_node_show(cc, args):
     """Show a node."""
@@ -28,12 +37,7 @@ def do_node_show(cc, args):
     except exc.HTTPNotFound:
         raise exc.CommandError('Node not found: %s' % args.node)
     else:
-        fields = ['uuid', 'instance_uuid', 'power_state', 'target_power_state',
-                  'provision_state', 'target_provision_state', 'driver',
-                  'driver_info', 'properties', 'extra',
-                  'created_at', 'updated_at', 'reservation']
-        data = dict([(f, getattr(node, f, '')) for f in fields])
-        utils.print_dict(data, wrap=72)
+        _print_node_show(node)
 
 
 def do_node_list(cc, args):
@@ -86,3 +90,27 @@ def do_node_delete(cc, args):
         cc.node.delete(args.node)
     except exc.HTTPNotFound:
         raise exc.CommandError('Node not found: %s' % args.node)
+
+
+@utils.arg('node',
+           metavar='<NODE>',
+           help="ID of node")
+@utils.arg('op',
+           metavar='<OP>',
+           choices=['add', 'replace', 'remove'],
+           help="Operations: 'add', 'replace' or 'remove'")
+@utils.arg('attributes',
+           metavar='<PATH=VALUE>',
+           nargs='+',
+           action='append',
+           default=[],
+           help="Attributes to add/replace or remove "
+                "(only PATH is necessary on remove)")
+def do_node_update(cc, args):
+    """Update a node."""
+    patch = utils.args_array_to_patch(args.op, args.attributes[0])
+    try:
+        node = cc.node.update(args.node, patch)
+    except exc.HTTPNotFound:
+        raise exc.CommandError('Node not found: %s' % args.node)
+    _print_node_show(node)
