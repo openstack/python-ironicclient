@@ -46,7 +46,8 @@ class HTTPException(ClientException):
         self.details = details
 
     def __str__(self):
-        return "%s (HTTP %s)" % (self.__class__.__name__, self.code)
+        return self.details or "%s (HTTP %s)" % (self.__class__.__name__,
+                                                 self.code)
 
 
 class HTTPMultipleChoices(HTTPException):
@@ -147,10 +148,10 @@ for obj_name in dir(sys.modules[__name__]):
         _code_map[obj.code] = obj
 
 
-def from_response(response):
+def from_response(response, error=None):
     """Return an instance of an HTTPException based on httplib response."""
     cls = _code_map.get(response.status, HTTPException)
-    return cls()
+    return cls(error)
 
 
 class NoTokenLookupException(Exception):

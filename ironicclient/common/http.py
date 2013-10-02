@@ -124,6 +124,16 @@ class HTTPClient(object):
         base_url = _args[2]
         return '%s/%s' % (base_url.rstrip('/'), url.lstrip('/'))
 
+    def _extract_error_message(self, body):
+        try:
+            body_json = json.loads(body)
+            if 'error_message' in body_json:
+                body_json = json.loads(body_json['error_message'])
+                if 'faultstring' in body_json:
+                    return body_json['faultstring']
+        except ValueError:
+            pass
+
     def _http_request(self, url, method, **kwargs):
         """Send an http request with the specified characteristics.
 
@@ -156,6 +166,7 @@ class HTTPClient(object):
         body_iter = ResponseBodyIterator(resp)
 
         # Read body into string if it isn't obviously image data
+        body_str = None
         if resp.getheader('content-type', None) != 'application/octet-stream':
             body_str = ''.join([chunk for chunk in body_iter])
             self.log_http_response(resp, body_str)
@@ -165,7 +176,8 @@ class HTTPClient(object):
 
         if 400 <= resp.status < 600:
             LOG.warn("Request returned failure status.")
-            raise exc.from_response(resp)
+            err_msg = self._extract_error_message(body_str)
+            raise exc.from_response(resp, err_msg)
         elif resp.status in (301, 302, 305):
             # Redirected. Reissue the request to the new location.
             return self._http_request(resp['location'], method, **kwargs)

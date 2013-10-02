@@ -184,6 +184,10 @@ class IronicShell(object):
                 level=logging.DEBUG)
 
             httplib2.debuglevel = 1
+        else:
+            logging.basicConfig(
+                    format="%(levelname)s %(message)s",
+                    level=logging.CRITICAL)
 
     def main(self, argv):
         # Parse args once to find version
