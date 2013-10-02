@@ -20,7 +20,13 @@ from ironicclient.common import utils
 from ironicclient import exc
 
 
-@utils.arg('port', metavar='<port>', help="ID of port")
+def _print_port_show(port):
+    fields = ['uuid', 'address', 'extra']
+    data = dict([(f, getattr(port, f, '')) for f in fields])
+    utils.print_dict(data, wrap=72)
+
+
+@utils.arg('port', metavar='<PORT>', help="ID of port")
 def do_port_show(cc, args):
     """Show a port."""
     try:
@@ -28,9 +34,7 @@ def do_port_show(cc, args):
     except exc.HTTPNotFound:
         raise exc.CommandError('Port not found: %s' % args.port)
     else:
-        fields = ['uuid', 'address', 'extra']
-        data = dict([(f, getattr(port, f, '')) for f in fields])
-        utils.print_dict(data, wrap=72)
+        _print_port_show(port)
 
 
 def do_port_list(cc, args):
@@ -48,7 +52,7 @@ def do_port_list(cc, args):
            metavar='<NODE_ID>',
            help='ID of the node that this port belongs to.')
 @utils.arg('--extra',
-           metavar="<key=value>",
+           metavar="<KEY=VALUE>",
            action='append',
            help="Record arbitrary key/value metadata. "
                 "Can be specified multiple times.")
@@ -72,3 +76,27 @@ def do_port_delete(cc, args):
         cc.port.delete(args.port)
     except exc.HTTPNotFound:
         raise exc.CommandError('Port not found: %s' % args.port)
+
+
+@utils.arg('port',
+           metavar='<PORT>',
+           help="ID of port")
+@utils.arg('op',
+           metavar='<OP>',
+           choices=['add', 'replace', 'remove'],
+           help="Operations: 'add', 'replace' or 'remove'")
+@utils.arg('attributes',
+           metavar='<PATH=VALUE>',
+           nargs='+',
+           action='append',
+           default=[],
+           help="Attributes to add/replace or remove "
+                "(only PATH is necessary on remove)")
+def do_port_update(cc, args):
+    """Update a port."""
+    patch = utils.args_array_to_patch(args.op, args.attributes[0])
+    try:
+        port = cc.port.update(args.port, patch)
+    except exc.HTTPNotFound:
+        raise exc.CommandError('Port not found: %s' % args.port)
+    _print_port_show(port)

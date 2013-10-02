@@ -52,3 +52,6 @@ class PortManager(base.Manager):
 
     def delete(self, port_id):
         return self._delete(self._path(port_id))
+
+    def update(self, port_id, patch):
+        return self._update(self._path(port_id), patch)

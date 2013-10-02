@@ -34,6 +34,9 @@ CREATE_NODE = copy.deepcopy(NODE)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
 
+UPDATED_NODE = copy.deepcopy(NODE)
+NEW_DRIVER = 'new-driver'
+UPDATED_NODE['driver'] = NEW_DRIVER
 
 fixtures = {
     '/v1/nodes':
@@ -56,6 +59,10 @@ fixtures = {
         'DELETE': (
             {},
             None,
+        ),
+        'PATCH': (
+            {},
+            UPDATED_NODE,
         ),
     },
 }
@@ -99,3 +106,14 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(self.api.calls, expect)
         self.assertTrue(node is None)
+
+    def test_update(self):
+        patch = {'op': 'replace',
+                 'value': NEW_DRIVER,
+                 'path': '/driver'}
+        node = self.mgr.update(node_id=NODE['uuid'], patch=patch)
+        expect = [
+            ('PATCH', '/v1/nodes/%s' % NODE['uuid'], {}, patch),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(node.driver, NEW_DRIVER)

@@ -33,6 +33,10 @@ CREATE_PORT = copy.deepcopy(PORT)
 del CREATE_PORT['id']
 del CREATE_PORT['uuid']
 
+UPDATED_PORT = copy.deepcopy(PORT)
+NEW_ADDR = 'AA:AA:AA:AA:AA:AA'
+UPDATED_PORT['address'] = NEW_ADDR
+
 fixtures = {
     '/v1/ports':
     {
@@ -54,6 +58,10 @@ fixtures = {
         'DELETE': (
             {},
             None,
+        ),
+        'PATCH': (
+            {},
+            UPDATED_PORT,
         ),
     },
 }
@@ -98,3 +106,14 @@ class PortManagerTest(testtools.TestCase):
         ]
         self.assertEqual(self.api.calls, expect)
         self.assertTrue(port is None)
+
+    def test_update(self):
+        patch = {'op': 'replace',
+                 'value': NEW_ADDR,
+                 'path': '/address'}
+        port = self.mgr.update(port_id=PORT['uuid'], patch=patch)
+        expect = [
+            ('PATCH', '/v1/ports/%s' % PORT['uuid'], {}, patch),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(port.address, NEW_ADDR)
