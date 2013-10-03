@@ -26,7 +26,7 @@ def _print_port_show(port):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('port', metavar='<PORT>', help="ID of port")
+@utils.arg('port', metavar='<port id>', help="ID of port")
 def do_port_show(cc, args):
     """Show a port."""
     try:
@@ -46,16 +46,16 @@ def do_port_list(cc, args):
 
 
 @utils.arg('--address',
-           metavar='<ADDRESS>',
-           help='MAC Address for this port.')
+           metavar='<address>',
+           help='MAC Address for this port [REQUIRED]')
 @utils.arg('--node_id',
-           metavar='<NODE_ID>',
-           help='ID of the node that this port belongs to.')
+           metavar='<node id>',
+           help='ID of the node that this port belongs to [REQUIRED]')
 @utils.arg('--extra',
-           metavar="<KEY=VALUE>",
+           metavar="<key=value>",
            action='append',
            help="Record arbitrary key/value metadata. "
-                "Can be specified multiple times.")
+                "Can be specified multiple times")
 def do_port_create(cc, args):
     """Create a new port."""
     field_list = ['address', 'extra', 'node_id']
@@ -69,7 +69,7 @@ def do_port_create(cc, args):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('port', metavar='<port>', help="ID of port")
+@utils.arg('port', metavar='<port id>', help="ID of port")
 def do_port_delete(cc, args):
     """Delete a port."""
     try:
@@ -79,14 +79,14 @@ def do_port_delete(cc, args):
 
 
 @utils.arg('port',
-           metavar='<PORT>',
+           metavar='<port id>',
            help="ID of port")
 @utils.arg('op',
-           metavar='<OP>',
+           metavar='<op>',
            choices=['add', 'replace', 'remove'],
            help="Operations: 'add', 'replace' or 'remove'")
 @utils.arg('attributes',
-           metavar='<PATH=VALUE>',
+           metavar='<path=value>',
            nargs='+',
            action='append',
            default=[],
