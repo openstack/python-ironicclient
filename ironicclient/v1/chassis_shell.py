@@ -75,22 +75,6 @@ def do_chassis_delete(cc, args):
         raise exc.CommandError('Chassis not found: %s' % args.chassis)
 
 
-@utils.arg('node', metavar='<node>', help="ID of node")
-def do_node_show(cc, args):
-    """Show a node."""
-    try:
-        node = cc.node.get(args.node)
-    except exc.HTTPNotFound:
-        raise exc.CommandError('Node not found: %s' % args.node)
-    else:
-        fields = ['uuid', 'instance_uuid', 'power_state', 'target_power_state',
-                  'provision_state', 'target_provision_state', 'driver',
-                  'driver_info', 'properties', 'extra',
-                  'created_at', 'updated_at', 'reservation']
-        data = dict([(f, getattr(node, f, '')) for f in fields])
-        utils.print_dict(data, wrap=72)
-
-
 @utils.arg('chassis',
            metavar='<CHASSIS>',
            help="ID of chassis")
