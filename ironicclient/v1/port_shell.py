@@ -69,13 +69,18 @@ def do_port_create(cc, args):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('port', metavar='<port id>', help="ID of port")
+@utils.arg('port',
+           metavar='<port id>',
+           nargs='+',
+           help="ID of port")
 def do_port_delete(cc, args):
     """Delete a port."""
-    try:
-        cc.port.delete(args.port)
-    except exc.HTTPNotFound:
-        raise exc.CommandError('Port not found: %s' % args.port)
+    for p in args.port:
+        try:
+            cc.port.delete(p)
+        except exc.HTTPNotFound:
+            raise exc.CommandError('Port not found: %s' % p)
+        print 'Deleted port %s' % p
 
 
 @utils.arg('port',

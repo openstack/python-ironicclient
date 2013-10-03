@@ -66,13 +66,18 @@ def do_chassis_create(cc, args):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('chassis', metavar='<chassis id>', help="ID of chassis")
+@utils.arg('chassis',
+           metavar='<chassis id>',
+           nargs='+',
+           help="ID of chassis")
 def do_chassis_delete(cc, args):
     """Delete a chassis."""
-    try:
-        cc.chassis.delete(args.chassis)
-    except exc.HTTPNotFound:
-        raise exc.CommandError('Chassis not found: %s' % args.chassis)
+    for c in args.chassis:
+        try:
+            cc.chassis.delete(c)
+        except exc.HTTPNotFound:
+            raise exc.CommandError('Chassis not found: %s' % c)
+        print 'Deleted chassis %s' % c
 
 
 @utils.arg('chassis',

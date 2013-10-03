@@ -86,13 +86,18 @@ def do_node_create(cc, args):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('node', metavar='<node id>', help="ID of node")
+@utils.arg('node',
+           metavar='<node id>',
+           nargs='+',
+           help="ID of node")
 def do_node_delete(cc, args):
     """Delete a node."""
-    try:
-        cc.node.delete(args.node)
-    except exc.HTTPNotFound:
-        raise exc.CommandError('Node not found: %s' % args.node)
+    for n in args.node:
+        try:
+            cc.node.delete(n)
+        except exc.HTTPNotFound:
+            raise exc.CommandError('Node not found: %s' % n)
+        print 'Deleted node %s' % n
 
 
 @utils.arg('node',
