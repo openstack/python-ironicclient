@@ -26,7 +26,7 @@ def _print_chassis_show(chassis):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('chassis', metavar='<chassis>', help="ID of chassis")
+@utils.arg('chassis', metavar='<chassis id>', help="ID of chassis")
 def do_chassis_show(cc, args):
     """Show a chassis."""
     try:
@@ -46,13 +46,13 @@ def do_chassis_list(cc, args):
 
 
 @utils.arg('--description',
-           metavar='<DESCRIPTION>',
+           metavar='<description>',
            help='Free text description of the chassis')
 @utils.arg('--extra',
            metavar="<key=value>",
            action='append',
            help="Record arbitrary key/value metadata. "
-                "Can be specified multiple times.")
+                "Can be specified multiple times")
 def do_chassis_create(cc, args):
     """Create a new chassis."""
     field_list = ['description', 'extra']
@@ -66,7 +66,7 @@ def do_chassis_create(cc, args):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('chassis', metavar='<chassis>', help="ID of chassis")
+@utils.arg('chassis', metavar='<chassis id>', help="ID of chassis")
 def do_chassis_delete(cc, args):
     """Delete a chassis."""
     try:
@@ -76,14 +76,14 @@ def do_chassis_delete(cc, args):
 
 
 @utils.arg('chassis',
-           metavar='<CHASSIS>',
+           metavar='<chassis id>',
            help="ID of chassis")
 @utils.arg('op',
-           metavar='<OP>',
+           metavar='<op>',
            choices=['add', 'replace', 'remove'],
            help="Operations: 'add', 'replace' or 'remove'")
 @utils.arg('attributes',
-           metavar='<PATH=VALUE>',
+           metavar='<path=value>',
            nargs='+',
            action='append',
            default=[],

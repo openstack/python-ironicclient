@@ -64,23 +64,23 @@ class IronicShell(object):
                             "The server's certificate will "
                             "not be verified against any certificate "
                             "authorities. This option should be used with "
-                            "caution.")
+                            "caution")
 
         parser.add_argument('--cert-file',
                             help='Path of certificate file to use in SSL '
                             'connection. This file can optionally be prepended'
-                            ' with the private key.')
+                            ' with the private key')
 
         parser.add_argument('--key-file',
                             help='Path of client key to use in SSL connection.'
                             ' This option is not necessary if your key is '
-                            'prepended to your cert file.')
+                            'prepended to your cert file')
 
         parser.add_argument('--ca-file',
                             help='Path of CA SSL certificate(s) used to verify'
                             ' the remote server certificate. Without this '
                             'option ironic looks for the default system '
-                            'CA certificates.')
+                            'CA certificates')
 
         parser.add_argument('--timeout',
                             default=600,

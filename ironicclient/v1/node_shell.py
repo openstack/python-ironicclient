@@ -29,7 +29,7 @@ def _print_node_show(node):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('node', metavar='<node>', help="ID of node")
+@utils.arg('node', metavar='<node id>', help="ID of node")
 def do_node_show(cc, args):
     """Show a node."""
     try:
@@ -50,27 +50,27 @@ def do_node_list(cc, args):
 
 
 @utils.arg('--chassis_id',
-           metavar='<CHASSIS_ID>',
-           help='ID of the chassis that this node belongs to.')
+           metavar='<chassis id>',
+           help='ID of the chassis that this node belongs to [REQUIRED]')
 @utils.arg('--driver',
-           metavar='<DRIVER>',
-           help='Driver used to control the node. [REQUIRED]')
+           metavar='<driver>',
+           help='Driver used to control the node [REQUIRED]')
 @utils.arg('--driver_info',
            metavar='<key=value>',
            action='append',
            help='Key/value pairs used by the driver. '
-                'Can be specified multiple times.')
+                'Can be specified multiple times')
 @utils.arg('--properties',
            metavar='<key=value>',
            action='append',
            help='Key/value pairs describing the physical characteristics '
                 'of the node. This is exported to Nova and used by the '
-                'scheduler. Can be specified multiple times.')
+                'scheduler. Can be specified multiple times')
 @utils.arg('--extra',
            metavar='<key=value>',
            action='append',
            help="Record arbitrary key/value metadata. "
-                "Can be specified multiple times.")
+                "Can be specified multiple times")
 def do_node_create(cc, args):
     """Create a new node."""
     field_list = ['chassis_id', 'driver', 'driver_info', 'properties', 'extra']
@@ -86,7 +86,7 @@ def do_node_create(cc, args):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('node', metavar='<node>', help="ID of node")
+@utils.arg('node', metavar='<node id>', help="ID of node")
 def do_node_delete(cc, args):
     """Delete a node."""
     try:
@@ -96,14 +96,14 @@ def do_node_delete(cc, args):
 
 
 @utils.arg('node',
-           metavar='<NODE>',
+           metavar='<node id>',
            help="ID of node")
 @utils.arg('op',
-           metavar='<OP>',
+           metavar='<op>',
            choices=['add', 'replace', 'remove'],
            help="Operations: 'add', 'replace' or 'remove'")
 @utils.arg('attributes',
-           metavar='<PATH=VALUE>',
+           metavar='<path=value>',
            nargs='+',
            action='append',
            default=[],
