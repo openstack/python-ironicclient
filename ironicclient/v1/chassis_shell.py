@@ -45,10 +45,10 @@ def do_chassis_list(cc, args):
     utils.print_list(chassis, fields, field_labels, sortby=1)
 
 
-@utils.arg('--description',
+@utils.arg('-d', '--description',
            metavar='<description>',
            help='Free text description of the chassis')
-@utils.arg('--extra',
+@utils.arg('-e', '--extra',
            metavar="<key=value>",
            action='append',
            help="Record arbitrary key/value metadata. "

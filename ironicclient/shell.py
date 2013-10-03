@@ -47,7 +47,7 @@ class IronicShell(object):
                             action='version',
                             version=ironicclient.__version__)
 
-        parser.add_argument('-d', '--debug',
+        parser.add_argument('--debug',
                             default=bool(utils.env('IRONICCLIENT_DEBUG')),
                             action='store_true',
                             help='Defaults to env[IRONICCLIENT_DEBUG]')

@@ -49,24 +49,24 @@ def do_node_list(cc, args):
     utils.print_list(nodes, fields, field_labels, sortby=1)
 
 
-@utils.arg('--chassis_id',
+@utils.arg('-c', '--chassis_id',
            metavar='<chassis id>',
            help='ID of the chassis that this node belongs to [REQUIRED]')
-@utils.arg('--driver',
+@utils.arg('-d', '--driver',
            metavar='<driver>',
            help='Driver used to control the node [REQUIRED]')
-@utils.arg('--driver_info',
+@utils.arg('-i', '--driver_info',
            metavar='<key=value>',
            action='append',
            help='Key/value pairs used by the driver. '
                 'Can be specified multiple times')
-@utils.arg('--properties',
+@utils.arg('-p', '--properties',
            metavar='<key=value>',
            action='append',
            help='Key/value pairs describing the physical characteristics '
                 'of the node. This is exported to Nova and used by the '
                 'scheduler. Can be specified multiple times')
-@utils.arg('--extra',
+@utils.arg('-e', '--extra',
            metavar='<key=value>',
            action='append',
            help="Record arbitrary key/value metadata. "

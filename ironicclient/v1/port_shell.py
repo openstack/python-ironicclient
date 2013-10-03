@@ -45,13 +45,13 @@ def do_port_list(cc, args):
     utils.print_list(port, fields, field_labels, sortby=1)
 
 
-@utils.arg('--address',
+@utils.arg('-a', '--address',
            metavar='<address>',
            help='MAC Address for this port [REQUIRED]')
-@utils.arg('--node_id',
+@utils.arg('-n', '--node_id',
            metavar='<node id>',
            help='ID of the node that this port belongs to [REQUIRED]')
-@utils.arg('--extra',
+@utils.arg('-e', '--extra',
            metavar="<key=value>",
            action='append',
            help="Record arbitrary key/value metadata. "
