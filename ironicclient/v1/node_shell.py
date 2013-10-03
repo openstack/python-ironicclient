@@ -49,6 +49,9 @@ def do_node_list(cc, args):
     utils.print_list(nodes, fields, field_labels, sortby=1)
 
 
+@utils.arg('--chassis_id',
+           metavar='<CHASSIS_ID>',
+           help='ID of the chassis that this node belongs to.')
 @utils.arg('--driver',
            metavar='<DRIVER>',
            help='Driver used to control the node. [REQUIRED]')
