@@ -122,3 +122,15 @@ def do_node_update(cc, args):
     except exc.HTTPNotFound:
         raise exc.CommandError('Node not found: %s' % args.node)
     _print_node_show(node)
+
+
+@utils.arg('node', metavar='<node id>', help="ID of node")
+def do_node_port_list(cc, args):
+    """List the ports contained in the node."""
+    try:
+        ports = cc.node.list_ports(args.node)
+    except exc.HTTPNotFound:
+        raise exc.CommandError(_('Node not found: %s') % args.node)
+    field_labels = ['UUID', 'Address']
+    fields = ['uuid', 'address']
+    utils.print_list(ports, fields, field_labels, sortby=1)
