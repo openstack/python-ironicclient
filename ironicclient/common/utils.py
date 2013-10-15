@@ -104,7 +104,7 @@ def print_dict(d, dict_property="Property", wrap=0):
     pt = prettytable.PrettyTable([dict_property, 'Value'],
                                  caching=False, print_empty=False)
     pt.align = 'l'
-    for k, v in six.iteritems(d):
+    for k, v in sorted(six.iteritems(d), key=lambda x: x[0]):
         # convert dict to str to check length
         if isinstance(v, dict):
             v = str(v)
