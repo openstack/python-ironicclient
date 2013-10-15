@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import print_function
+
 import argparse
 import os
 import sys
@@ -94,7 +96,7 @@ def print_list(objs, fields, field_labels, formatters={}, sortby=0):
                 data = getattr(o, field, '')
                 row.append(data)
         pt.add_row(row)
-    print pt.get_string(sortby=field_labels[sortby])
+    print(pt.get_string(sortby=field_labels[sortby]))
 
 
 def print_dict(d, dict_property="Property", wrap=0):
@@ -117,7 +119,7 @@ def print_dict(d, dict_property="Property", wrap=0):
                 col1 = ''
         else:
             pt.add_row([k, v])
-    print pt.get_string()
+    print(pt.get_string())
 
 
 def find_resource(manager, name_or_id):
@@ -206,5 +208,5 @@ def args_array_to_patch(op, attributes):
 
 def exit(msg=''):
     if msg:
-        print >> sys.stderr, msg
+        print(msg, file=sys.stderr)
     sys.exit(1)
