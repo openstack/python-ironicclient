@@ -36,6 +36,10 @@ class ChassisManager(base.Manager):
     def list(self):
         return self._list(self._path(), "chassis")
 
+    def list_nodes(self, chassis_id):
+        path = "%s/nodes" % chassis_id
+        return self._list(self._path(path), "nodes")
+
     def get(self, chassis_id):
         try:
             return self._list(self._path(chassis_id))[0]

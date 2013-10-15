@@ -102,3 +102,16 @@ def do_chassis_update(cc, args):
     except exc.HTTPNotFound:
         raise exc.CommandError('Chassis not found: %s' % args.chassis)
     _print_chassis_show(chassis)
+
+
+@utils.arg('chassis', metavar='<chassis id>', help="ID of chassis")
+def do_chassis_node_list(cc, args):
+    """List the nodes contained in the chassis."""
+    try:
+        nodes = cc.chassis.list_nodes(args.chassis)
+    except exc.HTTPNotFound:
+        raise exc.CommandError(_('Chassis not found: %s') % args.chassis)
+    field_labels = ['UUID', 'Instance UUID',
+                    'Power State', 'Provisioning State']
+    fields = ['uuid', 'instance_uuid', 'power_state', 'provision_state']
+    utils.print_list(nodes, fields, field_labels, sortby=1)

@@ -28,6 +28,14 @@ CHASSIS = {'id': 42,
            'extra': {},
            'description': 'data-center-1-chassis'}
 
+NODE = {'id': 123,
+        'uuid': '66666666-7777-8888-9999-000000000000',
+        'chassis_id': 42,
+        'driver': 'fake',
+        'driver_info': {'user': 'foo', 'password': 'bar'},
+        'properties': {'num_cpu': 4},
+        'extra': {}}
+
 CREATE_CHASSIS = copy.deepcopy(CHASSIS)
 del CREATE_CHASSIS['id']
 del CREATE_CHASSIS['uuid']
@@ -62,7 +70,13 @@ fixtures = {
             {},
             UPDATED_CHASSIS,
         ),
-
+    },
+    '/v1/chassis/%s/nodes' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE]},
+        ),
     },
 }
 
@@ -117,3 +131,12 @@ class ChassisManagerTest(testtools.TestCase):
         ]
         self.assertEqual(self.api.calls, expect)
         self.assertEqual(chassis.description, NEW_DESCR)
+
+    def test_chassis_node_list(self):
+        nodes = self.mgr.list_nodes(CHASSIS['uuid'])
+        expect = [
+            ('GET', '/v1/chassis/%s/nodes' % CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(len(nodes), 1)
+        self.assertEqual(nodes[0].uuid, NODE['uuid'])
