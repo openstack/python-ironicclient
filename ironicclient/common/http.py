@@ -18,8 +18,8 @@ import logging
 import os
 import six
 import socket
-import urlparse
 
+from ironicclient.openstack.common.py3kcompat import urlutils
 from six.moves import http_client as httplib
 
 try:
@@ -32,11 +32,6 @@ try:
     import json
 except ImportError:
     import simplejson as json
-
-# Python 2.5 compat fix
-if not hasattr(urlparse, 'parse_qsl'):
-    import cgi
-    urlparse.parse_qsl = cgi.parse_qsl
 
 
 from ironicclient import exc
@@ -56,7 +51,7 @@ class HTTPClient(object):
 
     @staticmethod
     def get_connection_params(endpoint, **kwargs):
-        parts = urlparse.urlparse(endpoint)
+        parts = urlutils.urlparse(endpoint)
 
         _args = (parts.hostname, parts.port, parts.path)
         _kwargs = {'timeout': (float(kwargs.get('timeout'))
