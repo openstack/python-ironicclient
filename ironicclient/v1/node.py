@@ -37,6 +37,10 @@ class NodeManager(base.Manager):
     def list(self):
         return self._list(self._path(), "nodes")
 
+    def list_ports(self, node_id):
+        path = "%s/ports" % node_id
+        return self._list(self._path(path), "ports")
+
     def get(self, node_id):
         try:
             return self._list(self._path(node_id))[0]

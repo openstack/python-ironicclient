@@ -30,6 +30,12 @@ NODE = {'id': 123,
         'properties': {'num_cpu': 4},
         'extra': {}}
 
+PORT = {'id': 456,
+        'uuid': '11111111-2222-3333-4444-555555555555',
+        'node_id': 123,
+        'address': 'AA:AA:AA:AA:AA:AA',
+        'extra': {}}
+
 CREATE_NODE = copy.deepcopy(NODE)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
@@ -63,6 +69,13 @@ fixtures = {
         'PATCH': (
             {},
             UPDATED_NODE,
+        ),
+    },
+    '/v1/nodes/%s/ports' % NODE['uuid']:
+    {
+        'GET': (
+            {},
+            {"ports": [PORT]},
         ),
     },
 }
@@ -117,3 +130,13 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(self.api.calls, expect)
         self.assertEqual(node.driver, NEW_DRIVER)
+
+    def test_node_port_list(self):
+        ports = self.mgr.list_ports(NODE['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/ports' % NODE['uuid'], {}, None),
+        ]
+        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(len(ports), 1)
+        self.assertEqual(ports[0].uuid, PORT['uuid'])
+        self.assertEqual(ports[0].address, PORT['address'])
