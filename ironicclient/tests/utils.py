@@ -15,7 +15,6 @@
 
 import copy
 import fixtures
-import mox
 import StringIO
 import testtools
 
@@ -26,8 +25,6 @@ class BaseTestCase(testtools.TestCase):
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
-        self.m = mox.Mox()
-        self.addCleanup(self.m.UnsetStubs)
         self.useFixture(fixtures.FakeLogger())
 
 

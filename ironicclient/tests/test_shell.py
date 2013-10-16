@@ -18,12 +18,9 @@ import sys
 import fixtures
 from testtools import matchers
 
-from keystoneclient.v2_0 import client as ksclient
-
 from ironicclient import exc
 from ironicclient import shell as ironic_shell
 from ironicclient.tests import utils
-from ironicclient.v1 import client as v1client
 
 FAKE_ENV = {'OS_USERNAME': 'username',
             'OS_PASSWORD': 'password',
@@ -41,9 +38,6 @@ class ShellTest(utils.BaseTestCase):
 
     def setUp(self):
         super(ShellTest, self).setUp()
-        self.m.StubOutWithMock(ksclient, 'Client')
-        self.m.StubOutWithMock(v1client.Client, 'json_request')
-        self.m.StubOutWithMock(v1client.Client, 'raw_request')
 
     def shell(self, argstr):
         orig = sys.stdout
