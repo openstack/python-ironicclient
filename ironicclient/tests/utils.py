@@ -15,7 +15,7 @@
 
 import copy
 import fixtures
-import StringIO
+import six
 import testtools
 
 from ironicclient.common import http
@@ -40,7 +40,7 @@ class FakeAPI(object):
 
     def raw_request(self, *args, **kwargs):
         fixture = self._request(*args, **kwargs)
-        body_iter = http.ResponseBodyIterator(StringIO.StringIO(fixture[1]))
+        body_iter = http.ResponseBodyIterator(six.StringIO(fixture[1]))
         return FakeResponse(fixture[0]), body_iter
 
     def json_request(self, *args, **kwargs):

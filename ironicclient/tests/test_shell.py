@@ -10,9 +10,9 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
-import cStringIO
 import httplib2
 import re
+import six
 import sys
 
 import fixtures
@@ -42,7 +42,7 @@ class ShellTest(utils.BaseTestCase):
     def shell(self, argstr):
         orig = sys.stdout
         try:
-            sys.stdout = cStringIO.StringIO()
+            sys.stdout = six.StringIO()
             _shell = ironic_shell.IronicShell()
             _shell.main(argstr.split())
         except SystemExit:
