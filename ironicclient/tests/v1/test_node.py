@@ -36,6 +36,9 @@ PORT = {'id': 456,
         'address': 'AA:AA:AA:AA:AA:AA',
         'extra': {}}
 
+POWER_STATE = {'current': 'power off',
+               'target': 'power on'}
+
 CREATE_NODE = copy.deepcopy(NODE)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
@@ -76,6 +79,13 @@ fixtures = {
         'GET': (
             {},
             {"ports": [PORT]},
+        ),
+    },
+    '/v1/nodes/%s/state/power' % NODE['uuid']:
+    {
+        'PUT': (
+            {},
+            POWER_STATE,
         ),
     },
 }
@@ -140,3 +150,12 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(len(ports), 1)
         self.assertEqual(ports[0].uuid, PORT['uuid'])
         self.assertEqual(ports[0].address, PORT['address'])
+
+    def test_node_set_power_state(self):
+        power_state = self.mgr.set_power_state(NODE['uuid'], "on")
+        body = {'target': 'power on'}
+        expect = [
+            ('PUT', '/v1/nodes/%s/state/power' % NODE['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual('power on', power_state.target)

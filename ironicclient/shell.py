@@ -23,6 +23,9 @@ import ironicclient
 from ironicclient import client as iroclient
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.openstack.common import gettextutils
+
+gettextutils.install('ironicclient')
 
 
 class IronicShell(object):

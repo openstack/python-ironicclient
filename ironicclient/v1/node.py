@@ -61,3 +61,8 @@ class NodeManager(base.Manager):
 
     def update(self, node_id, patch):
         return self._update(self._path(node_id), patch)
+
+    def set_power_state(self, node_id, state):
+        path = "%s/state/power" % node_id
+        target = {'target': "power %s" % state}
+        return self._update(self._path(path), target, method='PUT')

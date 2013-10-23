@@ -134,3 +134,22 @@ def do_node_port_list(cc, args):
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
     utils.print_list(ports, fields, field_labels, sortby=1)
+
+
+@utils.arg('node',
+           metavar='<node id>',
+           help="ID of node")
+@utils.arg('power_state',
+           metavar='<power state>',
+           choices=['on', 'off'],
+           help="Supported states: 'on' or 'off'")
+def do_node_set_power_state(cc, args):
+    """Power the node on or off."""
+    try:
+        state = cc.node.set_power_state(args.node, args.power_state)
+    except exc.HTTPNotFound:
+        raise exc.CommandError(_('Node not found: %s') % args.node)
+
+    field_list = ['current', 'target']
+    data = dict([(f, getattr(state, f, '')) for f in field_list])
+    utils.print_dict(data, wrap=72)
