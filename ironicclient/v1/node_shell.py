@@ -29,20 +29,42 @@ def _print_node_show(node):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('node', metavar='<node id>', help="ID of node")
+@utils.arg('node', metavar='<id>',
+           help="ID, UUID or instance UUID of node")
+@utils.arg('--instance',
+           dest='instance_uuid',
+           action='store_true',
+           default=False,
+           help='The id is an instance UUID')
 def do_node_show(cc, args):
     """Show a node."""
     try:
-        node = cc.node.get(args.node)
+        if args.instance_uuid:
+            node = cc.node.get_by_instance_uuid(args.node)
+        else:
+            node = cc.node.get(args.node)
     except exc.HTTPNotFound:
-        raise exc.CommandError('Node not found: %s' % args.node)
+        if args.instance_uuid:
+            error_tmpl = _('Node not found with instance UUID: %s')
+        else:
+            error_tmpl = _('Node not found: %s')
+        raise exc.CommandError(error_tmpl % args.node)
     else:
         _print_node_show(node)
 
 
+@utils.arg('--associated',
+           metavar='<assoc>',
+           choices=['true', 'True', 'false', 'False'],
+           help="List nodes by instance association: 'true' or 'false'")
 def do_node_list(cc, args):
     """List nodes."""
-    nodes = cc.node.list()
+    if args.associated is None:
+        nodes = cc.node.list()
+    else:
+        associated = args.associated.lower() == 'true'
+        nodes = cc.node.list(associated)
+
     field_labels = ['UUID', 'Instance UUID',
                     'Power State', 'Provisioning State']
     fields = ['uuid', 'instance_uuid', 'power_state', 'provision_state']
@@ -96,8 +118,8 @@ def do_node_delete(cc, args):
         try:
             cc.node.delete(n)
         except exc.HTTPNotFound:
-            raise exc.CommandError('Node not found: %s' % n)
-        print('Deleted node %s' % n)
+            raise exc.CommandError(_('Node not found: %s') % n)
+        print _('Deleted node %s') % n
 
 
 @utils.arg('node',
@@ -120,7 +142,7 @@ def do_node_update(cc, args):
     try:
         node = cc.node.update(args.node, patch)
     except exc.HTTPNotFound:
-        raise exc.CommandError('Node not found: %s' % args.node)
+        raise exc.CommandError(_('Node not found: %s') % args.node)
     _print_node_show(node)
 
 

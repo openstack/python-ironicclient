@@ -17,7 +17,6 @@
 from ironicclient.common import base
 from ironicclient import exc
 
-
 CREATION_ATTRIBUTES = ['chassis_id', 'driver', 'driver_info', 'extra',
                        'node_id', 'properties']
 
@@ -34,8 +33,12 @@ class NodeManager(base.Manager):
     def _path(id=None):
         return '/v1/nodes/%s' % id if id else '/v1/nodes'
 
-    def list(self):
-        return self._list(self._path(), "nodes")
+    def list(self, associated=None):
+        if associated is None:
+            return self._list(self._path(), "nodes")
+        else:
+            path = '?associated=%s' % str(bool(associated))
+            return self._list(self._path(path), "nodes")
 
     def list_ports(self, node_id):
         path = "%s/ports" % node_id
@@ -46,6 +49,18 @@ class NodeManager(base.Manager):
             return self._list(self._path(node_id))[0]
         except IndexError:
             return None
+
+    def get_by_instance_uuid(self, instance_uuid):
+        path = "?instance_uuid=%s" % instance_uuid
+        nodes = self._list(self._path(path), 'nodes')
+        # get all the details of the node assuming that
+        # filtering by instance_uuid returns a collection
+        # of one node if successful.
+        if len(nodes) > 0:
+            uuid = getattr(nodes[0], 'uuid')
+            return self.get(uuid)
+        else:
+            raise exc.HTTPNotFound()
 
     def create(self, **kwargs):
         new = {}
