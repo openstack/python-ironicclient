@@ -64,3 +64,15 @@ class FakeResponse(object):
 
     def read(self, amt):
         return self.body.read(amt)
+
+
+class FakeServiceCatalog():
+    def url_for(self, endpoint_type, service_type):
+        return 'http://localhost:6385/v1/f14b41234'
+
+
+class FakeKeystone():
+    service_catalog = FakeServiceCatalog()
+
+    def __init__(self, auth_token):
+        self.auth_token = auth_token
