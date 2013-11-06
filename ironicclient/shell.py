@@ -14,6 +14,8 @@
 Command-line interface to the OpenStack Bare Metal Provisioning
 """
 
+from __future__ import print_function
+
 import argparse
 import httplib2
 import logging
@@ -268,7 +270,7 @@ def main():
         IronicShell().main(sys.argv[1:])
 
     except Exception as e:
-        print >> sys.stderr, e
+        print(str(e), file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
