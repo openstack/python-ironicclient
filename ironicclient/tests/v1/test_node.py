@@ -47,7 +47,7 @@ UPDATED_NODE = copy.deepcopy(NODE)
 NEW_DRIVER = 'new-driver'
 UPDATED_NODE['driver'] = NEW_DRIVER
 
-fixtures = {
+fake_responses = {
     '/v1/nodes':
     {
         'GET': (
@@ -95,7 +95,7 @@ class NodeManagerTest(testtools.TestCase):
 
     def setUp(self):
         super(NodeManagerTest, self).setUp()
-        self.api = utils.FakeAPI(fixtures)
+        self.api = utils.FakeAPI(fake_responses)
         self.mgr = ironicclient.v1.node.NodeManager(self.api)
 
     def test_node_list(self):

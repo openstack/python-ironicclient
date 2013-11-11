@@ -44,7 +44,7 @@ UPDATED_CHASSIS = copy.deepcopy(CHASSIS)
 NEW_DESCR = 'new-description'
 UPDATED_CHASSIS['description'] = NEW_DESCR
 
-fixtures = {
+fake_responses = {
     '/v1/chassis':
     {
         'GET': (
@@ -85,7 +85,7 @@ class ChassisManagerTest(testtools.TestCase):
 
     def setUp(self):
         super(ChassisManagerTest, self).setUp()
-        self.api = utils.FakeAPI(fixtures)
+        self.api = utils.FakeAPI(fake_responses)
         self.mgr = ironicclient.v1.chassis.ChassisManager(self.api)
 
     def test_chassis_list(self):

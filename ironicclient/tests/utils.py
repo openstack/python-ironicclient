@@ -29,23 +29,23 @@ class BaseTestCase(testtools.TestCase):
 
 
 class FakeAPI(object):
-    def __init__(self, fixtures):
-        self.fixtures = fixtures
+    def __init__(self, responses):
+        self.responses = responses
         self.calls = []
 
     def _request(self, method, url, headers=None, body=None):
         call = (method, url, headers or {}, body)
         self.calls.append(call)
-        return self.fixtures[url][method]
+        return self.responses[url][method]
 
     def raw_request(self, *args, **kwargs):
-        fixture = self._request(*args, **kwargs)
-        body_iter = http.ResponseBodyIterator(six.StringIO(fixture[1]))
-        return FakeResponse(fixture[0]), body_iter
+        response = self._request(*args, **kwargs)
+        body_iter = http.ResponseBodyIterator(six.StringIO(response[1]))
+        return FakeResponse(response[0]), body_iter
 
     def json_request(self, *args, **kwargs):
-        fixture = self._request(*args, **kwargs)
-        return FakeResponse(fixture[0]), fixture[1]
+        response = self._request(*args, **kwargs)
+        return FakeResponse(response[0]), response[1]
 
 
 class FakeResponse(object):
