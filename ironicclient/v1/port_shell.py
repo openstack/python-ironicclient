@@ -80,7 +80,7 @@ def do_port_delete(cc, args):
             cc.port.delete(p)
         except exc.HTTPNotFound:
             raise exc.CommandError('Port not found: %s' % p)
-        print 'Deleted port %s' % p
+        print ('Deleted port %s' % p)
 
 
 @utils.arg('port',

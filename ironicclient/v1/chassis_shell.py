@@ -77,7 +77,7 @@ def do_chassis_delete(cc, args):
             cc.chassis.delete(c)
         except exc.HTTPNotFound:
             raise exc.CommandError('Chassis not found: %s' % c)
-        print 'Deleted chassis %s' % c
+        print('Deleted chassis %s' % c)
 
 
 @utils.arg('chassis',

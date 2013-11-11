@@ -97,7 +97,7 @@ def do_node_delete(cc, args):
             cc.node.delete(n)
         except exc.HTTPNotFound:
             raise exc.CommandError('Node not found: %s' % n)
-        print 'Deleted node %s' % n
+        print('Deleted node %s' % n)
 
 
 @utils.arg('node',
