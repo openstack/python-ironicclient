@@ -18,6 +18,7 @@ Base utilities to build API operation managers and objects on top of.
 """
 
 import copy
+
 import six
 
 

@@ -10,12 +10,12 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
-import httplib2
 import re
-import six
 import sys
 
 import fixtures
+import httplib2
+import six
 from testtools import matchers
 
 from ironicclient import exc

@@ -14,8 +14,9 @@
 #    under the License.
 
 
-import six
 import sys
+
+import six
 
 from ironicclient.common import utils
 from ironicclient import exc

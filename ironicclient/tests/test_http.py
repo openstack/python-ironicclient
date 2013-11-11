@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from ironicclient.tests import utils
-
 from ironicclient.common import http
+from ironicclient.tests import utils
 
 
 fixtures = {}

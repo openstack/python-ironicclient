@@ -17,6 +17,7 @@
 #    under the License.
 
 import copy
+
 import testtools
 
 from ironicclient.tests import utils

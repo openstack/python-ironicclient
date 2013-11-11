@@ -17,12 +17,12 @@ from __future__ import print_function
 
 import argparse
 import os
-import six
 import sys
 import textwrap
 import uuid
 
 import prettytable
+import six
 
 from ironicclient import exc
 from ironicclient.openstack.common import importutils

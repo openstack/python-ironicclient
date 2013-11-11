@@ -16,8 +16,9 @@
 import copy
 import logging
 import os
-import six
 import socket
+
+import six
 
 from ironicclient.openstack.common.py3kcompat import urlutils
 

@@ -17,9 +17,10 @@ Command-line interface to the OpenStack Bare Metal Provisioning
 from __future__ import print_function
 
 import argparse
-import httplib2
 import logging
 import sys
+
+import httplib2
 
 import ironicclient
 from ironicclient import client as iroclient
