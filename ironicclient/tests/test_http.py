@@ -17,9 +17,6 @@ from ironicclient.common import http
 from ironicclient.tests import utils
 
 
-fixtures = {}
-
-
 class HttpClientTest(utils.BaseTestCase):
 
     def test_url_generation_trailing_slash_in_base(self):

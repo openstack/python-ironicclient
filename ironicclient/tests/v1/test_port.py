@@ -38,7 +38,7 @@ UPDATED_PORT = copy.deepcopy(PORT)
 NEW_ADDR = 'AA:AA:AA:AA:AA:AA'
 UPDATED_PORT['address'] = NEW_ADDR
 
-fixtures = {
+fake_responses = {
     '/v1/ports':
     {
         'GET': (
@@ -72,7 +72,7 @@ class PortManagerTest(testtools.TestCase):
 
     def setUp(self):
         super(PortManagerTest, self).setUp()
-        self.api = utils.FakeAPI(fixtures)
+        self.api = utils.FakeAPI(fake_responses)
         self.mgr = ironicclient.v1.port.PortManager(self.api)
 
     def test_ports_list(self):
