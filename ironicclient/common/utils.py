@@ -83,7 +83,8 @@ def pretty_choice_list(l):
     return ', '.join("'%s'" % i for i in l)
 
 
-def print_list(objs, fields, field_labels, formatters={}, sortby=0):
+def print_list(objs, fields, field_labels, formatters={},
+               sortby=0, outfile=None):
     pt = prettytable.PrettyTable([f for f in field_labels],
                                  caching=False, print_empty=False)
     pt.align = 'l'
@@ -97,10 +98,10 @@ def print_list(objs, fields, field_labels, formatters={}, sortby=0):
                 data = getattr(o, field, '')
                 row.append(data)
         pt.add_row(row)
-    print(pt.get_string(sortby=field_labels[sortby]))
+    print(pt.get_string(sortby=field_labels[sortby]), file=outfile)
 
 
-def print_dict(d, dict_property="Property", wrap=0):
+def print_dict(d, dict_property="Property", wrap=0, outfile=None):
     pt = prettytable.PrettyTable([dict_property, 'Value'],
                                  caching=False, print_empty=False)
     pt.align = 'l'
@@ -120,7 +121,7 @@ def print_dict(d, dict_property="Property", wrap=0):
                 col1 = ''
         else:
             pt.add_row([k, v])
-    print(pt.get_string())
+    print(pt.get_string(), file=outfile)
 
 
 def find_resource(manager, name_or_id):
