@@ -15,6 +15,7 @@
 
 from ironicclient.common import http
 from ironicclient.v1 import chassis
+from ironicclient.v1 import driver
 from ironicclient.v1 import node
 from ironicclient.v1 import port
 
@@ -35,3 +36,4 @@ class Client(http.HTTPClient):
         self.chassis = chassis.ChassisManager(self)
         self.node = node.NodeManager(self)
         self.port = port.PortManager(self)
+        self.driver = driver.DriverManager(self)
