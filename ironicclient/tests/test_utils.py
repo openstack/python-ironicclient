@@ -78,3 +78,9 @@ class UtilsTest(test_utils.BaseTestCase):
                                           my_args['attributes'])
         self.assertEqual(patch, [{'op': 'remove', 'path': '/foo'},
                                  {'op': 'remove', 'path': '/extra/bar'}])
+
+    def test_print_dict_unicode(self):
+        unicode_str = u'\u2026'
+        output_file = six.StringIO()
+        utils.print_dict({'K': 'k', 'Key': unicode_str}, outfile=output_file)
+        self.assertIn(unicode_str, output_file.getvalue())
