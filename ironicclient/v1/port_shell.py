@@ -47,10 +47,12 @@ def do_port_list(cc, args):
 
 @utils.arg('-a', '--address',
            metavar='<address>',
-           help='MAC Address for this port [REQUIRED]')
+           required=True,
+           help='MAC Address for this port')
 @utils.arg('-n', '--node_id',
            metavar='<node id>',
-           help='ID of the node that this port belongs to [REQUIRED]')
+           required=True,
+           help='ID of the node that this port belongs to')
 @utils.arg('-e', '--extra',
            metavar="<key=value>",
            action='append',
