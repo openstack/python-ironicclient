@@ -14,8 +14,6 @@
 #    under the License.
 
 
-import sys
-
 import six
 
 from ironicclient.common import utils
@@ -26,19 +24,8 @@ from ironicclient.tests import utils as test_utils
 class UtilsTest(test_utils.BaseTestCase):
 
     def test_prettytable(self):
-        class Struct:
-            def __init__(self, **entries):
-                self.__dict__.update(entries)
-
-        # test that the prettytable output is wellformatted (left-aligned)
-        saved_stdout = sys.stdout
-        try:
-            sys.stdout = output_dict = six.StringIO()
-            utils.print_dict({'K': 'k', 'Key': 'Value'})
-
-        finally:
-            sys.stdout = saved_stdout
-
+        output_dict = six.StringIO()
+        utils.print_dict({'K': 'k', 'Key': 'Value'}, outfile=output_dict)
         self.assertEqual(output_dict.getvalue(), '''\
 +----------+-------+
 | Property | Value |
