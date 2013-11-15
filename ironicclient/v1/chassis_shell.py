@@ -26,7 +26,7 @@ def _print_chassis_show(chassis):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('chassis', metavar='<chassis id>', help="ID of chassis")
+@utils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
 def do_chassis_show(cc, args):
     """Show a chassis."""
     try:
@@ -69,7 +69,7 @@ def do_chassis_create(cc, args):
 @utils.arg('chassis',
            metavar='<chassis id>',
            nargs='+',
-           help="ID of chassis")
+           help="UUID of chassis")
 def do_chassis_delete(cc, args):
     """Delete a chassis."""
     for c in args.chassis:
@@ -82,7 +82,7 @@ def do_chassis_delete(cc, args):
 
 @utils.arg('chassis',
            metavar='<chassis id>',
-           help="ID of chassis")
+           help="UUID of chassis")
 @utils.arg('op',
            metavar='<op>',
            choices=['add', 'replace', 'remove'],
@@ -104,7 +104,7 @@ def do_chassis_update(cc, args):
     _print_chassis_show(chassis)
 
 
-@utils.arg('chassis', metavar='<chassis id>', help="ID of chassis")
+@utils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
 def do_chassis_node_list(cc, args):
     """List the nodes contained in the chassis."""
     try:

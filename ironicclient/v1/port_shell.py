@@ -26,7 +26,7 @@ def _print_port_show(port):
     utils.print_dict(data, wrap=72)
 
 
-@utils.arg('port', metavar='<port id>', help="ID of port")
+@utils.arg('port', metavar='<port id>', help="UUID of port")
 def do_port_show(cc, args):
     """Show a port."""
     try:
@@ -52,7 +52,7 @@ def do_port_list(cc, args):
 @utils.arg('-n', '--node_id',
            metavar='<node id>',
            required=True,
-           help='ID of the node that this port belongs to')
+           help='UUID of the node that this port belongs to')
 @utils.arg('-e', '--extra',
            metavar="<key=value>",
            action='append',
@@ -74,7 +74,7 @@ def do_port_create(cc, args):
 @utils.arg('port',
            metavar='<port id>',
            nargs='+',
-           help="ID of port")
+           help="UUID of port")
 def do_port_delete(cc, args):
     """Delete a port."""
     for p in args.port:
@@ -87,7 +87,7 @@ def do_port_delete(cc, args):
 
 @utils.arg('port',
            metavar='<port id>',
-           help="ID of port")
+           help="UUID of port")
 @utils.arg('op',
            metavar='<op>',
            choices=['add', 'replace', 'remove'],

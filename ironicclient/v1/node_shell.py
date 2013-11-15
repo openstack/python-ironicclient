@@ -73,7 +73,7 @@ def do_node_list(cc, args):
 
 @utils.arg('-c', '--chassis_id',
            metavar='<chassis id>',
-           help='ID of the chassis that this node belongs to [REQUIRED]')
+           help='UUID of the chassis that this node belongs to [REQUIRED]')
 @utils.arg('-d', '--driver',
            metavar='<driver>',
            help='Driver used to control the node [REQUIRED]')
@@ -111,7 +111,7 @@ def do_node_create(cc, args):
 @utils.arg('node',
            metavar='<node id>',
            nargs='+',
-           help="ID of node")
+           help="UUID of node")
 def do_node_delete(cc, args):
     """Delete a node."""
     for n in args.node:
@@ -124,7 +124,7 @@ def do_node_delete(cc, args):
 
 @utils.arg('node',
            metavar='<node id>',
-           help="ID of node")
+           help="UUID of node")
 @utils.arg('op',
            metavar='<op>',
            choices=['add', 'replace', 'remove'],
@@ -146,7 +146,7 @@ def do_node_update(cc, args):
     _print_node_show(node)
 
 
-@utils.arg('node', metavar='<node id>', help="ID of node")
+@utils.arg('node', metavar='<node id>', help="UUID of node")
 def do_node_port_list(cc, args):
     """List the ports contained in the node."""
     try:
@@ -160,7 +160,7 @@ def do_node_port_list(cc, args):
 
 @utils.arg('node',
            metavar='<node id>',
-           help="ID of node")
+           help="UUID of node")
 @utils.arg('power_state',
            metavar='<power state>',
            choices=['on', 'off'],
