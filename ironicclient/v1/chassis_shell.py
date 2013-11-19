@@ -17,7 +17,6 @@
 #    under the License.
 
 from ironicclient.common import utils
-from ironicclient import exc
 
 
 def _print_chassis_show(chassis):
@@ -29,12 +28,8 @@ def _print_chassis_show(chassis):
 @utils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
 def do_chassis_show(cc, args):
     """Show a chassis."""
-    try:
-        chassis = cc.chassis.get(args.chassis)
-    except exc.HTTPNotFound:
-        raise exc.CommandError('Chassis not found: %s' % args.chassis)
-    else:
-        _print_chassis_show(chassis)
+    chassis = cc.chassis.get(args.chassis)
+    _print_chassis_show(chassis)
 
 
 def do_chassis_list(cc, args):
@@ -73,10 +68,7 @@ def do_chassis_create(cc, args):
 def do_chassis_delete(cc, args):
     """Delete a chassis."""
     for c in args.chassis:
-        try:
-            cc.chassis.delete(c)
-        except exc.HTTPNotFound:
-            raise exc.CommandError('Chassis not found: %s' % c)
+        cc.chassis.delete(c)
         print('Deleted chassis %s' % c)
 
 
@@ -97,20 +89,14 @@ def do_chassis_delete(cc, args):
 def do_chassis_update(cc, args):
     """Update a chassis."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
-    try:
-        chassis = cc.chassis.update(args.chassis, patch)
-    except exc.HTTPNotFound:
-        raise exc.CommandError('Chassis not found: %s' % args.chassis)
+    chassis = cc.chassis.update(args.chassis, patch)
     _print_chassis_show(chassis)
 
 
 @utils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
 def do_chassis_node_list(cc, args):
     """List the nodes contained in the chassis."""
-    try:
-        nodes = cc.chassis.list_nodes(args.chassis)
-    except exc.HTTPNotFound:
-        raise exc.CommandError(_('Chassis not found: %s') % args.chassis)
+    nodes = cc.chassis.list_nodes(args.chassis)
     field_labels = ['UUID', 'Instance UUID',
                     'Power State', 'Provisioning State']
     fields = ['uuid', 'instance_uuid', 'power_state', 'provision_state']

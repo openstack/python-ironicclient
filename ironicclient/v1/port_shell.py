@@ -17,7 +17,6 @@
 #    under the License.
 
 from ironicclient.common import utils
-from ironicclient import exc
 
 
 def _print_port_show(port):
@@ -29,12 +28,8 @@ def _print_port_show(port):
 @utils.arg('port', metavar='<port id>', help="UUID of port")
 def do_port_show(cc, args):
     """Show a port."""
-    try:
-        port = cc.port.get(args.port)
-    except exc.HTTPNotFound:
-        raise exc.CommandError('Port not found: %s' % args.port)
-    else:
-        _print_port_show(port)
+    port = cc.port.get(args.port)
+    _print_port_show(port)
 
 
 def do_port_list(cc, args):
@@ -78,10 +73,7 @@ def do_port_create(cc, args):
 def do_port_delete(cc, args):
     """Delete a port."""
     for p in args.port:
-        try:
-            cc.port.delete(p)
-        except exc.HTTPNotFound:
-            raise exc.CommandError('Port not found: %s' % p)
+        cc.port.delete(p)
         print ('Deleted port %s' % p)
 
 
@@ -102,8 +94,5 @@ def do_port_delete(cc, args):
 def do_port_update(cc, args):
     """Update a port."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
-    try:
-        port = cc.port.update(args.port, patch)
-    except exc.HTTPNotFound:
-        raise exc.CommandError('Port not found: %s' % args.port)
+    port = cc.port.update(args.port, patch)
     _print_port_show(port)
