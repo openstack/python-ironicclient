@@ -26,7 +26,7 @@ import ironicclient.v1.port
 
 PORT = {'id': 987,
         'uuid': '11111111-2222-3333-4444-555555555555',
-        'node_id': 1,
+        'node_uuid': '55555555-4444-3333-2222-111111111111',
         'address': 'AA:BB:CC:DD:EE:FF',
         'extra': {}}
 
@@ -88,9 +88,10 @@ class PortManagerTest(testtools.TestCase):
         expect = [
             ('GET', '/v1/ports/%s' % PORT['uuid'], {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(port.uuid, PORT['uuid'])
-        self.assertEqual(port.address, PORT['address'])
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(PORT['uuid'], port.uuid)
+        self.assertEqual(PORT['address'], port.address)
+        self.assertEqual(PORT['node_uuid'], port.node_uuid)
 
     def test_create(self):
         port = self.mgr.create(**CREATE_PORT)

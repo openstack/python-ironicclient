@@ -49,8 +49,8 @@ def do_port_list(cc, args):
            metavar='<address>',
            required=True,
            help='MAC Address for this port')
-@utils.arg('-n', '--node_id',
-           metavar='<node id>',
+@utils.arg('-n', '--node_uuid',
+           metavar='<node uuid>',
            required=True,
            help='UUID of the node that this port belongs to')
 @utils.arg('-e', '--extra',
@@ -60,7 +60,7 @@ def do_port_list(cc, args):
                 "Can be specified multiple times")
 def do_port_create(cc, args):
     """Create a new port."""
-    field_list = ['address', 'extra', 'node_id']
+    field_list = ['address', 'extra', 'node_uuid']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'extra')
