@@ -17,7 +17,6 @@
 #    under the License.
 
 from ironicclient.common import utils
-from ironicclient import exc
 
 
 def _print_node_show(node):
@@ -38,19 +37,11 @@ def _print_node_show(node):
            help='The id is an instance UUID')
 def do_node_show(cc, args):
     """Show a node."""
-    try:
-        if args.instance_uuid:
-            node = cc.node.get_by_instance_uuid(args.node)
-        else:
-            node = cc.node.get(args.node)
-    except exc.HTTPNotFound:
-        if args.instance_uuid:
-            error_tmpl = _('Node not found with instance UUID: %s')
-        else:
-            error_tmpl = _('Node not found: %s')
-        raise exc.CommandError(error_tmpl % args.node)
+    if args.instance_uuid:
+        node = cc.node.get_by_instance_uuid(args.node)
     else:
-        _print_node_show(node)
+        node = cc.node.get(args.node)
+    _print_node_show(node)
 
 
 @utils.arg('--associated',
@@ -115,10 +106,7 @@ def do_node_create(cc, args):
 def do_node_delete(cc, args):
     """Delete a node."""
     for n in args.node:
-        try:
-            cc.node.delete(n)
-        except exc.HTTPNotFound:
-            raise exc.CommandError(_('Node not found: %s') % n)
+        cc.node.delete(n)
         print(_('Deleted node %s') % n)
 
 
@@ -139,20 +127,14 @@ def do_node_delete(cc, args):
 def do_node_update(cc, args):
     """Update a node."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
-    try:
-        node = cc.node.update(args.node, patch)
-    except exc.HTTPNotFound:
-        raise exc.CommandError(_('Node not found: %s') % args.node)
+    node = cc.node.update(args.node, patch)
     _print_node_show(node)
 
 
 @utils.arg('node', metavar='<node id>', help="UUID of node")
 def do_node_port_list(cc, args):
     """List the ports contained in the node."""
-    try:
-        ports = cc.node.list_ports(args.node)
-    except exc.HTTPNotFound:
-        raise exc.CommandError(_('Node not found: %s') % args.node)
+    ports = cc.node.list_ports(args.node)
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
     utils.print_list(ports, fields, field_labels, sortby=1)
@@ -167,11 +149,7 @@ def do_node_port_list(cc, args):
            help="Supported states: 'on' or 'off'")
 def do_node_set_power_state(cc, args):
     """Power the node on or off."""
-    try:
-        state = cc.node.set_power_state(args.node, args.power_state)
-    except exc.HTTPNotFound:
-        raise exc.CommandError(_('Node not found: %s') % args.node)
-
+    state = cc.node.set_power_state(args.node, args.power_state)
     field_list = ['current', 'target']
     data = dict([(f, getattr(state, f, '')) for f in field_list])
     utils.print_dict(data, wrap=72)
