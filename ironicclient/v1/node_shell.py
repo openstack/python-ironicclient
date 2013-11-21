@@ -21,8 +21,8 @@ from ironicclient.common import utils
 
 def _print_node_show(node):
     fields = ['uuid', 'instance_uuid', 'power_state', 'target_power_state',
-              'provision_state', 'target_provision_state', 'driver',
-              'driver_info', 'properties', 'extra',
+              'provision_state', 'target_provision_state', 'last_error',
+              'driver', 'driver_info', 'properties', 'extra',
               'created_at', 'updated_at', 'reservation']
     data = dict([(f, getattr(node, f, '')) for f in fields])
     utils.print_dict(data, wrap=72)
