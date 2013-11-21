@@ -20,7 +20,7 @@ from ironicclient.common import utils
 
 
 def _print_port_show(port):
-    fields = ['uuid', 'address', 'extra']
+    fields = ['uuid', 'address', 'created_at', 'updated_at', 'extra']
     data = dict([(f, getattr(port, f, '')) for f in fields])
     utils.print_dict(data, wrap=72)
 

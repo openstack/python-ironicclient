@@ -20,7 +20,7 @@ from ironicclient.common import utils
 
 
 def _print_chassis_show(chassis):
-    fields = ['uuid', 'description', 'extra']
+    fields = ['uuid', 'description', 'created_at', 'updated_at', 'extra']
     data = dict([(f, getattr(chassis, f, '')) for f in fields])
     utils.print_dict(data, wrap=72)
 
