@@ -144,8 +144,9 @@ def find_resource(manager, name_or_id):
     try:
         return manager.find(name=name_or_id)
     except exc.NotFound:
-        msg = "No %s with a name or ID of '%s' exists." % \
-              (manager.resource_class.__name__.lower(), name_or_id)
+        msg = (_("No %(class)s with a name or ID of '%(nameid)s' exists") %
+                {'class': manager.resource_class.__name__.lower(),
+                 'nameid': name_or_id})
         raise exc.CommandError(msg)
 
 
@@ -181,8 +182,8 @@ def args_array_to_dict(kwargs, key_to_convert):
                                           for v in values_to_convert)
         except ValueError:
             raise exc.CommandError(
-                '%s must be a list of KEY=VALUE not "%s"' % (
-                    key_to_convert, values_to_convert))
+                _('%(key)s must be a list of KEY=VALUE not "%(values)s"') %
+                 {'key': key_to_convert, 'values': values_to_convert})
     return kwargs
 
 
@@ -198,13 +199,13 @@ def args_array_to_patch(op, attributes):
                 path, value = attr.split("=", 1)
                 patch.append({'op': op, 'path': path, 'value': value})
             except ValueError:
-                raise exc.CommandError('Attributes must be a list of '
-                                       'PATH=VALUE not "%s"' % attr)
+                raise exc.CommandError(_('Attributes must be a list of '
+                                         'PATH=VALUE not "%s"') % attr)
         elif op == "remove":
             # For remove only the key is needed
             patch.append({'op': op, 'path': attr})
         else:
-            raise exc.CommandError('Unknown PATCH operation: %s' % op)
+            raise exc.CommandError(_('Unknown PATCH operation: %s') % op)
     return patch
 
 

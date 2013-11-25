@@ -222,31 +222,31 @@ class IronicShell(object):
 
         if not (args.os_auth_token and args.ironic_url):
             if not args.os_username:
-                raise exc.CommandError("You must provide a username via "
-                                       "either --os-username or via "
-                                       "env[OS_USERNAME]")
+                raise exc.CommandError(_("You must provide a username via "
+                                         "either --os-username or via "
+                                         "env[OS_USERNAME]"))
 
             if not args.os_password:
-                raise exc.CommandError("You must provide a password via "
-                                       "either --os-password or via "
-                                       "env[OS_PASSWORD]")
+                raise exc.CommandError(_("You must provide a password via "
+                                         "either --os-password or via "
+                                         "env[OS_PASSWORD]"))
 
             if not (args.os_tenant_id or args.os_tenant_name):
-                raise exc.CommandError("You must provide a tenant_id via "
-                                       "either --os-tenant-id or via "
-                                       "env[OS_TENANT_ID]")
+                raise exc.CommandError(_("You must provide a tenant_id via "
+                                         "either --os-tenant-id or via "
+                                         "env[OS_TENANT_ID]"))
 
             if not args.os_auth_url:
-                raise exc.CommandError("You must provide an auth url via "
-                                       "either --os-auth-url or via "
-                                       "env[OS_AUTH_URL]")
+                raise exc.CommandError(_("You must provide an auth url via "
+                                         "either --os-auth-url or via "
+                                         "env[OS_AUTH_URL]"))
 
         client = iroclient.get_client(api_version, **(args.__dict__))
 
         try:
             args.func(client, args)
         except exc.Unauthorized:
-            raise exc.CommandError("Invalid OpenStack Identity credentials.")
+            raise exc.CommandError(_("Invalid OpenStack Identity credentials"))
 
     @utils.arg('command', metavar='<subcommand>', nargs='?',
                help='Display help for <subcommand>')
@@ -256,7 +256,7 @@ class IronicShell(object):
             if args.command in self.subcommands:
                 self.subcommands[args.command].print_help()
             else:
-                raise exc.CommandError("'%s' is not a valid subcommand" %
+                raise exc.CommandError(_("'%s' is not a valid subcommand") %
                                        args.command)
         else:
             self.parser.print_help()
