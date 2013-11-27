@@ -81,3 +81,7 @@ class NodeManager(base.Manager):
         path = "%s/state/power" % node_id
         target = {'target': "power %s" % state}
         return self._update(self._path(path), target, method='PUT')
+
+    def validate(self, node_uuid):
+        path = "%s/validate" % node_uuid
+        return self.get(path)
