@@ -49,13 +49,32 @@ class FakeAPI(object):
         return FakeResponse(response[0]), response[1]
 
 
+class FakeConnection(object):
+    def __init__(self, response=None):
+        self._response = response
+        self._last_request = None
+
+    def request(self, method, conn_url, **kwargs):
+        self._last_request = (method, conn_url, kwargs)
+
+    def setresponse(self, response):
+        self._response = response
+
+    def getresponse(self):
+        return self._response
+
+
 class FakeResponse(object):
-    def __init__(self, headers, body=None, version=None):
+    def __init__(self, headers, body=None, version=None, status=None,
+                 reason=None):
         """:param headers: dict representing HTTP response headers
         :param body: file-like object
         """
         self.headers = headers
         self.body = body
+        self.version = version
+        self.status = status
+        self.reason = reason
 
     def getheaders(self):
         return copy.deepcopy(self.headers).items()

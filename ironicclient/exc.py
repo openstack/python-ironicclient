@@ -42,12 +42,18 @@ class HTTPException(ClientException):
     """Base exception for all HTTP-derived exceptions."""
     code = 'N/A'
 
-    def __init__(self, details=None):
+    def __init__(self, details=None, server_traceback=None):
         self.details = details
+        self.server_traceback = server_traceback
 
     def __str__(self):
-        return self.details or "%s (HTTP %s)" % (self.__class__.__name__,
-                                                 self.code)
+        msg = "%s (HTTP %s)" % (self.__class__.__name__,
+                                self.code)
+        if self.details:
+            msg = self.details
+        if self.server_traceback:
+            msg += "\n%s" % self.server_traceback
+        return msg
 
 
 class HTTPMultipleChoices(HTTPException):
@@ -148,10 +154,10 @@ for obj_name in dir(sys.modules[__name__]):
         _code_map[obj.code] = obj
 
 
-def from_response(response, error=None):
+def from_response(response, message=None, traceback=None):
     """Return an instance of an HTTPException based on httplib response."""
     cls = _code_map.get(response.status, HTTPException)
-    return cls(error)
+    return cls(message, traceback)
 
 
 class NoTokenLookupException(Exception):
