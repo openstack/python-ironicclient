@@ -20,7 +20,7 @@ from ironicclient.v1 import node
 from ironicclient.v1 import port
 
 
-class Client(http.HTTPClient):
+class Client(object):
     """Client for the Ironic v1 API.
 
     :param string endpoint: A user-supplied endpoint URL for the ironic
@@ -32,8 +32,8 @@ class Client(http.HTTPClient):
 
     def __init__(self, *args, **kwargs):
         """Initialize a new client for the Ironic v1 API."""
-        super(Client, self).__init__(*args, **kwargs)
-        self.chassis = chassis.ChassisManager(self)
-        self.node = node.NodeManager(self)
-        self.port = port.PortManager(self)
-        self.driver = driver.DriverManager(self)
+        self.http_client = http.HTTPClient(*args, **kwargs)
+        self.chassis = chassis.ChassisManager(self.http_client)
+        self.node = node.NodeManager(self.http_client)
+        self.port = port.PortManager(self.http_client)
+        self.driver = driver.DriverManager(self.http_client)
