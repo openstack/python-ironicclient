@@ -120,15 +120,17 @@ class HTTPClient(object):
         base_url = _args[2]
         return '%s/%s' % (base_url.rstrip('/'), url.lstrip('/'))
 
-    def _extract_error_message(self, body):
+    def _extract_error_json(self, body):
+        error_json = {}
         try:
             body_json = json.loads(body)
             if 'error_message' in body_json:
-                body_json = json.loads(body_json['error_message'])
-                if 'faultstring' in body_json:
-                    return body_json['faultstring']
+                raw_msg = body_json['error_message']
+                error_json = json.loads(raw_msg)
         except ValueError:
-            pass
+            return {}
+
+        return error_json
 
     def _http_request(self, url, method, **kwargs):
         """Send an http request with the specified characteristics.
@@ -172,8 +174,10 @@ class HTTPClient(object):
 
         if 400 <= resp.status < 600:
             LOG.warn("Request returned failure status.")
-            err_msg = self._extract_error_message(body_str)
-            raise exc.from_response(resp, err_msg)
+            error_json = self._extract_error_json(body_str)
+            raise exc.from_response(resp,
+                                    error_json.get('faultstring'),
+                                    error_json.get('debuginfo'))
         elif resp.status in (301, 302, 305):
             # Redirected. Reissue the request to the new location.
             return self._http_request(resp['location'], method, **kwargs)
