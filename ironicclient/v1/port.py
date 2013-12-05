@@ -17,7 +17,7 @@
 from ironicclient.common import base
 from ironicclient import exc
 
-CREATION_ATTRIBUTES = ['address', 'extra', 'node_id']
+CREATION_ATTRIBUTES = ['address', 'extra', 'node_uuid']
 
 
 class Port(base.Resource):
