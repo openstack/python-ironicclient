@@ -78,7 +78,7 @@ class NodeManager(base.Manager):
         return self._update(self._path(node_id), patch)
 
     def set_power_state(self, node_id, state):
-        path = "%s/state/power" % node_id
+        path = "%s/states/power" % node_id
         if state in ['on', 'off']:
             state = "power %s" % state
         if state in ['reboot']:

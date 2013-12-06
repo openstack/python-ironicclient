@@ -45,8 +45,8 @@ PORT = {'id': 456,
         'address': 'AA:AA:AA:AA:AA:AA',
         'extra': {}}
 
-POWER_STATE = {'current': 'power off',
-               'target': 'power on'}
+POWER_STATE = {'power_state': 'power off',
+               'target_power_state': 'power on'}
 
 DRIVER_IFACES = {'power': True, 'deploy': True,
                  'console': 'not supported',
@@ -122,7 +122,7 @@ fake_responses = {
             {"ports": [PORT]},
         ),
     },
-    '/v1/nodes/%s/state/power' % NODE1['uuid']:
+    '/v1/nodes/%s/states/power' % NODE1['uuid']:
     {
         'PUT': (
             {},
@@ -231,10 +231,10 @@ class NodeManagerTest(testtools.TestCase):
         power_state = self.mgr.set_power_state(NODE1['uuid'], "on")
         body = {'target': 'power on'}
         expect = [
-            ('PUT', '/v1/nodes/%s/state/power' % NODE1['uuid'], {}, body),
+            ('PUT', '/v1/nodes/%s/states/power' % NODE1['uuid'], {}, body),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual('power on', power_state.target)
+        self.assertEqual('power on', power_state.target_power_state)
 
     def test_node_validate(self):
         ifaces = self.mgr.validate(NODE1['uuid'])
