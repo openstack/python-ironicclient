@@ -34,7 +34,7 @@ class ClientTest(utils.BaseTestCase):
         }
         client = get_client('1', **kwargs)
 
-        self.assertEqual(client.auth_token, 'KSCLIENT_AUTH_TOKEN')
+        self.assertEqual(client.http_client.auth_token, 'KSCLIENT_AUTH_TOKEN')
 
     def test_get_client_with_auth_token(self):
         self.useFixture(fixtures.MonkeyPatch(
@@ -48,4 +48,4 @@ class ClientTest(utils.BaseTestCase):
         }
         client = get_client('1', **kwargs)
 
-        self.assertEqual(client.auth_token, 'USER_AUTH_TOKEN')
+        self.assertEqual(client.http_client.auth_token, 'USER_AUTH_TOKEN')
