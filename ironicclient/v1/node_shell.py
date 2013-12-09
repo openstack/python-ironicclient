@@ -62,8 +62,8 @@ def do_node_list(cc, args):
     utils.print_list(nodes, fields, field_labels, sortby=1)
 
 
-@utils.arg('-c', '--chassis_id',
-           metavar='<chassis id>',
+@utils.arg('-c', '--chassis_uuid',
+           metavar='<chassis uuid>',
            help='UUID of the chassis that this node belongs to [REQUIRED]')
 @utils.arg('-d', '--driver',
            metavar='<driver>',
@@ -86,7 +86,8 @@ def do_node_list(cc, args):
                 "Can be specified multiple times")
 def do_node_create(cc, args):
     """Create a new node."""
-    field_list = ['chassis_id', 'driver', 'driver_info', 'properties', 'extra']
+    field_list = ['chassis_uuid', 'driver', 'driver_info',
+                  'properties', 'extra']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'driver_info')

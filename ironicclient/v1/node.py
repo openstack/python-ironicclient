@@ -17,7 +17,7 @@
 from ironicclient.common import base
 from ironicclient import exc
 
-CREATION_ATTRIBUTES = ['chassis_id', 'driver', 'driver_info', 'extra',
+CREATION_ATTRIBUTES = ['chassis_uuid', 'driver', 'driver_info', 'extra',
                        'node_id', 'properties']
 
 
