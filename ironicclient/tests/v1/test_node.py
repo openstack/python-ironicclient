@@ -136,6 +136,13 @@ fake_responses = {
             DRIVER_IFACES,
         ),
     },
+    '/v1/nodes/%s/states/provision' % NODE1['uuid']:
+    {
+        'PUT': (
+            {},
+            None,
+        ),
+    },
 }
 
 
@@ -246,3 +253,12 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(DRIVER_IFACES['deploy'], ifaces.deploy)
         self.assertEqual(DRIVER_IFACES['rescue'], ifaces.rescue)
         self.assertEqual(DRIVER_IFACES['console'], ifaces.console)
+
+    def test_node_set_provision_state(self):
+        target_state = 'active'
+        self.mgr.set_provision_state(NODE1['uuid'], target_state)
+        body = {'target': target_state}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
