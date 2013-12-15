@@ -48,6 +48,10 @@ PORT = {'id': 456,
 POWER_STATE = {'current': 'power off',
                'target': 'power on'}
 
+DRIVER_IFACES = {'power': True, 'deploy': True,
+                 'console': 'not supported',
+                 'rescue': 'not supported'}
+
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
@@ -123,6 +127,13 @@ fake_responses = {
         'PUT': (
             {},
             POWER_STATE,
+        ),
+    },
+    '/v1/nodes/%s/validate' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            DRIVER_IFACES,
         ),
     },
 }
@@ -224,3 +235,14 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual('power on', power_state.target)
+
+    def test_node_validate(self):
+        ifaces = self.mgr.validate(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/validate' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(DRIVER_IFACES['power'], ifaces.power)
+        self.assertEqual(DRIVER_IFACES['deploy'], ifaces.deploy)
+        self.assertEqual(DRIVER_IFACES['rescue'], ifaces.rescue)
+        self.assertEqual(DRIVER_IFACES['console'], ifaces.console)

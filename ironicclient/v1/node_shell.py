@@ -154,3 +154,14 @@ def do_node_set_power_state(cc, args):
     field_list = ['current', 'target']
     data = dict([(f, getattr(state, f, '')) for f in field_list])
     utils.print_dict(data, wrap=72)
+
+
+@utils.arg('node',
+           metavar='<node uuid>',
+           help="UUID of node")
+def do_node_validate(cc, args):
+    """Validate the node driver interfaces."""
+    ifaces = cc.node.validate(args.node)
+    field_list = ['power', 'deploy', 'console', 'rescue']
+    data = dict([(f, getattr(ifaces, f, '')) for f in field_list])
+    utils.print_dict(data, wrap=72)
