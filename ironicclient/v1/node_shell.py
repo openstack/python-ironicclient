@@ -20,7 +20,7 @@ from ironicclient.common import utils
 
 
 def _print_node_show(node):
-    fields = ['chassis_id', 'created_at', 'driver', 'driver_info', 'extra',
+    fields = ['chassis_uuid', 'created_at', 'driver', 'driver_info', 'extra',
               'instance_uuid', 'last_error', 'power_state', 'properties',
               'provision_state', 'reservation', 'target_power_state',
               'target_provision_state', 'updated_at', 'uuid']
