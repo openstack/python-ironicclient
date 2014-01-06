@@ -23,7 +23,7 @@ from ironicclient.tests import utils
 import ironicclient.v1.driver
 
 
-DRIVER = {'name': 'fake'}
+DRIVER = {'name': 'fake', 'hosts': ['fake-host1', 'fake-host2']}
 
 fake_responses = {
     '/v1/drivers':
