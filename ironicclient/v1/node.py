@@ -89,3 +89,8 @@ class NodeManager(base.Manager):
     def validate(self, node_uuid):
         path = "%s/validate" % node_uuid
         return self.get(path)
+
+    def set_provision_state(self, node_uuid, state):
+        path = "%s/states/provision" % node_uuid
+        target = {'target': state}
+        return self._update(self._path(path), target, method='PUT')
