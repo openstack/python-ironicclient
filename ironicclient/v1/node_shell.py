@@ -162,6 +162,11 @@ def do_node_set_power_state(cc, args):
 def do_node_validate(cc, args):
     """Validate the node driver interfaces."""
     ifaces = cc.node.validate(args.node)
-    field_list = ['power', 'deploy', 'console', 'rescue']
-    data = dict([(f, getattr(ifaces, f, '')) for f in field_list])
-    utils.print_dict(data, wrap=72)
+    obj_list = []
+    for key, value in ifaces.to_dict().iteritems():
+        data = {'interface': key}
+        data.update(value)
+        obj_list.append(type('iface', (object,), data))
+    field_labels = ['Iterface', 'Result', 'Reason']
+    fields = ['interface', 'result', 'reason']
+    utils.print_list(obj_list, fields, field_labels)

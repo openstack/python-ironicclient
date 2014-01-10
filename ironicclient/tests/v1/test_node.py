@@ -48,9 +48,10 @@ PORT = {'id': 456,
 POWER_STATE = {'power_state': 'power off',
                'target_power_state': 'power on'}
 
-DRIVER_IFACES = {'power': True, 'deploy': True,
-                 'console': 'not supported',
-                 'rescue': 'not supported'}
+DRIVER_IFACES = {'deploy': {'result': True},
+                 'power': {'result': False, 'reason': 'Invalid IPMI username'},
+                 'console': {'result': None, 'reason': 'not supported'},
+                 'rescue': {'result': None, 'reason': 'not supported'}}
 
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['id']
