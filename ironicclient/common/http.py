@@ -14,27 +14,16 @@
 #    under the License.
 
 import copy
+import json
 import logging
 import os
 import socket
+import ssl
 
 import six
 
-from ironicclient.openstack.common.py3kcompat import urlutils
-
-try:
-    import ssl
-except ImportError:
-    #TODO(bcwaldon): Handle this failure more gracefully
-    pass
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
-
 from ironicclient import exc
+from ironicclient.openstack.common.py3kcompat import urlutils
 
 
 LOG = logging.getLogger(__name__)
