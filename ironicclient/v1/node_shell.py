@@ -64,7 +64,7 @@ def do_node_list(cc, args):
 
 @utils.arg('-c', '--chassis_uuid',
            metavar='<chassis uuid>',
-           help='UUID of the chassis that this node belongs to [REQUIRED]')
+           help='UUID of the chassis that this node belongs to')
 @utils.arg('-d', '--driver',
            metavar='<driver>',
            help='Driver used to control the node [REQUIRED]')
