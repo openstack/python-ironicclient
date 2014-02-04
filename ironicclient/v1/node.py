@@ -94,3 +94,7 @@ class NodeManager(base.Manager):
         path = "%s/states/provision" % node_uuid
         target = {'target': state}
         return self._update(self._path(path), target, method='PUT')
+
+    def states(self, node_uuid):
+        path = "%s/states" % node_uuid
+        return self.get(path)
