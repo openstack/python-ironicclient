@@ -15,13 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from ironicclient.common import utils
+from ironicclient.openstack.common import cliutils
 
 
 def _print_driver_show(driver):
     fields = ['name', 'hosts']
     data = dict([(f, getattr(driver, f, '')) for f in fields])
-    utils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72)
 
 
 def do_driver_list(cc, args):
@@ -33,10 +33,11 @@ def do_driver_list(cc, args):
         d.hosts = ', '.join(d.hosts)
     field_labels = ['Supported driver(s)', 'Active host(s)']
     fields = ['name', 'hosts']
-    utils.print_list(drivers, fields, field_labels)
+    cliutils.print_list(drivers, fields, field_labels)
 
 
-@utils.arg('driver_name', metavar='<driver_name>', help='Name of the driver')
+@cliutils.arg('driver_name', metavar='<driver_name>',
+              help='Name of the driver')
 def do_driver_show(cc, args):
     """Show a driver."""
     driver = cc.driver.get(args.driver_name)

@@ -16,7 +16,7 @@
 
 import mock
 
-from ironicclient.common import utils as common_utils
+from ironicclient.openstack.common import cliutils
 from ironicclient.tests import utils
 import ironicclient.v1.driver_shell as d_shell
 
@@ -25,7 +25,7 @@ class DriverShellTest(utils.BaseTestCase):
     def test_driver_show(self):
         actual = {}
         fake_print_dict = lambda data, *args, **kwargs: actual.update(data)
-        with mock.patch.object(common_utils, 'print_dict', fake_print_dict):
+        with mock.patch.object(cliutils, 'print_dict', fake_print_dict):
             driver = object()
             d_shell._print_driver_show(driver)
         exp = ['hosts', 'name']

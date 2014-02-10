@@ -16,7 +16,7 @@
 
 import mock
 
-from ironicclient.common import utils as common_utils
+from ironicclient.openstack.common import cliutils
 from ironicclient.tests import utils
 import ironicclient.v1.chassis_shell as c_shell
 
@@ -25,7 +25,7 @@ class ChassisShellTest(utils.BaseTestCase):
     def test_chassis_show(self):
         actual = {}
         fake_print_dict = lambda data, *args, **kwargs: actual.update(data)
-        with mock.patch.object(common_utils, 'print_dict', fake_print_dict):
+        with mock.patch.object(cliutils, 'print_dict', fake_print_dict):
             chassis = object()
             c_shell._print_chassis_show(chassis)
         exp = ['created_at', 'description', 'extra', 'updated_at', 'uuid']

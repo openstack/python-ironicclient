@@ -14,12 +14,13 @@
 #    under the License.
 
 from ironicclient.common import utils
+from ironicclient.openstack.common import cliutils
 
 
 def _print_chassis_show(chassis):
     fields = ['uuid', 'description', 'created_at', 'updated_at', 'extra']
     data = dict([(f, getattr(chassis, f, '')) for f in fields])
-    utils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72)
 
 
 @utils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
@@ -34,7 +35,7 @@ def do_chassis_list(cc, args):
     chassis = cc.chassis.list()
     field_labels = ['UUID', 'Description']
     fields = ['uuid', 'description']
-    utils.print_list(chassis, fields, field_labels, sortby=1)
+    cliutils.print_list(chassis, fields, field_labels, sortby_index=1)
 
 
 @utils.arg('-d', '--description',
@@ -55,7 +56,7 @@ def do_chassis_create(cc, args):
 
     field_list.append('uuid')
     data = dict([(f, getattr(chassis, f, '')) for f in field_list])
-    utils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72)
 
 
 @utils.arg('chassis',
@@ -97,4 +98,4 @@ def do_chassis_node_list(cc, args):
     field_labels = ['UUID', 'Instance UUID',
                     'Power State', 'Provisioning State']
     fields = ['uuid', 'instance_uuid', 'power_state', 'provision_state']
-    utils.print_list(nodes, fields, field_labels, sortby=1)
+    cliutils.print_list(nodes, fields, field_labels, sortby_index=1)

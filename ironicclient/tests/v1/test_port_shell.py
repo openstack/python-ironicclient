@@ -16,7 +16,7 @@
 
 import mock
 
-from ironicclient.common import utils as common_utils
+from ironicclient.openstack.common import cliutils
 from ironicclient.tests import utils
 import ironicclient.v1.port_shell as p_shell
 
@@ -25,7 +25,7 @@ class PortShellTest(utils.BaseTestCase):
     def test_port_show(self):
         actual = {}
         fake_print_dict = lambda data, *args, **kwargs: actual.update(data)
-        with mock.patch.object(common_utils, 'print_dict', fake_print_dict):
+        with mock.patch.object(cliutils, 'print_dict', fake_print_dict):
             port = object()
             p_shell._print_port_show(port)
         exp = ['address', 'created_at', 'extra', 'node_uuid', 'updated_at',

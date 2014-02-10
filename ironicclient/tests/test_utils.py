@@ -13,28 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-import six
-
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.tests import utils as test_utils
 
 
 class UtilsTest(test_utils.BaseTestCase):
-
-    def test_prettytable(self):
-        output_dict = six.StringIO()
-        utils.print_dict({'K': 'k', 'Key': 'Value'}, outfile=output_dict)
-        self.assertEqual('''\
-+----------+-------+
-| Property | Value |
-+----------+-------+
-| K        | k     |
-| Key      | Value |
-+----------+-------+
-''', output_dict.getvalue())
-
     def test_args_array_to_dict(self):
         my_args = {
             'matching_metadata': ['metadata.key=metadata_value'],
@@ -78,9 +62,3 @@ class UtilsTest(test_utils.BaseTestCase):
                                           my_args['attributes'])
         self.assertEqual([{'op': 'remove', 'path': '/foo'},
                           {'op': 'remove', 'path': '/extra/bar'}], patch)
-
-    def test_print_dict_unicode(self):
-        unicode_str = u'\u2026'
-        output_file = six.StringIO()
-        utils.print_dict({'K': 'k', 'Key': unicode_str}, outfile=output_file)
-        self.assertIn(unicode_str, output_file.getvalue())

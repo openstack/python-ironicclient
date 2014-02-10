@@ -16,7 +16,7 @@
 
 import mock
 
-from ironicclient.common import utils as common_utils
+from ironicclient.openstack.common import cliutils
 from ironicclient.tests import utils
 import ironicclient.v1.node_shell as n_shell
 
@@ -25,7 +25,7 @@ class NodeShellTest(utils.BaseTestCase):
     def test_node_show(self):
         actual = {}
         fake_print_dict = lambda data, *args, **kwargs: actual.update(data)
-        with mock.patch.object(common_utils, 'print_dict', fake_print_dict):
+        with mock.patch.object(cliutils, 'print_dict', fake_print_dict):
             node = object()
             n_shell._print_node_show(node)
         exp = ['chassis_uuid',

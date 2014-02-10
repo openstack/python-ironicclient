@@ -14,6 +14,7 @@
 #    under the License.
 
 from ironicclient.common import utils
+from ironicclient.openstack.common import cliutils
 
 
 def _print_node_show(node):
@@ -23,7 +24,7 @@ def _print_node_show(node):
               'reservation', 'target_power_state', 'target_provision_state',
               'updated_at', 'uuid']
     data = dict([(f, getattr(node, f, '')) for f in fields])
-    utils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72)
 
 
 @utils.arg('node', metavar='<id>',
@@ -63,7 +64,7 @@ def do_node_list(cc, args):
                     'Provisioning State', 'Maintenance']
     fields = ['uuid', 'instance_uuid', 'power_state',
               'provision_state', 'maintenance']
-    utils.print_list(nodes, fields, field_labels, sortby=1)
+    cliutils.print_list(nodes, fields, field_labels, sortby_index=1)
 
 
 @utils.arg('-c', '--chassis_uuid',
@@ -101,7 +102,7 @@ def do_node_create(cc, args):
 
     field_list.append('uuid')
     data = dict([(f, getattr(node, f, '')) for f in field_list])
-    utils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72)
 
 
 @utils.arg('node',
@@ -142,7 +143,7 @@ def do_node_port_list(cc, args):
     ports = cc.node.list_ports(args.node)
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
-    utils.print_list(ports, fields, field_labels, sortby=1)
+    cliutils.print_list(ports, fields, field_labels, sortby_index=1)
 
 
 @utils.arg('node',
@@ -170,7 +171,7 @@ def do_node_validate(cc, args):
         obj_list.append(type('iface', (object,), data))
     field_labels = ['Interface', 'Result', 'Reason']
     fields = ['interface', 'result', 'reason']
-    utils.print_list(obj_list, fields, field_labels)
+    cliutils.print_list(obj_list, fields, field_labels)
 
 
 @utils.arg('node',
@@ -179,7 +180,7 @@ def do_node_validate(cc, args):
 def do_node_get_console(cc, args):
     """Return the connection information about the console."""
     info = cc.node.get_console(args.node)
-    utils.print_dict(info, wrap=72)
+    cliutils.print_dict(info, wrap=72)
 
 
 @utils.arg('node',

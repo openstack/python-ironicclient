@@ -14,13 +14,14 @@
 #    under the License.
 
 from ironicclient.common import utils
+from ironicclient.openstack.common import cliutils
 
 
 def _print_port_show(port):
     fields = ['address', 'created_at', 'extra', 'node_uuid', 'updated_at',
               'uuid']
     data = dict([(f, getattr(port, f, '')) for f in fields])
-    utils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72)
 
 
 @utils.arg('port', metavar='<port id>', help="UUID of port")
@@ -35,7 +36,7 @@ def do_port_list(cc, args):
     port = cc.port.list()
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
-    utils.print_list(port, fields, field_labels, sortby=1)
+    cliutils.print_list(port, fields, field_labels, sortby_index=1)
 
 
 @utils.arg('-a', '--address',
@@ -61,7 +62,7 @@ def do_port_create(cc, args):
 
     field_list.append('uuid')
     data = dict([(f, getattr(port, f, '')) for f in field_list])
-    utils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72)
 
 
 @utils.arg('port',

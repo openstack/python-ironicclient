@@ -16,16 +16,14 @@
 from __future__ import print_function
 
 import argparse
-import os
-import sys
-import textwrap
-import uuid
-
-import prettytable
-import six
 
 from ironicclient import exc
+from ironicclient.openstack.common import cliutils
 from ironicclient.openstack.common import importutils
+
+
+arg = cliutils.arg
+env = cliutils.env
 
 
 class HelpFormatter(argparse.HelpFormatter):
@@ -69,100 +67,6 @@ def define_commands_from_module(subparsers, command_module, cmd_mapper):
         define_command(subparsers, command, callback, cmd_mapper)
 
 
-# Decorator for cli-args
-def arg(*args, **kwargs):
-    def _decorator(func):
-        # Because of the sematics of decorator composition if we just append
-        # to the options list positional options will appear to be backwards.
-        func.__dict__.setdefault('arguments', []).insert(0, (args, kwargs))
-        return func
-    return _decorator
-
-
-def pretty_choice_list(l):
-    return ', '.join("'%s'" % i for i in l)
-
-
-def print_list(objs, fields, field_labels, formatters={},
-               sortby=0, outfile=None):
-    pt = prettytable.PrettyTable([f for f in field_labels],
-                                 caching=False, print_empty=False)
-    pt.align = 'l'
-
-    for o in objs:
-        row = []
-        for field in fields:
-            if field in formatters:
-                row.append(formatters[field](o))
-            else:
-                data = getattr(o, field, '')
-                row.append(data)
-        pt.add_row(row)
-    print(pt.get_string(sortby=field_labels[sortby]), file=outfile)
-
-
-def print_dict(d, dict_property="Property", wrap=0, outfile=None):
-    pt = prettytable.PrettyTable([dict_property, 'Value'],
-                                 caching=False, print_empty=False)
-    pt.align = 'l'
-    for k, v in sorted(six.iteritems(d), key=lambda x: x[0]):
-        # convert dict to str to check length
-        if isinstance(v, dict):
-            v = six.text_type(v)
-        if wrap > 0:
-            v = textwrap.fill(six.text_type(v), wrap)
-        # if value has a newline, add in multiple rows
-        # e.g. fault with stacktrace
-        if v and isinstance(v, six.string_types) and r'\n' in v:
-            lines = v.strip().split(r'\n')
-            col1 = k
-            for line in lines:
-                pt.add_row([col1, line])
-                col1 = ''
-        else:
-            pt.add_row([k, v])
-    print(pt.get_string(), file=outfile)
-
-
-def find_resource(manager, name_or_id):
-    """Helper for the _find_* methods."""
-    # first try to get entity as integer id
-    try:
-        if isinstance(name_or_id, int) or name_or_id.isdigit():
-            return manager.get(int(name_or_id))
-    except exc.NotFound:
-        pass
-
-    # now try to get entity as uuid
-    try:
-        uuid.UUID(str(name_or_id))
-        return manager.get(name_or_id)
-    except (ValueError, exc.NotFound):
-        pass
-
-    # finally try to find entity by name
-    try:
-        return manager.find(name=name_or_id)
-    except exc.NotFound:
-        msg = (_("No %(class)s with a name or ID of '%(nameid)s' exists") %
-                {'class': manager.resource_class.__name__.lower(),
-                 'nameid': name_or_id})
-        raise exc.CommandError(msg)
-
-
-def env(*vars, **kwargs):
-    """Search for the first defined of possibly many env vars
-
-    Returns the first environment variable defined in vars, or
-    returns the default defined in kwargs.
-    """
-    for v in vars:
-        value = os.environ.get(v, None)
-        if value:
-            return value
-    return kwargs.get('default', '')
-
-
 def import_versioned_module(version, submodule=None):
     module = 'ironicclient.v%s' % version
     if submodule:
@@ -203,9 +107,3 @@ def args_array_to_patch(op, attributes):
         else:
             raise exc.CommandError(_('Unknown PATCH operation: %s') % op)
     return patch
-
-
-def exit(msg=''):
-    if msg:
-        print(msg, file=sys.stderr)
-    sys.exit(1)
