@@ -167,6 +167,6 @@ def do_node_validate(cc, args):
         data = {'interface': key}
         data.update(value)
         obj_list.append(type('iface', (object,), data))
-    field_labels = ['Iterface', 'Result', 'Reason']
+    field_labels = ['Interface', 'Result', 'Reason']
     fields = ['interface', 'result', 'reason']
     utils.print_list(obj_list, fields, field_labels)
