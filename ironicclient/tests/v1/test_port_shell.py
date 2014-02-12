@@ -28,6 +28,7 @@ class PortShellTest(utils.BaseTestCase):
         with mock.patch.object(common_utils, 'print_dict', fake_print_dict):
             port = object()
             p_shell._print_port_show(port)
-        exp = ['address', 'created_at', 'extra', 'updated_at', 'uuid']
+        exp = ['address', 'created_at', 'extra', 'node_uuid', 'updated_at',
+               'uuid']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
