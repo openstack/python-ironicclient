@@ -150,10 +150,7 @@ def do_node_port_list(cc, args):
            help="Supported states: 'on' or 'off' or 'reboot'")
 def do_node_set_power_state(cc, args):
     """Power the node on or off."""
-    state = cc.node.set_power_state(args.node, args.power_state)
-    field_list = ['current', 'target']
-    data = dict([(f, getattr(state, f, '')) for f in field_list])
-    utils.print_dict(data, wrap=72)
+    cc.node.set_power_state(args.node, args.power_state)
 
 
 @utils.arg('node',
