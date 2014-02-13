@@ -53,6 +53,12 @@ DRIVER_IFACES = {'deploy': {'result': True},
                  'console': {'result': None, 'reason': 'not supported'},
                  'rescue': {'result': None, 'reason': 'not supported'}}
 
+NODE_STATES = {"last_error": None,
+               "power_state": "power on",
+               "provision_state": "active",
+               "target_power_state": None,
+               "target_provision_state": None}
+
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
@@ -142,6 +148,13 @@ fake_responses = {
         'PUT': (
             {},
             None,
+        ),
+    },
+    '/v1/nodes/%s/states' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            NODE_STATES,
         ),
     },
 }
@@ -263,3 +276,14 @@ class NodeManagerTest(testtools.TestCase):
             ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
         ]
         self.assertEqual(expect, self.api.calls)
+
+    def test_node_states(self):
+        states = self.mgr.states(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/states' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        expected_fields = ['last_error', 'power_state', 'provision_state',
+                           'target_power_state', 'target_provision_state']
+        self.assertEqual(sorted(expected_fields),
+                         sorted(states.to_dict().keys()))
