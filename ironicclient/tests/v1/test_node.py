@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 #!/usr/bin/env python
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
 #
 # Copyright 2013 Hewlett-Packard Development Company, L.P.
 #
