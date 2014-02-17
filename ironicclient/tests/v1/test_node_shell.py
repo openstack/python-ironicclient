@@ -30,6 +30,7 @@ class NodeShellTest(utils.BaseTestCase):
             n_shell._print_node_show(node)
         exp = ['chassis_uuid',
                'created_at',
+               'console_enabled',
                'driver',
                'driver_info',
                'extra',

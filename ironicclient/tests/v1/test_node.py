@@ -59,6 +59,8 @@ NODE_STATES = {"last_error": None,
                "target_power_state": None,
                "target_provision_state": None}
 
+CONSOLE_DATA = {'test-console': 'test-console-data'}
+
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
@@ -177,6 +179,17 @@ fake_responses = {
         'GET': (
             {},
             NODE_STATES,
+        ),
+    },
+    '/v1/nodes/%s/states/console' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            CONSOLE_DATA,
+        ),
+        'PUT': (
+            {},
+            None,
         ),
     },
 }
@@ -336,3 +349,20 @@ class NodeManagerTest(testtools.TestCase):
                            'target_power_state', 'target_provision_state']
         self.assertEqual(sorted(expected_fields),
                          sorted(states.to_dict().keys()))
+
+    def test_node_set_console_mode(self):
+        enabled = 'true'
+        self.mgr.set_console_mode(NODE1['uuid'], enabled)
+        body = {'enabled': enabled}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/console' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
+    def test_node_get_console(self):
+        info = self.mgr.get_console(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/states/console' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(CONSOLE_DATA, info)

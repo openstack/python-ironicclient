@@ -104,3 +104,15 @@ class NodeManager(base.Manager):
     def states(self, node_uuid):
         path = "%s/states" % node_uuid
         return self.get(path)
+
+    def get_console(self, node_uuid):
+        path = "%s/states/console" % node_uuid
+        info = self.get(path)
+        if not info:
+            return {}
+        return info.to_dict()
+
+    def set_console_mode(self, node_uuid, enabled):
+        path = "%s/states/console" % node_uuid
+        target = {'enabled': enabled}
+        return self._update(self._path(path), target, method='PUT')
