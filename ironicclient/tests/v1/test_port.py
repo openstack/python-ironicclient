@@ -79,8 +79,8 @@ class PortManagerTest(testtools.TestCase):
         expect = [
             ('GET', '/v1/ports', {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(len(ports), 1)
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(ports))
 
     def test_ports_show(self):
         port = self.mgr.get(PORT['uuid'])
@@ -97,7 +97,7 @@ class PortManagerTest(testtools.TestCase):
         expect = [
             ('POST', '/v1/ports', {}, CREATE_PORT),
         ]
-        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(expect, self.api.calls)
         self.assertTrue(port)
 
     def test_delete(self):
@@ -105,7 +105,7 @@ class PortManagerTest(testtools.TestCase):
         expect = [
             ('DELETE', '/v1/ports/%s' % PORT['uuid'], {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(expect, self.api.calls)
         self.assertTrue(port is None)
 
     def test_update(self):
@@ -116,5 +116,5 @@ class PortManagerTest(testtools.TestCase):
         expect = [
             ('PATCH', '/v1/ports/%s' % PORT['uuid'], {}, patch),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(port.address, NEW_ADDR)
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(NEW_ADDR, port.address)

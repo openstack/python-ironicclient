@@ -47,7 +47,7 @@ class ShellTest(utils.BaseTestCase):
             _shell.main(argstr.split())
         except SystemExit:
             exc_type, exc_value, exc_traceback = sys.exc_info()
-            self.assertEqual(exc_value.code, 0)
+            self.assertEqual(0, exc_value.code)
         finally:
             out = sys.stdout.getvalue()
             sys.stdout.close()
@@ -61,7 +61,7 @@ class ShellTest(utils.BaseTestCase):
     def test_debug(self):
         httplib2.debuglevel = 0
         self.shell('--debug help')
-        self.assertEqual(httplib2.debuglevel, 1)
+        self.assertEqual(1, httplib2.debuglevel)
 
     def test_help(self):
         required = [

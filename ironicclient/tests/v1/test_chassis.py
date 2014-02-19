@@ -93,24 +93,24 @@ class ChassisManagerTest(testtools.TestCase):
         expect = [
             ('GET', '/v1/chassis', {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(len(chassis), 1)
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(chassis))
 
     def test_chassis_show(self):
         chassis = self.mgr.get(CHASSIS['uuid'])
         expect = [
             ('GET', '/v1/chassis/%s' % CHASSIS['uuid'], {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(chassis.uuid, CHASSIS['uuid'])
-        self.assertEqual(chassis.description, CHASSIS['description'])
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(CHASSIS['uuid'], chassis.uuid)
+        self.assertEqual(CHASSIS['description'], chassis.description)
 
     def test_create(self):
         chassis = self.mgr.create(**CREATE_CHASSIS)
         expect = [
             ('POST', '/v1/chassis', {}, CREATE_CHASSIS),
         ]
-        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(expect, self.api.calls)
         self.assertTrue(chassis)
 
     def test_delete(self):
@@ -118,7 +118,7 @@ class ChassisManagerTest(testtools.TestCase):
         expect = [
             ('DELETE', '/v1/chassis/%s' % CHASSIS['uuid'], {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(expect, self.api.calls)
         self.assertTrue(chassis is None)
 
     def test_update(self):
@@ -129,14 +129,14 @@ class ChassisManagerTest(testtools.TestCase):
         expect = [
             ('PATCH', '/v1/chassis/%s' % CHASSIS['uuid'], {}, patch),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(chassis.description, NEW_DESCR)
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(NEW_DESCR, chassis.description)
 
     def test_chassis_node_list(self):
         nodes = self.mgr.list_nodes(CHASSIS['uuid'])
         expect = [
             ('GET', '/v1/chassis/%s/nodes' % CHASSIS['uuid'], {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(len(nodes), 1)
-        self.assertEqual(nodes[0].uuid, NODE['uuid'])
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(nodes))
+        self.assertEqual(NODE['uuid'], nodes[0].uuid)

@@ -26,14 +26,14 @@ class UtilsTest(test_utils.BaseTestCase):
     def test_prettytable(self):
         output_dict = six.StringIO()
         utils.print_dict({'K': 'k', 'Key': 'Value'}, outfile=output_dict)
-        self.assertEqual(output_dict.getvalue(), '''\
+        self.assertEqual('''\
 +----------+-------+
 | Property | Value |
 +----------+-------+
 | K        | k     |
 | Key      | Value |
 +----------+-------+
-''')
+''', output_dict.getvalue())
 
     def test_args_array_to_dict(self):
         my_args = {
@@ -42,10 +42,10 @@ class UtilsTest(test_utils.BaseTestCase):
         }
         cleaned_dict = utils.args_array_to_dict(my_args,
                                                 "matching_metadata")
-        self.assertEqual(cleaned_dict, {
+        self.assertEqual({
             'matching_metadata': {'metadata.key': 'metadata_value'},
             'other': 'value'
-        })
+        }, cleaned_dict)
 
     def test_args_array_to_patch(self):
         my_args = {
@@ -54,12 +54,12 @@ class UtilsTest(test_utils.BaseTestCase):
         }
         patch = utils.args_array_to_patch(my_args['op'],
                                           my_args['attributes'])
-        self.assertEqual(patch, [{'op': 'add',
-                                  'value': 'bar',
-                                  'path': '/foo'},
-                                  {'op': 'add',
-                                  'value': 'baz',
-                                  'path': '/extra/bar'}])
+        self.assertEqual([{'op': 'add',
+                           'value': 'bar',
+                           'path': '/foo'},
+                          {'op': 'add',
+                           'value': 'baz',
+                           'path': '/extra/bar'}], patch)
 
     def test_args_array_to_patch_format_error(self):
         my_args = {
@@ -76,8 +76,8 @@ class UtilsTest(test_utils.BaseTestCase):
         }
         patch = utils.args_array_to_patch(my_args['op'],
                                           my_args['attributes'])
-        self.assertEqual(patch, [{'op': 'remove', 'path': '/foo'},
-                                 {'op': 'remove', 'path': '/extra/bar'}])
+        self.assertEqual([{'op': 'remove', 'path': '/foo'},
+                          {'op': 'remove', 'path': '/extra/bar'}], patch)
 
     def test_print_dict_unicode(self):
         unicode_str = u'\u2026'

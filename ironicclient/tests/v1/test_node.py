@@ -171,8 +171,8 @@ class NodeManagerTest(testtools.TestCase):
         expect = [
             ('GET', '/v1/nodes', {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(len(nodes), 2)
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(2, len(nodes))
 
     def test_node_list_associated(self):
         nodes = self.mgr.list(associated=True)
@@ -197,8 +197,8 @@ class NodeManagerTest(testtools.TestCase):
         expect = [
             ('GET', '/v1/nodes/%s' % NODE1['uuid'], {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(node.uuid, NODE1['uuid'])
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(NODE1['uuid'], node.uuid)
 
     def test_node_show_by_instance(self):
         node = self.mgr.get_by_instance_uuid(NODE2['instance_uuid'])
@@ -215,7 +215,7 @@ class NodeManagerTest(testtools.TestCase):
         expect = [
             ('POST', '/v1/nodes', {}, CREATE_NODE),
         ]
-        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(expect, self.api.calls)
         self.assertTrue(node)
 
     def test_delete(self):
@@ -223,7 +223,7 @@ class NodeManagerTest(testtools.TestCase):
         expect = [
             ('DELETE', '/v1/nodes/%s' % NODE1['uuid'], {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
+        self.assertEqual(expect, self.api.calls)
         self.assertTrue(node is None)
 
     def test_update(self):
@@ -234,18 +234,18 @@ class NodeManagerTest(testtools.TestCase):
         expect = [
             ('PATCH', '/v1/nodes/%s' % NODE1['uuid'], {}, patch),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(node.driver, NEW_DRIVER)
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(NEW_DRIVER, node.driver)
 
     def test_node_port_list(self):
         ports = self.mgr.list_ports(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/ports' % NODE1['uuid'], {}, None),
         ]
-        self.assertEqual(self.api.calls, expect)
-        self.assertEqual(len(ports), 1)
-        self.assertEqual(ports[0].uuid, PORT['uuid'])
-        self.assertEqual(ports[0].address, PORT['address'])
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(ports))
+        self.assertEqual(PORT['uuid'], ports[0].uuid)
+        self.assertEqual(PORT['address'], ports[0].address)
 
     def test_node_set_power_state(self):
         power_state = self.mgr.set_power_state(NODE1['uuid'], "on")
