@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-#!/usr/bin/env python
 
 # Copyright 2013 Red Hat, Inc.
 # All Rights Reserved.
