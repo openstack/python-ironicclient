@@ -44,18 +44,23 @@ def do_node_show(cc, args):
     _print_node_show(node)
 
 
+@utils.arg('--maintenance',
+           metavar='<maintenance>',
+           choices=['true', 'True', 'false', 'False'],
+           help="List nodes in maintenance mode: 'true' or 'false'")
 @utils.arg('--associated',
            metavar='<assoc>',
            choices=['true', 'True', 'false', 'False'],
            help="List nodes by instance association: 'true' or 'false'")
 def do_node_list(cc, args):
     """List nodes."""
-    if args.associated is None:
-        nodes = cc.node.list()
-    else:
-        associated = args.associated.lower() == 'true'
-        nodes = cc.node.list(associated)
+    params = {}
+    if args.associated is not None:
+        params['associated'] = args.associated
+    if args.maintenance is not None:
+        params['maintenance'] = args.maintenance
 
+    nodes = cc.node.list(**params)
     field_labels = ['UUID', 'Instance UUID',
                     'Power State', 'Provisioning State']
     fields = ['uuid', 'instance_uuid', 'power_state', 'provision_state']
