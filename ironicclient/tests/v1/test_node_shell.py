@@ -35,6 +35,7 @@ class NodeShellTest(utils.BaseTestCase):
                'extra',
                'instance_uuid',
                'last_error',
+               'maintenance',
                'power_state',
                'properties',
                'provision_state',
