@@ -45,6 +45,19 @@ def do_driver_show(cc, args):
     _print_driver_show(driver)
 
 
+@cliutils.arg('driver_name', metavar='<driver name>',
+              help="name of a driver")
+def do_driver_properties(cc, args):
+    """Get properties of the driver."""
+    properties = cc.driver.properties(args.driver_name)
+    obj_list = []
+    for key, value in properties.iteritems():
+        data = {'Property': key, 'Description': value}
+        obj_list.append(type('iface', (object,), data))
+    fields = ['Property', 'Description']
+    cliutils.print_list(obj_list, fields, mixed_case_fields=fields)
+
+
 @cliutils.arg('driver_name',
               metavar='<driver_name>',
               help='Name of the driver')

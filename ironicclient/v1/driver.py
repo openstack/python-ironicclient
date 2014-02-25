@@ -35,6 +35,15 @@ class DriverManager(base.Manager):
         except IndexError:
             return None
 
+    def properties(self, driver_name):
+        try:
+            info = self._list('/v1/drivers/%s/properties' % driver_name)[0]
+            if info:
+                return info.to_dict()
+            return {}
+        except IndexError:
+            return {}
+
     def vendor_passthru(self, **kwargs):
         driver_name = kwargs['driver_name']
         method = kwargs['method']
