@@ -33,11 +33,17 @@ class NodeManager(base.Manager):
     def _path(id=None):
         return '/v1/nodes/%s' % id if id else '/v1/nodes'
 
-    def list(self, associated=None):
-        if associated is None:
+    def list(self, associated=None, maintenance=None):
+        filters = []
+        if associated is not None:
+            filters.append('associated=%s' % associated)
+        if maintenance is not None:
+            filters.append('maintenance=%s' % maintenance)
+
+        if not filters:
             return self._list(self._path(), "nodes")
         else:
-            path = '?associated=%s' % str(bool(associated))
+            path = '?' + '&'.join(filters)
             return self._list(self._path(path), "nodes")
 
     def list_ports(self, node_id):
