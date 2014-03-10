@@ -22,6 +22,10 @@ class BaseException(Exception):
         return self.message or self.__class__.__doc__
 
 
+class AmbigiousAuthSystem(BaseException):
+    """Could not obtain token and endpoint using provided credentials."""
+
+
 class CommandError(BaseException):
     """Invalid usage of CLI."""
 
