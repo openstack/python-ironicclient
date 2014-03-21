@@ -32,6 +32,13 @@ fake_responses = {
             {'drivers': [DRIVER]},
         ),
     },
+    '/v1/drivers/%s' % DRIVER['name']:
+    {
+        'GET': (
+            {},
+            DRIVER
+        ),
+    }
 }
 
 
@@ -49,3 +56,12 @@ class DriverManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertThat(drivers, matchers.HasLength(1))
+
+    def test_driver_show(self):
+        driver = self.mgr.get(DRIVER['name'])
+        expect = [
+            ('GET', '/v1/drivers/%s' % DRIVER['name'], {}, None)
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(DRIVER['name'], driver.name)
+        self.assertEqual(DRIVER['hosts'], driver.hosts)

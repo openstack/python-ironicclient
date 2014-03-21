@@ -18,6 +18,12 @@
 from ironicclient.common import utils
 
 
+def _print_driver_show(driver):
+    fields = ['name', 'hosts']
+    data = dict([(f, getattr(driver, f, '')) for f in fields])
+    utils.print_dict(data, wrap=72)
+
+
 def do_driver_list(cc, args):
     """List drivers."""
     drivers = cc.driver.list()
@@ -28,3 +34,10 @@ def do_driver_list(cc, args):
     field_labels = ['Supported driver(s)', 'Active host(s)']
     fields = ['name', 'hosts']
     utils.print_list(drivers, fields, field_labels)
+
+
+@utils.arg('driver_name', metavar='<driver_name>', help='Name of the driver')
+def do_driver_show(cc, args):
+    """Show a driver."""
+    driver = cc.driver.get(args.driver_name)
+    _print_driver_show(driver)

@@ -28,3 +28,9 @@ class DriverManager(base.Manager):
 
     def list(self):
         return self._list('/v1/drivers', "drivers")
+
+    def get(self, driver_name):
+        try:
+            return self._list('/v1/drivers/%s' % driver_name)[0]
+        except IndexError:
+            return None
