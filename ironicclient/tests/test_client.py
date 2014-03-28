@@ -13,6 +13,7 @@
 import fixtures
 
 from ironicclient.client import get_client
+from ironicclient import exc
 from ironicclient.tests import utils
 
 
@@ -49,3 +50,15 @@ class ClientTest(utils.BaseTestCase):
         client = get_client('1', **kwargs)
 
         self.assertEqual('USER_AUTH_TOKEN', client.http_client.auth_token)
+
+    def test_get_client_no_url_and_no_token(self):
+        self.useFixture(fixtures.MonkeyPatch(
+            'ironicclient.client._get_ksclient', fake_get_ksclient))
+        kwargs = {
+            'os_tenant_name': 'TENANT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': '',
+            'os_auth_token': '',
+        }
+        self.assertRaises(exc.AmbigiousAuthSystem, get_client, '1', **kwargs)

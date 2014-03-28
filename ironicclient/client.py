@@ -13,6 +13,10 @@
 from keystoneclient.v2_0 import client as ksclient
 
 from ironicclient.common import utils
+from ironicclient import exc
+from ironicclient.openstack.common import gettextutils
+
+gettextutils.install('ironicclient')
 
 
 def _get_ksclient(**kwargs):
@@ -55,6 +59,7 @@ def get_client(api_version, **kwargs):
             * insecure: allow insecure SSL (no cert verification)
             * os_tenant_{name|id}: name or ID of tenant
     """
+
     if kwargs.get('os_auth_token') and kwargs.get('ironic_url'):
         token = kwargs.get('os_auth_token')
         endpoint = kwargs.get('ironic_url')
@@ -80,6 +85,10 @@ def get_client(api_version, **kwargs):
 
         endpoint = kwargs.get('ironic_url') or \
             _get_endpoint(_ksclient, **ks_kwargs)
+    else:
+        e = (_('Must provide Keystone credentials or user-defined endpoint '
+               'and token'))
+        raise exc.AmbigiousAuthSystem(e)
 
     cli_kwargs = {
         'token': token,
