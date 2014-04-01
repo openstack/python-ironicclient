@@ -8,7 +8,7 @@
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               'sphinx.ext.viewcode',
-              'oslo.sphinx'
+              'oslosphinx',
               ]
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
@@ -45,9 +45,9 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages. Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme_path = ["."]
-html_theme = '_theme'
-html_static_path = ['_static']
+#html_theme_path = ["."]
+#html_theme = '_theme'
+#html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = '%sdoc' % project
