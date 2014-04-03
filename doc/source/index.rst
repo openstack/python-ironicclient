@@ -12,6 +12,7 @@ Contents
 .. toctree::
    :maxdepth: 1
 
+   api_v1
    cli
    contributing
 
