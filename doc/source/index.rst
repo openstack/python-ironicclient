@@ -12,6 +12,7 @@ Contents
 .. toctree::
    :maxdepth: 1
 
+   contributing
 
 Indices and tables
 ==================
