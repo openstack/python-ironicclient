@@ -59,9 +59,10 @@ def do_node_list(cc, args):
         params['maintenance'] = args.maintenance
 
     nodes = cc.node.list(**params)
-    field_labels = ['UUID', 'Instance UUID',
-                    'Power State', 'Provisioning State']
-    fields = ['uuid', 'instance_uuid', 'power_state', 'provision_state']
+    field_labels = ['UUID', 'Instance UUID', 'Power State',
+                    'Provisioning State', 'Maintenance']
+    fields = ['uuid', 'instance_uuid', 'power_state',
+              'provision_state', 'maintenance']
     utils.print_list(nodes, fields, field_labels, sortby=1)
 
 
