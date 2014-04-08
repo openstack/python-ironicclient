@@ -45,10 +45,10 @@ def _get_endpoint(client, **kwargs):
 
 
 def get_client(api_version, **kwargs):
-    """Get an authtenticated client, based on the credentials
+    """Get an authenticated client, based on the credentials
        in the keyword args.
 
-    :param api_version: the API version to use ('1' or '2')
+    :param api_version: the API version to use. Valid value: '1'.
     :param kwargs: keyword args containing credentials, either:
             * os_auth_token: pre-existing token to re-use
             * ironic_url: ironic API endpoint
