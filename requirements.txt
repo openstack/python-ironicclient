@@ -2,7 +2,7 @@ anyjson>=0.3.3
 argparse
 httplib2>=0.7.5
 lxml>=2.3
-pbr>=0.6,<1.0
+pbr>=0.6,!=0.7,<1.0
 PrettyTable>=0.7,<0.8
 python-keystoneclient>=0.7.0
 six>=1.5.2
