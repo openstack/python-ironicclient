@@ -59,7 +59,9 @@ NODE_STATES = {"last_error": None,
                "target_power_state": None,
                "target_provision_state": None}
 
-CONSOLE_DATA = {'test-console': 'test-console-data'}
+CONSOLE_DATA_ENABLED = {'console_enabled': True,
+                        'console_info': {'test-console': 'test-console-data'}}
+CONSOLE_DATA_DISABLED = {'console_enabled': False, 'console_info': None}
 
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['id']
@@ -185,11 +187,18 @@ fake_responses = {
     {
         'GET': (
             {},
-            CONSOLE_DATA,
+            CONSOLE_DATA_ENABLED,
         ),
         'PUT': (
-            {},
+            {'enabled': 'true'},
             None,
+        ),
+    },
+    '/v1/nodes/%s/states/console' % NODE2['uuid']:
+    {
+        'GET': (
+            {},
+            CONSOLE_DATA_DISABLED,
         ),
     },
 }
@@ -365,4 +374,12 @@ class NodeManagerTest(testtools.TestCase):
             ('GET', '/v1/nodes/%s/states/console' % NODE1['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual(CONSOLE_DATA, info)
+        self.assertEqual(CONSOLE_DATA_ENABLED, info)
+
+    def test_node_get_console_disabled(self):
+        info = self.mgr.get_console(NODE2['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/states/console' % NODE2['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(CONSOLE_DATA_DISABLED, info)
