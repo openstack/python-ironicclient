@@ -56,7 +56,7 @@ class HTTPClient(object):
             _class = six.moves.http_client.HTTPConnection
         else:
             msg = 'Unsupported scheme: %s' % parts.scheme
-            raise exc.InvalidEndpoint(msg)
+            raise exc.EndpointException(msg)
 
         return (_class, _args, _kwargs)
 
@@ -66,7 +66,7 @@ class HTTPClient(object):
             return _class(*self.connection_params[1][0:2],
                           **self.connection_params[2])
         except six.moves.http_client.InvalidURL:
-            raise exc.InvalidEndpoint()
+            raise exc.EndpointException()
 
     def log_curl_request(self, method, url, kwargs):
         curl = ['curl -i -X %s' % method]
@@ -143,12 +143,12 @@ class HTTPClient(object):
         except socket.gaierror as e:
             message = ("Error finding address for %(url)s: %(e)s"
                        % dict(url=url, e=e))
-            raise exc.InvalidEndpoint(message=message)
+            raise exc.EndpointNotFound(message)
         except (socket.error, socket.timeout) as e:
             endpoint = self.endpoint
             message = ("Error communicating with %(endpoint)s %(e)s"
                        % dict(endpoint=endpoint, e=e))
-            raise exc.CommunicationError(message=message)
+            raise exc.ConnectionRefused(message)
 
         body_iter = ResponseBodyIterator(resp)
 
@@ -164,14 +164,14 @@ class HTTPClient(object):
         if 400 <= resp.status < 600:
             LOG.warn("Request returned failure status.")
             error_json = self._extract_error_json(body_str)
-            raise exc.from_response(resp,
-                                    error_json.get('faultstring'),
-                                    error_json.get('debuginfo'))
+            raise exc.from_response(
+                resp, error_json.get('faultstring'),
+                error_json.get('debuginfo'), method, url)
         elif resp.status in (301, 302, 305):
             # Redirected. Reissue the request to the new location.
             return self._http_request(resp['location'], method, **kwargs)
         elif resp.status == 300:
-            raise exc.from_response(resp)
+            raise exc.from_response(resp, method=method, url=url)
 
         return resp, body_iter
 

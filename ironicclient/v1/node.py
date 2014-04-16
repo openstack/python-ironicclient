@@ -66,7 +66,7 @@ class NodeManager(base.Manager):
             uuid = getattr(nodes[0], 'uuid')
             return self.get(uuid)
         else:
-            raise exc.HTTPNotFound()
+            raise exc.NotFound()
 
     def create(self, **kwargs):
         new = {}
