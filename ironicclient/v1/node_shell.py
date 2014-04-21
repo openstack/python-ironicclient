@@ -158,6 +158,18 @@ def do_node_set_power_state(cc, args):
 
 
 @utils.arg('node',
+           metavar='<node id>',
+           help="UUID of node")
+@utils.arg('provision_state',
+           metavar='<provision state>',
+           choices=['active', 'deleted'],
+           help="Supported states: 'active' or 'deleted'")
+def do_node_set_provision_state(cc, args):
+    """Provision or tear down a node."""
+    cc.node.set_provision_state(args.node, args.provision_state)
+
+
+@utils.arg('node',
            metavar='<node uuid>',
            help="UUID of node")
 def do_node_validate(cc, args):
