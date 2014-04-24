@@ -179,7 +179,7 @@ def args_array_to_dict(kwargs, key_to_convert):
         except ValueError:
             raise exc.CommandError(
                 _('%(key)s must be a list of KEY=VALUE not "%(values)s"') %
-                 {'key': key_to_convert, 'values': values_to_convert})
+                {'key': key_to_convert, 'values': values_to_convert})
     return kwargs
 
 

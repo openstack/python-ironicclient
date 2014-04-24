@@ -64,10 +64,10 @@ class HttpClientTest(utils.BaseTestCase):
         client.get_connection = \
             lambda *a, **kw: utils.FakeConnection(fake_resp)
 
-        error = self.assertRaises(exc.HTTPInternalServerError,
+        error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
                                   'GET', '/v1/resources')
-        self.assertEqual('HTTPInternalServerError (HTTP 500)', str(error))
+        self.assertEqual('Internal Server Error (HTTP 500)', str(error))
 
     def test_server_exception_msg_only(self):
         error_msg = 'test error msg'
@@ -80,10 +80,10 @@ class HttpClientTest(utils.BaseTestCase):
         client.get_connection = \
             lambda *a, **kw: utils.FakeConnection(fake_resp)
 
-        error = self.assertRaises(exc.HTTPInternalServerError,
+        error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
                                   'GET', '/v1/resources')
-        self.assertEqual(error_msg, str(error))
+        self.assertEqual(error_msg + ' (HTTP 500)', str(error))
 
     def test_server_exception_msg_and_traceback(self):
         error_msg = 'another test error'
@@ -98,7 +98,12 @@ class HttpClientTest(utils.BaseTestCase):
         client.get_connection = \
             lambda *a, **kw: utils.FakeConnection(fake_resp)
 
-        error = self.assertRaises(exc.HTTPInternalServerError,
+        error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
                                   'GET', '/v1/resources')
-        self.assertEqual(error_msg + "\n" + error_trace, str(error))
+
+        self.assertEqual(
+            '%(error)s (HTTP 500)\n%(trace)s' % {'error': error_msg,
+                                                 'trace': error_trace},
+            "%(error)s\n%(details)s" % {'error': str(error),
+                                        'details': str(error.details)})
