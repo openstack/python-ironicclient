@@ -21,9 +21,9 @@ import socket
 import ssl
 
 import six
+import six.moves.urllib.parse as urlparse
 
 from ironicclient import exc
-from ironicclient.openstack.common.py3kcompat import urlutils
 
 
 LOG = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class HTTPClient(object):
 
     @staticmethod
     def get_connection_params(endpoint, **kwargs):
-        parts = urlutils.urlparse(endpoint)
+        parts = urlparse.urlparse(endpoint)
 
         _args = (parts.hostname, parts.port, parts.path)
         _kwargs = {'timeout': (float(kwargs.get('timeout'))
