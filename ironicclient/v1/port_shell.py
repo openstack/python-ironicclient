@@ -33,12 +33,31 @@ def do_port_show(cc, args):
     _print_port_show(port)
 
 
+@cliutils.arg(
+    '--limit',
+    metavar='<limit>',
+    type=int,
+    help='Maximum number of ports to return per request, '
+         '0 for no limit. Default is the maximum number used '
+         'by the Ironic API Service.')
+@cliutils.arg(
+    '--marker',
+    metavar='<marker>',
+    help='Port UUID (e.g of the last port in the list from '
+         'a previous request). Returns the list of ports '
+         'after this UUID.')
 def do_port_list(cc, args):
     """List ports."""
-    port = cc.port.list()
+    params = {}
+    if args.marker is not None:
+        params['marker'] = args.marker
+    if args.limit is not None:
+        params['limit'] = args.limit
+
+    port = cc.port.list(**params)
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
-    cliutils.print_list(port, fields, field_labels, sortby_index=1)
+    cliutils.print_list(port, fields, field_labels, sortby_index=None)
 
 
 @cliutils.arg(

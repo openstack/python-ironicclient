@@ -33,22 +33,89 @@ class NodeManager(base.Manager):
     def _path(id=None):
         return '/v1/nodes/%s' % id if id else '/v1/nodes'
 
-    def list(self, associated=None, maintenance=None):
+    def list(self, associated=None, maintenance=None, marker=None, limit=None):
+        """Retrieve a list of nodes.
+
+        :param associated: Optional, boolean whether to return a list of
+                           associated or unassociated nodes.
+        :param maintenance: Optional, boolean value that indicates whether
+                            to get nodes in maintenance mode ("True"), or not
+                            in maintenance mode ("False").
+        :param marker: Optional, the UUID of a node, eg the last
+                       node from a previous result set. Return
+                       the next result set.
+        :param limit: The maximum number of results to return per
+                      request, if:
+
+            1) limit > 0, the maximum number of nodes to return.
+            2) limit == 0, return the entire list of nodes.
+            3) limit param is NOT specified (None), the number of items
+               returned respect the maximum imposed by the Ironic API
+               (see Ironic's api.max_limit option).
+
+        :returns: A list of nodes.
+
+        """
+        if limit is not None:
+            limit = int(limit)
+
         filters = []
+        if isinstance(limit, int) and limit > 0:
+            filters.append('limit=%s' % limit)
+        if marker is not None:
+            filters.append('marker=%s' % marker)
         if associated is not None:
             filters.append('associated=%s' % associated)
         if maintenance is not None:
             filters.append('maintenance=%s' % maintenance)
 
-        if not filters:
-            return self._list(self._path(), "nodes")
-        else:
+        path = None
+        if filters:
             path = '?' + '&'.join(filters)
-            return self._list(self._path(path), "nodes")
 
-    def list_ports(self, node_id):
+        if limit is None:
+            return self._list(self._path(path), "nodes")
+        else:
+            return self._list_pagination(self._path(path), "nodes",
+                                         limit=limit)
+
+    def list_ports(self, node_id, marker=None, limit=None):
+        """List all the ports for a given node.
+
+        :param node_id: The UUID of the node.
+        :param marker: Optional, the UUID of a port, eg the last
+                       port from a previous result set. Return
+                       the next result set.
+        :param limit: The maximum number of results to return per
+                      request, if:
+
+            1) limit > 0, the maximum number of ports to return.
+            2) limit == 0, return the entire list of ports.
+            3) limit param is NOT specified (None), the number of items
+               returned respect the maximum imposed by the Ironic API
+               (see Ironic's api.max_limit option).
+
+        :returns: A list of ports.
+
+        """
+        if limit is not None:
+            limit = int(limit)
+
+        filters = []
+        if isinstance(limit, int) and limit > 0:
+            filters.append('limit=%s' % limit)
+        if marker is not None:
+            filters.append('marker=%s' % marker)
+
         path = "%s/ports" % node_id
-        return self._list(self._path(path), "ports")
+        if filters:
+            path += '?' + '&'.join(filters)
+
+        if limit is None:
+            return self._list(self._path(path), "ports")
+        else:
+            return self._list_pagination(self._path(path), "ports",
+                                         limit=limit)
 
     def get(self, node_id):
         try:

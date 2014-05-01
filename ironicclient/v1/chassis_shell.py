@@ -32,12 +32,31 @@ def do_chassis_show(cc, args):
     _print_chassis_show(chassis)
 
 
+@cliutils.arg(
+    '--limit',
+    metavar='<limit>',
+    type=int,
+    help='Maximum number of chassis to return per request, '
+         '0 for no limit. Default is the maximum number used '
+         'by the Ironic API Service.')
+@cliutils.arg(
+    '--marker',
+    metavar='<marker>',
+    help='Chassis UUID (e.g of the last chassis in the list '
+         'from a previous request). Returns the list of chassis '
+         'after this UUID.')
 def do_chassis_list(cc, args):
     """List chassis."""
-    chassis = cc.chassis.list()
+    params = {}
+    if args.marker is not None:
+        params['marker'] = args.marker
+    if args.limit is not None:
+        params['limit'] = args.limit
+
+    chassis = cc.chassis.list(**params)
     field_labels = ['UUID', 'Description']
     fields = ['uuid', 'description']
-    cliutils.print_list(chassis, fields, field_labels, sortby_index=1)
+    cliutils.print_list(chassis, fields, field_labels, sortby_index=None)
 
 
 @cliutils.arg(
@@ -96,11 +115,30 @@ def do_chassis_update(cc, args):
     _print_chassis_show(chassis)
 
 
+@cliutils.arg(
+    '--limit',
+    metavar='<limit>',
+    type=int,
+    help='Maximum number of nodes to return per request, '
+         '0 for no limit. Default is the maximum number used '
+         'by the Ironic API Service.')
+@cliutils.arg(
+    '--marker',
+    metavar='<marker>',
+    help='Node UUID (e.g of the last node in the list from '
+         'a previous request). Returns the list of nodes '
+         'after this UUID.')
 @cliutils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
 def do_chassis_node_list(cc, args):
     """List the nodes contained in the chassis."""
-    nodes = cc.chassis.list_nodes(args.chassis)
+    params = {}
+    if args.marker is not None:
+        params['marker'] = args.marker
+    if args.limit is not None:
+        params['limit'] = args.limit
+
+    nodes = cc.chassis.list_nodes(args.chassis, **params)
     field_labels = ['UUID', 'Instance UUID',
                     'Power State', 'Provisioning State']
     fields = ['uuid', 'instance_uuid', 'power_state', 'provision_state']
-    cliutils.print_list(nodes, fields, field_labels, sortby_index=1)
+    cliutils.print_list(nodes, fields, field_labels, sortby_index=None)

@@ -17,10 +17,10 @@
 import copy
 
 import testtools
+from testtools.matchers import HasLength
 
 from ironicclient.tests import utils
 import ironicclient.v1.node
-from testtools.matchers import HasLength
 
 NODE1 = {'id': 123,
         'uuid': '66666666-7777-8888-9999-000000000000',
@@ -77,7 +77,7 @@ fake_responses = {
     {
         'GET': (
             {},
-            {"nodes": [NODE1, NODE2]},
+            {"nodes": [NODE1, NODE2]}
         ),
         'POST': (
             {},
@@ -203,6 +203,45 @@ fake_responses = {
     },
 }
 
+fake_responses_pagination = {
+    '/v1/nodes':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1],
+             "next": "http://127.0.0.1:6385/v1/nodes/?limit=1"}
+        ),
+    },
+    '/v1/nodes/?limit=1':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]}
+        ),
+    },
+    '/v1/nodes/?marker=%s' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]}
+        ),
+    },
+    '/v1/nodes/%s/ports?limit=1' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"ports": [PORT]},
+        ),
+    },
+    '/v1/nodes/%s/ports?marker=%s' % (NODE1['uuid'], PORT['uuid']):
+    {
+        'GET': (
+            {},
+            {"ports": [PORT]},
+        ),
+    },
+}
+
 
 class NodeManagerTest(testtools.TestCase):
 
@@ -215,6 +254,37 @@ class NodeManagerTest(testtools.TestCase):
         nodes = self.mgr.list()
         expect = [
             ('GET', '/v1/nodes', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(2, len(nodes))
+
+    def test_node_list_limit(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        nodes = self.mgr.list(limit=1)
+        expect = [
+            ('GET', '/v1/nodes/?limit=1', {}, None)
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+
+    def test_node_list_marker(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        nodes = self.mgr.list(marker=NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/?marker=%s' % NODE1['uuid'], {}, None)
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+
+    def test_node_list_pagination_no_limit(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        nodes = self.mgr.list(limit=0)
+        expect = [
+            ('GET', '/v1/nodes', {}, None),
+            ('GET', '/v1/nodes/?limit=1', {}, None)
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(nodes))
@@ -318,6 +388,29 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(1, len(ports))
         self.assertEqual(PORT['uuid'], ports[0].uuid)
         self.assertEqual(PORT['address'], ports[0].address)
+
+    def test_node_port_list_limit(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        ports = self.mgr.list_ports(NODE1['uuid'], limit=1)
+        expect = [
+            ('GET', '/v1/nodes/%s/ports?limit=1' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(ports, HasLength(1))
+        self.assertEqual(PORT['uuid'], ports[0].uuid)
+        self.assertEqual(PORT['address'], ports[0].address)
+
+    def test_node_port_list_marker(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        ports = self.mgr.list_ports(NODE1['uuid'], marker=PORT['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/ports?marker=%s' % (NODE1['uuid'],
+                                                      PORT['uuid']), {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(ports, HasLength(1))
 
     def test_node_set_power_state(self):
         power_state = self.mgr.set_power_state(NODE1['uuid'], "on")

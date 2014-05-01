@@ -32,8 +32,42 @@ class PortManager(base.Manager):
     def _path(id=None):
         return '/v1/ports/%s' % id if id else '/v1/ports'
 
-    def list(self):
-        return self._list(self._path(), "ports")
+    def list(self, limit=None, marker=None):
+        """Retrieve a list of port.
+
+        :param marker: Optional, the UUID of a port, eg the last
+                       port from a previous result set. Return
+                       the next result set.
+        :param limit: The maximum number of results to return per
+                      request, if:
+
+            1) limit > 0, the maximum number of ports to return.
+            2) limit == 0, return the entire list of ports.
+            3) limit param is NOT specified (None), the number of items
+               returned respect the maximum imposed by the Ironic API
+               (see Ironic's api.max_limit option).
+
+        :returns: A list of ports.
+
+        """
+        if limit is not None:
+            limit = int(limit)
+
+        filters = []
+        if isinstance(limit, int) and limit > 0:
+            filters.append('limit=%s' % limit)
+        if marker is not None:
+            filters.append('marker=%s' % marker)
+
+        path = None
+        if filters:
+            path = '?' + '&'.join(filters)
+
+        if limit is None:
+            return self._list(self._path(path), "ports")
+        else:
+            return self._list_pagination(self._path(path), "ports",
+                                         limit=limit)
 
     def get(self, port_id):
         try:

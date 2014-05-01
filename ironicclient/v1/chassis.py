@@ -33,12 +33,80 @@ class ChassisManager(base.Manager):
     def _path(id=None):
         return '/v1/chassis/%s' % id if id else '/v1/chassis'
 
-    def list(self):
-        return self._list(self._path(), "chassis")
+    def list(self, marker=None, limit=None):
+        """Retrieve a list of chassis.
 
-    def list_nodes(self, chassis_id):
+        :param marker: Optional, the UUID of a chassis, eg the last
+                       chassis from a previous result set. Return
+                       the next result set.
+        :param limit: The maximum number of results to return per
+                      request, if:
+
+            1) limit > 0, the maximum number of chassis to return.
+            2) limit == 0, return the entire list of chassis.
+            3) limit param is NOT specified (None), the number of items
+               returned respect the maximum imposed by the Ironic API
+               (see Ironic's api.max_limit option).
+
+        :returns: A list of chassis.
+
+        """
+        if limit is not None:
+            limit = int(limit)
+
+        filters = []
+        if isinstance(limit, int) and limit > 0:
+            filters.append('limit=%s' % limit)
+        if marker is not None:
+            filters.append('marker=%s' % marker)
+
+        path = None
+        if filters:
+            path = '?' + '&'.join(filters)
+
+        if limit is None:
+            return self._list(self._path(path), "chassis")
+        else:
+            return self._list_pagination(self._path(path), "chassis",
+                                         limit=limit)
+
+    def list_nodes(self, chassis_id, marker=None, limit=None):
+        """List all the nodes for a given chassis.
+
+        :param chassis_id: The UUID of the chassis.
+        :param marker: Optional, the UUID of a node, eg the last
+                       node from a previous result set. Return
+                       the next result set.
+        :param limit: The maximum number of results to return per
+                      request, if:
+
+            1) limit > 0, the maximum number of nodes to return.
+            2) limit == 0, return the entire list of nodes.
+            3) limit param is NOT specified (None), the number of items
+               returned respect the maximum imposed by the Ironic API
+               (see Ironic's api.max_limit option).
+
+        :returns: A list of nodes.
+
+        """
+        if limit is not None:
+            limit = int(limit)
+
+        filters = []
+        if isinstance(limit, int) and limit > 0:
+            filters.append('limit=%s' % limit)
+        if marker is not None:
+            filters.append('marker=%s' % marker)
+
         path = "%s/nodes" % chassis_id
-        return self._list(self._path(path), "nodes")
+        if filters:
+            path += '?' + '&'.join(filters)
+
+        if limit is None:
+            return self._list(self._path(path), "nodes")
+        else:
+            return self._list_pagination(self._path(path), "nodes",
+                                         limit=limit)
 
     def get(self, chassis_id):
         try:

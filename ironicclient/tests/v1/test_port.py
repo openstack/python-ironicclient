@@ -18,6 +18,7 @@
 import copy
 
 import testtools
+from testtools.matchers import HasLength
 
 from ironicclient.tests import utils
 import ironicclient.v1.port
@@ -26,6 +27,12 @@ PORT = {'id': 987,
         'uuid': '11111111-2222-3333-4444-555555555555',
         'node_uuid': '55555555-4444-3333-2222-111111111111',
         'address': 'AA:BB:CC:DD:EE:FF',
+        'extra': {}}
+
+PORT2 = {'id': 988,
+        'uuid': '55555555-4444-3333-2222-111111111111',
+        'node_uuid': '55555555-4444-3333-2222-111111111111',
+        'address': 'AA:AA:AA:BB:BB:BB',
         'extra': {}}
 
 CREATE_PORT = copy.deepcopy(PORT)
@@ -65,6 +72,31 @@ fake_responses = {
     },
 }
 
+fake_responses_pagination = {
+    '/v1/ports':
+    {
+        'GET': (
+            {},
+            {"ports": [PORT],
+             "next": "http://127.0.0.1:6385/v1/ports/?limit=1"}
+        ),
+    },
+    '/v1/ports/?limit=1':
+    {
+        'GET': (
+            {},
+            {"ports": [PORT2]}
+        ),
+    },
+    '/v1/ports/?marker=%s' % PORT['uuid']:
+    {
+        'GET': (
+            {},
+            {"ports": [PORT2]}
+        ),
+    },
+}
+
 
 class PortManagerTest(testtools.TestCase):
 
@@ -80,6 +112,37 @@ class PortManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
+
+    def test_ports_list_limit(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = ironicclient.v1.port.PortManager(self.api)
+        ports = self.mgr.list(limit=1)
+        expect = [
+            ('GET', '/v1/ports/?limit=1', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(ports, HasLength(1))
+
+    def test_ports_list_marker(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = ironicclient.v1.port.PortManager(self.api)
+        ports = self.mgr.list(marker=PORT['uuid'])
+        expect = [
+            ('GET', '/v1/ports/?marker=%s' % PORT['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(ports, HasLength(1))
+
+    def test_ports_list_pagination_no_limit(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = ironicclient.v1.port.PortManager(self.api)
+        ports = self.mgr.list(limit=0)
+        expect = [
+            ('GET', '/v1/ports', {}, None),
+            ('GET', '/v1/ports/?limit=1', {}, None)
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(ports, HasLength(2))
 
     def test_ports_show(self):
         port = self.mgr.get(PORT['uuid'])
