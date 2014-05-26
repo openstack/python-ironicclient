@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from ironicclient.common import utils
 from ironicclient.openstack.common import cliutils
 
@@ -165,7 +167,7 @@ def do_node_validate(cc, args):
     """Validate the node driver interfaces."""
     ifaces = cc.node.validate(args.node)
     obj_list = []
-    for key, value in ifaces.to_dict().iteritems():
+    for key, value in six.iteritems(ifaces.to_dict()):
         data = {'interface': key}
         data.update(value)
         obj_list.append(type('iface', (object,), data))
