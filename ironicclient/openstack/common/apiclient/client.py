@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # Copyright 2010 Jacob Kaplan-Moss
 # Copyright 2011 OpenStack Foundation
 # Copyright 2011 Piston Cloud Computing, Inc.
