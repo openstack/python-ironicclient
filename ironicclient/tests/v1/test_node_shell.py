@@ -34,6 +34,7 @@ class NodeShellTest(utils.BaseTestCase):
                'driver',
                'driver_info',
                'extra',
+               'instance_info',
                'instance_uuid',
                'last_error',
                'maintenance',

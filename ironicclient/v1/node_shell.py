@@ -21,10 +21,10 @@ from ironicclient.openstack.common import cliutils
 
 def _print_node_show(node):
     fields = ['chassis_uuid', 'created_at', 'console_enabled', 'driver',
-              'driver_info', 'extra', 'instance_uuid', 'last_error',
-              'maintenance', 'power_state', 'properties', 'provision_state',
-              'reservation', 'target_power_state', 'target_provision_state',
-              'updated_at', 'uuid']
+              'driver_info', 'extra', 'instance_info', 'instance_uuid',
+              'last_error', 'maintenance', 'power_state', 'properties',
+              'provision_state', 'reservation', 'target_power_state',
+              'target_provision_state', 'updated_at', 'uuid']
     data = dict([(f, getattr(node, f, '')) for f in fields])
     cliutils.print_dict(data, wrap=72)
 
