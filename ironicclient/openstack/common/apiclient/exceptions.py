@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # Copyright 2010 Jacob Kaplan-Moss
 # Copyright 2011 Nebula, Inc.
 # Copyright 2013 Alessio Ababilov
