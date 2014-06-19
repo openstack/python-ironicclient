@@ -15,9 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
 import testtools
 from testtools import matchers
 
+from ironicclient.common import base
 from ironicclient.tests import utils
 import ironicclient.v1.driver
 
@@ -65,3 +67,20 @@ class DriverManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(DRIVER['name'], driver.name)
         self.assertEqual(DRIVER['hosts'], driver.hosts)
+
+    @mock.patch.object(base.Manager, '_update')
+    def test_vendor_passthru(self, update_mock):
+        # For now just mock the tests because vendor-passthru doesn't return
+        # anything to verify.
+        vendor_passthru_args = {'arg1': 'val1'}
+        kwargs = {
+                  'driver_name': 'driver_name',
+                  'method': 'method',
+                  'args': vendor_passthru_args
+                 }
+        self.mgr.vendor_passthru(**kwargs)
+
+        final_path = '/v1/drivers/driver_name/vendor_passthru/method'
+        update_mock.assert_once_called_with(final_path,
+                                            vendor_passthru_args,
+                                            method='POST')

@@ -162,6 +162,34 @@ def do_node_update(cc, args):
     _print_node_show(node)
 
 
+@cliutils.arg('node',
+           metavar='<node id>',
+           help="UUID of node")
+@cliutils.arg('method',
+           metavar='<method>',
+           help="vendor-passthru method to be called")
+@cliutils.arg('arguments',
+           metavar='<arg=value>',
+           nargs='*',
+           action='append',
+           default=[],
+           help="arguments to be passed to vendor-passthru method")
+def do_node_vendor_passthru(cc, args):
+    """Call a vendor-passthru extension for a node."""
+    fields = {}
+    fields['node_id'] = args.node
+    fields['method'] = args.method
+    fields['args'] = args.arguments[0]
+    fields = utils.args_array_to_dict(fields, 'args')
+
+    # If there were no arguments for the method, fields['args'] will still
+    # be an empty list. So make it an empty dict.
+    if not fields['args']:
+        fields['args'] = {}
+    cc.node.vendor_passthru(**fields)
+
+
+@cliutils.arg('node', metavar='<node id>', help="UUID of node")
 @cliutils.arg(
     '--limit',
     metavar='<limit>',

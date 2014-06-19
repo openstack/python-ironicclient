@@ -31,3 +31,33 @@ class DriverShellTest(utils.BaseTestCase):
         exp = ['hosts', 'name']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
+
+    def test_do_driver_vendor_passthru_with_args(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.driver_name = 'driver_name'
+        args.method = 'method'
+        args.arguments = [['arg1=val1', 'arg2=val2']]
+
+        d_shell.do_driver_vendor_passthru(client_mock, args)
+        kwargs = {
+                  'driver_name': 'driver_name',
+                  'method': 'method',
+                  'args': {'arg1': 'val1', 'arg2': 'val2'}
+                  }
+        client_mock.driver.vendor_passthru.assert_called_once_with(**kwargs)
+
+    def test_do_driver_vendor_passthru_without_args(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.driver_name = 'driver_name'
+        args.method = 'method'
+        args.arguments = [[]]
+
+        d_shell.do_driver_vendor_passthru(client_mock, args)
+        kwargs = {
+                  'driver_name': 'driver_name',
+                  'method': 'method',
+                  'args': {}
+                  }
+        client_mock.driver.vendor_passthru.assert_called_once_with(**kwargs)

@@ -34,3 +34,13 @@ class DriverManager(base.Manager):
             return self._list('/v1/drivers/%s' % driver_name)[0]
         except IndexError:
             return None
+
+    def vendor_passthru(self, **kwargs):
+        driver_name = kwargs['driver_name']
+        method = kwargs['method']
+        args = kwargs['args']
+        path = "/v1/drivers/%(driver_name)s/vendor_passthru/%(method)s" % {
+                                                    'driver_name': driver_name,
+                                                    'method': method
+                                                    }
+        return self._update(path, args, method='POST')

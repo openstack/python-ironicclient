@@ -48,3 +48,33 @@ class NodeShellTest(utils.BaseTestCase):
                'uuid']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
+
+    def test_do_node_vendor_passthru_with_args(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.method = 'method'
+        args.arguments = [['arg1=val1', 'arg2=val2']]
+
+        n_shell.do_node_vendor_passthru(client_mock, args)
+        kwargs = {
+                  'node_id': 'node_uuid',
+                  'method': 'method',
+                  'args': {'arg1': 'val1', 'arg2': 'val2'}
+                  }
+        client_mock.node.vendor_passthru.assert_called_once_with(**kwargs)
+
+    def test_do_node_vendor_passthru_without_args(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.method = 'method'
+        args.arguments = [[]]
+
+        n_shell.do_node_vendor_passthru(client_mock, args)
+        kwargs = {
+                  'node_id': 'node_uuid',
+                  'method': 'method',
+                  'args': {}
+                  }
+        client_mock.node.vendor_passthru.assert_called_once_with(**kwargs)

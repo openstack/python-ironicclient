@@ -15,12 +15,13 @@
 #    under the License.
 
 import copy
-
+import mock
 import testtools
 from testtools.matchers import HasLength
 
+from ironicclient.common import base
 from ironicclient.tests import utils
-import ironicclient.v1.node
+from ironicclient.v1 import node
 
 NODE1 = {'id': 123,
         'uuid': '66666666-7777-8888-9999-000000000000',
@@ -248,7 +249,7 @@ class NodeManagerTest(testtools.TestCase):
     def setUp(self):
         super(NodeManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
-        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        self.mgr = node.NodeManager(self.api)
 
     def test_node_list(self):
         nodes = self.mgr.list()
@@ -260,7 +261,7 @@ class NodeManagerTest(testtools.TestCase):
 
     def test_node_list_limit(self):
         self.api = utils.FakeAPI(fake_responses_pagination)
-        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        self.mgr = node.NodeManager(self.api)
         nodes = self.mgr.list(limit=1)
         expect = [
             ('GET', '/v1/nodes/?limit=1', {}, None)
@@ -270,7 +271,7 @@ class NodeManagerTest(testtools.TestCase):
 
     def test_node_list_marker(self):
         self.api = utils.FakeAPI(fake_responses_pagination)
-        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        self.mgr = node.NodeManager(self.api)
         nodes = self.mgr.list(marker=NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/?marker=%s' % NODE1['uuid'], {}, None)
@@ -280,7 +281,7 @@ class NodeManagerTest(testtools.TestCase):
 
     def test_node_list_pagination_no_limit(self):
         self.api = utils.FakeAPI(fake_responses_pagination)
-        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        self.mgr = node.NodeManager(self.api)
         nodes = self.mgr.list(limit=0)
         expect = [
             ('GET', '/v1/nodes', {}, None),
@@ -391,7 +392,7 @@ class NodeManagerTest(testtools.TestCase):
 
     def test_node_port_list_limit(self):
         self.api = utils.FakeAPI(fake_responses_pagination)
-        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        self.mgr = node.NodeManager(self.api)
         ports = self.mgr.list_ports(NODE1['uuid'], limit=1)
         expect = [
             ('GET', '/v1/nodes/%s/ports?limit=1' % NODE1['uuid'], {}, None),
@@ -403,7 +404,7 @@ class NodeManagerTest(testtools.TestCase):
 
     def test_node_port_list_marker(self):
         self.api = utils.FakeAPI(fake_responses_pagination)
-        self.mgr = ironicclient.v1.node.NodeManager(self.api)
+        self.mgr = node.NodeManager(self.api)
         ports = self.mgr.list_ports(NODE1['uuid'], marker=PORT['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/ports?marker=%s' % (NODE1['uuid'],
@@ -476,3 +477,20 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(CONSOLE_DATA_DISABLED, info)
+
+    @mock.patch.object(base.Manager, '_update')
+    def test_vendor_passthru(self, update_mock):
+        # For now just mock the tests because vendor-passthru doesn't return
+        # anything to verify.
+        vendor_passthru_args = {'arg1': 'val1'}
+        kwargs = {
+                  'node_id': 'node_uuid',
+                  'method': 'method',
+                  'args': vendor_passthru_args
+                 }
+        self.mgr.vendor_passthru(**kwargs)
+
+        final_path = '/v1/nodes/node_uuid/vendor_passthru/method'
+        update_mock.assert_once_called_with(final_path,
+                                            vendor_passthru_args,
+                                            method='POST')

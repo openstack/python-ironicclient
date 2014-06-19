@@ -150,6 +150,13 @@ class NodeManager(base.Manager):
     def update(self, node_id, patch):
         return self._update(self._path(node_id), patch)
 
+    def vendor_passthru(self, **kwargs):
+        node_id = kwargs['node_id']
+        method = kwargs['method']
+        args = kwargs['args']
+        path = self._path(node_id) + "/vendor_passthru/%s" % method
+        return self._update(path, args, method='POST')
+
     def set_power_state(self, node_id, state):
         path = "%s/states/power" % node_id
         if state in ['on', 'off']:
