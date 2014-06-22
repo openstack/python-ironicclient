@@ -1,0 +1,27 @@
+_ironic_opts="" # lazy init
+_ironic_flags="" # lazy init
+_ironic_opts_exp="" # lazy init
+_ironic()
+{
+    local cur prev nbc cflags
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    if [ "x$_ironic_opts" == "x" ] ; then
+        nbc="`ironic bash-completion | sed -e "s/  *-h  */ /" -e "s/  *-i  */ /"`"
+        _ironic_opts="`echo "$nbc" | sed -e "s/--[a-z0-9_-]*//g" -e "s/  */ /g"`"
+        _ironic_flags="`echo " $nbc" | sed -e "s/ [^-][^-][a-z0-9_-]*//g" -e "s/  */ /g"`"
+        _ironic_opts_exp="`echo "$_ironic_opts" | tr ' ' '|'`"
+    fi
+
+    if [[ " ${COMP_WORDS[@]} " =~ " "($_ironic_opts_exp)" " && "$prev" != "help" ]] ; then
+        COMPLETION_CACHE=$HOME/.cache/python-ironicclient/*/*-cache
+        cflags="$_ironic_flags "$(cat $COMPLETION_CACHE 2> /dev/null | tr '\n' ' ')
+        COMPREPLY=($(compgen -W "${cflags}" -- ${cur}))
+    else
+        COMPREPLY=($(compgen -W "${_ironic_opts}" -- ${cur}))
+    fi
+    return 0
+}
+complete -F _ironic ironic
