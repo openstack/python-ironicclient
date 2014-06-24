@@ -39,7 +39,7 @@ def _print_node_show(node):
            default=False,
            help='The id is an instance UUID')
 def do_node_show(cc, args):
-    """Show a node."""
+    """Show detailed information for a node."""
     if args.instance_uuid:
         node = cc.node.get_by_instance_uuid(args.node)
     else:
@@ -56,7 +56,7 @@ def do_node_show(cc, args):
            choices=['true', 'True', 'false', 'False'],
            help="List nodes by instance association: 'true' or 'false'")
 def do_node_list(cc, args):
-    """List nodes."""
+    """List nodes which are registered with the Ironic service."""
     params = {}
     if args.associated is not None:
         params['associated'] = args.associated
@@ -80,8 +80,8 @@ def do_node_list(cc, args):
 @utils.arg('-i', '--driver_info',
            metavar='<key=value>',
            action='append',
-           help='Key/value pairs used by the driver. '
-                'Can be specified multiple times')
+           help='Key/value pairs used by the driver, such as out-of-band '
+                'management credentials. Can be specified multiple times')
 @utils.arg('-p', '--properties',
            metavar='<key=value>',
            action='append',
@@ -94,7 +94,7 @@ def do_node_list(cc, args):
            help="Record arbitrary key/value metadata. "
                 "Can be specified multiple times")
 def do_node_create(cc, args):
-    """Create a new node."""
+    """Register a new node with the Ironic service."""
     field_list = ['chassis_uuid', 'driver', 'driver_info',
                   'properties', 'extra']
     fields = dict((k, v) for (k, v) in vars(args).items()
@@ -114,7 +114,7 @@ def do_node_create(cc, args):
            nargs='+',
            help="UUID of node")
 def do_node_delete(cc, args):
-    """Delete a node."""
+    """Unregister a node from the Ironic service."""
     for n in args.node:
         cc.node.delete(n)
         print(_('Deleted node %s') % n)
@@ -135,7 +135,7 @@ def do_node_delete(cc, args):
            help="Attributes to add/replace or remove "
                 "(only PATH is necessary on remove)")
 def do_node_update(cc, args):
-    """Update a node."""
+    """Update information about a registered node."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
     node = cc.node.update(args.node, patch)
     _print_node_show(node)
@@ -143,7 +143,7 @@ def do_node_update(cc, args):
 
 @utils.arg('node', metavar='<node id>', help="UUID of node")
 def do_node_port_list(cc, args):
-    """List the ports contained in the node."""
+    """List the ports associated with the node."""
     ports = cc.node.list_ports(args.node)
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
@@ -170,7 +170,7 @@ def do_node_set_power_state(cc, args):
            choices=['active', 'deleted'],
            help="Supported states: 'active' or 'deleted'")
 def do_node_set_provision_state(cc, args):
-    """Provision or tear down a node."""
+    """Provision an instance on, or delete an instance from a node."""
     cc.node.set_provision_state(args.node, args.provision_state)
 
 
@@ -194,7 +194,7 @@ def do_node_validate(cc, args):
            metavar='<node uuid>',
            help="UUID of node")
 def do_node_get_console(cc, args):
-    """Return the connection information about the console."""
+    """Return the connection information for the node's console, if enabled."""
     info = cc.node.get_console(args.node)
     cliutils.print_dict(info, wrap=72)
 
@@ -208,5 +208,5 @@ def do_node_get_console(cc, args):
            help="Enable or disable the console access. "
                 "Supported options are: 'true' or 'false'")
 def do_node_set_console_mode(cc, args):
-    """Enable or disable the console access."""
+    """Enable or disable serial console access for this node."""
     cc.node.set_console_mode(args.node, args.enabled)
