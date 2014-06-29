@@ -38,6 +38,7 @@ class HTTPClient(object):
     def __init__(self, endpoint, **kwargs):
         self.endpoint = endpoint
         self.auth_token = kwargs.get('token')
+        self.auth_ref = kwargs.get('auth_ref')
         self.connection_params = self.get_connection_params(endpoint, **kwargs)
 
     @staticmethod

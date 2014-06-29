@@ -65,6 +65,7 @@ def get_client(api_version, **kwargs):
     if kwargs.get('os_auth_token') and kwargs.get('ironic_url'):
         token = kwargs.get('os_auth_token')
         endpoint = kwargs.get('ironic_url')
+        auth_ref = None
     elif (kwargs.get('os_username') and
           kwargs.get('os_password') and
           kwargs.get('os_auth_url') and
@@ -87,6 +88,9 @@ def get_client(api_version, **kwargs):
 
         endpoint = kwargs.get('ironic_url') or \
             _get_endpoint(_ksclient, **ks_kwargs)
+
+        auth_ref = _ksclient.auth_ref
+
     else:
         e = (_('Must provide Keystone credentials or user-defined endpoint '
                'and token'))
@@ -99,6 +103,7 @@ def get_client(api_version, **kwargs):
         'ca_file': kwargs.get('ca_file'),
         'cert_file': kwargs.get('cert_file'),
         'key_file': kwargs.get('key_file'),
+        'auth_ref': auth_ref,
     }
 
     return Client(api_version, endpoint, **cli_kwargs)
