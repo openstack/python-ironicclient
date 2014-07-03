@@ -31,13 +31,13 @@ def _print_node_show(node):
     cliutils.print_dict(data, wrap=72)
 
 
-@utils.arg('node', metavar='<id>',
-           help="ID, UUID or instance UUID of node")
-@utils.arg('--instance',
-           dest='instance_uuid',
-           action='store_true',
-           default=False,
-           help='The id is an instance UUID')
+@cliutils.arg('node', metavar='<id>', help="ID, UUID or instance UUID of node")
+@cliutils.arg(
+    '--instance',
+    dest='instance_uuid',
+    action='store_true',
+    default=False,
+    help='The id is an instance UUID')
 def do_node_show(cc, args):
     """Show detailed information for a node."""
     if args.instance_uuid:
@@ -47,14 +47,16 @@ def do_node_show(cc, args):
     _print_node_show(node)
 
 
-@utils.arg('--maintenance',
-           metavar='<maintenance>',
-           choices=['true', 'True', 'false', 'False'],
-           help="List nodes in maintenance mode: 'true' or 'false'")
-@utils.arg('--associated',
-           metavar='<assoc>',
-           choices=['true', 'True', 'false', 'False'],
-           help="List nodes by instance association: 'true' or 'false'")
+@cliutils.arg(
+    '--maintenance',
+    metavar='<maintenance>',
+    choices=['true', 'True', 'false', 'False'],
+    help="List nodes in maintenance mode: 'true' or 'false'")
+@cliutils.arg(
+    '--associated',
+    metavar='<assoc>',
+    choices=['true', 'True', 'false', 'False'],
+    help="List nodes by instance association: 'true' or 'false'")
 def do_node_list(cc, args):
     """List nodes which are registered with the Ironic service."""
     params = {}
@@ -71,28 +73,33 @@ def do_node_list(cc, args):
     cliutils.print_list(nodes, fields, field_labels, sortby_index=1)
 
 
-@utils.arg('-c', '--chassis_uuid',
-           metavar='<chassis uuid>',
-           help='UUID of the chassis that this node belongs to')
-@utils.arg('-d', '--driver',
-           metavar='<driver>',
-           help='Driver used to control the node [REQUIRED]')
-@utils.arg('-i', '--driver_info',
-           metavar='<key=value>',
-           action='append',
-           help='Key/value pairs used by the driver, such as out-of-band '
-                'management credentials. Can be specified multiple times')
-@utils.arg('-p', '--properties',
-           metavar='<key=value>',
-           action='append',
-           help='Key/value pairs describing the physical characteristics '
-                'of the node. This is exported to Nova and used by the '
-                'scheduler. Can be specified multiple times')
-@utils.arg('-e', '--extra',
-           metavar='<key=value>',
-           action='append',
-           help="Record arbitrary key/value metadata. "
-                "Can be specified multiple times")
+@cliutils.arg(
+    '-c', '--chassis_uuid',
+    metavar='<chassis uuid>',
+    help='UUID of the chassis that this node belongs to')
+@cliutils.arg(
+    '-d', '--driver',
+    metavar='<driver>',
+    help='Driver used to control the node [REQUIRED]')
+@cliutils.arg(
+    '-i', '--driver_info',
+    metavar='<key=value>',
+    action='append',
+    help='Key/value pairs used by the driver, such as out-of-band management'
+         'credentials. Can be specified multiple times')
+@cliutils.arg(
+    '-p', '--properties',
+    metavar='<key=value>',
+    action='append',
+    help='Key/value pairs describing the physical characteristics of the '
+         'node. This is exported to Nova and used by the scheduler. '
+         'Can be specified multiple times')
+@cliutils.arg(
+    '-e', '--extra',
+    metavar='<key=value>',
+    action='append',
+    help="Record arbitrary key/value metadata. "
+         "Can be specified multiple times")
 def do_node_create(cc, args):
     """Register a new node with the Ironic service."""
     field_list = ['chassis_uuid', 'driver', 'driver_info',
@@ -109,10 +116,7 @@ def do_node_create(cc, args):
     cliutils.print_dict(data, wrap=72)
 
 
-@utils.arg('node',
-           metavar='<node id>',
-           nargs='+',
-           help="UUID of node")
+@cliutils.arg('node', metavar='<node id>', nargs='+', help="UUID of node")
 def do_node_delete(cc, args):
     """Unregister a node from the Ironic service."""
     for n in args.node:
@@ -120,20 +124,20 @@ def do_node_delete(cc, args):
         print(_('Deleted node %s') % n)
 
 
-@utils.arg('node',
-           metavar='<node id>',
-           help="UUID of node")
-@utils.arg('op',
-           metavar='<op>',
-           choices=['add', 'replace', 'remove'],
-           help="Operations: 'add', 'replace' or 'remove'")
-@utils.arg('attributes',
-           metavar='<path=value>',
-           nargs='+',
-           action='append',
-           default=[],
-           help="Attributes to add/replace or remove "
-                "(only PATH is necessary on remove)")
+@cliutils.arg('node', metavar='<node id>', help="UUID of node")
+@cliutils.arg(
+    'op',
+    metavar='<op>',
+    choices=['add', 'replace', 'remove'],
+    help="Operations: 'add', 'replace' or 'remove'")
+@cliutils.arg(
+    'attributes',
+    metavar='<path=value>',
+    nargs='+',
+    action='append',
+    default=[],
+    help="Attributes to add/replace or remove "
+         "(only PATH is necessary on remove)")
 def do_node_update(cc, args):
     """Update information about a registered node."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
@@ -141,7 +145,7 @@ def do_node_update(cc, args):
     _print_node_show(node)
 
 
-@utils.arg('node', metavar='<node id>', help="UUID of node")
+@cliutils.arg('node', metavar='<node id>', help="UUID of node")
 def do_node_port_list(cc, args):
     """List the ports associated with the node."""
     ports = cc.node.list_ports(args.node)
@@ -150,33 +154,29 @@ def do_node_port_list(cc, args):
     cliutils.print_list(ports, fields, field_labels, sortby_index=1)
 
 
-@utils.arg('node',
-           metavar='<node id>',
-           help="UUID of node")
-@utils.arg('power_state',
-           metavar='<power state>',
-           choices=['on', 'off', 'reboot'],
-           help="Supported states: 'on' or 'off' or 'reboot'")
+@cliutils.arg('node', metavar='<node id>', help="UUID of node")
+@cliutils.arg(
+    'power_state',
+    metavar='<power state>',
+    choices=['on', 'off', 'reboot'],
+    help="Supported states: 'on' or 'off' or 'reboot'")
 def do_node_set_power_state(cc, args):
     """Power the node on or off."""
     cc.node.set_power_state(args.node, args.power_state)
 
 
-@utils.arg('node',
-           metavar='<node id>',
-           help="UUID of node")
-@utils.arg('provision_state',
-           metavar='<provision state>',
-           choices=['active', 'deleted'],
-           help="Supported states: 'active' or 'deleted'")
+@cliutils.arg('node', metavar='<node id>', help="UUID of node")
+@cliutils.arg(
+    'provision_state',
+    metavar='<provision state>',
+    choices=['active', 'deleted'],
+    help="Supported states: 'active' or 'deleted'")
 def do_node_set_provision_state(cc, args):
     """Provision an instance on, or delete an instance from a node."""
     cc.node.set_provision_state(args.node, args.provision_state)
 
 
-@utils.arg('node',
-           metavar='<node uuid>',
-           help="UUID of node")
+@cliutils.arg('node', metavar='<node uuid>', help="UUID of node")
 def do_node_validate(cc, args):
     """Validate the node driver interfaces."""
     ifaces = cc.node.validate(args.node)
@@ -190,23 +190,20 @@ def do_node_validate(cc, args):
     cliutils.print_list(obj_list, fields, field_labels)
 
 
-@utils.arg('node',
-           metavar='<node uuid>',
-           help="UUID of node")
+@cliutils.arg('node', metavar='<node uuid>', help="UUID of node")
 def do_node_get_console(cc, args):
     """Return the connection information for the node's console, if enabled."""
     info = cc.node.get_console(args.node)
     cliutils.print_dict(info, wrap=72)
 
 
-@utils.arg('node',
-           metavar='<node uuid>',
-           help="UUID of node")
-@utils.arg('enabled',
-           metavar='<enabled>',
-           choices=['true', 'false'],
-           help="Enable or disable the console access. "
-                "Supported options are: 'true' or 'false'")
+@cliutils.arg('node', metavar='<node uuid>', help="UUID of node")
+@cliutils.arg(
+    'enabled',
+    metavar='<enabled>',
+    choices=['true', 'false'],
+    help="Enable or disable the console access. Supported options are: "
+         "'true' or 'false'")
 def do_node_set_console_mode(cc, args):
     """Enable or disable serial console access for this node."""
     cc.node.set_console_mode(args.node, args.enabled)

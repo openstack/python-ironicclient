@@ -20,12 +20,7 @@ from __future__ import print_function
 import argparse
 
 from ironicclient import exc
-from ironicclient.openstack.common import cliutils
 from ironicclient.openstack.common import importutils
-
-
-arg = cliutils.arg
-env = cliutils.env
 
 
 class HelpFormatter(argparse.HelpFormatter):
