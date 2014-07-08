@@ -296,7 +296,7 @@ class NodeManagerTest(testtools.TestCase):
             ('DELETE', '/v1/nodes/%s' % NODE1['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertTrue(node is None)
+        self.assertIsNone(node)
 
     def test_update(self):
         patch = {'op': 'replace',
