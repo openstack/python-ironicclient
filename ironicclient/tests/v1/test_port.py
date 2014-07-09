@@ -105,7 +105,7 @@ class PortManagerTest(testtools.TestCase):
             ('DELETE', '/v1/ports/%s' % PORT['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertTrue(port is None)
+        self.assertIsNone(port)
 
     def test_update(self):
         patch = {'op': 'replace',
