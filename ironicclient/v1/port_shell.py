@@ -26,7 +26,7 @@ def _print_port_show(port):
     cliutils.print_dict(data, wrap=72)
 
 
-@utils.arg('port', metavar='<port id>', help="UUID of port")
+@cliutils.arg('port', metavar='<port id>', help="UUID of port")
 def do_port_show(cc, args):
     """Show a port."""
     port = cc.port.get(args.port)
@@ -41,19 +41,22 @@ def do_port_list(cc, args):
     cliutils.print_list(port, fields, field_labels, sortby_index=1)
 
 
-@utils.arg('-a', '--address',
-           metavar='<address>',
-           required=True,
-           help='MAC Address for this port')
-@utils.arg('-n', '--node_uuid',
-           metavar='<node uuid>',
-           required=True,
-           help='UUID of the node that this port belongs to')
-@utils.arg('-e', '--extra',
-           metavar="<key=value>",
-           action='append',
-           help="Record arbitrary key/value metadata. "
-                "Can be specified multiple times")
+@cliutils.arg(
+    '-a', '--address',
+    metavar='<address>',
+    required=True,
+    help='MAC Address for this port')
+@cliutils.arg(
+    '-n', '--node_uuid',
+    metavar='<node uuid>',
+    required=True,
+    help='UUID of the node that this port belongs to')
+@cliutils.arg(
+    '-e', '--extra',
+    metavar="<key=value>",
+    action='append',
+    help="Record arbitrary key/value metadata. "
+         "Can be specified multiple times")
 def do_port_create(cc, args):
     """Create a new port."""
     field_list = ['address', 'extra', 'node_uuid']
@@ -67,10 +70,7 @@ def do_port_create(cc, args):
     cliutils.print_dict(data, wrap=72)
 
 
-@utils.arg('port',
-           metavar='<port id>',
-           nargs='+',
-           help="UUID of port")
+@cliutils.arg('port', metavar='<port id>', nargs='+', help="UUID of port")
 def do_port_delete(cc, args):
     """Delete a port."""
     for p in args.port:
@@ -78,20 +78,20 @@ def do_port_delete(cc, args):
         print ('Deleted port %s' % p)
 
 
-@utils.arg('port',
-           metavar='<port id>',
-           help="UUID of port")
-@utils.arg('op',
-           metavar='<op>',
-           choices=['add', 'replace', 'remove'],
-           help="Operations: 'add', 'replace' or 'remove'")
-@utils.arg('attributes',
-           metavar='<path=value>',
-           nargs='+',
-           action='append',
-           default=[],
-           help="Attributes to add/replace or remove "
-                "(only PATH is necessary on remove)")
+@cliutils.arg('port', metavar='<port id>', help="UUID of port")
+@cliutils.arg(
+    'op',
+    metavar='<op>',
+    choices=['add', 'replace', 'remove'],
+    help="Operations: 'add', 'replace' or 'remove'")
+@cliutils.arg(
+    'attributes',
+    metavar='<path=value>',
+    nargs='+',
+    action='append',
+    default=[],
+    help="Attributes to add/replace or remove "
+         "(only PATH is necessary on remove)")
 def do_port_update(cc, args):
     """Update a port."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])

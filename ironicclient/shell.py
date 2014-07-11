@@ -28,6 +28,7 @@ import ironicclient
 from ironicclient import client as iroclient
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.openstack.common import cliutils
 from ironicclient.openstack.common import gettextutils
 
 gettextutils.install('ironicclient')
@@ -56,7 +57,7 @@ class IronicShell(object):
                             version=ironicclient.__version__)
 
         parser.add_argument('--debug',
-                            default=bool(utils.env('IRONICCLIENT_DEBUG')),
+                            default=bool(cliutils.env('IRONICCLIENT_DEBUG')),
                             action='store_true',
                             help='Defaults to env[IRONICCLIENT_DEBUG]')
 
@@ -95,63 +96,63 @@ class IronicShell(object):
                             help='Number of seconds to wait for a response')
 
         parser.add_argument('--os-username',
-                            default=utils.env('OS_USERNAME'),
+                            default=cliutils.env('OS_USERNAME'),
                             help='Defaults to env[OS_USERNAME]')
 
         parser.add_argument('--os_username',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-password',
-                            default=utils.env('OS_PASSWORD'),
+                            default=cliutils.env('OS_PASSWORD'),
                             help='Defaults to env[OS_PASSWORD]')
 
         parser.add_argument('--os_password',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-tenant-id',
-                            default=utils.env('OS_TENANT_ID'),
+                            default=cliutils.env('OS_TENANT_ID'),
                             help='Defaults to env[OS_TENANT_ID]')
 
         parser.add_argument('--os_tenant_id',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-tenant-name',
-                            default=utils.env('OS_TENANT_NAME'),
+                            default=cliutils.env('OS_TENANT_NAME'),
                             help='Defaults to env[OS_TENANT_NAME]')
 
         parser.add_argument('--os_tenant_name',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-auth-url',
-                            default=utils.env('OS_AUTH_URL'),
+                            default=cliutils.env('OS_AUTH_URL'),
                             help='Defaults to env[OS_AUTH_URL]')
 
         parser.add_argument('--os_auth_url',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-region-name',
-                            default=utils.env('OS_REGION_NAME'),
+                            default=cliutils.env('OS_REGION_NAME'),
                             help='Defaults to env[OS_REGION_NAME]')
 
         parser.add_argument('--os_region_name',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-auth-token',
-                            default=utils.env('OS_AUTH_TOKEN'),
+                            default=cliutils.env('OS_AUTH_TOKEN'),
                             help='Defaults to env[OS_AUTH_TOKEN]')
 
         parser.add_argument('--os_auth_token',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--ironic-url',
-                            default=utils.env('IRONIC_URL'),
+                            default=cliutils.env('IRONIC_URL'),
                             help='Defaults to env[IRONIC_URL]')
 
         parser.add_argument('--ironic_url',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--ironic-api-version',
-                            default=utils.env(
+                            default=cliutils.env(
                             'IRONIC_API_VERSION', default='1'),
                             help='Defaults to env[IRONIC_API_VERSION] '
                             'or 1')
@@ -160,14 +161,14 @@ class IronicShell(object):
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-service-type',
-                            default=utils.env('OS_SERVICE_TYPE'),
+                            default=cliutils.env('OS_SERVICE_TYPE'),
                             help='Defaults to env[OS_SERVICE_TYPE]')
 
         parser.add_argument('--os_service_type',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-endpoint-type',
-                            default=utils.env('OS_ENDPOINT_TYPE'),
+                            default=cliutils.env('OS_ENDPOINT_TYPE'),
                             help='Defaults to env[OS_ENDPOINT_TYPE]')
 
         parser.add_argument('--os_endpoint_type',
@@ -250,8 +251,8 @@ class IronicShell(object):
         except exc.Unauthorized:
             raise exc.CommandError(_("Invalid OpenStack Identity credentials"))
 
-    @utils.arg('command', metavar='<subcommand>', nargs='?',
-               help='Display help for <subcommand>')
+    @cliutils.arg('command', metavar='<subcommand>', nargs='?',
+                  help='Display help for <subcommand>')
     def do_help(self, args):
         """Display help about this program or one of its subcommands."""
         if getattr(args, 'command', None):
