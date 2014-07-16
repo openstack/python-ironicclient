@@ -64,3 +64,18 @@ class ClientTest(utils.BaseTestCase):
             'os_auth_token': '',
         }
         self.assertRaises(exc.AmbigiousAuthSystem, get_client, '1', **kwargs)
+
+    def test_ensure_auth_ref_propagated(self):
+        ksclient = fake_get_ksclient
+        self.useFixture(fixtures.MonkeyPatch(
+            'ironicclient.client._get_ksclient', ksclient))
+        kwargs = {
+            'os_tenant_name': 'TENANT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': 'http://localhost:35357/v2.0',
+            'os_auth_token': '',
+        }
+        client = get_client('1', **kwargs)
+
+        self.assertEqual(ksclient().auth_ref, client.http_client.auth_ref)
