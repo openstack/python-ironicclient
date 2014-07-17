@@ -32,6 +32,8 @@ LOG = logging.getLogger(__name__)
 USER_AGENT = 'python-ironicclient'
 CHUNKSIZE = 1024 * 64  # 64kB
 
+API_VERSION = '/v1'
+
 
 class HTTPClient(object):
 
@@ -45,7 +47,11 @@ class HTTPClient(object):
     def get_connection_params(endpoint, **kwargs):
         parts = urlparse.urlparse(endpoint)
 
-        _args = (parts.hostname, parts.port, parts.path)
+        # trim API version and trailing slash from endpoint
+        path = parts.path
+        path = path.rstrip('/').rstrip(API_VERSION)
+
+        _args = (parts.hostname, parts.port, path)
         _kwargs = {'timeout': (float(kwargs.get('timeout'))
                                if kwargs.get('timeout') else 600)}
 
@@ -110,7 +116,7 @@ class HTTPClient(object):
     def _make_connection_url(self, url):
         (_class, _args, _kwargs) = self.connection_params
         base_url = _args[2]
-        return '%s/%s' % (base_url.rstrip('/'), url.lstrip('/'))
+        return '%s/%s' % (base_url, url.lstrip('/'))
 
     def _extract_error_json(self, body):
         error_json = {}
