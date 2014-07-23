@@ -17,5 +17,14 @@
 
 import pbr.version
 
+from ironicclient import client
+from ironicclient import exc as exceptions
+
 
 __version__ = pbr.version.VersionInfo('python-ironicclient').version_string()
+
+__all__ = [
+        'client',
+        'exc',
+        'exceptions',
+]
