@@ -271,3 +271,36 @@ def do_node_get_console(cc, args):
 def do_node_set_console_mode(cc, args):
     """Enable or disable serial console access for this node."""
     cc.node.set_console_mode(args.node, args.enabled)
+
+
+@cliutils.arg('node', metavar='<node uuid>', help="UUID of node")
+@cliutils.arg(
+    'device',
+    metavar='<boot device>',
+    choices=['pxe', 'disk', 'cdrom', 'bios', 'safe'],
+    help="Supported boot devices:  'pxe', 'disk', 'cdrom', 'bios', 'safe'")
+@cliutils.arg(
+    '--persistent',
+    dest='persistent',
+    action='store_true',
+    default=False,
+    help="Make changes persistent for all future boots")
+def do_node_set_boot_device(cc, args):
+    """Set the boot device for a node."""
+    cc.node.set_boot_device(args.node, args.device, args.persistent)
+
+
+@cliutils.arg('node', metavar='<node uuid>', help="UUID of node")
+def do_node_get_boot_device(cc, args):
+    """Get the current boot device."""
+    boot_device = cc.node.get_boot_device(args.node)
+    cliutils.print_dict(boot_device, wrap=72)
+
+
+@cliutils.arg('node', metavar='<node uuid>', help="UUID of node")
+def do_node_get_supported_boot_devices(cc, args):
+    """Get the supported boot devices."""
+    boot_devices = cc.node.get_supported_boot_devices(args.node)
+    boot_device_list = boot_devices.get('supported_boot_devices', [])
+    boot_devices['supported_boot_devices'] = ', '.join(boot_device_list)
+    cliutils.print_dict(boot_devices, wrap=72)

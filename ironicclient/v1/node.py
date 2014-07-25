@@ -190,3 +190,16 @@ class NodeManager(base.Manager):
         path = "%s/states/console" % node_uuid
         target = {'enabled': enabled}
         return self._update(self._path(path), target, method='PUT')
+
+    def set_boot_device(self, node_uuid, boot_device, persistent=False):
+        path = "%s/management/boot_device" % node_uuid
+        target = {'boot_device': boot_device, 'persistent': persistent}
+        return self._update(self._path(path), target, method='PUT')
+
+    def get_boot_device(self, node_uuid):
+        path = "%s/management/boot_device" % node_uuid
+        return self.get(path).to_dict()
+
+    def get_supported_boot_devices(self, node_uuid):
+        path = "%s/management/boot_device/supported" % node_uuid
+        return self.get(path).to_dict()

@@ -64,6 +64,9 @@ CONSOLE_DATA_ENABLED = {'console_enabled': True,
                         'console_info': {'test-console': 'test-console-data'}}
 CONSOLE_DATA_DISABLED = {'console_enabled': False, 'console_info': None}
 
+BOOT_DEVICE = {'boot_device': 'pxe', 'persistent': False}
+SUPPORTED_BOOT_DEVICE = {'supported_boot_devices': ['pxe']}
+
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
@@ -200,6 +203,24 @@ fake_responses = {
         'GET': (
             {},
             CONSOLE_DATA_DISABLED,
+        ),
+    },
+    '/v1/nodes/%s/management/boot_device' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            BOOT_DEVICE,
+        ),
+        'PUT': (
+            {},
+            None,
+        ),
+    },
+    '/v1/nodes/%s/management/boot_device/supported' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            SUPPORTED_BOOT_DEVICE,
         ),
     },
 }
@@ -494,3 +515,36 @@ class NodeManagerTest(testtools.TestCase):
         update_mock.assert_once_called_with(final_path,
                                             vendor_passthru_args,
                                             method='POST')
+
+    def _test_node_set_boot_device(self, boot_device, persistent=False):
+        self.mgr.set_boot_device(NODE1['uuid'], boot_device, persistent)
+        body = {'boot_device': boot_device, 'persistent': persistent}
+        expect = [
+            ('PUT', '/v1/nodes/%s/management/boot_device' % NODE1['uuid'],
+             {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
+    def test_node_set_boot_device(self):
+        self._test_node_set_boot_device('pxe')
+
+    def test_node_set_boot_device_persistent(self):
+        self._test_node_set_boot_device('pxe', persistent=True)
+
+    def test_node_get_boot_device(self):
+        boot_device = self.mgr.get_boot_device(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/management/boot_device' % NODE1['uuid'],
+             {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(BOOT_DEVICE, boot_device)
+
+    def test_node_get_supported_boot_devices(self):
+        boot_device = self.mgr.get_supported_boot_devices(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/management/boot_device/supported' %
+             NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(SUPPORTED_BOOT_DEVICE, boot_device)
