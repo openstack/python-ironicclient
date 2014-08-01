@@ -12,22 +12,44 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
+import json
 import re
 import sys
 
 import fixtures
 import httplib2
+import httpretty
+from keystoneclient.fixture import v2 as ks_v2_fixture
+from keystoneclient.fixture import v3 as ks_v3_fixture
 import six
+import testtools
 from testtools import matchers
 
 from ironicclient import exc
 from ironicclient import shell as ironic_shell
+from ironicclient.tests import keystone_client_fixtures
 from ironicclient.tests import utils
 
 FAKE_ENV = {'OS_USERNAME': 'username',
             'OS_PASSWORD': 'password',
             'OS_TENANT_NAME': 'tenant_name',
             'OS_AUTH_URL': 'http://no.where'}
+
+FAKE_ENV_KEYSTONE_V2 = {
+    'OS_USERNAME': 'username',
+    'OS_PASSWORD': 'password',
+    'OS_TENANT_NAME': 'tenant_name',
+    'OS_AUTH_URL': keystone_client_fixtures.BASE_URL,
+}
+
+FAKE_ENV_KEYSTONE_V3 = {
+    'OS_USERNAME': 'username',
+    'OS_PASSWORD': 'password',
+    'OS_TENANT_NAME': 'tenant_name',
+    'OS_AUTH_URL': keystone_client_fixtures.BASE_URL,
+    'OS_USER_DOMAIN_ID': 'default',
+    'OS_PROJECT_DOMAIN_ID': 'default',
+}
 
 
 class ShellTest(utils.BaseTestCase):
@@ -109,3 +131,128 @@ class ShellTest(utils.BaseTestCase):
         for r in required:
             self.assertThat(stdout,
                             matchers.MatchesRegex(r, self.re_options))
+
+
+class TestCase(testtools.TestCase):
+
+    tokenid = keystone_client_fixtures.TOKENID
+
+    def set_fake_env(self, fake_env):
+        client_env = ('OS_USERNAME', 'OS_PASSWORD', 'OS_TENANT_ID',
+                      'OS_TENANT_NAME', 'OS_AUTH_URL', 'OS_REGION_NAME',
+                      'OS_AUTH_TOKEN', 'OS_NO_CLIENT_AUTH', 'OS_SERVICE_TYPE',
+                      'OS_ENDPOINT_TYPE')
+
+        for key in client_env:
+            self.useFixture(
+                fixtures.EnvironmentVariable(key, fake_env.get(key)))
+
+    # required for testing with Python 2.6
+    def assertRegexpMatches(self, text, expected_regexp, msg=None):
+        """Fail the test unless the text matches the regular expression."""
+        if isinstance(expected_regexp, six.string_types):
+            expected_regexp = re.compile(expected_regexp)
+        if not expected_regexp.search(text):
+            msg = msg or "Regexp didn't match"
+            msg = '%s: %r not found in %r' % (
+                msg, expected_regexp.pattern, text)
+            raise self.failureException(msg)
+
+    def register_keystone_v2_token_fixture(self):
+        v2_token = ks_v2_fixture.Token(token_id=self.tokenid)
+        service = v2_token.add_service('baremetal')
+        service.add_endpoint('http://ironic.example.com', region='RegionOne')
+        httpretty.register_uri(
+            httpretty.POST,
+            '%s/tokens' % (keystone_client_fixtures.V2_URL),
+            body=json.dumps(v2_token))
+
+    def register_keystone_v3_token_fixture(self):
+        v3_token = ks_v3_fixture.Token()
+        service = v3_token.add_service('baremetal')
+        service.add_standard_endpoints(public='http://ironic.example.com')
+        httpretty.register_uri(
+            httpretty.POST,
+            '%s/auth/tokens' % (keystone_client_fixtures.V3_URL),
+            body=json.dumps(v3_token),
+            adding_headers={'X-Subject-Token': self.tokenid})
+
+    def register_keystone_auth_fixture(self):
+        self.register_keystone_v2_token_fixture()
+        self.register_keystone_v3_token_fixture()
+        httpretty.register_uri(
+            httpretty.GET,
+            keystone_client_fixtures.BASE_URL,
+            body=keystone_client_fixtures.keystone_request_callback)
+
+
+class ShellTestNoMox(TestCase):
+    def setUp(self):
+        super(ShellTestNoMox, self).setUp()
+        self.set_fake_env(FAKE_ENV_KEYSTONE_V2)
+
+    def shell(self, argstr):
+        orig = sys.stdout
+        try:
+            sys.stdout = six.StringIO()
+            _shell = ironic_shell.IronicShell()
+            _shell.main(argstr.split())
+            self.subcommands = _shell.subcommands.keys()
+        except SystemExit:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            self.assertEqual(0, exc_value.code)
+        finally:
+            out = sys.stdout.getvalue()
+            sys.stdout.close()
+            sys.stdout = orig
+
+        return out
+
+    @httpretty.activate
+    def test_node_list(self):
+        self.register_keystone_auth_fixture()
+        resp_dict = {"nodes": [
+                     {"instance_uuid": "null",
+                      "uuid": "351a82d6-9f04-4c36-b79a-a38b9e98ff71",
+                      "links": [{"href": "http://ironic.example.com:6385/"
+                                 "v1/nodes/foo",
+                                 "rel": "self"},
+                                {"href": "http://ironic.example.com:6385/"
+                                 "nodes/foo",
+                                 "rel": "bookmark"}],
+                      "maintenance": "false",
+                      "provision_state": "null",
+                      "power_state": "power off"},
+                     {"instance_uuid": "null",
+                      "uuid": "66fbba13-29e8-4b8a-9e80-c655096a40d3",
+                      "links": [{"href": "http://ironic.example.com:6385/"
+                                 "v1/nodes/foo2",
+                                 "rel": "self"},
+                                {"href": "http://ironic.example.com:6385/"
+                                 "nodes/foo2",
+                                 "rel": "bookmark"}],
+                      "maintenance": "false",
+                      "provision_state": "null",
+                      "power_state": "power off"}]}
+        httpretty.register_uri(
+            httpretty.GET,
+            'http://ironic.example.com/v1/nodes',
+            status=200,
+            content_type='application/json; charset=UTF-8',
+            body=json.dumps(resp_dict))
+
+        event_list_text = self.shell('node-list')
+
+        required = [
+            '351a82d6-9f04-4c36-b79a-a38b9e98ff71',
+            '66fbba13-29e8-4b8a-9e80-c655096a40d3',
+        ]
+
+        for r in required:
+            self.assertRegexpMatches(event_list_text, r)
+
+
+class ShellTestNoMoxV3(ShellTestNoMox):
+
+    def _set_fake_env(self):
+        self.set_fake_env(FAKE_ENV_KEYSTONE_V3)

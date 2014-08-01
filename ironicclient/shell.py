@@ -23,6 +23,13 @@ import logging
 import sys
 
 import httplib2
+from keystoneclient.auth.identity import v2 as v2_auth
+from keystoneclient.auth.identity import v3 as v3_auth
+from keystoneclient import discover
+from keystoneclient.openstack.common.apiclient import exceptions as ks_exc
+from keystoneclient import session as kssession
+import six.moves.urllib.parse as urlparse
+
 
 import ironicclient
 from ironicclient import client as iroclient
@@ -35,6 +42,46 @@ gettextutils.install('ironicclient')
 
 
 class IronicShell(object):
+
+    def _append_global_identity_args(self, parser):
+        # FIXME(dhu): these are global identity (Keystone) arguments which
+        # should be consistent and shared by all service clients. Therefore,
+        # they should be provided by python-keystoneclient. We will need to
+        # refactor this code once this functionality is avaible in
+        # python-keystoneclient.
+
+        # Register arguments needed for a Session
+        kssession.Session.register_cli_options(parser)
+
+        parser.add_argument('--os-user-domain-id',
+                            default=cliutils.env('OS_USER_DOMAIN_ID'),
+                            help='Defaults to env[OS_USER_DOMAIN_ID].')
+
+        parser.add_argument('--os-user-domain-name',
+                            default=cliutils.env('OS_USER_DOMAIN_NAME'),
+                            help='Defaults to env[OS_USER_DOMAIN_NAME].')
+
+        parser.add_argument('--os-project-id',
+                            default=cliutils.env('OS_PROJECT_ID'),
+                            help='Another way to specify tenant ID. '
+                                 'This option is mutually exclusive with '
+                                 ' --os-tenant-id. '
+                                 'Defaults to env[OS_PROJECT_ID].')
+
+        parser.add_argument('--os-project-name',
+                            default=cliutils.env('OS_PROJECT_NAME'),
+                            help='Another way to specify tenant name. '
+                                 'This option is mutually exclusive with '
+                                 ' --os-tenant-name. '
+                                 'Defaults to env[OS_PROJECT_NAME].')
+
+        parser.add_argument('--os-project-domain-id',
+                            default=cliutils.env('OS_PROJECT_DOMAIN_ID'),
+                            help='Defaults to env[OS_PROJECT_DOMAIN_ID].')
+
+        parser.add_argument('--os-project-domain-name',
+                            default=cliutils.env('OS_PROJECT_DOMAIN_NAME'),
+                            help='Defaults to env[OS_PROJECT_DOMAIN_NAME].')
 
     def get_base_parser(self):
         parser = argparse.ArgumentParser(
@@ -65,36 +112,20 @@ class IronicShell(object):
                             default=False, action="store_true",
                             help="Print more verbose output")
 
-        parser.add_argument('-k', '--insecure',
-                            default=False,
-                            action='store_true',
-                            help="Explicitly allow ironicclient to "
-                            "perform \"insecure\" SSL (https) requests. "
-                            "The server's certificate will "
-                            "not be verified against any certificate "
-                            "authorities. This option should be used with "
-                            "caution")
-
+        # for backward compatibility only
         parser.add_argument('--cert-file',
-                            help='Path of certificate file to use in SSL '
-                            'connection. This file can optionally be prepended'
-                            ' with the private key')
+                            dest='os_cert',
+                            help='DEPRECATED! Use --os-cert.')
 
+        # for backward compatibility only
         parser.add_argument('--key-file',
-                            help='Path of client key to use in SSL connection.'
-                            ' This option is not necessary if your key is '
-                            'prepended to your cert file')
+                            dest='os_key',
+                            help='DEPRECATED! Use --os-key.')
 
+        # for backward compatibility only
         parser.add_argument('--ca-file',
-                            help='Path of CA SSL certificate(s) used to verify'
-                            ' the remote server certificate. Without this '
-                            'option ironic looks for the default system '
-                            'CA certificates')
-
-        parser.add_argument('--timeout',
-                            default=600,
-                            help='Number of seconds to wait for a response; '
-                                 'defaults to 600')
+                            dest='os_cacert',
+                            help='DEPRECATED! Use --os-cacert.')
 
         parser.add_argument('--os-username',
                             default=cliutils.env('OS_USERNAME'),
@@ -177,6 +208,12 @@ class IronicShell(object):
         parser.add_argument('--os_endpoint_type',
                             help=argparse.SUPPRESS)
 
+        # FIXME(gyee): this method should come from python-keystoneclient.
+        # Will refactor this code once it is available.
+        # https://bugs.launchpad.net/python-keystoneclient/+bug/1332337
+
+        self._append_global_identity_args(parser)
+
         return parser
 
     def get_subcommand_parser(self, version):
@@ -212,6 +249,94 @@ class IronicShell(object):
 
         commands.remove('bash-completion')
         print(' '.join(commands | options))
+
+    def _discover_auth_versions(self, session, auth_url):
+        # discover the API versions the server is supporting base on the
+        # given URL
+        v2_auth_url = None
+        v3_auth_url = None
+        try:
+            ks_discover = discover.Discover(session=session, auth_url=auth_url)
+            v2_auth_url = ks_discover.url_for('2.0')
+            v3_auth_url = ks_discover.url_for('3.0')
+        except ks_exc.ClientException:
+            # Identity service may not support discover API version.
+            # Let's try to figure out the API version from the original URL.
+            url_parts = urlparse.urlparse(auth_url)
+            (scheme, netloc, path, params, query, fragment) = url_parts
+            path = path.lower()
+            if path.startswith('/v3'):
+                v3_auth_url = auth_url
+            elif path.startswith('/v2'):
+                v2_auth_url = auth_url
+            else:
+                # not enough information to determine the auth version
+                msg = _('Unable to determine the Keystone version '
+                        'to authenticate with using the given '
+                        'auth_url. Identity service may not support API '
+                        'version discovery. Please provide a versioned '
+                        'auth_url instead. %s') % auth_url
+                raise exc.CommandError(msg)
+
+        return (v2_auth_url, v3_auth_url)
+
+    def _get_keystone_v3_auth(self, v3_auth_url, **kwargs):
+        auth_token = kwargs.pop('auth_token', None)
+        if auth_token:
+            return v3_auth.Token(v3_auth_url, auth_token)
+        else:
+            return v3_auth.Password(v3_auth_url, **kwargs)
+
+    def _get_keystone_v2_auth(self, v2_auth_url, **kwargs):
+        auth_token = kwargs.pop('auth_token', None)
+        if auth_token:
+            return v2_auth.Token(v2_auth_url, auth_token,
+                tenant_id=kwargs.pop('project_id', None),
+                tenant_name=kwargs.pop('project_name', None))
+        else:
+            return v2_auth.Password(v2_auth_url,
+                username=kwargs.pop('username', None),
+                password=kwargs.pop('password', None),
+                tenant_id=kwargs.pop('project_id', None),
+                tenant_name=kwargs.pop('project_name', None))
+
+    def _get_keystone_auth(self, session, auth_url, **kwargs):
+        # FIXME(dhu): this code should come from keystoneclient
+
+        # discover the supported keystone versions using the given url
+        (v2_auth_url, v3_auth_url) = self._discover_auth_versions(
+            session=session,
+            auth_url=auth_url)
+
+        # Determine which authentication plugin to use. First inspect the
+        # auth_url to see the supported version. If both v3 and v2 are
+        # supported, then use the highest version if possible.
+        auth = None
+        if v3_auth_url and v2_auth_url:
+            user_domain_name = kwargs.get('user_domain_name', None)
+            user_domain_id = kwargs.get('user_domain_id', None)
+            project_domain_name = kwargs.get('project_domain_name', None)
+            project_domain_id = kwargs.get('project_domain_id', None)
+
+            # support both v2 and v3 auth. Use v3 if domain information is
+            # provided.
+            if (user_domain_name or user_domain_id or project_domain_name or
+                    project_domain_id):
+                auth = self._get_keystone_v3_auth(v3_auth_url, **kwargs)
+            else:
+                auth = self._get_keystone_v2_auth(v2_auth_url, **kwargs)
+        elif v3_auth_url:
+            # support only v3
+            auth = self._get_keystone_v3_auth(v3_auth_url, **kwargs)
+        elif v2_auth_url:
+            # support only v2
+            auth = self._get_keystone_v2_auth(v2_auth_url, **kwargs)
+        else:
+            raise exc.CommandError('Unable to determine the Keystone version '
+                                   'to authenticate with using the given '
+                                   'auth_url.')
+
+        return auth
 
     def main(self, argv):
         # Parse args once to find version
@@ -252,17 +377,73 @@ class IronicShell(object):
                                          "either --os-password or via "
                                          "env[OS_PASSWORD]"))
 
-            if not (args.os_tenant_id or args.os_tenant_name):
-                raise exc.CommandError(_("You must provide a tenant_id via "
-                                         "either --os-tenant-id or via "
-                                         "env[OS_TENANT_ID]"))
+            if not (args.os_tenant_id or args.os_tenant_name or
+                    args.os_project_id or args.os_project_name):
+                raise exc.CommandError(_("You must provide a project name or"
+                    " project id via --os-project-name, --os-project-id,"
+                    " env[OS_PROJECT_ID] or env[OS_PROJECT_NAME].  You may"
+                    " use os-project and os-tenant interchangeably."))
 
             if not args.os_auth_url:
                 raise exc.CommandError(_("You must provide an auth url via "
                                          "either --os-auth-url or via "
                                          "env[OS_AUTH_URL]"))
 
-        client = iroclient.get_client(api_version, **(args.__dict__))
+        endpoint = args.ironic_url
+        service_type = args.os_service_type or 'baremetal'
+        project_id = args.os_project_id or args.os_tenant_id
+        project_name = args.os_project_name or args.os_tenant_name
+
+        if args.os_auth_token and args.ironic_url:
+            kwargs = {
+                'token': args.os_auth_token,
+                'insecure': args.insecure,
+                'timeout': args.timeout,
+                'ca_file': args.ca_file,
+                'cert_file': args.cert_file,
+                'key_file': args.key_file,
+                'auth_ref': None,
+            }
+        elif (args.os_username and
+            args.os_password and
+            args.os_auth_url and
+            (project_id or project_name)):
+
+            keystone_session = kssession.Session.load_from_cli_options(args)
+
+            kwargs = {
+                'username': args.os_username,
+                'user_domain_id': args.os_user_domain_id,
+                'user_domain_name': args.os_user_domain_name,
+                'password': args.os_password,
+                'auth_token': args.os_auth_token,
+                'project_id': project_id,
+                'project_name': project_name,
+                'project_domain_id': args.os_project_domain_id,
+                'project_domain_name': args.os_project_domain_name,
+            }
+            keystone_auth = self._get_keystone_auth(keystone_session,
+                                                    args.os_auth_url,
+                                                    **kwargs)
+            if not endpoint:
+                svc_type = args.os_service_type
+                region_name = args.os_region_name
+                endpoint = keystone_auth.get_endpoint(keystone_session,
+                                                      service_type=svc_type,
+                                                      region_name=region_name)
+
+            endpoint_type = args.os_endpoint_type or 'publicURL'
+            kwargs = {
+                'auth_url': args.os_auth_url,
+                'session': keystone_session,
+                'auth': keystone_auth,
+                'service_type': service_type,
+                'endpoint_type': endpoint_type,
+                'region_name': args.os_region_name,
+                'username': args.os_username,
+                'password': args.os_password,
+            }
+        client = iroclient.Client(api_version, endpoint, **kwargs)
 
         try:
             args.func(client, args)
