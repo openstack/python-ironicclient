@@ -21,13 +21,27 @@ from ironicclient.common import utils
 from ironicclient.openstack.common import cliutils
 
 
+FIELDS = ['chassis_uuid', 'created_at', 'console_enabled', 'driver',
+          'driver_info', 'extra', 'instance_info', 'instance_uuid',
+          'last_error', 'maintenance', 'power_state', 'properties',
+          'provision_state', 'reservation', 'target_power_state',
+          'target_provision_state', 'updated_at', 'uuid']
+
+FIELD_LABELS = ['Chassis UUID', 'Created At', 'Console Enabled', 'Driver',
+                'Driver Info', 'Extra', 'Instance Info', 'Instance UUID',
+                'Last Error', 'Maintenance', 'Power State', 'Properties',
+                'Provision State', 'Reservation', 'Target Power State',
+                'Target Provision State', 'Updated At', 'UUID']
+
+LIST_FIELDS = ['uuid', 'instance_uuid', 'power_state',
+               'provision_state', 'maintenance']
+
+LIST_FIELD_LABELS = ['UUID', 'Instance UUID', 'Power State',
+                     'Provisioning State', 'Maintenance']
+
+
 def _print_node_show(node):
-    fields = ['chassis_uuid', 'created_at', 'console_enabled', 'driver',
-              'driver_info', 'extra', 'instance_info', 'instance_uuid',
-              'last_error', 'maintenance', 'power_state', 'properties',
-              'provision_state', 'reservation', 'target_power_state',
-              'target_provision_state', 'updated_at', 'uuid']
-    data = dict([(f, getattr(node, f, '')) for f in fields])
+    data = dict([(f, getattr(node, f, '')) for f in FIELDS])
     cliutils.print_dict(data, wrap=72)
 
 
@@ -70,6 +84,12 @@ def do_node_show(cc, args):
     metavar='<assoc>',
     choices=['true', 'True', 'false', 'False'],
     help="List nodes by instance association: 'true' or 'false'")
+@cliutils.arg(
+    '--detail',
+    dest='detail',
+    action='store_true',
+    default=False,
+    help="Show detailed information about nodes")
 def do_node_list(cc, args):
     """List nodes which are registered with the Ironic service."""
     params = {}
@@ -81,13 +101,16 @@ def do_node_list(cc, args):
         params['marker'] = args.marker
     if args.limit is not None:
         params['limit'] = args.limit
+    params['detail'] = args.detail
 
     nodes = cc.node.list(**params)
-    field_labels = ['UUID', 'Instance UUID', 'Power State',
-                    'Provisioning State', 'Maintenance']
-    fields = ['uuid', 'instance_uuid', 'power_state',
-              'provision_state', 'maintenance']
-    cliutils.print_list(nodes, fields, field_labels, sortby_index=None)
+    if args.detail:
+        cliutils.print_list(nodes, FIELDS, FIELD_LABELS, sortby_index=None)
+    else:
+        cliutils.print_list(nodes,
+                            LIST_FIELDS,
+                            LIST_FIELD_LABELS,
+                            sortby_index=None)
 
 
 @cliutils.arg(

@@ -33,7 +33,8 @@ class NodeManager(base.Manager):
     def _path(id=None):
         return '/v1/nodes/%s' % id if id else '/v1/nodes'
 
-    def list(self, associated=None, maintenance=None, marker=None, limit=None):
+    def list(self, associated=None, maintenance=None, marker=None, limit=None,
+             detail=False):
         """Retrieve a list of nodes.
 
         :param associated: Optional, boolean whether to return a list of
@@ -53,6 +54,9 @@ class NodeManager(base.Manager):
                returned respect the maximum imposed by the Ironic API
                (see Ironic's api.max_limit option).
 
+        :param detail: Optional, boolean whether to return detailed information
+                       about nodes.
+
         :returns: A list of nodes.
 
         """
@@ -69,9 +73,11 @@ class NodeManager(base.Manager):
         if maintenance is not None:
             filters.append('maintenance=%s' % maintenance)
 
-        path = None
+        path = ''
+        if detail:
+            path += 'detail'
         if filters:
-            path = '?' + '&'.join(filters)
+            path += '?' + '&'.join(filters)
 
         if limit is None:
             return self._list(self._path(path), "nodes")

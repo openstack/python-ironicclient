@@ -88,6 +88,13 @@ fake_responses = {
             CREATE_NODE,
         ),
     },
+    '/v1/nodes/detail':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1, NODE2]}
+        ),
+    },
     '/v1/nodes/?associated=False':
     {
         'GET': (
@@ -355,6 +362,15 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_detail(self):
+        nodes = self.mgr.list(detail=True)
+        expect = [
+            ('GET', '/v1/nodes/detail', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(2, len(nodes))
+        self.assertEqual(nodes[0].extra, {})
 
     def test_node_show(self):
         node = self.mgr.get(NODE1['uuid'])
