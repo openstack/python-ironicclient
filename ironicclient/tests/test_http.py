@@ -23,6 +23,11 @@ from ironicclient import exc
 from ironicclient.tests import utils
 
 
+HTTP_CLASS = six.moves.http_client.HTTPConnection
+HTTPS_CLASS = http.VerifiedHTTPSConnection
+DEFAULT_TIMEOUT = 600
+
+
 class HttpClientTest(utils.BaseTestCase):
 
     def test_url_generation_trailing_slash_in_base(self):
@@ -109,3 +114,106 @@ class HttpClientTest(utils.BaseTestCase):
                                                  'trace': error_trace},
             "%(error)s\n%(details)s" % {'error': str(error),
                                         'details': str(error.details)})
+
+    def test_get_connection_params(self):
+        endpoint = 'http://ironic-host:6385'
+        expected = (HTTP_CLASS,
+                    ('ironic-host', 6385, ''),
+                    {'timeout': DEFAULT_TIMEOUT})
+        params = http.HTTPClient.get_connection_params(endpoint)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_trailing_slash(self):
+        endpoint = 'http://ironic-host:6385/'
+        expected = (HTTP_CLASS,
+                    ('ironic-host', 6385, ''),
+                    {'timeout': DEFAULT_TIMEOUT})
+        params = http.HTTPClient.get_connection_params(endpoint)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_ssl(self):
+        endpoint = 'https://ironic-host:6385'
+        expected = (HTTPS_CLASS,
+                    ('ironic-host', 6385, ''),
+                    {
+                        'timeout': DEFAULT_TIMEOUT,
+                        'ca_file': None,
+                        'cert_file': None,
+                        'key_file': None,
+                        'insecure': False,
+                    })
+        params = http.HTTPClient.get_connection_params(endpoint)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_ssl_params(self):
+        endpoint = 'https://ironic-host:6385'
+        ssl_args = {
+            'ca_file': '/path/to/ca_file',
+            'cert_file': '/path/to/cert_file',
+            'key_file': '/path/to/key_file',
+            'insecure': True,
+        }
+
+        expected_kwargs = {'timeout': DEFAULT_TIMEOUT}
+        expected_kwargs.update(ssl_args)
+        expected = (HTTPS_CLASS,
+                    ('ironic-host', 6385, ''),
+                    expected_kwargs)
+        params = http.HTTPClient.get_connection_params(endpoint, **ssl_args)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_timeout(self):
+        endpoint = 'http://ironic-host:6385'
+        expected = (HTTP_CLASS,
+                    ('ironic-host', 6385, ''),
+                    {'timeout': 300.0})
+        params = http.HTTPClient.get_connection_params(endpoint, timeout=300)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_version(self):
+        endpoint = 'http://ironic-host:6385/v1'
+        expected = (HTTP_CLASS,
+                    ('ironic-host', 6385, ''),
+                    {'timeout': DEFAULT_TIMEOUT})
+        params = http.HTTPClient.get_connection_params(endpoint)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_version_trailing_slash(self):
+        endpoint = 'http://ironic-host:6385/v1/'
+        expected = (HTTP_CLASS,
+                    ('ironic-host', 6385, ''),
+                    {'timeout': DEFAULT_TIMEOUT})
+        params = http.HTTPClient.get_connection_params(endpoint)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_subpath(self):
+        endpoint = 'http://ironic-host:6385/ironic'
+        expected = (HTTP_CLASS,
+                    ('ironic-host', 6385, '/ironic'),
+                    {'timeout': DEFAULT_TIMEOUT})
+        params = http.HTTPClient.get_connection_params(endpoint)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_subpath_trailing_slash(self):
+        endpoint = 'http://ironic-host:6385/ironic/'
+        expected = (HTTP_CLASS,
+                    ('ironic-host', 6385, '/ironic'),
+                    {'timeout': DEFAULT_TIMEOUT})
+        params = http.HTTPClient.get_connection_params(endpoint)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_subpath_version(self):
+        endpoint = 'http://ironic-host:6385/ironic/v1'
+        expected = (HTTP_CLASS,
+                    ('ironic-host', 6385, '/ironic'),
+                    {'timeout': DEFAULT_TIMEOUT})
+        params = http.HTTPClient.get_connection_params(endpoint)
+        self.assertEqual(expected, params)
+
+    def test_get_connection_params_with_subpath_version_trailing_slash(self):
+        endpoint = 'http://ironic-host:6385/ironic/v1/'
+        expected = (HTTP_CLASS,
+                    ('ironic-host', 6385, '/ironic'),
+                    {'timeout': DEFAULT_TIMEOUT})
+        params = http.HTTPClient.get_connection_params(endpoint)
+        self.assertEqual(expected, params)
