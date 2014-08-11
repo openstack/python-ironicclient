@@ -27,9 +27,18 @@ def _print_port_show(port):
 
 
 @cliutils.arg('port', metavar='<port id>', help="UUID of port")
+@cliutils.arg(
+    '--address',
+    dest='address',
+    action='store_true',
+    default=False,
+    help='Get the port by it\'s MAC address instead of UUID.')
 def do_port_show(cc, args):
     """Show a port."""
-    port = cc.port.get(args.port)
+    if args.address:
+        port = cc.port.get_by_address(args.port)
+    else:
+        port = cc.port.get(args.port)
     _print_port_show(port)
 
 

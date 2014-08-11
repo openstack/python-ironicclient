@@ -22,6 +22,7 @@ import ironicclient.v1.port_shell as p_shell
 
 
 class PortShellTest(utils.BaseTestCase):
+
     def test_port_show(self):
         actual = {}
         fake_print_dict = lambda data, *args, **kwargs: actual.update(data)
@@ -32,3 +33,25 @@ class PortShellTest(utils.BaseTestCase):
                'uuid']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
+
+    def test_do_port_show(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.port = 'port_uuid'
+        args.address = False
+
+        p_shell.do_port_show(client_mock, args)
+        client_mock.port.get.assert_called_once_with('port_uuid')
+        # assert get_by_address() wasn't called
+        client_mock.port.get_by_address.assert_not_called()
+
+    def test_do_port_show_by_address(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.port = 'port_address'
+        args.address = True
+
+        p_shell.do_port_show(client_mock, args)
+        client_mock.port.get_by_address.assert_called_once_with('port_address')
+        # assert get() wasn't called
+        client_mock.port.get_by_address.assert_not_called()
