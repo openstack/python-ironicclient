@@ -130,7 +130,7 @@ fake_responses = {
             {"nodes": [NODE2]},
         )
     },
-    '/v1/nodes/?instance_uuid=%s' % NODE2['instance_uuid']:
+    '/v1/nodes/detail?instance_uuid=%s' % NODE2['instance_uuid']:
     {
         'GET': (
             {},
@@ -383,9 +383,8 @@ class NodeManagerTest(testtools.TestCase):
     def test_node_show_by_instance(self):
         node = self.mgr.get_by_instance_uuid(NODE2['instance_uuid'])
         expect = [
-            ('GET', '/v1/nodes/?instance_uuid=%s' % NODE2['instance_uuid'],
-                     {}, None),
-            ('GET', '/v1/nodes/%s' % NODE2['uuid'], {}, None),
+            ('GET', '/v1/nodes/detail?instance_uuid=%s' %
+             NODE2['instance_uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NODE2['uuid'], node.uuid)
