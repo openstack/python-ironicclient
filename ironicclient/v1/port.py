@@ -75,6 +75,16 @@ class PortManager(base.Manager):
         except IndexError:
             return None
 
+    def get_by_address(self, address):
+        path = "detail?address=%s" % address
+        ports = self._list(self._path(path), 'ports')
+        # get all the details of the port assuming that filtering by
+        # address returns a collection of one port if successful.
+        if len(ports) == 1:
+            return ports[0]
+        else:
+            raise exc.NotFound()
+
     def create(self, **kwargs):
         new = {}
         for (key, value) in kwargs.items():
