@@ -130,14 +130,13 @@ class NodeManager(base.Manager):
             return None
 
     def get_by_instance_uuid(self, instance_uuid):
-        path = "?instance_uuid=%s" % instance_uuid
+        path = "detail?instance_uuid=%s" % instance_uuid
         nodes = self._list(self._path(path), 'nodes')
         # get all the details of the node assuming that
         # filtering by instance_uuid returns a collection
         # of one node if successful.
-        if len(nodes) > 0:
-            uuid = getattr(nodes[0], 'uuid')
-            return self.get(uuid)
+        if len(nodes) == 1:
+            return nodes[0]
         else:
             raise exc.NotFound()
 
