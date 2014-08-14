@@ -105,11 +105,13 @@ def do_node_list(cc, args):
 
     nodes = cc.node.list(**params)
     if args.detail:
-        cliutils.print_list(nodes, FIELDS, FIELD_LABELS, sortby_index=None)
+        cliutils.print_list(nodes, FIELDS,
+                            field_labels=FIELD_LABELS,
+                            sortby_index=None)
     else:
         cliutils.print_list(nodes,
                             LIST_FIELDS,
-                            LIST_FIELD_LABELS,
+                            field_labels=LIST_FIELD_LABELS,
                             sortby_index=None)
 
 
@@ -238,7 +240,9 @@ def do_node_port_list(cc, args):
     ports = cc.node.list_ports(args.node, **params)
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
-    cliutils.print_list(ports, fields, field_labels, sortby_index=None)
+    cliutils.print_list(ports, fields,
+                        field_labels=field_labels,
+                        sortby_index=None)
 
 
 @cliutils.arg('node', metavar='<node id>', help="UUID of node")
@@ -274,7 +278,7 @@ def do_node_validate(cc, args):
         obj_list.append(type('iface', (object,), data))
     field_labels = ['Interface', 'Result', 'Reason']
     fields = ['interface', 'result', 'reason']
-    cliutils.print_list(obj_list, fields, field_labels)
+    cliutils.print_list(obj_list, fields, field_labels=field_labels)
 
 
 @cliutils.arg('node', metavar='<node uuid>', help="UUID of node")

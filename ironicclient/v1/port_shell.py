@@ -66,7 +66,9 @@ def do_port_list(cc, args):
     port = cc.port.list(**params)
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
-    cliutils.print_list(port, fields, field_labels, sortby_index=None)
+    cliutils.print_list(port, fields,
+                        field_labels=field_labels,
+                        sortby_index=None)
 
 
 @cliutils.arg(

@@ -34,7 +34,7 @@ def do_driver_list(cc, args):
         d.hosts = ', '.join(d.hosts)
     field_labels = ['Supported driver(s)', 'Active host(s)']
     fields = ['name', 'hosts']
-    cliutils.print_list(drivers, fields, field_labels)
+    cliutils.print_list(drivers, fields, field_labels=field_labels)
 
 
 @cliutils.arg('driver_name', metavar='<driver_name>',
