@@ -15,6 +15,7 @@
 #    under the License.
 
 from ironicclient.common import base
+from ironicclient.common import utils
 from ironicclient import exc
 
 CREATION_ATTRIBUTES = ['chassis_uuid', 'driver', 'driver_info', 'extra',
@@ -34,7 +35,7 @@ class NodeManager(base.Manager):
         return '/v1/nodes/%s' % id if id else '/v1/nodes'
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
-             detail=False):
+             detail=False, sort_key=None, sort_dir=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional, boolean whether to return a list of
@@ -57,17 +58,18 @@ class NodeManager(base.Manager):
         :param detail: Optional, boolean whether to return detailed information
                        about nodes.
 
+        :param sort_key: Optional, field used for sorting.
+
+        :param sort_dir: Optional, direction of sorting, either 'asc' (the
+                         default) or 'desc'.
+
         :returns: A list of nodes.
 
         """
         if limit is not None:
             limit = int(limit)
 
-        filters = []
-        if isinstance(limit, int) and limit > 0:
-            filters.append('limit=%s' % limit)
-        if marker is not None:
-            filters.append('marker=%s' % marker)
+        filters = utils.common_filters(marker, limit, sort_key, sort_dir)
         if associated is not None:
             filters.append('associated=%s' % associated)
         if maintenance is not None:
@@ -85,7 +87,8 @@ class NodeManager(base.Manager):
             return self._list_pagination(self._path(path), "nodes",
                                          limit=limit)
 
-    def list_ports(self, node_id, marker=None, limit=None):
+    def list_ports(self, node_id, marker=None, limit=None, sort_key=None,
+                   sort_dir=None):
         """List all the ports for a given node.
 
         :param node_id: The UUID of the node.
@@ -101,17 +104,18 @@ class NodeManager(base.Manager):
                returned respect the maximum imposed by the Ironic API
                (see Ironic's api.max_limit option).
 
+        :param sort_key: Optional, field used for sorting.
+
+        :param sort_dir: Optional, direction of sorting, either 'asc' (the
+                         default) or 'desc'.
+
         :returns: A list of ports.
 
         """
         if limit is not None:
             limit = int(limit)
 
-        filters = []
-        if isinstance(limit, int) and limit > 0:
-            filters.append('limit=%s' % limit)
-        if marker is not None:
-            filters.append('marker=%s' % marker)
+        filters = utils.common_filters(marker, limit, sort_key, sort_dir)
 
         path = "%s/ports" % node_id
         if filters:

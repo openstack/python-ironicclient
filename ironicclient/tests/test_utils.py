@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
+
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.tests import utils as test_utils
@@ -64,3 +66,50 @@ class UtilsTest(test_utils.BaseTestCase):
                                           my_args['attributes'])
         self.assertEqual([{'op': 'remove', 'path': '/foo'},
                           {'op': 'remove', 'path': '/extra/bar'}], patch)
+
+
+class CommonParamsForListTest(test_utils.BaseTestCase):
+    def setUp(self):
+        super(CommonParamsForListTest, self).setUp()
+        self.args = mock.Mock(marker=None, limit=None,
+                              sort_key=None, sort_dir=None)
+
+    def test_nothing_set(self):
+        self.assertEqual({}, utils.common_params_for_list(self.args, [], []))
+
+    def test_marker_and_limit(self):
+        self.args.marker = 'foo'
+        self.args.limit = 42
+        self.assertEqual({'marker': 'foo', 'limit': 42},
+                         utils.common_params_for_list(self.args, [], []))
+
+    def test_sort_key_and_sort_dir(self):
+        self.args.sort_key = 'field'
+        self.args.sort_dir = 'desc'
+        self.assertEqual({'sort_key': 'field', 'sort_dir': 'desc'},
+                         utils.common_params_for_list(self.args,
+                                                      ['field'],
+                                                      []))
+
+    def test_sort_key_allows_label(self):
+        self.args.sort_key = 'Label'
+        self.assertEqual({'sort_key': 'field'},
+                         utils.common_params_for_list(self.args,
+                                                      ['field', 'field2'],
+                                                      ['Label', 'Label2']))
+
+    def test_sort_key_invalid(self):
+        self.args.sort_key = 'something'
+        self.assertRaises(exc.CommandError,
+                          utils.common_params_for_list,
+                          self.args,
+                          ['field', 'field2'],
+                          [])
+
+    def test_sort_dir_invalid(self):
+        self.args.sort_dir = 'something'
+        self.assertRaises(exc.CommandError,
+                          utils.common_params_for_list,
+                          self.args,
+                          [],
+                          [])

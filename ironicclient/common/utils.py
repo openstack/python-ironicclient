@@ -104,3 +104,47 @@ def args_array_to_patch(op, attributes):
         else:
             raise exc.CommandError(_('Unknown PATCH operation: %s') % op)
     return patch
+
+
+def common_params_for_list(args, fields, field_labels):
+    params = {}
+    if args.marker is not None:
+        params['marker'] = args.marker
+    if args.limit is not None:
+        params['limit'] = args.limit
+
+    if args.sort_key is not None:
+        # Support using both heading and field name for sort_key
+        fields_map = dict(zip(field_labels, fields))
+        fields_map.update(zip(fields, fields))
+        try:
+            sort_key = fields_map[args.sort_key]
+        except KeyError:
+            raise exc.CommandError(
+                _("%(sort_key)s is not a valid field for sorting, "
+                  "valid are %(valid)s") %
+                {'sort_key': args.sort_key,
+                 'valid': list(fields_map)})
+        params['sort_key'] = sort_key
+    if args.sort_dir is not None:
+        if args.sort_dir not in ('asc', 'desc'):
+            raise exc.CommandError(
+                _("%s is not valid value for sort direction, "
+                  "valid are 'asc' and 'desc'") %
+                args.sort_dir)
+        params['sort_dir'] = args.sort_dir
+
+    return params
+
+
+def common_filters(marker, limit, sort_key, sort_dir):
+    filters = []
+    if isinstance(limit, int) and limit > 0:
+        filters.append('limit=%s' % limit)
+    if marker is not None:
+        filters.append('marker=%s' % marker)
+    if sort_key is not None:
+        filters.append('sort_key=%s' % sort_key)
+    if sort_dir is not None:
+        filters.append('sort_dir=%s' % sort_dir)
+    return filters

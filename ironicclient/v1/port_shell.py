@@ -55,17 +55,22 @@ def do_port_show(cc, args):
     help='Port UUID (e.g of the last port in the list from '
          'a previous request). Returns the list of ports '
          'after this UUID.')
+@cliutils.arg(
+    '--sort-key',
+    metavar='<sort_key>',
+    help='Port field that will be used for sorting.')
+@cliutils.arg(
+    '--sort-dir',
+    metavar='<sort_dir>',
+    choices=['asc', 'desc'],
+    help='Sort direction: one of "asc" (the default) or "desc".')
 def do_port_list(cc, args):
     """List ports."""
-    params = {}
-    if args.marker is not None:
-        params['marker'] = args.marker
-    if args.limit is not None:
-        params['limit'] = args.limit
-
-    port = cc.port.list(**params)
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
+    params = utils.common_params_for_list(args, fields, field_labels)
+
+    port = cc.port.list(**params)
     cliutils.print_list(port, fields,
                         field_labels=field_labels,
                         sortby_index=None)

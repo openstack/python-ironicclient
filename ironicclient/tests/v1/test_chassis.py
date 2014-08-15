@@ -125,6 +125,37 @@ fake_responses_pagination = {
     },
 }
 
+fake_responses_sorting = {
+    '/v1/chassis/?sort_key=updated_at':
+    {
+        'GET': (
+            {},
+            {"chassis": [CHASSIS2]}
+        ),
+    },
+    '/v1/chassis/?sort_dir=desc':
+    {
+        'GET': (
+            {},
+            {"chassis": [CHASSIS2]}
+        ),
+    },
+    '/v1/chassis/%s/nodes?sort_key=updated_at' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE]},
+        ),
+    },
+    '/v1/chassis/%s/nodes?sort_dir=desc' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE]},
+        ),
+    },
+}
+
 
 class ChassisManagerTest(testtools.TestCase):
 
@@ -171,6 +202,26 @@ class ChassisManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertThat(chassis, HasLength(2))
+
+    def test_chassis_list_sort_key(self):
+        self.api = utils.FakeAPI(fake_responses_sorting)
+        self.mgr = ironicclient.v1.chassis.ChassisManager(self.api)
+        chassis = self.mgr.list(sort_key='updated_at')
+        expect = [
+            ('GET', '/v1/chassis/?sort_key=updated_at', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(chassis, HasLength(1))
+
+    def test_chassis_list_sort_dir(self):
+        self.api = utils.FakeAPI(fake_responses_sorting)
+        self.mgr = ironicclient.v1.chassis.ChassisManager(self.api)
+        chassis = self.mgr.list(sort_dir='desc')
+        expect = [
+            ('GET', '/v1/chassis/?sort_dir=desc', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(chassis, HasLength(1))
 
     def test_chassis_show(self):
         chassis = self.mgr.get(CHASSIS['uuid'])
@@ -224,6 +275,32 @@ class ChassisManagerTest(testtools.TestCase):
         expect = [
             ('GET',
              '/v1/chassis/%s/nodes?limit=1' % CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE['uuid'], nodes[0].uuid)
+
+    def test_chassis_node_list_sort_key(self):
+        self.api = utils.FakeAPI(fake_responses_sorting)
+        self.mgr = ironicclient.v1.chassis.ChassisManager(self.api)
+        nodes = self.mgr.list_nodes(CHASSIS['uuid'], sort_key='updated_at')
+        expect = [
+            ('GET',
+             '/v1/chassis/%s/nodes?sort_key=updated_at' % CHASSIS['uuid'], {},
+             None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE['uuid'], nodes[0].uuid)
+
+    def test_chassis_node_list_sort_dir(self):
+        self.api = utils.FakeAPI(fake_responses_sorting)
+        self.mgr = ironicclient.v1.chassis.ChassisManager(self.api)
+        nodes = self.mgr.list_nodes(CHASSIS['uuid'], sort_dir='desc')
+        expect = [
+            ('GET',
+             '/v1/chassis/%s/nodes?sort_dir=desc' % CHASSIS['uuid'], {},
+             None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
