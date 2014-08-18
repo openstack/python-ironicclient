@@ -63,6 +63,8 @@ class ClientTest(utils.BaseTestCase):
             'os_auth_url': '',
             'os_auth_token': '',
         }
+        self.assertRaises(exc.AmbiguousAuthSystem, get_client, '1', **kwargs)
+        # test the alias as well to ensure backwards compatibility
         self.assertRaises(exc.AmbigiousAuthSystem, get_client, '1', **kwargs)
 
     def test_ensure_auth_ref_propagated(self):

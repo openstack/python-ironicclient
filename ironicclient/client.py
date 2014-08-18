@@ -94,7 +94,7 @@ def get_client(api_version, **kwargs):
     else:
         e = (_('Must provide Keystone credentials or user-defined endpoint '
                'and token'))
-        raise exc.AmbigiousAuthSystem(e)
+        raise exc.AmbiguousAuthSystem(e)
 
     cli_kwargs = {
         'token': token,
