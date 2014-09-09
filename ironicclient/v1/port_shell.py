@@ -17,6 +17,7 @@
 
 from ironicclient.common import utils
 from ironicclient.openstack.common import cliutils
+from ironicclient.v1 import resource_fields as res_fields
 
 
 def _print_port_show(port):
@@ -43,6 +44,12 @@ def do_port_show(cc, args):
 
 
 @cliutils.arg(
+    '--detail',
+    dest='detail',
+    action='store_true',
+    default=False,
+    help="Show detailed information about ports.")
+@cliutils.arg(
     '--limit',
     metavar='<limit>',
     type=int,
@@ -66,8 +73,13 @@ def do_port_show(cc, args):
     help='Sort direction: one of "asc" (the default) or "desc".')
 def do_port_list(cc, args):
     """List ports."""
-    field_labels = ['UUID', 'Address']
-    fields = ['uuid', 'address']
+    if args.detail:
+        fields = res_fields.PORT_FIELDS
+        field_labels = res_fields.PORT_FIELD_LABELS
+    else:
+        fields = res_fields.PORT_LIST_FIELDS
+        field_labels = res_fields.PORT_LIST_FIELD_LABELS
+
     params = utils.common_params_for_list(args, fields, field_labels)
 
     port = cc.port.list(**params)

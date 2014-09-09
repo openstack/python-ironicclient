@@ -88,7 +88,7 @@ class NodeManager(base.Manager):
                                          limit=limit)
 
     def list_ports(self, node_id, marker=None, limit=None, sort_key=None,
-                   sort_dir=None):
+                   sort_dir=None, detail=False):
         """List all the ports for a given node.
 
         :param node_id: The UUID of the node.
@@ -109,6 +109,9 @@ class NodeManager(base.Manager):
         :param sort_dir: Optional, direction of sorting, either 'asc' (the
                          default) or 'desc'.
 
+        :param detail: Optional, boolean whether to return detailed information
+                       about ports.
+
         :returns: A list of ports.
 
         """
@@ -118,6 +121,9 @@ class NodeManager(base.Manager):
         filters = utils.common_filters(marker, limit, sort_key, sort_dir)
 
         path = "%s/ports" % node_id
+        if detail:
+            path += '/detail'
+
         if filters:
             path += '?' + '&'.join(filters)
 
