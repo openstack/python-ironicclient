@@ -138,6 +138,29 @@ class NodeShellTest(utils.BaseTestCase):
                   }
         client_mock.node.create.assert_called_once_with(**kwargs)
 
+    def test_do_node_show(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.instance_uuid = False
+
+        n_shell.do_node_show(client_mock, args)
+        client_mock.node.get.assert_called_once_with('node_uuid')
+        # assert get_by_instance_uuid() wasn't called
+        self.assertFalse(client_mock.node.get_by_instance_uuid.called)
+
+    def test_do_node_show_by_instance_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'instance_uuid'
+        args.instance_uuid = True
+
+        n_shell.do_node_show(client_mock, args)
+        client_mock.node.get_by_instance_uuid.assert_called_once_with(
+            'instance_uuid')
+        # assert get() wasn't called
+        self.assertFalse(client_mock.node.get.called)
+
     def test_do_node_vendor_passthru_with_args(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
