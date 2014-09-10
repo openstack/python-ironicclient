@@ -78,6 +78,66 @@ class NodeShellTest(utils.BaseTestCase):
         patch = commonutils.args_array_to_patch(args.op, args.attributes[0])
         client_mock.node.update.assert_called_once_with('node_uuid', patch)
 
+    def test_do_node_create(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with()
+
+    def test_do_node_create_with_driver(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.driver = 'driver'
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            driver='driver')
+
+    def test_do_node_create_with_chassis_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.chassis_uuid = 'chassis_uuid'
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            chassis_uuid='chassis_uuid')
+
+    def test_do_node_create_with_driver_info(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.driver_info = ['arg1=val1', 'arg2=val2']
+
+        n_shell.do_node_create(client_mock, args)
+        kwargs = {
+                  'driver_info': {'arg1': 'val1', 'arg2': 'val2'}
+                  }
+        client_mock.node.create.assert_called_once_with(**kwargs)
+
+    def test_do_node_create_with_properties(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.properties = ['arg1=val1', 'arg2=val2']
+
+        n_shell.do_node_create(client_mock, args)
+        kwargs = {
+                  'properties': {'arg1': 'val1', 'arg2': 'val2'}
+                  }
+        client_mock.node.create.assert_called_once_with(**kwargs)
+
+    def test_do_node_create_with_extra(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.driver = 'driver_name'
+        args.extra = ['arg1=val1', 'arg2=val2']
+
+        n_shell.do_node_create(client_mock, args)
+        kwargs = {
+                  'driver': 'driver_name',
+                  'extra': {'arg1': 'val1', 'arg2': 'val2'}
+                  }
+        client_mock.node.create.assert_called_once_with(**kwargs)
+
     def test_do_node_vendor_passthru_with_args(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
