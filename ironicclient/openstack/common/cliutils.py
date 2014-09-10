@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Copyright 2012 Red Hat, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -58,7 +56,7 @@ def validate_args(fn, *args, **kwargs):
     required_args = argspec.args[:len(argspec.args) - num_defaults]
 
     def isbound(method):
-        return getattr(method, 'im_self', None) is not None
+        return getattr(method, '__self__', None) is not None
 
     if isbound(fn):
         required_args.pop(0)
@@ -134,7 +132,7 @@ def isunauthenticated(func):
 
 
 def print_list(objs, fields, formatters=None, sortby_index=0,
-               mixed_case_fields=None):
+               mixed_case_fields=None, field_labels=None):
     """Print a list or objects as a table, one row per object.
 
     :param objs: iterable of :class:`Resource`
@@ -143,14 +141,22 @@ def print_list(objs, fields, formatters=None, sortby_index=0,
     :param sortby_index: index of the field for sorting table rows
     :param mixed_case_fields: fields corresponding to object attributes that
         have mixed case names (e.g., 'serverId')
+    :param field_labels: Labels to use in the heading of the table, default to
+        fields.
     """
     formatters = formatters or {}
     mixed_case_fields = mixed_case_fields or []
+    field_labels = field_labels or fields
+    if len(field_labels) != len(fields):
+        raise ValueError(_("Field labels list %(labels)s has different number "
+                           "of elements than fields list %(fields)s"),
+                         {'labels': field_labels, 'fields': fields})
+
     if sortby_index is None:
         kwargs = {}
     else:
-        kwargs = {'sortby': fields[sortby_index]}
-    pt = prettytable.PrettyTable(fields, caching=False)
+        kwargs = {'sortby': field_labels[sortby_index]}
+    pt = prettytable.PrettyTable(field_labels, caching=False)
     pt.align = 'l'
 
     for o in objs:
@@ -225,6 +231,8 @@ def find_resource(manager, name_or_id, **find_args):
     Used as a helper for the _find_* methods.
     Example:
 
+    .. code-block:: python
+
         def _find_hypervisor(cs, hypervisor):
             #Get a hypervisor by name or ID.
             return cliutils.find_resource(cs.hypervisors, hypervisor)
@@ -237,7 +245,10 @@ def find_resource(manager, name_or_id, **find_args):
 
     # now try to get entity as uuid
     try:
-        tmp_id = strutils.safe_encode(name_or_id)
+        if six.PY2:
+            tmp_id = strutils.safe_encode(name_or_id)
+        else:
+            tmp_id = strutils.safe_decode(name_or_id)
 
         if uuidutils.is_uuid_like(tmp_id):
             return manager.get(tmp_id)
@@ -286,9 +297,12 @@ def service_type(stype):
     """Adds 'service_type' attribute to decorated function.
 
     Usage:
-        @service_type('volume')
-        def mymethod(f):
-            ...
+
+    .. code-block:: python
+
+       @service_type('volume')
+       def mymethod(f):
+       ...
     """
     def inner(f):
         f.service_type = stype

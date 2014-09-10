@@ -56,7 +56,9 @@ def do_chassis_list(cc, args):
     chassis = cc.chassis.list(**params)
     field_labels = ['UUID', 'Description']
     fields = ['uuid', 'description']
-    cliutils.print_list(chassis, fields, field_labels, sortby_index=None)
+    cliutils.print_list(chassis, fields,
+                        field_labels=field_labels,
+                        sortby_index=None)
 
 
 @cliutils.arg(
@@ -141,4 +143,6 @@ def do_chassis_node_list(cc, args):
     field_labels = ['UUID', 'Instance UUID',
                     'Power State', 'Provisioning State']
     fields = ['uuid', 'instance_uuid', 'power_state', 'provision_state']
-    cliutils.print_list(nodes, fields, field_labels, sortby_index=None)
+    cliutils.print_list(nodes, fields,
+                        field_labels=field_labels,
+                        sortby_index=None)
