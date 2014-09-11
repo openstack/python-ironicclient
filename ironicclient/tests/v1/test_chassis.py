@@ -62,6 +62,13 @@ fake_responses = {
             CREATE_CHASSIS,
         ),
     },
+    '/v1/chassis/detail':
+    {
+        'GET': (
+            {},
+            {"chassis": [CHASSIS]},
+        ),
+    },
     '/v1/chassis/%s' % CHASSIS['uuid']:
     {
         'GET': (
@@ -78,6 +85,13 @@ fake_responses = {
         ),
     },
     '/v1/chassis/%s/nodes' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE]},
+        ),
+    },
+    '/v1/chassis/%s/nodes/detail' % CHASSIS['uuid']:
     {
         'GET': (
             {},
@@ -223,6 +237,14 @@ class ChassisManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(chassis, HasLength(1))
 
+    def test_chassis_list_detail(self):
+        chassis = self.mgr.list(detail=True)
+        expect = [
+            ('GET', '/v1/chassis/detail', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(chassis))
+
     def test_chassis_show(self):
         chassis = self.mgr.get(CHASSIS['uuid'])
         expect = [
@@ -263,6 +285,15 @@ class ChassisManagerTest(testtools.TestCase):
         nodes = self.mgr.list_nodes(CHASSIS['uuid'])
         expect = [
             ('GET', '/v1/chassis/%s/nodes' % CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(nodes))
+        self.assertEqual(NODE['uuid'], nodes[0].uuid)
+
+    def test_chassis_node_list_detail(self):
+        nodes = self.mgr.list_nodes(CHASSIS['uuid'], detail=True)
+        expect = [
+            ('GET', '/v1/chassis/%s/nodes/detail' % CHASSIS['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(nodes))

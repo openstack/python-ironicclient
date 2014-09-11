@@ -19,29 +19,11 @@ import six
 
 from ironicclient.common import utils
 from ironicclient.openstack.common import cliutils
-
-
-FIELDS = ['chassis_uuid', 'created_at', 'console_enabled', 'driver',
-          'driver_info', 'extra', 'instance_info', 'instance_uuid',
-          'last_error', 'maintenance', 'power_state', 'properties',
-          'provision_state', 'reservation', 'target_power_state',
-          'target_provision_state', 'updated_at', 'uuid']
-
-FIELD_LABELS = ['Chassis UUID', 'Created At', 'Console Enabled', 'Driver',
-                'Driver Info', 'Extra', 'Instance Info', 'Instance UUID',
-                'Last Error', 'Maintenance', 'Power State', 'Properties',
-                'Provision State', 'Reservation', 'Target Power State',
-                'Target Provision State', 'Updated At', 'UUID']
-
-LIST_FIELDS = ['uuid', 'instance_uuid', 'power_state',
-               'provision_state', 'maintenance']
-
-LIST_FIELD_LABELS = ['UUID', 'Instance UUID', 'Power State',
-                     'Provisioning State', 'Maintenance']
+from ironicclient.v1 import resource_fields as res_fields
 
 
 def _print_node_show(node):
-    data = dict([(f, getattr(node, f, '')) for f in FIELDS])
+    data = dict([(f, getattr(node, f, '')) for f in res_fields.NODE_FIELDS])
     cliutils.print_dict(data, wrap=72)
 
 
@@ -109,11 +91,11 @@ def do_node_list(cc, args):
     params['detail'] = args.detail
 
     if args.detail:
-        fields = FIELDS
-        field_labels = FIELD_LABELS
+        fields = res_fields.NODE_FIELDS
+        field_labels = res_fields.NODE_FIELD_LABELS
     else:
-        fields = LIST_FIELDS
-        field_labels = LIST_FIELD_LABELS
+        fields = res_fields.NODE_LIST_FIELDS
+        field_labels = res_fields.NODE_LIST_FIELD_LABELS
 
     params.update(utils.common_params_for_list(args,
                                                fields,
@@ -223,7 +205,12 @@ def do_node_vendor_passthru(cc, args):
     cc.node.vendor_passthru(**fields)
 
 
-@cliutils.arg('node', metavar='<node id>', help="UUID of node")
+@cliutils.arg(
+    '--detail',
+    dest='detail',
+    action='store_true',
+    default=False,
+    help="Show detailed information about ports.")
 @cliutils.arg(
     '--limit',
     metavar='<limit>',
@@ -249,8 +236,13 @@ def do_node_vendor_passthru(cc, args):
 @cliutils.arg('node', metavar='<node id>', help="UUID of node")
 def do_node_port_list(cc, args):
     """List the ports associated with the node."""
-    field_labels = ['UUID', 'Address']
-    fields = ['uuid', 'address']
+    if args.detail:
+        fields = res_fields.PORT_FIELDS
+        field_labels = res_fields.PORT_FIELD_LABELS
+    else:
+        fields = res_fields.PORT_LIST_FIELDS
+        field_labels = res_fields.PORT_LIST_FIELD_LABELS
+
     params = utils.common_params_for_list(args, fields, field_labels)
 
     ports = cc.node.list_ports(args.node, **params)

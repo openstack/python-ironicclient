@@ -33,7 +33,8 @@ class PortManager(base.Manager):
     def _path(id=None):
         return '/v1/ports/%s' % id if id else '/v1/ports'
 
-    def list(self, limit=None, marker=None, sort_key=None, sort_dir=None):
+    def list(self, limit=None, marker=None, sort_key=None,
+             sort_dir=None, detail=False):
         """Retrieve a list of port.
 
         :param marker: Optional, the UUID of a port, eg the last
@@ -53,6 +54,9 @@ class PortManager(base.Manager):
         :param sort_dir: Optional, direction of sorting, either 'asc' (the
                          default) or 'desc'.
 
+        :param detail: Optional, boolean whether to return detailed information
+                       about ports.
+
         :returns: A list of ports.
 
         """
@@ -61,9 +65,11 @@ class PortManager(base.Manager):
 
         filters = utils.common_filters(marker, limit, sort_key, sort_dir)
 
-        path = None
+        path = ''
+        if detail:
+            path += 'detail'
         if filters:
-            path = '?' + '&'.join(filters)
+            path += '?' + '&'.join(filters)
 
         if limit is None:
             return self._list(self._path(path), "ports")

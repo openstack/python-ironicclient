@@ -55,6 +55,13 @@ fake_responses = {
             CREATE_PORT,
         ),
     },
+    '/v1/ports/detail':
+    {
+        'GET': (
+            {},
+            {"ports": [PORT]},
+        ),
+    },
     '/v1/ports/%s' % PORT['uuid']:
     {
         'GET': (
@@ -133,6 +140,14 @@ class PortManagerTest(testtools.TestCase):
         ports = self.mgr.list()
         expect = [
             ('GET', '/v1/ports', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(ports))
+
+    def test_ports_list_detail(self):
+        ports = self.mgr.list(detail=True)
+        expect = [
+            ('GET', '/v1/ports/detail', {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))

@@ -166,6 +166,13 @@ fake_responses = {
             {"ports": [PORT]},
         ),
     },
+    '/v1/nodes/%s/ports/detail' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"ports": [PORT]},
+        ),
+    },
     '/v1/nodes/%s/states/power' % NODE1['uuid']:
     {
         'PUT': (
@@ -525,6 +532,14 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(ports, HasLength(1))
         self.assertEqual(PORT['uuid'], ports[0].uuid)
         self.assertEqual(PORT['address'], ports[0].address)
+
+    def test_node_port_list_detail(self):
+        ports = self.mgr.list_ports(NODE1['uuid'], detail=True)
+        expect = [
+            ('GET', '/v1/nodes/%s/ports/detail' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(ports))
 
     def test_node_set_power_state(self):
         power_state = self.mgr.set_power_state(NODE1['uuid'], "on")

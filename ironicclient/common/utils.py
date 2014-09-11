@@ -134,6 +134,8 @@ def common_params_for_list(args, fields, field_labels):
                 args.sort_dir)
         params['sort_dir'] = args.sort_dir
 
+    params['detail'] = args.detail
+
     return params
 
 
