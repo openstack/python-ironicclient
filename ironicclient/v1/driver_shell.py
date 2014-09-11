@@ -26,7 +26,7 @@ def _print_driver_show(driver):
 
 
 def do_driver_list(cc, args):
-    """List drivers."""
+    """List of enabled drivers."""
     drivers = cc.driver.list()
     # NOTE(lucasagomes): Separate each host by a comma.
     # It's easier to read.
