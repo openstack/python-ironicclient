@@ -68,6 +68,7 @@ class ShellTest(utils.BaseTestCase):
     def test_help(self):
         required = [
             '.*?^usage: ironic',
+            '.*?^ +bash-completion',
             '.*?^See "ironic help COMMAND" '
             'for help on a specific command',
         ]

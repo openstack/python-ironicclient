@@ -198,7 +198,7 @@ class IronicShell(object):
                     format="%(levelname)s %(message)s",
                     level=logging.CRITICAL)
 
-    def _bash_completion(self):
+    def do_bash_completion(self):
         """Prints all of the commands and options for bash-completion."""
         commands = set()
         options = set()
@@ -206,6 +206,8 @@ class IronicShell(object):
             commands.add(sc_str)
             for option in sc._optionals._option_string_actions.keys():
                 options.add(option)
+
+        commands.remove('bash-completion')
         print(' '.join(commands | options))
 
     def main(self, argv):
@@ -224,16 +226,16 @@ class IronicShell(object):
         if options.help or not argv:
             self.do_help(options)
             return 0
-        elif argv[0] == 'bash-completion':
-            self._bash_completion()
-            return 0
 
         # Parse args again and call whatever callback was selected
         args = subcommand_parser.parse_args(argv)
 
-        # Short-circuit and deal with help command right away.
+        # Short-circuit and deal with these commands right away.
         if args.func == self.do_help:
             self.do_help(args)
+            return 0
+        elif args.func == self.do_bash_completion:
+            self.do_bash_completion()
             return 0
 
         if not (args.os_auth_token and args.ironic_url):
