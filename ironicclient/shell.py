@@ -290,7 +290,9 @@ class HelpFormatter(argparse.HelpFormatter):
 def main():
     try:
         IronicShell().main(sys.argv[1:])
-
+    except KeyboardInterrupt:
+        print("... terminating ironic client", file=sys.stderr)
+        sys.exit(130)
     except Exception as e:
         print(str(e), file=sys.stderr)
         sys.exit(1)
