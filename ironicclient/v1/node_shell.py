@@ -75,6 +75,15 @@ def do_node_show(cc, args):
          'a previous request). Returns the list of nodes '
          'after this UUID.')
 @cliutils.arg(
+    '--sort-key',
+    metavar='<sort_key>',
+    help='Node field that will be used for sorting.')
+@cliutils.arg(
+    '--sort-dir',
+    metavar='<sort_dir>',
+    choices=['asc', 'desc'],
+    help='Sort direction: one of "asc" (the default) or "desc".')
+@cliutils.arg(
     '--maintenance',
     metavar='<maintenance>',
     choices=['true', 'True', 'false', 'False'],
@@ -97,22 +106,22 @@ def do_node_list(cc, args):
         params['associated'] = args.associated
     if args.maintenance is not None:
         params['maintenance'] = args.maintenance
-    if args.marker is not None:
-        params['marker'] = args.marker
-    if args.limit is not None:
-        params['limit'] = args.limit
     params['detail'] = args.detail
 
-    nodes = cc.node.list(**params)
     if args.detail:
-        cliutils.print_list(nodes, FIELDS,
-                            field_labels=FIELD_LABELS,
-                            sortby_index=None)
+        fields = FIELDS
+        field_labels = FIELD_LABELS
     else:
-        cliutils.print_list(nodes,
-                            LIST_FIELDS,
-                            field_labels=LIST_FIELD_LABELS,
-                            sortby_index=None)
+        fields = LIST_FIELDS
+        field_labels = LIST_FIELD_LABELS
+
+    params.update(utils.common_params_for_list(args,
+                                               fields,
+                                               field_labels))
+    nodes = cc.node.list(**params)
+    cliutils.print_list(nodes, fields,
+                        field_labels=field_labels,
+                        sortby_index=None)
 
 
 @cliutils.arg(
@@ -228,18 +237,23 @@ def do_node_vendor_passthru(cc, args):
     help='Port UUID (e.g of the last port in the list from '
          'a previous request). Returns the list of ports '
          'after this UUID.')
+@cliutils.arg(
+    '--sort-key',
+    metavar='<sort_key>',
+    help='Port field that will be used for sorting.')
+@cliutils.arg(
+    '--sort-dir',
+    metavar='<sort_dir>',
+    choices=['asc', 'desc'],
+    help='Sort direction: one of "asc" (the default) or "desc".')
 @cliutils.arg('node', metavar='<node id>', help="UUID of node")
 def do_node_port_list(cc, args):
     """List the ports associated with the node."""
-    params = {}
-    if args.marker is not None:
-        params['marker'] = args.marker
-    if args.limit is not None:
-        params['limit'] = args.limit
-
-    ports = cc.node.list_ports(args.node, **params)
     field_labels = ['UUID', 'Address']
     fields = ['uuid', 'address']
+    params = utils.common_params_for_list(args, fields, field_labels)
+
+    ports = cc.node.list_ports(args.node, **params)
     cliutils.print_list(ports, fields,
                         field_labels=field_labels,
                         sortby_index=None)

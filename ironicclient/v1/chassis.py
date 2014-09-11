@@ -15,6 +15,7 @@
 #    under the License.
 
 from ironicclient.common import base
+from ironicclient.common import utils
 from ironicclient import exc
 
 
@@ -33,7 +34,7 @@ class ChassisManager(base.Manager):
     def _path(id=None):
         return '/v1/chassis/%s' % id if id else '/v1/chassis'
 
-    def list(self, marker=None, limit=None):
+    def list(self, marker=None, limit=None, sort_key=None, sort_dir=None):
         """Retrieve a list of chassis.
 
         :param marker: Optional, the UUID of a chassis, eg the last
@@ -48,17 +49,18 @@ class ChassisManager(base.Manager):
                returned respect the maximum imposed by the Ironic API
                (see Ironic's api.max_limit option).
 
+        :param sort_key: Optional, field used for sorting.
+
+        :param sort_dir: Optional, direction of sorting, either 'asc' (the
+                         default) or 'desc'.
+
         :returns: A list of chassis.
 
         """
         if limit is not None:
             limit = int(limit)
 
-        filters = []
-        if isinstance(limit, int) and limit > 0:
-            filters.append('limit=%s' % limit)
-        if marker is not None:
-            filters.append('marker=%s' % marker)
+        filters = utils.common_filters(marker, limit, sort_key, sort_dir)
 
         path = None
         if filters:
@@ -70,7 +72,8 @@ class ChassisManager(base.Manager):
             return self._list_pagination(self._path(path), "chassis",
                                          limit=limit)
 
-    def list_nodes(self, chassis_id, marker=None, limit=None):
+    def list_nodes(self, chassis_id, marker=None, limit=None,
+                   sort_key=None, sort_dir=None):
         """List all the nodes for a given chassis.
 
         :param chassis_id: The UUID of the chassis.
@@ -86,17 +89,18 @@ class ChassisManager(base.Manager):
                returned respect the maximum imposed by the Ironic API
                (see Ironic's api.max_limit option).
 
+        :param sort_key: Optional, field used for sorting.
+
+        :param sort_dir: Optional, direction of sorting, either 'asc' (the
+                         default) or 'desc'.
+
         :returns: A list of nodes.
 
         """
         if limit is not None:
             limit = int(limit)
 
-        filters = []
-        if isinstance(limit, int) and limit > 0:
-            filters.append('limit=%s' % limit)
-        if marker is not None:
-            filters.append('marker=%s' % marker)
+        filters = utils.common_filters(marker, limit, sort_key, sort_dir)
 
         path = "%s/nodes" % chassis_id
         if filters:

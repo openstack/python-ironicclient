@@ -45,17 +45,22 @@ def do_chassis_show(cc, args):
     help='Chassis UUID (e.g of the last chassis in the list '
          'from a previous request). Returns the list of chassis '
          'after this UUID.')
+@cliutils.arg(
+    '--sort-key',
+    metavar='<sort_key>',
+    help='Chassis field that will be used for sorting.')
+@cliutils.arg(
+    '--sort-dir',
+    metavar='<sort_dir>',
+    choices=['asc', 'desc'],
+    help='Sort direction: one of "asc" (the default) or "desc".')
 def do_chassis_list(cc, args):
     """List chassis."""
-    params = {}
-    if args.marker is not None:
-        params['marker'] = args.marker
-    if args.limit is not None:
-        params['limit'] = args.limit
-
-    chassis = cc.chassis.list(**params)
     field_labels = ['UUID', 'Description']
     fields = ['uuid', 'description']
+    params = utils.common_params_for_list(args, fields, field_labels)
+
+    chassis = cc.chassis.list(**params)
     cliutils.print_list(chassis, fields,
                         field_labels=field_labels,
                         sortby_index=None)
@@ -130,19 +135,24 @@ def do_chassis_update(cc, args):
     help='Node UUID (e.g of the last node in the list from '
          'a previous request). Returns the list of nodes '
          'after this UUID.')
+@cliutils.arg(
+    '--sort-key',
+    metavar='<sort_key>',
+    help='Node field that will be used for sorting.')
+@cliutils.arg(
+    '--sort-dir',
+    metavar='<sort_dir>',
+    choices=['asc', 'desc'],
+    help='Sort direction: one of "asc" (the default) or "desc".')
 @cliutils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
 def do_chassis_node_list(cc, args):
     """List the nodes contained in the chassis."""
-    params = {}
-    if args.marker is not None:
-        params['marker'] = args.marker
-    if args.limit is not None:
-        params['limit'] = args.limit
-
-    nodes = cc.chassis.list_nodes(args.chassis, **params)
     field_labels = ['UUID', 'Instance UUID',
                     'Power State', 'Provisioning State']
     fields = ['uuid', 'instance_uuid', 'power_state', 'provision_state']
+    params = utils.common_params_for_list(args, fields, field_labels)
+
+    nodes = cc.chassis.list_nodes(args.chassis, **params)
     cliutils.print_list(nodes, fields,
                         field_labels=field_labels,
                         sortby_index=None)
