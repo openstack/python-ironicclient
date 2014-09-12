@@ -161,6 +161,25 @@ class NodeShellTest(utils.BaseTestCase):
         # assert get() wasn't called
         self.assertFalse(client_mock.node.get.called)
 
+    def _do_node_set_power_state_helper(self, power_state):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.power_state = power_state
+
+        n_shell.do_node_set_power_state(client_mock, args)
+        client_mock.node.set_power_state.assert_called_once_with('node_uuid',
+                                                                 power_state)
+
+    def test_do_node_set_power_state_on(self):
+        self._do_node_set_power_state_helper('on')
+
+    def test_do_node_set_power_state_off(self):
+        self._do_node_set_power_state_helper('off')
+
+    def test_do_node_set_power_state_reboot(self):
+        self._do_node_set_power_state_helper('reboot')
+
     def test_do_node_vendor_passthru_with_args(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
