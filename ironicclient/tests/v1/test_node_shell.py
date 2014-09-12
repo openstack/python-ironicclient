@@ -96,6 +96,36 @@ class NodeShellTest(utils.BaseTestCase):
                   }
         client_mock.node.vendor_passthru.assert_called_once_with(**kwargs)
 
+    def test_do_node_set_provision_state_active(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'active'
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'active')
+
+    def test_do_node_set_provision_state_deleted(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'deleted'
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'deleted')
+
+    def test_do_node_set_provision_state_rebuild(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'rebuild'
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'rebuild')
+
     def test_do_node_set_boot_device(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
