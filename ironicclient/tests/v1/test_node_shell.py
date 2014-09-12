@@ -16,6 +16,7 @@
 
 import mock
 
+from ironicclient.common import utils as commonutils
 from ironicclient.openstack.common import cliutils
 from ironicclient.tests import utils
 import ironicclient.v1.node_shell as n_shell
@@ -65,6 +66,17 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_delete(client_mock, args)
         client_mock.node.delete.assert_has_calls(
             [mock.call('node_uuid1'), mock.call('node_uuid2')])
+
+    def test_do_node_update(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.op = 'add'
+        args.attributes = [['arg1=val1', 'arg2=val2']]
+
+        n_shell.do_node_update(client_mock, args)
+        patch = commonutils.args_array_to_patch(args.op, args.attributes[0])
+        client_mock.node.update.assert_called_once_with('node_uuid', patch)
 
     def test_do_node_vendor_passthru_with_args(self):
         client_mock = mock.MagicMock()
