@@ -89,8 +89,12 @@ class FakeResponse(object):
 
 
 class FakeServiceCatalog():
-    def url_for(self, endpoint_type, service_type):
-        return 'http://localhost:6385/v1/f14b41234'
+    def url_for(self, endpoint_type, service_type, attr=None,
+                filter_value=None):
+        if attr == 'region' and filter_value:
+            return 'http://regionhost:6385/v1/f14b41234'
+        else:
+            return 'http://localhost:6385/v1/f14b41234'
 
 
 class FakeKeystone():
