@@ -266,8 +266,8 @@ def do_node_set_power_state(cc, args):
 @cliutils.arg(
     'provision_state',
     metavar='<provision state>',
-    choices=['active', 'deleted'],
-    help="Supported states: 'active' or 'deleted'")
+    choices=['active', 'deleted', 'rebuild'],
+    help="Supported states: 'active' or 'deleted' or 'rebuild'")
 def do_node_set_provision_state(cc, args):
     """Provision an instance on, or delete an instance from a node."""
     cc.node.set_provision_state(args.node, args.provision_state)
