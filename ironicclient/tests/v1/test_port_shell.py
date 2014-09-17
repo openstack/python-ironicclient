@@ -44,7 +44,7 @@ class PortShellTest(utils.BaseTestCase):
         p_shell.do_port_show(client_mock, args)
         client_mock.port.get.assert_called_once_with('port_uuid')
         # assert get_by_address() wasn't called
-        client_mock.port.get_by_address.assert_not_called()
+        self.assertFalse(client_mock.port.get_by_address.called)
 
     def test_do_port_show_by_address(self):
         client_mock = mock.MagicMock()
@@ -55,7 +55,7 @@ class PortShellTest(utils.BaseTestCase):
         p_shell.do_port_show(client_mock, args)
         client_mock.port.get_by_address.assert_called_once_with('port_address')
         # assert get() wasn't called
-        client_mock.port.get_by_address.assert_not_called()
+        self.assertFalse(client_mock.port.get.called)
 
     def test_do_port_update(self):
         client_mock = mock.MagicMock()
