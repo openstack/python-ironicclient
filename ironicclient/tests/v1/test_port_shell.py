@@ -16,6 +16,7 @@
 
 import mock
 
+from ironicclient.common import utils as commonutils
 from ironicclient.openstack.common import cliutils
 from ironicclient.tests import utils
 import ironicclient.v1.port_shell as p_shell
@@ -55,3 +56,14 @@ class PortShellTest(utils.BaseTestCase):
         client_mock.port.get_by_address.assert_called_once_with('port_address')
         # assert get() wasn't called
         client_mock.port.get_by_address.assert_not_called()
+
+    def test_do_port_update(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.port = 'port_uuid'
+        args.op = 'add'
+        args.attributes = [['arg1=val1', 'arg2=val2']]
+
+        p_shell.do_port_update(client_mock, args)
+        patch = commonutils.args_array_to_patch(args.op, args.attributes[0])
+        client_mock.port.update.assert_called_once_with('port_uuid', patch)
