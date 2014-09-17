@@ -42,13 +42,22 @@ supplying an auth token using :option:`--ironic-url` and
     export IRONIC_URL=http://ironic.example.org:6385/
     export OS_AUTH_TOKEN=3bcc3d3a03f44e3d8377f9247b0ad155
 
-Ironic cli supports bash completion. The command-line tool can automatically
-fill partially typed commands. To use this feature, source the below file to
-your terminal and then bash completion should work::
+Since Keystone can return multiple regions in the Service Catalog, you can
+specify the one you want with :option:`--os-region-name` or set the following
+environment variable. (It defaults to the first in the list returned.)
+::
 
-    source tools/ironic.bash_completion
+    export OS_REGION_NAME=region
 
-To avoid doing this everytime, add this to your ``.bashrc`` or copy the
+Ironic CLI supports bash completion. The command-line tool can automatically
+fill partially typed commands. To use this feature, source the below file
+(available at
+https://git.openstack.org/cgit/openstack/python-ironicclient/tree/tools/ironic.bash_completion)
+to your terminal and then bash completion should work::
+
+    source ironic.bash_completion
+
+To avoid doing this every time, add this to your ``.bashrc`` or copy the
 ironic.bash_completion file to the default bash completion scripts directory
 on your linux distribution.
 
