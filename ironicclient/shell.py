@@ -93,7 +93,8 @@ class IronicShell(object):
 
         parser.add_argument('--timeout',
                             default=600,
-                            help='Number of seconds to wait for a response')
+                            help='Number of seconds to wait for a response; '
+                                 'defaults to 600')
 
         parser.add_argument('--os-username',
                             default=cliutils.env('OS_USERNAME'),
@@ -162,14 +163,16 @@ class IronicShell(object):
 
         parser.add_argument('--os-service-type',
                             default=cliutils.env('OS_SERVICE_TYPE'),
-                            help='Defaults to env[OS_SERVICE_TYPE]')
+                            help='Defaults to env[OS_SERVICE_TYPE] or '
+                                 '"baremetal"')
 
         parser.add_argument('--os_service_type',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-endpoint-type',
                             default=cliutils.env('OS_ENDPOINT_TYPE'),
-                            help='Defaults to env[OS_ENDPOINT_TYPE]')
+                            help='Defaults to env[OS_ENDPOINT_TYPE] or '
+                                 '"publicURL"')
 
         parser.add_argument('--os_endpoint_type',
                             help=argparse.SUPPRESS)
