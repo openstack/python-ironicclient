@@ -87,6 +87,12 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
         self.assertEqual(self.expected_params,
                          utils.common_params_for_list(self.args, [], []))
 
+    def test_invalid_limit(self):
+        self.args.limit = -42
+        self.assertRaises(exc.CommandError,
+                          utils.common_params_for_list,
+                          self.args, [], [])
+
     def test_sort_key_and_sort_dir(self):
         self.args.sort_key = 'field'
         self.args.sort_dir = 'desc'
@@ -125,3 +131,18 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
         self.expected_params['detail'] = True
         self.assertEqual(self.expected_params,
                          utils.common_params_for_list(self.args, [], []))
+
+
+class CommonFiltersTest(test_utils.BaseTestCase):
+    def test_limit(self):
+        result = utils.common_filters(limit=42)
+        self.assertEqual(['limit=42'], result)
+
+    def test_limit_0(self):
+        result = utils.common_filters(limit=0)
+        self.assertEqual([], result)
+
+    def test_other(self):
+        for key in ('marker', 'sort_key', 'sort_dir'):
+            result = utils.common_filters(**{key: 'test'})
+            self.assertEqual(['%s=test' % key], result)
