@@ -15,6 +15,7 @@
 #    under the License.
 
 import copy
+
 import mock
 import testtools
 from testtools.matchers import HasLength

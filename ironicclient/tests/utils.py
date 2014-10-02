@@ -17,6 +17,7 @@
 
 import copy
 import datetime
+
 import fixtures
 import six
 import testtools
@@ -69,7 +70,9 @@ class FakeConnection(object):
 class FakeResponse(object):
     def __init__(self, headers, body=None, version=None, status=None,
                  reason=None):
-        """:param headers: dict representing HTTP response headers
+        """Fake object to help testing.
+
+        :param headers: dict representing HTTP response headers
         :param body: file-like object
         """
         self.headers = headers

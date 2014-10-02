@@ -54,8 +54,7 @@ def _get_endpoint(client, **kwargs):
 
 
 def get_client(api_version, **kwargs):
-    """Get an authenticated client, based on the credentials
-       in the keyword args.
+    """Get an authenticated client, based on the credentials in args.
 
     :param api_version: the API version to use. Valid value: '1'.
     :param kwargs: keyword args containing credentials, either:
@@ -94,8 +93,8 @@ def get_client(api_version, **kwargs):
                  else _ksclient.auth_token)
 
         ks_kwargs['region_name'] = kwargs.get('os_region_name')
-        endpoint = kwargs.get('ironic_url') or \
-            _get_endpoint(_ksclient, **ks_kwargs)
+        endpoint = (kwargs.get('ironic_url') or
+            _get_endpoint(_ksclient, **ks_kwargs))
 
         auth_ref = _ksclient.auth_ref
 

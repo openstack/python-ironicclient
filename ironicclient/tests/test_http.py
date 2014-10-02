@@ -16,6 +16,7 @@
 #    under the License.
 
 import json
+
 import six
 
 from ironicclient.common import http
@@ -68,8 +69,8 @@ class HttpClientTest(utils.BaseTestCase):
                                        version=1,
                                        status=500)
         client = http.HTTPClient('http://localhost/')
-        client.get_connection = \
-            lambda *a, **kw: utils.FakeConnection(fake_resp)
+        client.get_connection = (
+            lambda *a, **kw: utils.FakeConnection(fake_resp))
 
         error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
@@ -84,8 +85,8 @@ class HttpClientTest(utils.BaseTestCase):
                                        version=1,
                                        status=500)
         client = http.HTTPClient('http://localhost/')
-        client.get_connection = \
-            lambda *a, **kw: utils.FakeConnection(fake_resp)
+        client.get_connection = (
+            lambda *a, **kw: utils.FakeConnection(fake_resp))
 
         error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
@@ -94,16 +95,16 @@ class HttpClientTest(utils.BaseTestCase):
 
     def test_server_exception_msg_and_traceback(self):
         error_msg = 'another test error'
-        error_trace = "\"Traceback (most recent call last):\\n\\n  " \
-                      "File \\\"/usr/local/lib/python2.7/..."
+        error_trace = ("\"Traceback (most recent call last):\\n\\n  "
+                      "File \\\"/usr/local/lib/python2.7/...")
         error_body = self._get_error_body(error_msg, error_trace)
         fake_resp = utils.FakeResponse({'content-type': 'application/json'},
                                        six.StringIO(error_body),
                                        version=1,
                                        status=500)
         client = http.HTTPClient('http://localhost/')
-        client.get_connection = \
-            lambda *a, **kw: utils.FakeConnection(fake_resp)
+        client.get_connection = (
+            lambda *a, **kw: utils.FakeConnection(fake_resp))
 
         error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,

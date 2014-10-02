@@ -27,7 +27,9 @@ from ironicclient.openstack.common.apiclient import base
 
 
 def getid(obj):
-    """Abstracts the common pattern of allowing both an object or an
+    """Wrapper to get  object's ID.
+
+    Abstracts the common pattern of allowing both an object or an
     object's ID (UUID) as a parameter when dealing with relationships.
     """
     try:
@@ -37,9 +39,7 @@ def getid(obj):
 
 
 class Manager(object):
-    """Managers interact with a particular type of API and provide CRUD
-    operations for them.
-    """
+    """Provides  CRUD operations with a particular API."""
     resource_class = None
 
     def __init__(self, api):
@@ -137,8 +137,9 @@ class Manager(object):
 
 
 class Resource(base.Resource):
-    """A resource represents a particular instance of an object (tenant, user,
-    etc). This is pretty much just a bag for attributes.
+    """Represents a particular instance of an object (tenant, user, etc).
+
+    This is pretty much just a bag for attributes.
     """
 
     def to_dict(self):

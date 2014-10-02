@@ -216,8 +216,8 @@ def do_node_vendor_passthru(cc, args):
     metavar='<limit>',
     type=int,
     help='Maximum number of ports to return per request, '
-          '0 for no limit. Default is the maximum number used '
-          'by the Ironic API Service.')
+         '0 for no limit. Default is the maximum number used '
+         'by the Ironic API Service.')
 @cliutils.arg(
     '--marker',
     metavar='<marker>',

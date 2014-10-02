@@ -40,9 +40,7 @@ class InvalidAttribute(ClientException):
 
 def from_response(response, message=None, traceback=None, method=None,
                   url=None):
-    """Return an instance of an HttpError based on response from
-    httplib/requests.
-    """
+    """Return an HttpError instance based on response from httplib/requests."""
 
     error_body = {}
     if message:
