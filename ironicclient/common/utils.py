@@ -106,10 +106,20 @@ def args_array_to_patch(op, attributes):
 
 
 def common_params_for_list(args, fields, field_labels):
+    """Generate 'params' dict that is common for every 'list' command.
+
+    :param args: arguments from command line.
+    :param fields: possible fields for sorting.
+    :param field_labels: possible field labels for sorting.
+    :returns: a dict with params to pass to the client method.
+    """
     params = {}
     if args.marker is not None:
         params['marker'] = args.marker
     if args.limit is not None:
+        if args.limit < 0:
+            raise exc.CommandError(
+                _('Expected non-negative --limit, got %s') % args.limit)
         params['limit'] = args.limit
 
     if args.sort_key is not None:
@@ -120,16 +130,16 @@ def common_params_for_list(args, fields, field_labels):
             sort_key = fields_map[args.sort_key]
         except KeyError:
             raise exc.CommandError(
-                _("%(sort_key)s is not a valid field for sorting, "
-                  "valid are %(valid)s") %
+                _("%(sort_key)s is an invalid field for sorting, "
+                  "valid values for --sort-key are: %(valid)s") %
                 {'sort_key': args.sort_key,
                  'valid': list(fields_map)})
         params['sort_key'] = sort_key
     if args.sort_dir is not None:
         if args.sort_dir not in ('asc', 'desc'):
             raise exc.CommandError(
-                _("%s is not valid value for sort direction, "
-                  "valid are 'asc' and 'desc'") %
+                _("%s is an invalid value for sort direction, "
+                  "valid values for --sort-dir are: 'asc', 'desc'") %
                 args.sort_dir)
         params['sort_dir'] = args.sort_dir
 
@@ -138,7 +148,15 @@ def common_params_for_list(args, fields, field_labels):
     return params
 
 
-def common_filters(marker, limit, sort_key, sort_dir):
+def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None):
+    """Generate common filters for any list request.
+
+    :param marker: entity ID from which to start returning entities.
+    :param limit: maximum number of entities to return.
+    :param sort_key: field to use for sorting.
+    :param sort_dir: direction of sorting: 'asc' or 'desc'.
+    :returns: list of string filters.
+    """
     filters = []
     if isinstance(limit, int) and limit > 0:
         filters.append('limit=%s' % limit)
