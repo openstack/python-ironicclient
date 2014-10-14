@@ -77,6 +77,10 @@ UPDATED_NODE = copy.deepcopy(NODE1)
 NEW_DRIVER = 'new-driver'
 UPDATED_NODE['driver'] = NEW_DRIVER
 
+CREATE_WITH_UUID = copy.deepcopy(NODE1)
+del CREATE_WITH_UUID['id']
+del CREATE_WITH_UUID['maintenance']
+
 fake_responses = {
     '/v1/nodes':
     {
@@ -452,6 +456,14 @@ class NodeManagerTest(testtools.TestCase):
         node = self.mgr.create(**CREATE_NODE)
         expect = [
             ('POST', '/v1/nodes', {}, CREATE_NODE),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertTrue(node)
+
+    def test_create_with_uuid(self):
+        node = self.mgr.create(**CREATE_WITH_UUID)
+        expect = [
+            ('POST', '/v1/nodes', {}, CREATE_WITH_UUID),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(node)
