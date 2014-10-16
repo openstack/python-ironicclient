@@ -19,8 +19,10 @@ import sys
 import fixtures
 import httplib2
 import httpretty
+from keystoneclient import exceptions as keystone_exc
 from keystoneclient.fixture import v2 as ks_v2_fixture
 from keystoneclient.fixture import v3 as ks_v3_fixture
+import mock
 import six
 import testtools
 from testtools import matchers
@@ -33,7 +35,7 @@ from ironicclient.tests import utils
 FAKE_ENV = {'OS_USERNAME': 'username',
             'OS_PASSWORD': 'password',
             'OS_TENANT_NAME': 'tenant_name',
-            'OS_AUTH_URL': 'http://no.where'}
+            'OS_AUTH_URL': 'http://no.where/v2.0/'}
 
 FAKE_ENV_KEYSTONE_V2 = {
     'OS_USERNAME': 'username',
@@ -76,7 +78,6 @@ class ShellTest(utils.BaseTestCase):
             out = sys.stdout.getvalue()
             sys.stdout.close()
             sys.stdout = orig
-
         return out
 
     def test_help_unknown_command(self):
@@ -118,6 +119,42 @@ class ShellTest(utils.BaseTestCase):
     def test_auth_param(self):
         self.make_env(exclude='OS_USERNAME')
         self.test_help()
+
+    @mock.patch('sys.stdin', side_effect=mock.MagicMock)
+    @mock.patch('getpass.getpass', return_value='password')
+    def test_password_prompted(self, mock_getpass, mock_stdin):
+        self.make_env(exclude='OS_PASSWORD')
+        # We will get a Connection Refused because there is no keystone.
+        self.assertRaises(keystone_exc.ConnectionRefused,
+            self.shell, 'node-list')
+        # Make sure we are actually prompted.
+        mock_getpass.assert_called_with('OpenStack Password: ')
+
+    @mock.patch('sys.stdin', side_effect=mock.MagicMock)
+    @mock.patch('getpass.getpass', side_effect=EOFError)
+    def test_password_prompted_ctrlD(self, mock_getpass, mock_stdin):
+        self.make_env(exclude='OS_PASSWORD')
+        # We should get Command Error because we mock Ctl-D.
+        self.assertRaises(exc.CommandError,
+            self.shell, 'node-list')
+        # Make sure we are actually prompted.
+        mock_getpass.assert_called_with('OpenStack Password: ')
+
+    @mock.patch('sys.stdin')
+    def test_no_password_no_tty(self, mock_stdin):
+        # delete the isatty attribute so that we do not get
+        # prompted when manually running the tests
+        del mock_stdin.isatty
+        required = ('You must provide a password'
+                    ' via either --os-password, env[OS_PASSWORD],'
+                    ' or prompted response',)
+        self.make_env(exclude='OS_PASSWORD')
+        try:
+            self.shell('node-list')
+        except exc.CommandError as message:
+            self.assertEqual(required, message.args)
+        else:
+            self.fail('CommandError not raised')
 
     def test_bash_completion(self):
         stdout = self.shell('bash-completion')

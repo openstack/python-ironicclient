@@ -19,6 +19,7 @@ Command-line interface to the OpenStack Bare Metal Provisioning
 from __future__ import print_function
 
 import argparse
+import getpass
 import logging
 import sys
 
@@ -373,9 +374,21 @@ class IronicShell(object):
                                          "env[OS_USERNAME]"))
 
             if not args.os_password:
+                # No password, If we've got a tty, try prompting for it
+                if hasattr(sys.stdin, 'isatty') and sys.stdin.isatty():
+                    # Check for Ctl-D
+                    try:
+                        args.os_password = getpass.getpass(
+                            'OpenStack Password: ')
+                    except EOFError:
+                        pass
+            # No password because we didn't have a tty or the
+            # user Ctl-D when prompted.
+            if not args.os_password:
                 raise exc.CommandError(_("You must provide a password via "
-                                         "either --os-password or via "
-                                         "env[OS_PASSWORD]"))
+                                         "either --os-password, "
+                                         "env[OS_PASSWORD], "
+                                         "or prompted response"))
 
             if not (args.os_tenant_id or args.os_tenant_name or
                     args.os_project_id or args.os_project_name):
