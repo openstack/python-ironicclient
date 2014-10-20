@@ -178,6 +178,17 @@ fake_responses = {
             {"ports": [PORT]},
         ),
     },
+    '/v1/nodes/%s/maintenance' % NODE1['uuid']:
+    {
+        'PUT': (
+            {},
+            None,
+        ),
+        'DELETE': (
+            {},
+            None,
+        ),
+    },
     '/v1/nodes/%s/states/power' % NODE1['uuid']:
     {
         'PUT': (
@@ -553,6 +564,24 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
+
+    def test_node_set_maintenance_on(self):
+        maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'on',
+                                               maint_reason='reason')
+        body = {'reason': 'reason'}
+        expect = [
+            ('PUT', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(None, maintenance)
+
+    def test_node_set_maintenance_off(self):
+        maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'off')
+        expect = [
+            ('DELETE', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(None, maintenance)
 
     def test_node_set_power_state(self):
         power_state = self.mgr.set_power_state(NODE1['uuid'], "on")

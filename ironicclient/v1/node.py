@@ -172,6 +172,14 @@ class NodeManager(base.Manager):
         path = self._path(node_id) + "/vendor_passthru/%s" % method
         return self._update(path, args, method='POST')
 
+    def set_maintenance(self, node_id, state, maint_reason=None):
+        path = "%s/maintenance" % node_id
+        if state == 'on':
+            reason = {'reason': maint_reason}
+            return self._update(self._path(path), reason, method='PUT')
+        if state == 'off':
+            return self._delete(self._path(path))
+
     def set_power_state(self, node_id, state):
         path = "%s/states/power" % node_id
         if state in ['on', 'off']:
