@@ -34,7 +34,7 @@ class Client(object):
 
     def __init__(self, *args, **kwargs):
         """Initialize a new client for the Ironic v1 API."""
-        self.http_client = http.HTTPClient(*args, **kwargs)
+        self.http_client = http._construct_http_client(*args, **kwargs)
         self.chassis = chassis.ChassisManager(self.http_client)
         self.node = node.NodeManager(self.http_client)
         self.port = port.PortManager(self.http_client)

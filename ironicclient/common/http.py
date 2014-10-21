@@ -22,6 +22,7 @@ import os
 import socket
 import ssl
 
+from keystoneclient import adapter
 import six
 import six.moves.urllib.parse as urlparse
 
@@ -280,6 +281,62 @@ class VerifiedHTTPSConnection(six.moves.http_client.HTTPSConnection):
         return None
 
 
+class SessionClient(adapter.LegacyJsonAdapter):
+    """HTTP client based on Keystone client session."""
+
+    def _http_request(self, url, method, **kwargs):
+        kwargs.setdefault('user_agent', USER_AGENT)
+        kwargs.setdefault('auth', self.auth)
+
+        endpoint_filter = kwargs.setdefault('endpoint_filter', {})
+        endpoint_filter.setdefault('interface', self.interface)
+        endpoint_filter.setdefault('service_type', self.service_type)
+        endpoint_filter.setdefault('region_name', self.region_name)
+
+        resp = self.session.request(url, method,
+                                    raise_exc=False, **kwargs)
+
+        if 400 <= resp.status_code < 600:
+            raise exc.from_response(resp)
+        elif resp.status_code in (301, 302, 305):
+            # Redirected. Reissue the request to the new location.
+            location = resp.headers.get('location')
+            resp = self._http_request(location, method, **kwargs)
+        elif resp.status_code == 300:
+            raise exc.from_response(resp, method=method, url=url)
+        return resp
+
+    def json_request(self, method, url, **kwargs):
+        kwargs.setdefault('headers', {})
+        kwargs['headers'].setdefault('Content-Type', 'application/json')
+        kwargs['headers'].setdefault('Accept', 'application/json')
+
+        if 'body' in kwargs:
+            kwargs['data'] = json.dumps(kwargs.pop('body'))
+
+        resp = self._http_request(url, method, **kwargs)
+        body = resp.content
+        content_type = resp.headers.get('content-type', None)
+        status = resp.status_code
+        if status == 204 or status == 205 or content_type is None:
+            return resp, list()
+        if 'application/json' in content_type:
+            try:
+                body = resp.json()
+            except ValueError:
+                LOG.error('Could not decode response body as JSON')
+        else:
+            body = None
+
+        return resp, body
+
+    def raw_request(self, method, url, **kwargs):
+        kwargs.setdefault('headers', {})
+        kwargs['headers'].setdefault('Content-Type',
+                                     'application/octet-stream')
+        return self._http_request(url, method, **kwargs)
+
+
 class ResponseBodyIterator(object):
     """A class that acts as an iterator over an HTTP response."""
 
@@ -296,3 +353,22 @@ class ResponseBodyIterator(object):
             return chunk
         else:
             raise StopIteration()
+
+
+def _construct_http_client(*args, **kwargs):
+    session = kwargs.pop('session', None)
+    auth = kwargs.pop('auth', None)
+
+    if session:
+        service_type = kwargs.pop('service_type', 'baremetal')
+        interface = kwargs.pop('endpoint_type', None)
+        region_name = kwargs.pop('region_name', None)
+        return SessionClient(session=session,
+                             auth=auth,
+                             interface=interface,
+                             service_type=service_type,
+                             region_name=region_name,
+                             service_name=None,
+                             user_agent='python-ironicclient')
+    else:
+        return HTTPClient(*args, **kwargs)
