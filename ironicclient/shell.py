@@ -412,9 +412,9 @@ class IronicShell(object):
                 'token': args.os_auth_token,
                 'insecure': args.insecure,
                 'timeout': args.timeout,
-                'ca_file': args.ca_file,
-                'cert_file': args.cert_file,
-                'key_file': args.key_file,
+                'ca_file': args.os_cacert,
+                'cert_file': args.os_cert,
+                'key_file': args.os_key,
                 'auth_ref': None,
             }
         elif (args.os_username and
