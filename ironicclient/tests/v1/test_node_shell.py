@@ -17,6 +17,7 @@
 import mock
 
 from ironicclient.common import utils as commonutils
+from ironicclient.openstack.common.apiclient import exceptions
 from ironicclient.openstack.common import cliutils
 from ironicclient.tests import utils
 import ironicclient.v1.node_shell as n_shell
@@ -160,6 +161,42 @@ class NodeShellTest(utils.BaseTestCase):
             'instance_uuid')
         # assert get() wasn't called
         self.assertFalse(client_mock.node.get.called)
+
+    def test_do_node_set_maintenance_on(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.maintenance_mode = 'on'
+        args.reason = 'reason'
+
+        n_shell.do_node_set_maintenance(client_mock, args)
+        client_mock.node.set_maintenance.assert_called_once_with('node_uuid',
+            'on',
+            maint_reason='reason')
+
+    def test_do_node_set_maintenance_off(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.maintenance_mode = 'off'
+        # NOTE(jroll) None is the default. <3 mock.
+        args.reason = None
+
+        n_shell.do_node_set_maintenance(client_mock, args)
+        client_mock.node.set_maintenance.assert_called_once_with('node_uuid',
+            'off',
+            maint_reason=None)
+
+    def test_do_node_set_maintenance_off_with_reason_fails(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.maintenance_mode = 'off'
+        args.reason = 'reason'
+
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_set_maintenance,
+                          client_mock, args)
 
     def _do_node_set_power_state_helper(self, power_state):
         client_mock = mock.MagicMock()

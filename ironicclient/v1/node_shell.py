@@ -18,6 +18,7 @@
 import six
 
 from ironicclient.common import utils
+from ironicclient.openstack.common.apiclient import exceptions
 from ironicclient.openstack.common import cliutils
 from ironicclient.v1 import resource_fields as res_fields
 
@@ -249,6 +250,27 @@ def do_node_port_list(cc, args):
     cliutils.print_list(ports, fields,
                         field_labels=field_labels,
                         sortby_index=None)
+
+
+@cliutils.arg('node', metavar='<node id>', help="UUID of node")
+@cliutils.arg(
+    'maintenance_mode',
+    metavar='<maintenance mode>',
+    choices=['on', 'off'],
+    help="Supported states: 'on' or 'off'")
+@cliutils.arg(
+    '--reason',
+    metavar='<reason>',
+    default=None,
+    help=('The reason for setting maintenance mode to "on"; not valid when '
+           'setting to "off".'))
+def do_node_set_maintenance(cc, args):
+    """Set maintenance mode on or off."""
+    if args.reason and args.maintenance_mode == 'off':
+        raise exceptions.CommandError(_('Cannot set "reason" when turning off '
+                                        'maintenance mode.'))
+    cc.node.set_maintenance(args.node, args.maintenance_mode,
+                            maint_reason=args.reason)
 
 
 @cliutils.arg('node', metavar='<node id>', help="UUID of node")
