@@ -140,6 +140,14 @@ class NodeShellTest(utils.BaseTestCase):
                   }
         client_mock.node.create.assert_called_once_with(**kwargs)
 
+    def test_do_node_create_with_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.uuid = 'fef99cb8-a0d1-43df-b084-17b3b42b3cbd'
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(uuid=args.uuid)
+
     def test_do_node_show(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
