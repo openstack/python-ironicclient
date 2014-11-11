@@ -165,10 +165,17 @@ class NodeManager(base.Manager):
     def update(self, node_id, patch):
         return self._update(self._path(node_id), patch)
 
-    def vendor_passthru(self, **kwargs):
-        node_id = kwargs['node_id']
-        method = kwargs['method']
-        args = kwargs['args']
+    def vendor_passthru(self, node_id, method, args=None):
+        """Issue requests for vendor-specific actions on a given node.
+
+        :param node_id: The UUID of the node.
+        :param method: Name of the vendor method.
+        :param args: Optional. The arguments to be passed to the method.
+
+        """
+        if args is None:
+            args = {}
+
         path = self._path(node_id) + "/vendor_passthru/%s" % method
         return self._update(path, args, method='POST')
 

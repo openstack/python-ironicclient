@@ -44,10 +44,17 @@ class DriverManager(base.Manager):
         except IndexError:
             return {}
 
-    def vendor_passthru(self, **kwargs):
-        driver_name = kwargs['driver_name']
-        method = kwargs['method']
-        args = kwargs['args']
+    def vendor_passthru(self, driver_name, method, args=None):
+        """Issue requests for vendor-specific actions on a given driver.
+
+        :param driver_name: Name of the driver.
+        :param method: Name of the vendor method.
+        :param args: Optional. The arguments to be passed to the method.
+
+        """
+        if args is None:
+            args = {}
+
         path = "/v1/drivers/%(driver_name)s/vendor_passthru/%(method)s" % {
                                                     'driver_name': driver_name,
                                                     'method': method

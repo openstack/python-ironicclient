@@ -225,12 +225,8 @@ class NodeShellTest(utils.BaseTestCase):
         args.arguments = [['arg1=val1', 'arg2=val2']]
 
         n_shell.do_node_vendor_passthru(client_mock, args)
-        kwargs = {
-                  'node_id': 'node_uuid',
-                  'method': 'method',
-                  'args': {'arg1': 'val1', 'arg2': 'val2'}
-                  }
-        client_mock.node.vendor_passthru.assert_called_once_with(**kwargs)
+        client_mock.node.vendor_passthru.assert_called_once_with(
+                args.node, args.method, args={'arg1': 'val1', 'arg2': 'val2'})
 
     def test_do_node_vendor_passthru_without_args(self):
         client_mock = mock.MagicMock()
@@ -240,12 +236,8 @@ class NodeShellTest(utils.BaseTestCase):
         args.arguments = [[]]
 
         n_shell.do_node_vendor_passthru(client_mock, args)
-        kwargs = {
-                  'node_id': 'node_uuid',
-                  'method': 'method',
-                  'args': {}
-                  }
-        client_mock.node.vendor_passthru.assert_called_once_with(**kwargs)
+        client_mock.node.vendor_passthru.assert_called_once_with(
+                args.node, args.method, args={})
 
     def test_do_node_set_provision_state_active(self):
         client_mock = mock.MagicMock()

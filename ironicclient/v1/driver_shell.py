@@ -72,14 +72,12 @@ def do_driver_properties(cc, args):
               help="arguments to be passed to vendor-passthru method")
 def do_driver_vendor_passthru(cc, args):
     """Call a vendor-passthru extension for a driver."""
-    fields = {}
-    fields['driver_name'] = args.driver_name
-    fields['method'] = args.method
-    fields['args'] = args.arguments[0]
-    fields = utils.args_array_to_dict(fields, 'args')
+    arguments = utils.args_array_to_dict({'args': args.arguments[0]},
+                                          'args')['args']
 
-    # If there were no arguments for the method, fields['args'] will still
+    # If there were no arguments for the method, arguments will still
     # be an empty list. So make it an empty dict.
-    if not fields['args']:
-        fields['args'] = {}
-    cc.driver.vendor_passthru(**fields)
+    if not arguments:
+        arguments = {}
+
+    cc.driver.vendor_passthru(args.driver_name, args.method, args=arguments)
