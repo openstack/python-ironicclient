@@ -180,17 +180,23 @@ def do_node_update(cc, args):
 
 
 @cliutils.arg('node',
-           metavar='<node id>',
-           help="UUID of node")
+    metavar='<node id>',
+    help="UUID of node")
 @cliutils.arg('method',
-           metavar='<method>',
-           help="vendor-passthru method to be called")
+    metavar='<method>',
+    help="vendor-passthru method to be called")
 @cliutils.arg('arguments',
-           metavar='<arg=value>',
-           nargs='*',
-           action='append',
-           default=[],
-           help="arguments to be passed to vendor-passthru method")
+    metavar='<arg=value>',
+    nargs='*',
+    action='append',
+    default=[],
+    help="arguments to be passed to vendor-passthru method")
+@cliutils.arg('--http_method',
+    metavar='<http_method>',
+    choices=['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
+    help="The HTTP method to use in the request. Valid HTTP "
+         "methods are: 'POST', 'PUT', 'GET', 'DELETE', 'PATCH'. "
+         "Defaults to 'POST'.")
 def do_node_vendor_passthru(cc, args):
     """Call a vendor-passthru extension for a node."""
     arguments = utils.args_array_to_dict({'args': args.arguments[0]},
@@ -201,7 +207,12 @@ def do_node_vendor_passthru(cc, args):
     if not arguments:
         arguments = {}
 
-    cc.node.vendor_passthru(args.node, args.method, args=arguments)
+    resp = cc.node.vendor_passthru(args.node, args.method,
+                                   http_method=args.http_method,
+                                   args=arguments)
+    if resp:
+        # Print the raw response we don't know how it should be formated
+        print(str(resp.to_dict()))
 
 
 @cliutils.arg(
