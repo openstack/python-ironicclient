@@ -54,7 +54,7 @@ def define_command(subparsers, command, callback, cmd_mapper):
 
 
 def define_commands_from_module(subparsers, command_module, cmd_mapper):
-    """Add 'do_' methods in a module and add as commands into a subparsers."""
+    """Add *do_* methods in a module and add as commands into a subparsers."""
 
     for method_name in (a for a in dir(command_module) if a.startswith('do_')):
         # Commands should be hypen-separated instead of underscores.
