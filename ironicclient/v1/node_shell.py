@@ -278,7 +278,7 @@ def do_node_set_maintenance(cc, args):
     choices=['on', 'off', 'reboot'],
     help="Supported states: 'on' or 'off' or 'reboot'")
 def do_node_set_power_state(cc, args):
-    """Power the node on or off."""
+    """Power the node on or off or reboot."""
     cc.node.set_power_state(args.node, args.power_state)
 
 
