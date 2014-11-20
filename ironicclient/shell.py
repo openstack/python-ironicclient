@@ -13,7 +13,7 @@
 #    under the License.
 
 """
-Command-line interface to the OpenStack Bare Metal Provisioning
+Command-line interface to the OpenStack Bare Metal Provisioning API.
 """
 
 from __future__ import print_function
