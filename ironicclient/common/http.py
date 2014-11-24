@@ -36,10 +36,16 @@ CHUNKSIZE = 1024 * 64  # 64kB
 API_VERSION = '/v1'
 
 
+def _trim_endpoint_api_version(url):
+    """Trim API version and trailing slash from endpoint."""
+    return url.rstrip('/').rstrip(API_VERSION)
+
+
 class HTTPClient(object):
 
     def __init__(self, endpoint, **kwargs):
         self.endpoint = endpoint
+        self.endpoint_trimmed = _trim_endpoint_api_version(endpoint)
         self.auth_token = kwargs.get('token')
         self.auth_ref = kwargs.get('auth_ref')
         self.connection_params = self.get_connection_params(endpoint, **kwargs)
@@ -48,9 +54,7 @@ class HTTPClient(object):
     def get_connection_params(endpoint, **kwargs):
         parts = urlparse.urlparse(endpoint)
 
-        # trim API version and trailing slash from endpoint
-        path = parts.path
-        path = path.rstrip('/').rstrip(API_VERSION)
+        path = _trim_endpoint_api_version(parts.path)
 
         _args = (parts.hostname, parts.port, path)
         _kwargs = {'timeout': (float(kwargs.get('timeout'))
@@ -101,7 +105,7 @@ class HTTPClient(object):
         if 'body' in kwargs:
             curl.append('-d \'%s\'' % kwargs['body'])
 
-        curl.append('%s%s' % (self.endpoint, url))
+        curl.append(urlparse.urljoin(self.endpoint_trimmed, url))
         LOG.debug(' '.join(curl))
 
     @staticmethod
