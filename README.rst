@@ -45,6 +45,10 @@ as environment variables::
     export OS_PASSWORD=pass
     export OS_AUTH_URL=http://auth.example.com:5000/v2.0
 
+To use a specific Ironic API endpoint::
+
+    export IRONIC_URL=http://ironic.example.com:6385
+
 An example of how to create a basic node with the pxe_ipmitool driver::
 
     ironic node-create -d pxe_ipmitool
