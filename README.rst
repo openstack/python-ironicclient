@@ -6,7 +6,7 @@ This is a client for the OpenStack `Ironic
 ``ironicclient`` module) and a command-line interface (``ironic``).
 
 Development takes place via the usual OpenStack processes as outlined in the
-`OpenStack wiki <http://wiki.openstack.org/HowToContribute>`_. The master
+`developer guide <http://docs.openstack.org/infra/manual/developers.html>`_. The master
 repository is on `git.openstack.org
 <https://git.openstack.org/cgit/openstack/python-ironicclient>`_.
 
