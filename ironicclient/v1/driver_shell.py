@@ -70,6 +70,12 @@ def do_driver_properties(cc, args):
               action='append',
               default=[],
               help="arguments to be passed to vendor-passthru method")
+@cliutils.arg('--http_method',
+    metavar='<http_method>',
+    choices=['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
+    help="The HTTP method to use in the request. Valid HTTP "
+         "methods are: 'POST', 'PUT', 'GET', 'DELETE', 'PATCH'. "
+         "Defaults to 'POST'.")
 def do_driver_vendor_passthru(cc, args):
     """Call a vendor-passthru extension for a driver."""
     arguments = utils.args_array_to_dict({'args': args.arguments[0]},
@@ -80,4 +86,9 @@ def do_driver_vendor_passthru(cc, args):
     if not arguments:
         arguments = {}
 
-    cc.driver.vendor_passthru(args.driver_name, args.method, args=arguments)
+    resp = cc.driver.vendor_passthru(args.driver_name, args.method,
+                                     http_method=args.http_method,
+                                     args=arguments)
+    if resp:
+        # Print the raw response we don't know how it should be formated
+        print(str(resp.to_dict()))

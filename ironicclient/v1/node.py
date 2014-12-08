@@ -162,22 +162,37 @@ class NodeManager(base.Manager):
     def delete(self, node_id):
         return self._delete(self._path(node_id))
 
-    def update(self, node_id, patch):
-        return self._update(self._path(node_id), patch)
+    def update(self, node_id, patch, http_method='PATCH'):
+        return self._update(self._path(node_id), patch, method=http_method)
 
-    def vendor_passthru(self, node_id, method, args=None):
+    def vendor_passthru(self, node_id, method, args=None, http_method=None):
         """Issue requests for vendor-specific actions on a given node.
 
         :param node_id: The UUID of the node.
         :param method: Name of the vendor method.
         :param args: Optional. The arguments to be passed to the method.
+        :param http_method: The HTTP method to use on the request.
+                            Defaults to POST.
 
         """
         if args is None:
             args = {}
 
-        path = self._path(node_id) + "/vendor_passthru/%s" % method
-        return self._update(path, args, method='POST')
+        if http_method is None:
+            http_method = 'POST'
+
+        http_method = http_method.upper()
+
+        path = "%s/vendor_passthru/%s" % (node_id, method)
+        if http_method in ('POST', 'PUT', 'PATCH'):
+            return self.update(path, args, http_method=http_method)
+        elif http_method == 'DELETE':
+            return self.delete(path)
+        elif http_method == 'GET':
+            return self.get(path)
+        else:
+            raise exc.InvalidAttribute(
+                    _('Unknown HTTP method: %s') % http_method)
 
     def set_maintenance(self, node_id, state, maint_reason=None):
         path = "%s/maintenance" % node_id

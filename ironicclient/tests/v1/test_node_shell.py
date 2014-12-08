@@ -230,23 +230,26 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.node = 'node_uuid'
+        args.http_method = 'POST'
         args.method = 'method'
         args.arguments = [['arg1=val1', 'arg2=val2']]
 
         n_shell.do_node_vendor_passthru(client_mock, args)
         client_mock.node.vendor_passthru.assert_called_once_with(
-                args.node, args.method, args={'arg1': 'val1', 'arg2': 'val2'})
+                args.node, args.method, args={'arg1': 'val1', 'arg2': 'val2'},
+                http_method=args.http_method)
 
     def test_do_node_vendor_passthru_without_args(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.node = 'node_uuid'
+        args.http_method = 'POST'
         args.method = 'method'
         args.arguments = [[]]
 
         n_shell.do_node_vendor_passthru(client_mock, args)
         client_mock.node.vendor_passthru.assert_called_once_with(
-                args.node, args.method, args={})
+                args.node, args.method, args={}, http_method=args.http_method)
 
     def test_do_node_set_provision_state_active(self):
         client_mock = mock.MagicMock()

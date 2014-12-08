@@ -19,9 +19,9 @@ import mock
 import testtools
 from testtools import matchers
 
-from ironicclient.common import base
+from ironicclient import exc
 from ironicclient.tests import utils
-import ironicclient.v1.driver
+from ironicclient.v1 import driver
 
 
 DRIVER1 = {'name': 'fake', 'hosts': ['fake-host1', 'fake-host2']}
@@ -63,7 +63,7 @@ class DriverManagerTest(testtools.TestCase):
     def setUp(self):
         super(DriverManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
-        self.mgr = ironicclient.v1.driver.DriverManager(self.api)
+        self.mgr = driver.DriverManager(self.api)
 
     def test_driver_list(self):
         drivers = self.mgr.list()
@@ -74,13 +74,13 @@ class DriverManagerTest(testtools.TestCase):
         self.assertThat(drivers, matchers.HasLength(1))
 
     def test_driver_show(self):
-        driver = self.mgr.get(DRIVER1['name'])
+        driver_ = self.mgr.get(DRIVER1['name'])
         expect = [
             ('GET', '/v1/drivers/%s' % DRIVER1['name'], {}, None)
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual(DRIVER1['name'], driver.name)
-        self.assertEqual(DRIVER1['hosts'], driver.hosts)
+        self.assertEqual(DRIVER1['name'], driver_.name)
+        self.assertEqual(DRIVER1['hosts'], driver_.hosts)
 
     def test_driver_properties(self):
         properties = self.mgr.properties(DRIVER2['name'])
@@ -90,8 +90,8 @@ class DriverManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(DRIVER2_PROPERTIES, properties)
 
-    @mock.patch.object(base.Manager, '_update')
-    def test_vendor_passthru(self, update_mock):
+    @mock.patch.object(driver.DriverManager, 'update')
+    def test_vendor_passthru_update(self, update_mock):
         # For now just mock the tests because vendor-passthru doesn't return
         # anything to verify.
         vendor_passthru_args = {'arg1': 'val1'}
@@ -100,9 +100,46 @@ class DriverManagerTest(testtools.TestCase):
                   'method': 'method',
                   'args': vendor_passthru_args
                  }
-        self.mgr.vendor_passthru(**kwargs)
 
-        final_path = '/v1/drivers/driver_name/vendor_passthru/method'
-        update_mock.assert_once_called_with(final_path,
-                                            vendor_passthru_args,
-                                            method='POST')
+        final_path = 'driver_name/vendor_passthru/method'
+        for http_method in ('POST', 'PUT', 'PATCH'):
+            kwargs['http_method'] = http_method
+            self.mgr.vendor_passthru(**kwargs)
+            update_mock.assert_called_once_with(final_path,
+                                                vendor_passthru_args,
+                                                http_method=http_method)
+            update_mock.reset_mock()
+
+    @mock.patch.object(driver.DriverManager, 'get')
+    def test_vendor_passthru_get(self, get_mock):
+        kwargs = {
+                  'driver_name': 'driver_name',
+                  'method': 'method',
+                  'http_method': 'GET',
+                 }
+
+        final_path = 'driver_name/vendor_passthru/method'
+        self.mgr.vendor_passthru(**kwargs)
+        get_mock.assert_called_once_with(final_path)
+
+    @mock.patch.object(driver.DriverManager, 'delete')
+    def test_vendor_passthru_delete(self, delete_mock):
+        kwargs = {
+                  'driver_name': 'driver_name',
+                  'method': 'method',
+                  'http_method': 'DELETE',
+                 }
+
+        final_path = 'driver_name/vendor_passthru/method'
+        self.mgr.vendor_passthru(**kwargs)
+        delete_mock.assert_called_once_with(final_path)
+
+    @mock.patch.object(driver.DriverManager, 'delete')
+    def test_vendor_passthru_unknown_http_method(self, delete_mock):
+        kwargs = {
+                  'driver_name': 'driver_name',
+                  'method': 'method',
+                  'http_method': 'UNKNOWN',
+                 }
+        self.assertRaises(exc.InvalidAttribute, self.mgr.vendor_passthru,
+                          **kwargs)

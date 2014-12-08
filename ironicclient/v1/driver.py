@@ -16,6 +16,7 @@
 #    under the License.
 
 from ironicclient.common import base
+from ironicclient import exc
 
 
 class Driver(base.Resource):
@@ -35,6 +36,13 @@ class DriverManager(base.Manager):
         except IndexError:
             return None
 
+    def update(self, driver_name, patch, http_method='PATCH'):
+        path = '/v1/drivers/%s' % driver_name
+        return self._update(path, patch, method=http_method)
+
+    def delete(self, driver_name):
+        return self._delete('/v1/drivers/%s' % driver_name)
+
     def properties(self, driver_name):
         try:
             info = self._list('/v1/drivers/%s/properties' % driver_name)[0]
@@ -44,19 +52,31 @@ class DriverManager(base.Manager):
         except IndexError:
             return {}
 
-    def vendor_passthru(self, driver_name, method, args=None):
+    def vendor_passthru(self, driver_name, method, args=None,
+                        http_method=None):
         """Issue requests for vendor-specific actions on a given driver.
 
         :param driver_name: Name of the driver.
         :param method: Name of the vendor method.
         :param args: Optional. The arguments to be passed to the method.
-
+        :param http_method: The HTTP method to use on the request.
+                            Defaults to POST.
         """
         if args is None:
             args = {}
 
-        path = "/v1/drivers/%(driver_name)s/vendor_passthru/%(method)s" % {
-                                                    'driver_name': driver_name,
-                                                    'method': method
-                                                    }
-        return self._update(path, args, method='POST')
+        if http_method is None:
+            http_method = 'POST'
+
+        http_method = http_method.upper()
+
+        path = "%s/vendor_passthru/%s" % (driver_name, method)
+        if http_method in ('POST', 'PUT', 'PATCH'):
+            return self.update(path, args, http_method=http_method)
+        elif http_method == 'DELETE':
+            return self.delete(path)
+        elif http_method == 'GET':
+            return self.get(path)
+        else:
+            raise exc.InvalidAttribute(
+                    _('Unknown HTTP method: %s') % http_method)

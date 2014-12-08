@@ -20,7 +20,7 @@ import mock
 import testtools
 from testtools.matchers import HasLength
 
-from ironicclient.common import base
+from ironicclient import exc
 from ironicclient.tests import utils
 from ironicclient.v1 import node
 
@@ -648,8 +648,8 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(CONSOLE_DATA_DISABLED, info)
 
-    @mock.patch.object(base.Manager, '_update')
-    def test_vendor_passthru(self, update_mock):
+    @mock.patch.object(node.NodeManager, 'update')
+    def test_vendor_passthru_update(self, update_mock):
         # For now just mock the tests because vendor-passthru doesn't return
         # anything to verify.
         vendor_passthru_args = {'arg1': 'val1'}
@@ -658,12 +658,49 @@ class NodeManagerTest(testtools.TestCase):
                   'method': 'method',
                   'args': vendor_passthru_args
                  }
-        self.mgr.vendor_passthru(**kwargs)
 
-        final_path = '/v1/nodes/node_uuid/vendor_passthru/method'
-        update_mock.assert_once_called_with(final_path,
-                                            vendor_passthru_args,
-                                            method='POST')
+        final_path = 'node_uuid/vendor_passthru/method'
+        for http_method in ('POST', 'PUT', 'PATCH'):
+            kwargs['http_method'] = http_method
+            self.mgr.vendor_passthru(**kwargs)
+            update_mock.assert_called_once_with(final_path,
+                                                vendor_passthru_args,
+                                                http_method=http_method)
+            update_mock.reset_mock()
+
+    @mock.patch.object(node.NodeManager, 'get')
+    def test_vendor_passthru_get(self, get_mock):
+        kwargs = {
+                  'node_id': 'node_uuid',
+                  'method': 'method',
+                  'http_method': 'GET',
+                 }
+
+        final_path = 'node_uuid/vendor_passthru/method'
+        self.mgr.vendor_passthru(**kwargs)
+        get_mock.assert_called_once_with(final_path)
+
+    @mock.patch.object(node.NodeManager, 'delete')
+    def test_vendor_passthru_delete(self, delete_mock):
+        kwargs = {
+                  'node_id': 'node_uuid',
+                  'method': 'method',
+                  'http_method': 'DELETE',
+                 }
+
+        final_path = 'node_uuid/vendor_passthru/method'
+        self.mgr.vendor_passthru(**kwargs)
+        delete_mock.assert_called_once_with(final_path)
+
+    @mock.patch.object(node.NodeManager, 'delete')
+    def test_vendor_passthru_unknown_http_method(self, delete_mock):
+        kwargs = {
+                  'node_id': 'node_uuid',
+                  'method': 'method',
+                  'http_method': 'UNKNOWN',
+                 }
+        self.assertRaises(exc.InvalidAttribute, self.mgr.vendor_passthru,
+                          **kwargs)
 
     def _test_node_set_boot_device(self, boot_device, persistent=False):
         self.mgr.set_boot_device(NODE1['uuid'], boot_device, persistent)
