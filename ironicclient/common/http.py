@@ -41,6 +41,20 @@ def _trim_endpoint_api_version(url):
     return url.rstrip('/').rstrip(API_VERSION)
 
 
+def _extract_error_json(body):
+    """Return  error_message from the HTTP response body."""
+    error_json = {}
+    try:
+        body_json = json.loads(body)
+        if 'error_message' in body_json:
+            raw_msg = body_json['error_message']
+            error_json = json.loads(raw_msg)
+    except ValueError:
+        pass
+
+    return error_json
+
+
 class HTTPClient(object):
 
     def __init__(self, endpoint, **kwargs):
@@ -123,18 +137,6 @@ class HTTPClient(object):
         base_url = _args[2]
         return '%s/%s' % (base_url, url.lstrip('/'))
 
-    def _extract_error_json(self, body):
-        error_json = {}
-        try:
-            body_json = json.loads(body)
-            if 'error_message' in body_json:
-                raw_msg = body_json['error_message']
-                error_json = json.loads(raw_msg)
-        except ValueError:
-            return {}
-
-        return error_json
-
     def _http_request(self, url, method, **kwargs):
         """Send an http request with the specified characteristics.
 
@@ -177,7 +179,7 @@ class HTTPClient(object):
 
         if 400 <= resp.status < 600:
             LOG.warn("Request returned failure status.")
-            error_json = self._extract_error_json(body_str)
+            error_json = _extract_error_json(body_str)
             raise exc.from_response(
                 resp, error_json.get('faultstring'),
                 error_json.get('debuginfo'), method, url)
@@ -301,7 +303,9 @@ class SessionClient(adapter.LegacyJsonAdapter):
                                     raise_exc=False, **kwargs)
 
         if 400 <= resp.status_code < 600:
-            raise exc.from_response(resp)
+            error_json = _extract_error_json(resp.content)
+            raise exc.from_response(resp, error_json.get('faultstring'),
+                error_json.get('debuginfo'), method, url)
         elif resp.status_code in (301, 302, 305):
             # Redirected. Reissue the request to the new location.
             location = resp.headers.get('location')
