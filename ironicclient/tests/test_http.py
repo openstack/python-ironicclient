@@ -218,3 +218,16 @@ class HttpClientTest(utils.BaseTestCase):
                     {'timeout': DEFAULT_TIMEOUT})
         params = http.HTTPClient.get_connection_params(endpoint)
         self.assertEqual(expected, params)
+
+    def test_401_unauthorized_exception(self):
+        error_body = self._get_error_body()
+        fake_resp = utils.FakeResponse({'content-type': 'text/plain'},
+                                       six.StringIO(error_body),
+                                       version=1,
+                                       status=401)
+        client = http.HTTPClient('http://localhost/')
+        client.get_connection = (
+                lambda *a, **kw: utils.FakeConnection(fake_resp))
+
+        self.assertRaises(exc.Unauthorized, client.json_request,
+                          'GET', '/v1/resources')
