@@ -18,6 +18,7 @@
 from __future__ import print_function
 
 import argparse
+import json
 
 from ironicclient import exc
 from ironicclient.openstack.common import importutils
@@ -70,16 +71,32 @@ def import_versioned_module(version, submodule=None):
     return importutils.import_module(module)
 
 
+def split_and_deserialize(string):
+    """Split and try to JSON deserialize a string.
+
+    Gets a string with the KEY=VALUE format, split it (using '=' as the
+    separator) and try to JSON deserialize the VALUE.
+
+    :returns: A tuple of (key, value).
+    """
+    try:
+        key, value = string.split("=", 1)
+    except ValueError:
+        raise exc.CommandError(_('Attributes must be a list of '
+                                 'PATH=VALUE not "%s"') % string)
+    try:
+        value = json.loads(value)
+    except ValueError:
+        pass
+
+    return (key, value)
+
+
 def args_array_to_dict(kwargs, key_to_convert):
     values_to_convert = kwargs.get(key_to_convert)
     if values_to_convert:
-        try:
-            kwargs[key_to_convert] = dict(v.split("=", 1)
-                                          for v in values_to_convert)
-        except ValueError:
-            raise exc.CommandError(
-                _('%(key)s must be a list of KEY=VALUE not "%(values)s"') %
-                {'key': key_to_convert, 'values': values_to_convert})
+        kwargs[key_to_convert] = dict(split_and_deserialize(v)
+                                      for v in values_to_convert)
     return kwargs
 
 
@@ -91,12 +108,9 @@ def args_array_to_patch(op, attributes):
             attr = '/' + attr
 
         if op in ['add', 'replace']:
-            try:
-                path, value = attr.split("=", 1)
-                patch.append({'op': op, 'path': path, 'value': value})
-            except ValueError:
-                raise exc.CommandError(_('Attributes must be a list of '
-                                         'PATH=VALUE not "%s"') % attr)
+            path, value = split_and_deserialize(attr)
+            patch.append({'op': op, 'path': path, 'value': value})
+
         elif op == "remove":
             # For remove only the key is needed
             patch.append({'op': op, 'path': attr})
