@@ -13,6 +13,7 @@
 #   under the License.
 
 import json
+import os
 import re
 import sys
 
@@ -226,6 +227,10 @@ class TestCase(testtools.TestCase):
 class ShellTestNoMox(TestCase):
     def setUp(self):
         super(ShellTestNoMox, self).setUp()
+        # httpretty doesn't work as expected if http proxy environment
+        # variable is set.
+        os.environ = dict((k, v) for (k, v) in os.environ.items()
+                          if k.lower() not in ('http_proxy', 'https_proxy'))
         self.set_fake_env(FAKE_ENV_KEYSTONE_V2)
 
     def shell(self, argstr):
