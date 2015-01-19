@@ -56,6 +56,10 @@ def from_response(response, message=None, traceback=None, method=None,
         response.status_code = response.status
         response.headers = {
             'Content-Type': response.getheader('content-type', "")}
+
+    if hasattr(response, 'status_code'):
+        # NOTE(jiangfei): These modifications allow SessionClient
+        # to handle faultstring.
         response.json = lambda: {'error': error_body}
 
     if (response.headers['Content-Type'].startswith('text/') and
