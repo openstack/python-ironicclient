@@ -198,10 +198,10 @@ class NodeManager(base.Manager):
 
     def set_maintenance(self, node_id, state, maint_reason=None):
         path = "%s/maintenance" % node_id
-        if state == 'on':
+        if state in ('true', 'on'):
             reason = {'reason': maint_reason}
             return self._update(self._path(path), reason, method='PUT')
-        if state == 'off':
+        if state in ('false', 'off'):
             return self._delete(self._path(path))
 
     def set_power_state(self, node_id, state):

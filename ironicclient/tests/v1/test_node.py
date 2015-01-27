@@ -566,6 +566,24 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
 
+    def test_node_set_maintenance_true(self):
+        maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'true',
+                                               maint_reason='reason')
+        body = {'reason': 'reason'}
+        expect = [
+            ('PUT', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(None, maintenance)
+
+    def test_node_set_maintenance_false(self):
+        maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'false')
+        expect = [
+            ('DELETE', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(None, maintenance)
+
     def test_node_set_maintenance_on(self):
         maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'on',
                                                maint_reason='reason')
