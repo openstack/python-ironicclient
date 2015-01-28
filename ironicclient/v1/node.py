@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from ironicclient.common import base
 from ironicclient.common import utils
 from ironicclient import exc
@@ -215,10 +217,15 @@ class NodeManager(base.Manager):
         path = "%s/validate" % node_uuid
         return self.get(path)
 
-    def set_provision_state(self, node_uuid, state):
+    def set_provision_state(self, node_uuid, state, configdrive=None):
         path = "%s/states/provision" % node_uuid
-        target = {'target': state}
-        return self._update(self._path(path), target, method='PUT')
+        body = {'target': state}
+        if configdrive:
+            if os.path.isfile(configdrive):
+                with open(configdrive, 'rb') as f:
+                    configdrive = f.read()
+            body['configdrive'] = configdrive
+        return self._update(self._path(path), body, method='PUT')
 
     def states(self, node_uuid):
         path = "%s/states" % node_uuid

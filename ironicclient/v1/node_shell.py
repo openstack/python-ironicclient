@@ -302,9 +302,17 @@ def do_node_set_power_state(cc, args):
     metavar='<provision state>',
     choices=['active', 'deleted', 'rebuild'],
     help="Supported states: 'active' or 'deleted' or 'rebuild'")
+@cliutils.arg(
+    '--config-drive',
+    metavar='<config_drive>',
+    default=None,
+    help=('A gzipped base64 encoded config drive string or the path '
+          'to the config drive file; Only valid when setting provision '
+          'state to "active".'))
 def do_node_set_provision_state(cc, args):
     """Provision, rebuild or delete an instance."""
-    cc.node.set_provision_state(args.node, args.provision_state)
+    cc.node.set_provision_state(args.node, args.provision_state,
+                                configdrive=args.configdrive)
 
 
 @cliutils.arg('node', metavar='<node uuid>', help="UUID of node")

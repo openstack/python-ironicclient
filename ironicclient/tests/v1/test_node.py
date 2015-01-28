@@ -15,6 +15,7 @@
 #    under the License.
 
 import copy
+import tempfile
 
 import mock
 import testtools
@@ -607,6 +608,32 @@ class NodeManagerTest(testtools.TestCase):
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state)
         body = {'target': target_state}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
+    def test_node_set_provision_state_with_configdrive(self):
+        target_state = 'active'
+        self.mgr.set_provision_state(NODE1['uuid'], target_state,
+            configdrive='foo')
+        body = {'target': target_state, 'configdrive': 'foo'}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
+    def test_node_set_provision_state_with_configdrive_file(self):
+        target_state = 'active'
+        file_content = b'foo bar cat meow dog bark'
+
+        with tempfile.NamedTemporaryFile() as f:
+            f.write(file_content)
+            f.flush()
+            self.mgr.set_provision_state(NODE1['uuid'], target_state,
+                configdrive=f.name)
+
+        body = {'target': target_state, 'configdrive': file_content}
         expect = [
             ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
         ]
