@@ -7,5 +7,5 @@ httplib2>=0.7.5
 lxml>=2.3
 pbr>=0.6,!=0.7,<1.0
 PrettyTable>=0.7,<0.8
-python-keystoneclient>=0.11.1
+python-keystoneclient>=1.0.0
 six>=1.7.0
