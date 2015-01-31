@@ -50,6 +50,11 @@ def do_port_show(cc, args):
     default=False,
     help="Show detailed information about ports.")
 @cliutils.arg(
+    '--address',
+    metavar='<macaddress>',
+    help='MAC address of port, to get the port'
+         'which has this address')
+@cliutils.arg(
     '--limit',
     metavar='<limit>',
     type=int,
@@ -73,6 +78,10 @@ def do_port_show(cc, args):
     help='Sort direction: one of "asc" (the default) or "desc".')
 def do_port_list(cc, args):
     """List ports."""
+    params = {}
+
+    if args.address is not None:
+        params['address'] = args.address
     if args.detail:
         fields = res_fields.PORT_FIELDS
         field_labels = res_fields.PORT_FIELD_LABELS
@@ -80,7 +89,9 @@ def do_port_list(cc, args):
         fields = res_fields.PORT_LIST_FIELDS
         field_labels = res_fields.PORT_LIST_FIELD_LABELS
 
-    params = utils.common_params_for_list(args, fields, field_labels)
+    params.update(utils.common_params_for_list(args,
+                                               fields,
+                                               field_labels))
 
     port = cc.port.list(**params)
     cliutils.print_list(port, fields,
