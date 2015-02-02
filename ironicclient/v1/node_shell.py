@@ -311,6 +311,9 @@ def do_node_set_power_state(cc, args):
           'state to "active".'))
 def do_node_set_provision_state(cc, args):
     """Provision, rebuild or delete an instance."""
+    if args.configdrive and args.provision_state != 'active':
+        raise exceptions.CommandError(_('--config-drive is only valid when '
+                                        'setting provision state to "active"'))
     cc.node.set_provision_state(args.node, args.provision_state,
                                 configdrive=args.configdrive)
 

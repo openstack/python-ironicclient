@@ -256,30 +256,45 @@ class NodeShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.node = 'node_uuid'
         args.provision_state = 'active'
+        args.configdrive = 'foo'
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'active', configdrive=mock.ANY)
+            'node_uuid', 'active', configdrive='foo')
 
     def test_do_node_set_provision_state_deleted(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.node = 'node_uuid'
         args.provision_state = 'deleted'
+        args.configdrive = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'deleted', configdrive=mock.ANY)
+            'node_uuid', 'deleted', configdrive=None)
 
     def test_do_node_set_provision_state_rebuild(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.node = 'node_uuid'
         args.provision_state = 'rebuild'
+        args.configdrive = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'rebuild', configdrive=mock.ANY)
+            'node_uuid', 'rebuild', configdrive=None)
+
+    def test_do_node_set_provision_state_not_active_fails(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'deleted'
+        args.configdrive = 'foo'
+
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_set_provision_state,
+                          client_mock, args)
+        self.assertFalse(client_mock.node.set_provision_state.called)
 
     def test_do_node_set_boot_device(self):
         client_mock = mock.MagicMock()
