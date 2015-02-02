@@ -268,20 +268,20 @@ def do_node_port_list(cc, args):
 @cliutils.arg(
     'maintenance_mode',
     metavar='<maintenance mode>',
-    choices=['on', 'off'],
-    help="Supported states: 'on' or 'off'")
+    choices=['true', 'True', 'false', 'False', 'on', 'off'],
+    help="Supported states: 'true' or 'false'; 'on' or 'off'")
 @cliutils.arg(
     '--reason',
     metavar='<reason>',
     default=None,
-    help=('The reason for setting maintenance mode to "on"; not valid when '
-           'setting to "off".'))
+    help=('The reason for setting maintenance mode to "true" or "on";'
+          ' not valid when setting to "false" or "off".'))
 def do_node_set_maintenance(cc, args):
-    """Set maintenance mode on or off."""
-    if args.reason and args.maintenance_mode == 'off':
+    """Enable or disable maintenance mode for this node."""
+    if args.reason and args.maintenance_mode.lower() in ('false', 'off'):
         raise exceptions.CommandError(_('Cannot set "reason" when turning off '
                                         'maintenance mode.'))
-    cc.node.set_maintenance(args.node, args.maintenance_mode,
+    cc.node.set_maintenance(args.node, args.maintenance_mode.lower(),
                             maint_reason=args.reason)
 
 

@@ -171,6 +171,42 @@ class NodeShellTest(utils.BaseTestCase):
         # assert get() wasn't called
         self.assertFalse(client_mock.node.get.called)
 
+    def test_do_node_set_maintenance_true(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.maintenance_mode = 'true'
+        args.reason = 'reason'
+
+        n_shell.do_node_set_maintenance(client_mock, args)
+        client_mock.node.set_maintenance.assert_called_once_with('node_uuid',
+            'true',
+            maint_reason='reason')
+
+    def test_do_node_set_maintenance_false(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.maintenance_mode = 'false'
+        # NOTE(jroll) None is the default. <3 mock.
+        args.reason = None
+
+        n_shell.do_node_set_maintenance(client_mock, args)
+        client_mock.node.set_maintenance.assert_called_once_with('node_uuid',
+            'false',
+            maint_reason=None)
+
+    def test_do_node_set_maintenance_false_with_reason_fails(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.maintenance_mode = 'false'
+        args.reason = 'reason'
+
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_set_maintenance,
+                          client_mock, args)
+
     def test_do_node_set_maintenance_on(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
