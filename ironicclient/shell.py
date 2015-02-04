@@ -201,6 +201,16 @@ class IronicShell(object):
         parser.add_argument('--os_service_type',
                             help=argparse.SUPPRESS)
 
+        parser.add_argument('--os-endpoint',
+                            default=cliutils.env('OS_SERVICE_ENDPOINT'),
+                            help='Specify an endpoint to use instead of '
+                                 'retrieving one from the service catalog '
+                                 '(via authentication). '
+                                 'Defaults to env[OS_SERVICE_ENDPOINT].')
+
+        parser.add_argument('--os_endpoint',
+                             help=argparse.SUPPRESS)
+
         parser.add_argument('--os-endpoint-type',
                             default=cliutils.env('OS_ENDPOINT_TYPE'),
                             help='Defaults to env[OS_ENDPOINT_TYPE] or '
@@ -367,7 +377,7 @@ class IronicShell(object):
             self.do_bash_completion()
             return 0
 
-        if not (args.os_auth_token and args.ironic_url):
+        if not (args.os_auth_token and (args.ironic_url or args.os_endpoint)):
             if not args.os_username:
                 raise exc.CommandError(_("You must provide a username via "
                                          "either --os-username or via "
@@ -402,12 +412,12 @@ class IronicShell(object):
                                          "either --os-auth-url or via "
                                          "env[OS_AUTH_URL]"))
 
-        endpoint = args.ironic_url
+        endpoint = args.ironic_url or args.os_endpoint
         service_type = args.os_service_type or 'baremetal'
         project_id = args.os_project_id or args.os_tenant_id
         project_name = args.os_project_name or args.os_tenant_name
 
-        if args.os_auth_token and args.ironic_url:
+        if (args.os_auth_token and (args.ironic_url or args.os_endpoint)):
             kwargs = {
                 'token': args.os_auth_token,
                 'insecure': args.insecure,
