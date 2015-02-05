@@ -33,10 +33,12 @@ class PortManager(base.Manager):
     def _path(id=None):
         return '/v1/ports/%s' % id if id else '/v1/ports'
 
-    def list(self, limit=None, marker=None, sort_key=None,
+    def list(self, address=None, limit=None, marker=None, sort_key=None,
              sort_dir=None, detail=False):
         """Retrieve a list of port.
 
+        :param address: Optional, MAC address of a port, to get
+                       the port which has this MAC address
         :param marker: Optional, the UUID of a port, eg the last
                        port from a previous result set. Return
                        the next result set.
@@ -64,6 +66,8 @@ class PortManager(base.Manager):
             limit = int(limit)
 
         filters = utils.common_filters(marker, limit, sort_key, sort_dir)
+        if address is not None:
+            filters.append('address=%s' % address)
 
         path = ''
         if detail:
