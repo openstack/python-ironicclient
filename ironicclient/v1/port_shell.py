@@ -52,8 +52,8 @@ def do_port_show(cc, args):
 @cliutils.arg(
     '--address',
     metavar='<macaddress>',
-    help='MAC address of port, to get the port'
-         'which has this address')
+    help='MAC address of port, to get the port '
+         'which has this address.')
 @cliutils.arg(
     '--limit',
     metavar='<limit>',
