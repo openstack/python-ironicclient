@@ -35,6 +35,7 @@ class NodeShellTest(utils.BaseTestCase):
                'console_enabled',
                'driver',
                'driver_info',
+               'driver_internal_info',
                'extra',
                'instance_info',
                'instance_uuid',
