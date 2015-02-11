@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import argparse
+
 from ironicclient.common import utils
 from ironicclient.openstack.common import cliutils
 
@@ -26,7 +28,7 @@ def _print_driver_show(driver):
 
 
 def do_driver_list(cc, args):
-    """List of enabled drivers."""
+    """List the enabled drivers."""
     drivers = cc.driver.list()
     # NOTE(lucasagomes): Separate each host by a comma.
     # It's easier to read.
@@ -37,18 +39,18 @@ def do_driver_list(cc, args):
     cliutils.print_list(drivers, fields, field_labels=field_labels)
 
 
-@cliutils.arg('driver_name', metavar='<driver_name>',
-              help='Name of the driver')
+@cliutils.arg('driver_name', metavar='<driver>',
+              help='Name of the driver.')
 def do_driver_show(cc, args):
-    """Show a driver."""
+    """Show information about a driver."""
     driver = cc.driver.get(args.driver_name)
     _print_driver_show(driver)
 
 
-@cliutils.arg('driver_name', metavar='<driver name>',
-              help="name of a driver")
+@cliutils.arg('driver_name', metavar='<driver>',
+              help="Name of the driver.")
 def do_driver_properties(cc, args):
-    """Get properties of the driver."""
+    """Get properties of a driver."""
     properties = cc.driver.properties(args.driver_name)
     obj_list = []
     for key, value in properties.iteritems():
@@ -59,23 +61,26 @@ def do_driver_properties(cc, args):
 
 
 @cliutils.arg('driver_name',
-              metavar='<driver_name>',
-              help='Name of the driver')
+              metavar='<driver>',
+              help='Name of the driver.')
 @cliutils.arg('method',
               metavar='<method>',
-              help="vendor-passthru method to be called")
+              help="Vendor-passthru method to be called.")
 @cliutils.arg('arguments',
               metavar='<arg=value>',
               nargs='*',
               action='append',
               default=[],
-              help="arguments to be passed to vendor-passthru method")
-@cliutils.arg('--http_method',
-    metavar='<http_method>',
+              help="Argument to be passed to the vendor-passthru method. "
+                   "Can be specified multiple times.")
+@cliutils.arg('--http-method',
+    metavar='<http-method>',
     choices=['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
     help="The HTTP method to use in the request. Valid HTTP "
-         "methods are: 'POST', 'PUT', 'GET', 'DELETE', 'PATCH'. "
+         "methods are: 'POST', 'PUT', 'GET', 'DELETE', and 'PATCH'. "
          "Defaults to 'POST'.")
+@cliutils.arg('--http_method',
+    help=argparse.SUPPRESS)
 def do_driver_vendor_passthru(cc, args):
     """Call a vendor-passthru extension for a driver."""
     arguments = utils.args_array_to_dict({'args': args.arguments[0]},

@@ -106,7 +106,7 @@ class ShellTest(utils.BaseTestCase):
     def test_help_on_subcommand(self):
         required = [
             '.*?^usage: ironic chassis-show',
-            ".*?^Show a chassis",
+            ".*?^Show detailed information about a chassis",
         ]
         argstrings = [
             'help chassis-show',

@@ -26,9 +26,9 @@ def _print_chassis_show(chassis):
     cliutils.print_dict(data, wrap=72)
 
 
-@cliutils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
+@cliutils.arg('chassis', metavar='<chassis>', help="UUID of the chassis.")
 def do_chassis_show(cc, args):
-    """Show a chassis."""
+    """Show detailed information about a chassis."""
     chassis = cc.chassis.get(args.chassis)
     _print_chassis_show(chassis)
 
@@ -38,7 +38,7 @@ def do_chassis_show(cc, args):
     dest='detail',
     action='store_true',
     default=False,
-    help="Show detailed information about chassis.")
+    help="Show detailed information about the chassis.")
 @cliutils.arg(
     '--limit',
     metavar='<limit>',
@@ -48,21 +48,21 @@ def do_chassis_show(cc, args):
          'by the Ironic API Service.')
 @cliutils.arg(
     '--marker',
-    metavar='<marker>',
-    help='Chassis UUID (e.g of the last chassis in the list '
+    metavar='<chassis>',
+    help='Chassis UUID (for example, of the last chassis in the list '
          'from a previous request). Returns the list of chassis '
          'after this UUID.')
 @cliutils.arg(
     '--sort-key',
-    metavar='<sort_key>',
+    metavar='<field>',
     help='Chassis field that will be used for sorting.')
 @cliutils.arg(
     '--sort-dir',
-    metavar='<sort_dir>',
+    metavar='<direction>',
     choices=['asc', 'desc'],
-    help='Sort direction: one of "asc" (the default) or "desc".')
+    help='Sort direction: "asc" (the default) or "desc".')
 def do_chassis_list(cc, args):
-    """List chassis."""
+    """List the chassis."""
     if args.detail:
         fields = res_fields.CHASSIS_FIELDS
         field_labels = res_fields.CHASSIS_FIELD_LABELS
@@ -81,13 +81,13 @@ def do_chassis_list(cc, args):
 @cliutils.arg(
     '-d', '--description',
     metavar='<description>',
-    help='Free text description of the chassis')
+    help='Description of the chassis.')
 @cliutils.arg(
     '-e', '--extra',
     metavar="<key=value>",
     action='append',
     help="Record arbitrary key/value metadata. "
-         "Can be specified multiple times")
+         "Can be specified multiple times.")
 def do_chassis_create(cc, args):
     """Create a new chassis."""
     field_list = ['description', 'extra']
@@ -103,9 +103,9 @@ def do_chassis_create(cc, args):
 
 @cliutils.arg(
     'chassis',
-    metavar='<chassis id>',
+    metavar='<chassis>',
     nargs='+',
-    help="UUID of chassis")
+    help="UUID of the chassis.")
 def do_chassis_delete(cc, args):
     """Delete a chassis."""
     for c in args.chassis:
@@ -113,22 +113,22 @@ def do_chassis_delete(cc, args):
         print('Deleted chassis %s' % c)
 
 
-@cliutils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
+@cliutils.arg('chassis', metavar='<chassis>', help="UUID of the chassis.")
 @cliutils.arg(
     'op',
     metavar='<op>',
     choices=['add', 'replace', 'remove'],
-    help="Operations: 'add', 'replace' or 'remove'")
+    help="Operation: 'add', 'replace', or 'remove'.")
 @cliutils.arg(
     'attributes',
     metavar='<path=value>',
     nargs='+',
     action='append',
     default=[],
-    help="Attributes to add/replace or remove "
-         "(only PATH is necessary on remove)")
+    help="Attribute to add, replace, or remove. Can be specified "
+         "multiple times. For 'remove', only <path> is necessary.")
 def do_chassis_update(cc, args):
-    """Update a chassis."""
+    """Update information about a chassis."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
     chassis = cc.chassis.update(args.chassis, patch)
     _print_chassis_show(chassis)
@@ -139,7 +139,7 @@ def do_chassis_update(cc, args):
     dest='detail',
     action='store_true',
     default=False,
-    help="Show detailed information about nodes.")
+    help="Show detailed information about the nodes.")
 @cliutils.arg(
     '--limit',
     metavar='<limit>',
@@ -149,22 +149,21 @@ def do_chassis_update(cc, args):
          'by the Ironic API Service.')
 @cliutils.arg(
     '--marker',
-    metavar='<marker>',
-    help='Node UUID (e.g of the last node in the list from '
-         'a previous request). Returns the list of nodes '
-         'after this UUID.')
+    metavar='<node>',
+    help='Node UUID (for example, of the last node in the list from '
+         'a previous request). Returns the list of nodes after this UUID.')
 @cliutils.arg(
     '--sort-key',
-    metavar='<sort_key>',
+    metavar='<field>',
     help='Node field that will be used for sorting.')
 @cliutils.arg(
     '--sort-dir',
-    metavar='<sort_dir>',
+    metavar='<direction>',
     choices=['asc', 'desc'],
-    help='Sort direction: one of "asc" (the default) or "desc".')
-@cliutils.arg('chassis', metavar='<chassis id>', help="UUID of chassis")
+    help='Sort direction: "asc" (the default) or "desc".')
+@cliutils.arg('chassis', metavar='<chassis>', help="UUID of the chassis.")
 def do_chassis_node_list(cc, args):
-    """List the nodes contained in the chassis."""
+    """List the nodes contained in a chassis."""
     if args.detail:
         fields = res_fields.NODE_FIELDS
         field_labels = res_fields.NODE_FIELD_LABELS

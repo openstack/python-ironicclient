@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import argparse
+
 from ironicclient.common import utils
 from ironicclient.openstack.common import cliutils
 from ironicclient.v1 import resource_fields as res_fields
@@ -27,15 +29,18 @@ def _print_port_show(port):
     cliutils.print_dict(data, wrap=72)
 
 
-@cliutils.arg('port', metavar='<port id>', help="UUID of port")
+@cliutils.arg(
+    'port',
+    metavar='<id>',
+    help="UUID of the port (or MAC address if --address is specified).")
 @cliutils.arg(
     '--address',
     dest='address',
     action='store_true',
     default=False,
-    help='Get the port by it\'s MAC address instead of UUID.')
+    help='<id> is the MAC address (instead of the UUID) of the port.')
 def do_port_show(cc, args):
-    """Show a port."""
+    """Show detailed information about a port."""
     if args.address:
         port = cc.port.get_by_address(args.port)
     else:
@@ -51,9 +56,8 @@ def do_port_show(cc, args):
     help="Show detailed information about ports.")
 @cliutils.arg(
     '--address',
-    metavar='<macaddress>',
-    help='MAC address of port, to get the port '
-         'which has this address.')
+    metavar='<mac-address>',
+    help='Only show information for the port with this MAC address.')
 @cliutils.arg(
     '--limit',
     metavar='<limit>',
@@ -63,21 +67,20 @@ def do_port_show(cc, args):
          'by the Ironic API Service.')
 @cliutils.arg(
     '--marker',
-    metavar='<marker>',
-    help='Port UUID (e.g of the last port in the list from '
-         'a previous request). Returns the list of ports '
-         'after this UUID.')
+    metavar='<port>',
+    help='Port UUID (for example, of the last port in the list from a '
+         'previous request). Returns the list of ports after this UUID.')
 @cliutils.arg(
     '--sort-key',
-    metavar='<sort_key>',
+    metavar='<field>',
     help='Port field that will be used for sorting.')
 @cliutils.arg(
     '--sort-dir',
-    metavar='<sort_dir>',
+    metavar='<direction>',
     choices=['asc', 'desc'],
-    help='Sort direction: one of "asc" (the default) or "desc".')
+    help='Sort direction: "asc" (the default) or "desc".')
 def do_port_list(cc, args):
-    """List ports."""
+    """List the ports."""
     params = {}
 
     if args.address is not None:
@@ -103,18 +106,22 @@ def do_port_list(cc, args):
     '-a', '--address',
     metavar='<address>',
     required=True,
-    help='MAC Address for this port')
+    help='MAC address for this port.')
 @cliutils.arg(
-    '-n', '--node_uuid',
-    metavar='<node uuid>',
+    '-n', '--node',
+    dest='node_uuid',
+    metavar='<node>',
     required=True,
-    help='UUID of the node that this port belongs to')
+    help='UUID of the node that this port belongs to.')
+@cliutils.arg(
+    '--node_uuid',
+    help=argparse.SUPPRESS)
 @cliutils.arg(
     '-e', '--extra',
     metavar="<key=value>",
     action='append',
     help="Record arbitrary key/value metadata. "
-         "Can be specified multiple times")
+         "Can be specified multiple times.")
 def do_port_create(cc, args):
     """Create a new port."""
     field_list = ['address', 'extra', 'node_uuid']
@@ -128,7 +135,7 @@ def do_port_create(cc, args):
     cliutils.print_dict(data, wrap=72)
 
 
-@cliutils.arg('port', metavar='<port id>', nargs='+', help="UUID of port")
+@cliutils.arg('port', metavar='<port>', nargs='+', help="UUID of the port.")
 def do_port_delete(cc, args):
     """Delete a port."""
     for p in args.port:
@@ -136,22 +143,22 @@ def do_port_delete(cc, args):
         print ('Deleted port %s' % p)
 
 
-@cliutils.arg('port', metavar='<port id>', help="UUID of port")
+@cliutils.arg('port', metavar='<port>', help="UUID of the port.")
 @cliutils.arg(
     'op',
     metavar='<op>',
     choices=['add', 'replace', 'remove'],
-    help="Operations: 'add', 'replace' or 'remove'")
+    help="Operation: 'add', 'replace', or 'remove'.")
 @cliutils.arg(
     'attributes',
     metavar='<path=value>',
     nargs='+',
     action='append',
     default=[],
-    help="Attributes to add/replace or remove "
-         "(only PATH is necessary on remove)")
+    help="Attribute to add, replace, or remove. Can be specified multiple  "
+         "times. For 'remove', only <path> is necessary.")
 def do_port_update(cc, args):
-    """Update a port."""
+    """Update information about a port."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
     port = cc.port.update(args.port, patch)
     _print_port_show(port)
