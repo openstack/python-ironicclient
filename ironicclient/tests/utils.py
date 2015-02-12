@@ -17,8 +17,10 @@
 
 import copy
 import datetime
+import os
 
 import fixtures
+from oslo_utils import strutils
 import six
 import testtools
 
@@ -30,6 +32,15 @@ class BaseTestCase(testtools.TestCase):
     def setUp(self):
         super(BaseTestCase, self).setUp()
         self.useFixture(fixtures.FakeLogger())
+
+        # If enabled, stdout and/or stderr is captured and will appear in
+        # test results if that test fails.
+        if strutils.bool_from_string(os.environ.get('OS_STDOUT_CAPTURE')):
+            stdout = self.useFixture(fixtures.StringStream('stdout')).stream
+            self.useFixture(fixtures.MonkeyPatch('sys.stdout', stdout))
+        if strutils.bool_from_string(os.environ.get('OS_STDERR_CAPTURE')):
+            stderr = self.useFixture(fixtures.StringStream('stderr')).stream
+            self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
 
 
 class FakeAPI(object):
