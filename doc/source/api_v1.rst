@@ -58,10 +58,10 @@ To create a client, you can use the API like so::
 
    >>> from ironicclient import client
    >>>
-   >>> kwargs = {'os_username': 'name'
+   >>> kwargs = {'os_username': 'name',
    >>>           'os_password': 'password',
    >>>           'os_auth_url': 'http://keystone.example.org:5000/',
-   >>>           'os_tenant_name': 'tenant',
+   >>>           'os_tenant_name': 'tenant'}
    >>> ironic = client.get_client(1, **kwargs)
 
 Perform ironic operations
