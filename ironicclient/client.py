@@ -111,6 +111,7 @@ def get_client(api_version, **kwargs):
         'cert_file': kwargs.get('cert_file'),
         'key_file': kwargs.get('key_file'),
         'auth_ref': auth_ref,
+        'os_ironic_api_version': kwargs.get('os_ironic_api_version'),
     }
 
     return Client(api_version, endpoint, **cli_kwargs)

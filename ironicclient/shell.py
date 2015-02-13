@@ -42,6 +42,9 @@ from ironicclient.openstack.common import gettextutils
 gettextutils.install('ironicclient')
 
 
+LATEST_API_VERSION = ('1', 'latest')
+
+
 class IronicShell(object):
 
     def _append_global_identity_args(self, parser):
@@ -187,8 +190,9 @@ class IronicShell(object):
         parser.add_argument('--ironic-api-version',
                             default=cliutils.env(
                                 'IRONIC_API_VERSION', default='1'),
-                            help='Defaults to env[IRONIC_API_VERSION] '
-                                 'or 1')
+                            help='Accepts 1.x (where "x" is microversion) '
+                                 'or "latest", Defaults to '
+                                 'env[IRONIC_API_VERSION] or 1')
 
         parser.add_argument('--ironic_api_version',
                             help=argparse.SUPPRESS)
@@ -349,6 +353,30 @@ class IronicShell(object):
 
         return auth
 
+    def _check_version(self, api_version):
+        if api_version == 'latest':
+            return LATEST_API_VERSION
+        else:
+            try:
+                versions = tuple(int(i) for i in api_version.split('.'))
+            except ValueError:
+                versions = ()
+            if len(versions) == 1:
+                # Default value of ironic_api_version is '1'.
+                # If user not specify the value of api version, not passing
+                # headers at all.
+                os_ironic_api_version = None
+            elif len(versions) == 2:
+                os_ironic_api_version = api_version
+                # In the case of '1.0'
+                if versions[1] == 0:
+                    os_ironic_api_version = None
+            else:
+                raise exc.CommandError("Incorrect API version %s, expect "
+                                       "value ike X.Y" % api_version)
+            api_major_version = versions[0]
+            return (api_major_version, os_ironic_api_version)
+
     def main(self, argv):
         # Parse args once to find version
         parser = self.get_base_parser()
@@ -356,8 +384,10 @@ class IronicShell(object):
         self._setup_debugging(options.debug)
 
         # build available subcommands based on version
-        api_version = options.ironic_api_version
-        subcommand_parser = self.get_subcommand_parser(api_version)
+        (api_major_version, os_ironic_api_version) = (
+            self._check_version(options.ironic_api_version))
+
+        subcommand_parser = self.get_subcommand_parser(api_major_version)
         self.parser = subcommand_parser
 
         # Handle top-level --help/-h before attempting to parse
@@ -466,7 +496,8 @@ class IronicShell(object):
                 'username': args.os_username,
                 'password': args.os_password,
             }
-        client = iroclient.Client(api_version, endpoint, **kwargs)
+        kwargs['os_ironic_api_version'] = os_ironic_api_version
+        client = iroclient.Client(api_major_version, endpoint, **kwargs)
 
         try:
             args.func(client, args)

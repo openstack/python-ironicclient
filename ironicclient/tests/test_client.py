@@ -140,3 +140,18 @@ class ClientTest(utils.BaseTestCase):
         client = get_client('1', **kwargs)
 
         self.assertEqual(ksclient().auth_ref, client.http_client.auth_ref)
+
+    def test_get_client_with_api_version(self):
+        self.useFixture(fixtures.MonkeyPatch(
+            'ironicclient.client._get_ksclient', fake_get_ksclient))
+        kwargs = {
+            'os_tenant_name': 'TENANT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': 'http://localhost:35357/v2.0',
+            'os_auth_token': '',
+            'os_ironic_api_version': 'latest',
+        }
+        client = get_client('1', **kwargs)
+
+        self.assertEqual('latest', client.http_client.os_ironic_api_version)

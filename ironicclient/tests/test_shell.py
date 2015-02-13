@@ -170,6 +170,12 @@ class ShellTest(utils.BaseTestCase):
             self.assertThat(stdout,
                             matchers.MatchesRegex(r, self.re_options))
 
+    def test_ironic_api_version(self):
+        self.shell('--ironic-api-version 1.2 help')
+        self.shell('--ironic-api-version latest help')
+        self.assertRaises(exc.CommandError,
+            self.shell, '--ironic-api-version 1.2.1 help')
+
 
 class TestCase(testtools.TestCase):
 

@@ -62,6 +62,7 @@ class HTTPClient(object):
         self.endpoint_trimmed = _trim_endpoint_api_version(endpoint)
         self.auth_token = kwargs.get('token')
         self.auth_ref = kwargs.get('auth_ref')
+        self.os_ironic_api_version = kwargs.get('os_ironic_api_version')
         self.connection_params = self.get_connection_params(endpoint, **kwargs)
 
     @staticmethod
@@ -146,6 +147,9 @@ class HTTPClient(object):
         # Copy the kwargs so we can reuse the original in case of redirects
         kwargs['headers'] = copy.deepcopy(kwargs.get('headers', {}))
         kwargs['headers'].setdefault('User-Agent', USER_AGENT)
+        if self.os_ironic_api_version:
+            kwargs['headers'].setdefault('X-OpenStack-Ironic-API-Version',
+                                         self.os_ironic_api_version)
         if self.auth_token:
             kwargs['headers'].setdefault('X-Auth-Token', self.auth_token)
 
@@ -293,6 +297,9 @@ class SessionClient(adapter.LegacyJsonAdapter):
     def _http_request(self, url, method, **kwargs):
         kwargs.setdefault('user_agent', USER_AGENT)
         kwargs.setdefault('auth', self.auth)
+        if getattr(self, 'os_ironic_api_version', None):
+            kwargs['headers'].setdefault('X-OpenStack-Ironic-API-Version',
+                                         self.os_ironic_api_version)
 
         endpoint_filter = kwargs.setdefault('endpoint_filter', {})
         endpoint_filter.setdefault('interface', self.interface)
@@ -301,7 +308,6 @@ class SessionClient(adapter.LegacyJsonAdapter):
 
         resp = self.session.request(url, method,
                                     raise_exc=False, **kwargs)
-
         if 400 <= resp.status_code < 600:
             error_json = _extract_error_json(resp.content)
             raise exc.from_response(resp, error_json.get('faultstring'),
@@ -371,12 +377,16 @@ def _construct_http_client(*args, **kwargs):
         service_type = kwargs.pop('service_type', 'baremetal')
         interface = kwargs.pop('endpoint_type', None)
         region_name = kwargs.pop('region_name', None)
-        return SessionClient(session=session,
-                             auth=auth,
-                             interface=interface,
-                             service_type=service_type,
-                             region_name=region_name,
-                             service_name=None,
-                             user_agent='python-ironicclient')
+        os_ironic_api_version = kwargs.pop('os_ironic_api_version', None)
+        session_client = SessionClient(session=session,
+                                       auth=auth,
+                                       interface=interface,
+                                       service_type=service_type,
+                                       region_name=region_name,
+                                       service_name=None,
+                                       user_agent='python-ironicclient')
+        # Append an ironic specific variable to session
+        session_client.os_ironic_api_version = os_ironic_api_version
+        return session_client
     else:
         return HTTPClient(*args, **kwargs)
