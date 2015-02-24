@@ -42,6 +42,7 @@ class NodeShellTest(utils.BaseTestCase):
                'last_error',
                'maintenance',
                'maintenance_reason',
+               'name',
                'power_state',
                'properties',
                'provision_state',
@@ -146,6 +147,14 @@ class NodeShellTest(utils.BaseTestCase):
 
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with(uuid=args.uuid)
+
+    def test_do_node_create_with_name(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.name = 'node_name'
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(name=args.name)
 
     def test_do_node_show(self):
         client_mock = mock.MagicMock()
