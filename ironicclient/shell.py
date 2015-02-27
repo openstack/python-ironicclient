@@ -186,9 +186,9 @@ class IronicShell(object):
 
         parser.add_argument('--ironic-api-version',
                             default=cliutils.env(
-                            'IRONIC_API_VERSION', default='1'),
+                                'IRONIC_API_VERSION', default='1'),
                             help='Defaults to env[IRONIC_API_VERSION] '
-                            'or 1')
+                                 'or 1')
 
         parser.add_argument('--ironic_api_version',
                             help=argparse.SUPPRESS)
@@ -428,9 +428,9 @@ class IronicShell(object):
                 'auth_ref': None,
             }
         elif (args.os_username and
-            args.os_password and
-            args.os_auth_url and
-            (project_id or project_name)):
+              args.os_password and
+              args.os_auth_url and
+              (project_id or project_name)):
 
             keystone_session = kssession.Session.load_from_cli_options(args)
 

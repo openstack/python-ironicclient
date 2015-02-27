@@ -112,9 +112,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.driver_info = ['arg1=val1', 'arg2=val2']
 
         n_shell.do_node_create(client_mock, args)
-        kwargs = {
-                  'driver_info': {'arg1': 'val1', 'arg2': 'val2'}
-                  }
+        kwargs = {'driver_info': {'arg1': 'val1', 'arg2': 'val2'}}
         client_mock.node.create.assert_called_once_with(**kwargs)
 
     def test_do_node_create_with_properties(self):
@@ -123,9 +121,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.properties = ['arg1=val1', 'arg2=val2']
 
         n_shell.do_node_create(client_mock, args)
-        kwargs = {
-                  'properties': {'arg1': 'val1', 'arg2': 'val2'}
-                  }
+        kwargs = {'properties': {'arg1': 'val1', 'arg2': 'val2'}}
         client_mock.node.create.assert_called_once_with(**kwargs)
 
     def test_do_node_create_with_extra(self):
@@ -136,9 +132,9 @@ class NodeShellTest(utils.BaseTestCase):
 
         n_shell.do_node_create(client_mock, args)
         kwargs = {
-                  'driver': 'driver_name',
-                  'extra': {'arg1': 'val1', 'arg2': 'val2'}
-                  }
+            'driver': 'driver_name',
+            'extra': {'arg1': 'val1', 'arg2': 'val2'},
+        }
         client_mock.node.create.assert_called_once_with(**kwargs)
 
     def test_do_node_create_with_uuid(self):

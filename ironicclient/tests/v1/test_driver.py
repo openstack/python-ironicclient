@@ -28,9 +28,9 @@ DRIVER1 = {'name': 'fake', 'hosts': ['fake-host1', 'fake-host2']}
 DRIVER2 = {'name': 'pxe_ipminative', 'hosts': ['fake-host1', 'fake-host2']}
 
 DRIVER2_PROPERTIES = {
-  "username": "username. Required.",
-  "password": "password. Optional.",
-  "address": "IP of the node. Required.",
+    "username": "username. Required.",
+    "password": "password. Optional.",
+    "address": "IP of the node. Required.",
 }
 
 fake_responses = {
