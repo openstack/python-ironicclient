@@ -373,7 +373,7 @@ class IronicShell(object):
                     os_ironic_api_version = None
             else:
                 raise exc.CommandError("Incorrect API version %s, expect "
-                                       "value ike X.Y" % api_version)
+                                       "value like X.Y" % api_version)
             api_major_version = versions[0]
             return (api_major_version, os_ironic_api_version)
 
