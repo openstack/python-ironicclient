@@ -30,8 +30,8 @@ from testtools import matchers
 
 from ironicclient import exc
 from ironicclient import shell as ironic_shell
-from ironicclient.tests import keystone_client_fixtures
-from ironicclient.tests import utils
+from ironicclient.tests.unit import keystone_client_fixtures
+from ironicclient.tests.unit import utils
 
 FAKE_ENV = {'OS_USERNAME': 'username',
             'OS_PASSWORD': 'password',

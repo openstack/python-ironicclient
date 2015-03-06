@@ -19,7 +19,7 @@ import mock
 from ironicclient.common import utils as commonutils
 from ironicclient.openstack.common.apiclient import exceptions
 from ironicclient.openstack.common import cliutils
-from ironicclient.tests import utils
+from ironicclient.tests.unit import utils
 import ironicclient.v1.node_shell as n_shell
 
 

@@ -21,7 +21,7 @@ import six
 
 from ironicclient.common import http
 from ironicclient import exc
-from ironicclient.tests import utils
+from ironicclient.tests.unit import utils
 
 
 HTTP_CLASS = six.moves.http_client.HTTPConnection

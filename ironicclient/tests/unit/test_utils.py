@@ -19,7 +19,7 @@ import mock
 
 from ironicclient.common import utils
 from ironicclient import exc
-from ironicclient.tests import utils as test_utils
+from ironicclient.tests.unit import utils as test_utils
 
 
 class UtilsTest(test_utils.BaseTestCase):

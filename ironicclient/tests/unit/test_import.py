@@ -12,7 +12,7 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
-from ironicclient.tests import utils
+from ironicclient.tests.unit import utils
 
 module_str = 'ironicclient'
 

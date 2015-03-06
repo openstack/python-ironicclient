@@ -20,7 +20,7 @@ import copy
 import testtools
 from testtools.matchers import HasLength
 
-from ironicclient.tests import utils
+from ironicclient.tests.unit import utils
 import ironicclient.v1.chassis
 
 CHASSIS = {'id': 42,

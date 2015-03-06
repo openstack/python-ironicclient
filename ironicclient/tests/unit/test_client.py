@@ -16,7 +16,7 @@ import fixtures
 
 from ironicclient.client import get_client
 from ironicclient import exc
-from ironicclient.tests import utils
+from ironicclient.tests.unit import utils
 
 
 def fake_get_ksclient(**kwargs):

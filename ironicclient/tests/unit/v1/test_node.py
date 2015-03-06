@@ -22,7 +22,7 @@ import testtools
 from testtools.matchers import HasLength
 
 from ironicclient import exc
-from ironicclient.tests import utils
+from ironicclient.tests.unit import utils
 from ironicclient.v1 import node
 
 NODE1 = {'id': 123,

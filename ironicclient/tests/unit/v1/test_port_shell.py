@@ -18,7 +18,7 @@ import mock
 
 from ironicclient.common import utils as commonutils
 from ironicclient.openstack.common import cliutils
-from ironicclient.tests import utils
+from ironicclient.tests.unit import utils
 import ironicclient.v1.port_shell as p_shell
 
 
