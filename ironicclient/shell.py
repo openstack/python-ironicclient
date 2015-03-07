@@ -347,9 +347,10 @@ class IronicShell(object):
             # support only v2
             auth = self._get_keystone_v2_auth(v2_auth_url, **kwargs)
         else:
-            raise exc.CommandError('Unable to determine the Keystone version '
-                                   'to authenticate with using the given '
-                                   'auth_url.')
+            msg = _('Unable to determine the Keystone version '
+                    'to authenticate with using the given '
+                    'auth_url.')
+            raise exc.CommandError(msg)
 
         return auth
 
@@ -372,8 +373,12 @@ class IronicShell(object):
                 if versions[1] == 0:
                     os_ironic_api_version = None
             else:
-                raise exc.CommandError("Incorrect API version %s, expect "
-                                       "value like X.Y" % api_version)
+                msg = _("The requested API version %(ver)s is an unexpected "
+                        "format. Acceptable formats are 'X', 'X.Y', or the "
+                        "literal string '%(latest)s'."
+                        ) % {'ver': api_version, 'latest': 'latest'}
+                raise exc.CommandError(msg)
+
             api_major_version = versions[0]
             return (api_major_version, os_ironic_api_version)
 
