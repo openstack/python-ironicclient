@@ -14,11 +14,9 @@
 
 from keystoneclient.v2_0 import client as ksclient
 
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
-from ironicclient.openstack.common import gettextutils
-
-gettextutils.install('ironicclient')
 
 
 def _get_ksclient(**kwargs):

@@ -34,12 +34,10 @@ import six.moves.urllib.parse as urlparse
 
 import ironicclient
 from ironicclient import client as iroclient
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.openstack.common import cliutils
-from ironicclient.openstack.common import gettextutils
-
-gettextutils.install('ironicclient')
 
 
 LATEST_API_VERSION = ('1', 'latest')

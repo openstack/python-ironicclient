@@ -16,6 +16,7 @@
 #    under the License.
 
 from ironicclient.common import base
+from ironicclient.common.i18n import _
 from ironicclient import exc
 
 

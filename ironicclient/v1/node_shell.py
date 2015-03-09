@@ -19,6 +19,7 @@ import argparse
 
 import six
 
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient.openstack.common.apiclient import exceptions
 from ironicclient.openstack.common import cliutils
