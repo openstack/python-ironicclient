@@ -11,12 +11,25 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+########################################################################
+#
+# THIS MODULE IS DEPRECATED
+#
+# Please refer to
+# https://etherpad.openstack.org/p/kilo-ironicclient-library-proposals for
+# the discussion leading to this deprecation.
+#
+# We recommend checking out the python-openstacksdk project
+# (https://launchpad.net/python-openstacksdk) instead.
+#
+########################################################################
+
 from oslo_utils import encodeutils
+from oslo_utils import uuidutils
 import six
 
 from ironicclient.openstack.common._i18n import _
 from ironicclient.openstack.common.apiclient import exceptions
-from ironicclient.openstack.common import uuidutils
 
 
 def find_resource(manager, name_or_id, **find_args):
