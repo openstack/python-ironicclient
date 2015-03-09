@@ -20,9 +20,10 @@ from __future__ import print_function
 import argparse
 import json
 
+from oslo_utils import importutils
+
 from ironicclient.common.i18n import _
 from ironicclient import exc
-from ironicclient.openstack.common import importutils
 
 
 class HelpFormatter(argparse.HelpFormatter):
