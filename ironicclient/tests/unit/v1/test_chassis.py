@@ -29,9 +29,9 @@ CHASSIS = {'id': 42,
            'description': 'data-center-1-chassis'}
 
 CHASSIS2 = {'id': 43,
-           'uuid': 'eeeeeeee-dddd-cccc-bbbb-aaaaaaaaaaaa',
-           'extra': {},
-           'description': 'data-center-1-chassis'}
+            'uuid': 'eeeeeeee-dddd-cccc-bbbb-aaaaaaaaaaaa',
+            'extra': {},
+            'description': 'data-center-1-chassis'}
 
 
 NODE = {'id': 123,

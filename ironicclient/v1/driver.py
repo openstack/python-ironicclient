@@ -79,4 +79,4 @@ class DriverManager(base.Manager):
             return self.get(path)
         else:
             raise exc.InvalidAttribute(
-                    _('Unknown HTTP method: %s') % http_method)
+                _('Unknown HTTP method: %s') % http_method)

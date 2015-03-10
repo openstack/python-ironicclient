@@ -49,7 +49,7 @@ class TestIronicClient(testtools.TestCase):
         conf_settings = ['api_version']
         if auth_strategy == 'keystone':
             conf_settings += ['os_auth_url', 'os_username',
-                             'os_password', 'os_tenant_name']
+                              'os_password', 'os_tenant_name']
 
         else:
             conf_settings += ['os_auth_token', 'ironic_url']

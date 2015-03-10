@@ -194,7 +194,7 @@ class NodeManager(base.Manager):
             return self.get(path)
         else:
             raise exc.InvalidAttribute(
-                    _('Unknown HTTP method: %s') % http_method)
+                _('Unknown HTTP method: %s') % http_method)
 
     def set_maintenance(self, node_id, state, maint_reason=None):
         path = "%s/maintenance" % node_id

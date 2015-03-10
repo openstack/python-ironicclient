@@ -176,9 +176,8 @@ class NodeShellTest(utils.BaseTestCase):
         args.reason = 'reason'
 
         n_shell.do_node_set_maintenance(client_mock, args)
-        client_mock.node.set_maintenance.assert_called_once_with('node_uuid',
-            'true',
-            maint_reason='reason')
+        client_mock.node.set_maintenance.assert_called_once_with(
+            'node_uuid', 'true', maint_reason='reason')
 
     def test_do_node_set_maintenance_false(self):
         client_mock = mock.MagicMock()
@@ -189,9 +188,8 @@ class NodeShellTest(utils.BaseTestCase):
         args.reason = None
 
         n_shell.do_node_set_maintenance(client_mock, args)
-        client_mock.node.set_maintenance.assert_called_once_with('node_uuid',
-            'false',
-            maint_reason=None)
+        client_mock.node.set_maintenance.assert_called_once_with(
+            'node_uuid', 'false', maint_reason=None)
 
     def test_do_node_set_maintenance_false_with_reason_fails(self):
         client_mock = mock.MagicMock()
@@ -212,9 +210,8 @@ class NodeShellTest(utils.BaseTestCase):
         args.reason = 'reason'
 
         n_shell.do_node_set_maintenance(client_mock, args)
-        client_mock.node.set_maintenance.assert_called_once_with('node_uuid',
-            'on',
-            maint_reason='reason')
+        client_mock.node.set_maintenance.assert_called_once_with(
+            'node_uuid', 'on', maint_reason='reason')
 
     def test_do_node_set_maintenance_off(self):
         client_mock = mock.MagicMock()
@@ -225,9 +222,8 @@ class NodeShellTest(utils.BaseTestCase):
         args.reason = None
 
         n_shell.do_node_set_maintenance(client_mock, args)
-        client_mock.node.set_maintenance.assert_called_once_with('node_uuid',
-            'off',
-            maint_reason=None)
+        client_mock.node.set_maintenance.assert_called_once_with(
+            'node_uuid', 'off', maint_reason=None)
 
     def test_do_node_set_maintenance_off_with_reason_fails(self):
         client_mock = mock.MagicMock()
@@ -269,8 +265,8 @@ class NodeShellTest(utils.BaseTestCase):
 
         n_shell.do_node_vendor_passthru(client_mock, args)
         client_mock.node.vendor_passthru.assert_called_once_with(
-                args.node, args.method, args={'arg1': 'val1', 'arg2': 'val2'},
-                http_method=args.http_method)
+            args.node, args.method, args={'arg1': 'val1', 'arg2': 'val2'},
+            http_method=args.http_method)
 
     def test_do_node_vendor_passthru_without_args(self):
         client_mock = mock.MagicMock()
@@ -282,7 +278,7 @@ class NodeShellTest(utils.BaseTestCase):
 
         n_shell.do_node_vendor_passthru(client_mock, args)
         client_mock.node.vendor_passthru.assert_called_once_with(
-                args.node, args.method, args={}, http_method=args.http_method)
+            args.node, args.method, args={}, http_method=args.http_method)
 
     def test_do_node_set_provision_state_active(self):
         client_mock = mock.MagicMock()
@@ -338,7 +334,7 @@ class NodeShellTest(utils.BaseTestCase):
 
         n_shell.do_node_set_boot_device(client_mock, args)
         client_mock.node.set_boot_device.assert_called_once_with(
-                                                    'node_uuid', 'pxe', False)
+            'node_uuid', 'pxe', False)
 
     def test_do_node_get_boot_device(self):
         client_mock = mock.MagicMock()
@@ -355,4 +351,4 @@ class NodeShellTest(utils.BaseTestCase):
 
         n_shell.do_node_get_supported_boot_devices(client_mock, args)
         client_mock.node.get_supported_boot_devices.assert_called_once_with(
-                                                                   'node_uuid')
+            'node_uuid')

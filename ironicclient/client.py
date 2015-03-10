@@ -94,7 +94,7 @@ def get_client(api_version, **kwargs):
 
         ks_kwargs['region_name'] = kwargs.get('os_region_name')
         endpoint = (kwargs.get('ironic_url') or
-            _get_endpoint(_ksclient, **ks_kwargs))
+                    _get_endpoint(_ksclient, **ks_kwargs))
 
         auth_ref = _ksclient.auth_ref
 
