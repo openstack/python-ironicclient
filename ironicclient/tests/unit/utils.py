@@ -119,7 +119,7 @@ class FakeKeystone():
         self.auth_token = auth_token
         self.auth_ref = {
             'token': {'expires': FakeKeystone.timestamp.strftime(
-                          '%Y-%m-%dT%H:%M:%S.%f'),
+                      '%Y-%m-%dT%H:%M:%S.%f'),
                       'id': 'd1a541311782870742235'}
         }
 
@@ -141,4 +141,4 @@ class FakeSession():
 
     def request(self, url, method, **kwargs):
         return FakeSessionResponse(self.headers, self.content,
-                                 self.status_code)
+                                   self.status_code)

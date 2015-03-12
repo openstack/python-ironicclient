@@ -96,7 +96,7 @@ class HttpClientTest(utils.BaseTestCase):
     def test_server_exception_msg_and_traceback(self):
         error_msg = 'another test error'
         error_trace = ("\"Traceback (most recent call last):\\n\\n  "
-                      "File \\\"/usr/local/lib/python2.7/...")
+                       "File \\\"/usr/local/lib/python2.7/...")
         error_body = _get_error_body(error_msg, error_trace)
         fake_resp = utils.FakeResponse({'content-type': 'application/json'},
                                        six.StringIO(error_body),
@@ -227,7 +227,7 @@ class HttpClientTest(utils.BaseTestCase):
                                        status=401)
         client = http.HTTPClient('http://localhost/')
         client.get_connection = (
-                lambda *a, **kw: utils.FakeConnection(fake_resp))
+            lambda *a, **kw: utils.FakeConnection(fake_resp))
 
         self.assertRaises(exc.Unauthorized, client.json_request,
                           'GET', '/v1/resources')
@@ -238,12 +238,12 @@ class SessionClientTest(utils.BaseTestCase):
     def test_server_exception_msg_and_traceback(self):
         error_msg = 'another test error'
         error_trace = ("\"Traceback (most recent call last):\\n\\n  "
-                      "File \\\"/usr/local/lib/python2.7/...")
+                       "File \\\"/usr/local/lib/python2.7/...")
         error_body = _get_error_body(error_msg, error_trace)
 
         fake_session = utils.FakeSession({'Content-Type': 'application/json'},
-                                          error_body,
-                                          500)
+                                         error_body,
+                                         500)
 
         client = http.SessionClient(session=fake_session,
                                     auth=None,
@@ -266,8 +266,8 @@ class SessionClientTest(utils.BaseTestCase):
         error_body = _get_error_body()
 
         fake_session = utils.FakeSession({'Content-Type': 'application/json'},
-                                          error_body,
-                                          500)
+                                         error_body,
+                                         500)
 
         client = http.SessionClient(session=fake_session,
                                     auth=None,

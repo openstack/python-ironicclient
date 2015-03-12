@@ -213,7 +213,7 @@ class IronicShell(object):
                                  'Defaults to env[OS_SERVICE_ENDPOINT].')
 
         parser.add_argument('--os_endpoint',
-                             help=argparse.SUPPRESS)
+                            help=argparse.SUPPRESS)
 
         parser.add_argument('--os-endpoint-type',
                             default=cliutils.env('OS_ENDPOINT_TYPE'),
@@ -250,8 +250,8 @@ class IronicShell(object):
             httplib2.debuglevel = 1
         else:
             logging.basicConfig(
-                    format="%(levelname)s %(message)s",
-                    level=logging.CRITICAL)
+                format="%(levelname)s %(message)s",
+                level=logging.CRITICAL)
 
     def do_bash_completion(self):
         """Prints all of the commands and options for bash-completion."""
@@ -306,10 +306,11 @@ class IronicShell(object):
         auth_token = kwargs.pop('auth_token', None)
         if auth_token:
             return v2_auth.Token(v2_auth_url, auth_token,
-                tenant_id=kwargs.pop('project_id', None),
-                tenant_name=kwargs.pop('project_name', None))
+                                 tenant_id=kwargs.pop('project_id', None),
+                                 tenant_name=kwargs.pop('project_name', None))
         else:
-            return v2_auth.Password(v2_auth_url,
+            return v2_auth.Password(
+                v2_auth_url,
                 username=kwargs.pop('username', None),
                 password=kwargs.pop('password', None),
                 tenant_id=kwargs.pop('project_id', None),
@@ -432,10 +433,11 @@ class IronicShell(object):
 
             if not (args.os_tenant_id or args.os_tenant_name or
                     args.os_project_id or args.os_project_name):
-                raise exc.CommandError(_("You must provide a project name or"
-                    " project id via --os-project-name, --os-project-id,"
-                    " env[OS_PROJECT_ID] or env[OS_PROJECT_NAME].  You may"
-                    " use os-project and os-tenant interchangeably."))
+                raise exc.CommandError(
+                    _("You must provide a project name or"
+                      " project id via --os-project-name, --os-project-id,"
+                      " env[OS_PROJECT_ID] or env[OS_PROJECT_NAME].  You may"
+                      " use os-project and os-tenant interchangeably."))
 
             if not args.os_auth_url:
                 raise exc.CommandError(_("You must provide an auth url via "

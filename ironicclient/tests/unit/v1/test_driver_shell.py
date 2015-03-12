@@ -42,8 +42,8 @@ class DriverShellTest(utils.BaseTestCase):
 
         d_shell.do_driver_vendor_passthru(client_mock, args)
         client_mock.driver.vendor_passthru.assert_called_once_with(
-                args.driver_name, args.method, http_method=args.http_method,
-                args={'arg1': 'val1', 'arg2': 'val2'})
+            args.driver_name, args.method, http_method=args.http_method,
+            args={'arg1': 'val1', 'arg2': 'val2'})
 
     def test_do_driver_vendor_passthru_without_args(self):
         client_mock = mock.MagicMock()
@@ -55,5 +55,5 @@ class DriverShellTest(utils.BaseTestCase):
 
         d_shell.do_driver_vendor_passthru(client_mock, args)
         client_mock.driver.vendor_passthru.assert_called_once_with(
-                args.driver_name, args.method, args={},
-                http_method=args.http_method)
+            args.driver_name, args.method, args={},
+            http_method=args.http_method)

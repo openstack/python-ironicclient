@@ -237,8 +237,8 @@ class VerifiedHTTPSConnection(six.moves.http_client.HTTPSConnection):
     def __init__(self, host, port, key_file=None, cert_file=None,
                  ca_file=None, timeout=None, insecure=False):
         six.moves.http_client.HTTPSConnection.__init__(self, host, port,
-                                             key_file=key_file,
-                                             cert_file=cert_file)
+                                                       key_file=key_file,
+                                                       cert_file=cert_file)
         self.key_file = key_file
         self.cert_file = cert_file
         if ca_file is not None:
@@ -311,7 +311,7 @@ class SessionClient(adapter.LegacyJsonAdapter):
         if 400 <= resp.status_code < 600:
             error_json = _extract_error_json(resp.content)
             raise exc.from_response(resp, error_json.get('faultstring'),
-                error_json.get('debuginfo'), method, url)
+                                    error_json.get('debuginfo'), method, url)
         elif resp.status_code in (301, 302, 305):
             # Redirected. Reissue the request to the new location.
             location = resp.headers.get('location')

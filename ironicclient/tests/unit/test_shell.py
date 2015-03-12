@@ -127,7 +127,7 @@ class ShellTest(utils.BaseTestCase):
         self.make_env(exclude='OS_PASSWORD')
         # We will get a Connection Refused because there is no keystone.
         self.assertRaises(keystone_exc.ConnectionRefused,
-            self.shell, 'node-list')
+                          self.shell, 'node-list')
         # Make sure we are actually prompted.
         mock_getpass.assert_called_with('OpenStack Password: ')
 
@@ -137,7 +137,7 @@ class ShellTest(utils.BaseTestCase):
         self.make_env(exclude='OS_PASSWORD')
         # We should get Command Error because we mock Ctl-D.
         self.assertRaises(exc.CommandError,
-            self.shell, 'node-list')
+                          self.shell, 'node-list')
         # Make sure we are actually prompted.
         mock_getpass.assert_called_with('OpenStack Password: ')
 
@@ -174,7 +174,7 @@ class ShellTest(utils.BaseTestCase):
         self.shell('--ironic-api-version 1.2 help')
         self.shell('--ironic-api-version latest help')
         self.assertRaises(exc.CommandError,
-            self.shell, '--ironic-api-version 1.2.1 help')
+                          self.shell, '--ironic-api-version 1.2.1 help')
 
 
 class TestCase(testtools.TestCase):

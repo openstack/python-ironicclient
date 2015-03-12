@@ -30,10 +30,10 @@ PORT = {'id': 987,
         'extra': {}}
 
 PORT2 = {'id': 988,
-        'uuid': '55555555-4444-3333-2222-111111111111',
-        'node_uuid': '55555555-4444-3333-2222-111111111111',
-        'address': 'AA:AA:AA:BB:BB:BB',
-        'extra': {}}
+         'uuid': '55555555-4444-3333-2222-111111111111',
+         'node_uuid': '55555555-4444-3333-2222-111111111111',
+         'address': 'AA:AA:AA:BB:BB:BB',
+         'extra': {}}
 
 CREATE_PORT = copy.deepcopy(PORT)
 del CREATE_PORT['id']

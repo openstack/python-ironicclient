@@ -74,17 +74,17 @@ def do_driver_properties(cc, args):
               help="Argument to be passed to the vendor-passthru method. "
                    "Can be specified multiple times.")
 @cliutils.arg('--http-method',
-    metavar='<http-method>',
-    choices=['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
-    help="The HTTP method to use in the request. Valid HTTP "
-         "methods are: 'POST', 'PUT', 'GET', 'DELETE', and 'PATCH'. "
-         "Defaults to 'POST'.")
+              metavar='<http-method>',
+              choices=['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
+              help="The HTTP method to use in the request. Valid HTTP "
+              "methods are: 'POST', 'PUT', 'GET', 'DELETE', and 'PATCH'. "
+              "Defaults to 'POST'.")
 @cliutils.arg('--http_method',
-    help=argparse.SUPPRESS)
+              help=argparse.SUPPRESS)
 def do_driver_vendor_passthru(cc, args):
     """Call a vendor-passthru extension for a driver."""
     arguments = utils.args_array_to_dict({'args': args.arguments[0]},
-                                          'args')['args']
+                                         'args')['args']
 
     # If there were no arguments for the method, arguments will still
     # be an empty list. So make it an empty dict.
