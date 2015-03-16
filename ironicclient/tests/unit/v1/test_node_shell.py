@@ -49,6 +49,8 @@ class NodeShellTest(utils.BaseTestCase):
                'target_power_state',
                'target_provision_state',
                'updated_at',
+               'inspection_finished_at',
+               'inspection_started_at',
                'uuid']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
@@ -324,6 +326,39 @@ class NodeShellTest(utils.BaseTestCase):
                           n_shell.do_node_set_provision_state,
                           client_mock, args)
         self.assertFalse(client_mock.node.set_provision_state.called)
+
+    def test_do_node_set_provision_state_inspect(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'inspect'
+        args.config_drive = None
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'inspect', configdrive=None)
+
+    def test_do_node_set_provision_state_manage(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'manage'
+        args.config_drive = None
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'manage', configdrive=None)
+
+    def test_do_node_set_provision_state_provide(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'provide'
+        args.config_drive = None
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'provide', configdrive=None)
 
     def test_do_node_set_boot_device(self):
         client_mock = mock.MagicMock()
