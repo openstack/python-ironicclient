@@ -314,7 +314,7 @@ def do_node_set_power_state(cc, args):
 @cliutils.arg('node', metavar='<node>', help="UUID of the node.")
 @cliutils.arg(
     'provision_state',
-    metavar='<provision state>',
+    metavar='<provision-state>',
     choices=['active', 'deleted', 'rebuild', 'inspect', 'provide',
              'manage'],
     help="Supported states: 'active', 'deleted', 'rebuild', "
