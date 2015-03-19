@@ -32,6 +32,7 @@ NODE1 = {'id': 123,
          'driver': 'fake',
          'driver_info': {'user': 'foo', 'password': 'bar'},
          'properties': {'num_cpu': 4},
+         'name': 'fake-node-1',
          'extra': {}}
 NODE2 = {'id': 456,
          'uuid': '66666666-7777-8888-9999-111111111111',
@@ -163,6 +164,13 @@ fake_responses = {
         'GET': (
             {},
             NODE2,
+        ),
+    },
+    '/v1/nodes/%s' % NODE1['name']:
+    {
+        'GET': (
+            {},
+            NODE1,
         ),
     },
     '/v1/nodes/%s/ports' % NODE1['uuid']:
@@ -342,6 +350,10 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(nodes))
 
+    def test_node_list_shows_name(self):
+        nodes = self.mgr.list()
+        self.assertIsNotNone(getattr(nodes[0], 'name'))
+
     def test_node_list_limit(self):
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
@@ -463,6 +475,14 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NODE2['uuid'], node.uuid)
+
+    def test_node_show_by_name(self):
+        node = self.mgr.get(NODE1['name'])
+        expect = [
+            ('GET', '/v1/nodes/%s' % NODE1['name'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(NODE1['uuid'], node.uuid)
 
     def test_create(self):
         node = self.mgr.create(**CREATE_NODE)

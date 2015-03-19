@@ -37,7 +37,7 @@ NODE_FIELDS = ['chassis_uuid', 'created_at', 'console_enabled', 'driver',
                'properties', 'provision_state', 'reservation',
                'target_power_state', 'target_provision_state',
                'updated_at', 'inspection_finished_at',
-               'inspection_started_at', 'uuid']
+               'inspection_started_at', 'uuid', 'name']
 
 NODE_FIELD_LABELS = ['Chassis UUID', 'Created At', 'Console Enabled', 'Driver',
                      'Driver Info', 'Driver Internal Info', 'Extra',
@@ -46,12 +46,12 @@ NODE_FIELD_LABELS = ['Chassis UUID', 'Created At', 'Console Enabled', 'Driver',
                      'Properties', 'Provision State', 'Reservation',
                      'Target Power State', 'Target Provision State',
                      'Updated At', 'Inspection Finished At',
-                     'Inspection Started At', 'UUID']
+                     'Inspection Started At', 'UUID', 'Name']
 
-NODE_LIST_FIELDS = ['uuid', 'instance_uuid', 'power_state',
+NODE_LIST_FIELDS = ['uuid', 'name', 'instance_uuid', 'power_state',
                     'provision_state', 'maintenance']
 
-NODE_LIST_FIELD_LABELS = ['UUID', 'Instance UUID', 'Power State',
+NODE_LIST_FIELD_LABELS = ['UUID', 'Name', 'Instance UUID', 'Power State',
                           'Provisioning State', 'Maintenance']
 
 

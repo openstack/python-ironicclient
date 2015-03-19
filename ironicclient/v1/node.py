@@ -21,7 +21,7 @@ from ironicclient.common import utils
 from ironicclient import exc
 
 CREATION_ATTRIBUTES = ['chassis_uuid', 'driver', 'driver_info', 'extra',
-                       'uuid', 'properties']
+                       'uuid', 'properties', 'name']
 
 
 class Node(base.Resource):

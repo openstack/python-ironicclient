@@ -33,7 +33,8 @@ def _print_node_show(node):
 @cliutils.arg(
     'node',
     metavar='<id>',
-    help="UUID of the node (or instance UUID if --instance is specified).")
+    help="Name or UUID of the node "
+         "(or instance UUID if --instance is specified).")
 @cliutils.arg(
     '--instance',
     dest='instance_uuid',
@@ -151,10 +152,14 @@ def do_node_list(cc, args):
     '-u', '--uuid',
     metavar='<uuid>',
     help="Unique UUID for the node.")
+@cliutils.arg(
+    '-n', '--name',
+    metavar='<name>',
+    help="Unique name for the node.")
 def do_node_create(cc, args):
     """Register a new node with the Ironic service."""
     field_list = ['chassis_uuid', 'driver', 'driver_info',
-                  'properties', 'extra', 'uuid']
+                  'properties', 'extra', 'uuid', 'name']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'driver_info')
@@ -166,7 +171,10 @@ def do_node_create(cc, args):
     cliutils.print_dict(data, wrap=72)
 
 
-@cliutils.arg('node', metavar='<node>', nargs='+', help="UUID of the node.")
+@cliutils.arg('node',
+              metavar='<node>',
+              nargs='+',
+              help="Name or UUID of the node.")
 def do_node_delete(cc, args):
     """Unregister a node from the Ironic service."""
     for n in args.node:
@@ -174,7 +182,7 @@ def do_node_delete(cc, args):
         print(_('Deleted node %s') % n)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 @cliutils.arg(
     'op',
     metavar='<op>',
@@ -197,7 +205,7 @@ def do_node_update(cc, args):
 
 @cliutils.arg('node',
               metavar='<node>',
-              help="UUID of the node.")
+              help="Name or UUID of the node.")
 @cliutils.arg('method',
               metavar='<method>',
               help="Vendor-passthru method to be called.")
@@ -279,7 +287,7 @@ def do_node_port_list(cc, args):
                         sortby_index=None)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 @cliutils.arg(
     'maintenance_mode',
     metavar='<maintenance-mode>',
@@ -300,7 +308,7 @@ def do_node_set_maintenance(cc, args):
                             maint_reason=args.reason)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 @cliutils.arg(
     'power_state',
     metavar='<power-state>',
@@ -311,7 +319,7 @@ def do_node_set_power_state(cc, args):
     cc.node.set_power_state(args.node, args.power_state)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 @cliutils.arg(
     'provision_state',
     metavar='<provision-state>',
@@ -335,7 +343,7 @@ def do_node_set_provision_state(cc, args):
                                 configdrive=args.config_drive)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 def do_node_validate(cc, args):
     """Validate a node's driver interfaces."""
     ifaces = cc.node.validate(args.node)
@@ -349,14 +357,14 @@ def do_node_validate(cc, args):
     cliutils.print_list(obj_list, fields, field_labels=field_labels)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 def do_node_get_console(cc, args):
     """Get the connection information for a node's console, if enabled."""
     info = cc.node.get_console(args.node)
     cliutils.print_dict(info, wrap=72)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 @cliutils.arg(
     'enabled',
     metavar='<enabled>',
@@ -368,7 +376,7 @@ def do_node_set_console_mode(cc, args):
     cc.node.set_console_mode(args.node, args.enabled)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 @cliutils.arg(
     'device',
     metavar='<boot-device>',
@@ -385,14 +393,14 @@ def do_node_set_boot_device(cc, args):
     cc.node.set_boot_device(args.node, args.device, args.persistent)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 def do_node_get_boot_device(cc, args):
     """Get the current boot device for a node."""
     boot_device = cc.node.get_boot_device(args.node)
     cliutils.print_dict(boot_device, wrap=72)
 
 
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 def do_node_get_supported_boot_devices(cc, args):
     """Get the supported boot devices for a node."""
     boot_devices = cc.node.get_supported_boot_devices(args.node)
