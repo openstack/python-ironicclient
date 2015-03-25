@@ -18,7 +18,14 @@
 from __future__ import print_function
 
 import argparse
+import base64
+import contextlib
+import gzip
 import json
+import os
+import shutil
+import subprocess
+import tempfile
 
 from ironicclient.common.i18n import _
 from ironicclient import exc
@@ -182,3 +189,58 @@ def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None):
     if sort_dir is not None:
         filters.append('sort_dir=%s' % sort_dir)
     return filters
+
+
+@contextlib.contextmanager
+def tempdir(*args, **kwargs):
+    dirname = tempfile.mkdtemp(*args, **kwargs)
+    try:
+        yield dirname
+    finally:
+        shutil.rmtree(dirname)
+
+
+def make_configdrive(path):
+    """Make the config drive file.
+
+    :param path: The directory containing the config drive files.
+    :returns: A gzipped and base64 encoded configdrive string.
+
+    """
+    # Make sure path it's readable
+    if not os.access(path, os.R_OK):
+        raise exc.CommandError(_('The directory "%s" is not readable') % path)
+
+    with tempfile.NamedTemporaryFile() as tmpfile:
+        with tempfile.NamedTemporaryFile() as tmpzipfile:
+            publisher = 'ironicclient-configdrive 0.1'
+            try:
+                p = subprocess.Popen(['genisoimage', '-o', tmpfile.name,
+                                      '-ldots', '-allow-lowercase',
+                                      '-allow-multidot', '-l',
+                                      '-publisher', publisher,
+                                      '-quiet', '-J',
+                                      '-r', '-V', 'config-2',
+                                      path],
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+            except OSError as e:
+                raise exc.CommandError(
+                    _('Error generating the config drive. Make sure the '
+                      '"genisoimage" tool is installed. Error: %s') % e)
+
+            stdout, stderr = p.communicate()
+            if p.returncode != 0:
+                raise exc.CommandError(
+                    _('Error generating the config drive.'
+                      'Stdout: "%(stdout)s". Stderr: %(stderr)s') %
+                    {'stdout': stdout, 'stderr': stderr})
+
+            # Compress file
+            tmpfile.seek(0)
+            g = gzip.GzipFile(fileobj=tmpzipfile, mode='wb')
+            shutil.copyfileobj(tmpfile, g)
+            g.close()
+
+            tmpzipfile.seek(0)
+            return base64.b64encode(tmpzipfile.read())
