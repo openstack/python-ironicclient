@@ -17,6 +17,7 @@ import fixtures
 from ironicclient.client import get_client
 from ironicclient import exc
 from ironicclient.tests.unit import utils
+from ironicclient.v1 import client as v1
 
 
 def fake_get_ksclient(**kwargs):
@@ -155,3 +156,18 @@ class ClientTest(utils.BaseTestCase):
         client = get_client('1', **kwargs)
 
         self.assertEqual('latest', client.http_client.os_ironic_api_version)
+
+    def test_get_client_default_version_set(self):
+        self.useFixture(fixtures.MonkeyPatch(
+            'ironicclient.client._get_ksclient', fake_get_ksclient))
+        kwargs = {
+            'os_tenant_name': 'TENANT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': 'http://localhost:35357/v2.0',
+            'os_auth_token': '',
+        }
+        client = get_client('1', **kwargs)
+
+        self.assertEqual(v1.DEFAULT_VER,
+                         client.http_client.os_ironic_api_version)
