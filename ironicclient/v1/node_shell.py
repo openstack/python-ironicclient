@@ -332,9 +332,11 @@ def do_node_set_power_state(cc, args):
     '--config-drive',
     metavar='<config-drive>',
     default=None,
-    help=('A gzipped, base64-encoded configuration drive string or the path '
-          'to the configuration drive file. Only valid when setting provision '
-          'state to "active".'))
+    help=("A gzipped, base64-encoded configuration drive string OR the path "
+          "to the configuration drive file OR the path to a directory "
+          "containing the config drive files. In case it's a directory, a "
+          "config drive will be generated from it. This parameter is only "
+          "valid when setting provision state to 'active'."))
 def do_node_set_provision_state(cc, args):
     """Provision, rebuild, delete, inspect, provide or manage an instance."""
     if args.config_drive and args.provision_state != 'active':

@@ -225,6 +225,9 @@ class NodeManager(base.Manager):
             if os.path.isfile(configdrive):
                 with open(configdrive, 'rb') as f:
                     configdrive = f.read()
+            if os.path.isdir(configdrive):
+                configdrive = utils.make_configdrive(configdrive)
+
             body['configdrive'] = configdrive
         return self._update(self._path(path), body, method='PUT')
 

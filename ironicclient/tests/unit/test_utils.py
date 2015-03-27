@@ -15,6 +15,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+import subprocess
+
 import mock
 
 from ironicclient.common import utils
@@ -173,3 +176,62 @@ class CommonFiltersTest(test_utils.BaseTestCase):
         for key in ('marker', 'sort_key', 'sort_dir'):
             result = utils.common_filters(**{key: 'test'})
             self.assertEqual(['%s=test' % key], result)
+
+
+@mock.patch.object(subprocess, 'Popen')
+class MakeConfigDriveTest(test_utils.BaseTestCase):
+
+    def setUp(self):
+        super(MakeConfigDriveTest, self).setUp()
+        # expected genisoimage cmd
+        self.genisoimage_cmd = ['genisoimage', '-o', mock.ANY,
+                                '-ldots', '-allow-lowercase',
+                                '-allow-multidot', '-l',
+                                '-publisher', 'ironicclient-configdrive 0.1',
+                                '-quiet', '-J', '-r', '-V',
+                                'config-2', mock.ANY]
+
+    def test_make_configdrive(self, mock_popen):
+        fake_process = mock.Mock(returncode=0)
+        fake_process.communicate.return_value = ('', '')
+        mock_popen.return_value = fake_process
+
+        with utils.tempdir() as dirname:
+            utils.make_configdrive(dirname)
+
+        mock_popen.assert_called_once_with(self.genisoimage_cmd,
+                                           stderr=subprocess.PIPE,
+                                           stdout=subprocess.PIPE)
+        fake_process.communicate.assert_called_once_with()
+
+    @mock.patch.object(os, 'access')
+    def test_make_configdrive_non_readable_dir(self, mock_access, mock_popen):
+        mock_access.return_value = False
+        self.assertRaises(exc.CommandError, utils.make_configdrive, 'fake-dir')
+        mock_access.assert_called_once_with('fake-dir', os.R_OK)
+        self.assertFalse(mock_popen.called)
+
+    @mock.patch.object(os, 'access')
+    def test_make_configdrive_oserror(self, mock_access, mock_popen):
+        mock_access.return_value = True
+        mock_popen.side_effect = OSError('boom')
+
+        self.assertRaises(exc.CommandError, utils.make_configdrive, 'fake-dir')
+        mock_access.assert_called_once_with('fake-dir', os.R_OK)
+        mock_popen.assert_called_once_with(self.genisoimage_cmd,
+                                           stderr=subprocess.PIPE,
+                                           stdout=subprocess.PIPE)
+
+    @mock.patch.object(os, 'access')
+    def test_make_configdrive_non_zero_returncode(self, mock_access,
+                                                  mock_popen):
+        fake_process = mock.Mock(returncode=123)
+        fake_process.communicate.return_value = ('', '')
+        mock_popen.return_value = fake_process
+
+        self.assertRaises(exc.CommandError, utils.make_configdrive, 'fake-dir')
+        mock_access.assert_called_once_with('fake-dir', os.R_OK)
+        mock_popen.assert_called_once_with(self.genisoimage_cmd,
+                                           stderr=subprocess.PIPE,
+                                           stdout=subprocess.PIPE)
+        fake_process.communicate.assert_called_once_with()
