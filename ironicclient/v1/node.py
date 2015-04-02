@@ -14,6 +14,8 @@
 
 import os
 
+from oslo_utils import strutils
+
 from ironicclient.common import base
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
@@ -39,11 +41,15 @@ class NodeManager(base.Manager):
              detail=False, sort_key=None, sort_dir=None):
         """Retrieve a list of nodes.
 
-        :param associated: Optional, boolean whether to return a list of
-                           associated or unassociated nodes.
-        :param maintenance: Optional, boolean value that indicates whether
-                            to get nodes in maintenance mode ("True"), or not
-                            in maintenance mode ("False").
+        :param associated: Optional. Either a Boolean or a string
+                           representation of a Boolean that indicates whether
+                           to return a list of associated (True or "True") or
+                           unassociated (False or "False") nodes.
+        :param maintenance: Optional. Either a Boolean or a string
+                            representation of a Boolean that indicates whether
+                            to return nodes in maintenance mode (True or
+                            "True"), or not in maintenance mode (False or
+                            "False").
         :param marker: Optional, the UUID of a node, eg the last
                        node from a previous result set. Return
                        the next result set.
@@ -196,11 +202,32 @@ class NodeManager(base.Manager):
                 _('Unknown HTTP method: %s') % http_method)
 
     def set_maintenance(self, node_id, state, maint_reason=None):
+        """Set the maintenance mode for the node.
+
+        :param node_id: The UUID of the node.
+        :param state: the maintenance mode; either a Boolean or a string
+                      representation of a Boolean (eg, 'true', 'on', 'false',
+                      'off'). True to put the node in maintenance mode; False
+                      to take the node out of maintenance mode.
+        :param maint_reason: Optional string. Reason for putting node
+                             into maintenance mode.
+        :raises: InvalidAttribute if state is an invalid string (that doesn't
+                 represent a Boolean).
+
+        """
+        if isinstance(state, bool):
+            maintenance_mode = state
+        else:
+            try:
+                maintenance_mode = strutils.bool_from_string(state, True)
+            except ValueError as e:
+                raise exc.InvalidAttribute(_("Argument 'state': %(err)s") %
+                                           {'err': e})
         path = "%s/maintenance" % node_id
-        if state in ('true', 'on'):
+        if maintenance_mode:
             reason = {'reason': maint_reason}
             return self._update(self._path(path), reason, method='PUT')
-        if state in ('false', 'off'):
+        else:
             return self._delete(self._path(path))
 
     def set_power_state(self, node_id, state):
@@ -241,6 +268,13 @@ class NodeManager(base.Manager):
         return info.to_dict()
 
     def set_console_mode(self, node_uuid, enabled):
+        """Set the console mode for the node.
+
+        :param node_uuid: The UUID of the node.
+        :param enabled: Either a Boolean or a string representation of a
+                        Boolean. True to enable the console; False to disable.
+
+        """
         path = "%s/states/console" % node_uuid
         target = {'enabled': enabled}
         return self._update(self._path(path), target, method='PUT')

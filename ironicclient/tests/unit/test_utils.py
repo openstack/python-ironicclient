@@ -95,6 +95,25 @@ class UtilsTest(test_utils.BaseTestCase):
         self.assertRaises(exc.CommandError,
                           utils.split_and_deserialize, 'foo:bar')
 
+    def test_bool_arg_value(self):
+        self.assertTrue(utils.bool_argument_value('arg', 'y', strict=True))
+        self.assertTrue(utils.bool_argument_value('arg', 'TrUe', strict=True))
+        self.assertTrue(utils.bool_argument_value('arg', '1', strict=True))
+        self.assertTrue(utils.bool_argument_value('arg', 1, strict=True))
+
+        self.assertFalse(utils.bool_argument_value('arg', '0', strict=True))
+        self.assertFalse(utils.bool_argument_value('arg', 'No', strict=True))
+
+        self.assertRaises(exc.CommandError,
+                          utils.bool_argument_value, 'arg', 'ee', strict=True)
+
+        self.assertFalse(utils.bool_argument_value('arg', 'ee', strict=False))
+        self.assertTrue(utils.bool_argument_value('arg', 'ee', strict=False,
+                                                  default=True))
+        # No check that default is a Boolean...
+        self.assertEqual('foo', utils.bool_argument_value('arg', 'ee',
+                         strict=False, default='foo'))
+
 
 class CommonParamsForListTest(test_utils.BaseTestCase):
     def setUp(self):

@@ -66,6 +66,8 @@ CONSOLE_DATA_ENABLED = {'console_enabled': True,
                         'console_info': {'test-console': 'test-console-data'}}
 CONSOLE_DATA_DISABLED = {'console_enabled': False, 'console_info': None}
 
+CONSOLE_ENABLE = 'true'
+
 BOOT_DEVICE = {'boot_device': 'pxe', 'persistent': False}
 SUPPORTED_BOOT_DEVICE = {'supported_boot_devices': ['pxe']}
 
@@ -232,7 +234,7 @@ fake_responses = {
             CONSOLE_DATA_ENABLED,
         ),
         'PUT': (
-            {'enabled': 'true'},
+            {'enabled': CONSOLE_ENABLE},
             None,
         ),
     },
@@ -422,8 +424,26 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
+    def test_node_list_unassociated_string(self):
+        nodes = self.mgr.list(associated="False")
+        expect = [
+            ('GET', '/v1/nodes/?associated=False', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
+
     def test_node_list_maintenance(self):
         nodes = self.mgr.list(maintenance=True)
+        expect = [
+            ('GET', '/v1/nodes/?maintenance=True', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_maintenance_string(self):
+        nodes = self.mgr.list(maintenance="True")
         expect = [
             ('GET', '/v1/nodes/?maintenance=True', {}, None),
         ]
@@ -621,6 +641,20 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(None, maintenance)
 
+    def test_node_set_maintenance_bad(self):
+        self.assertRaises(exc.InvalidAttribute, self.mgr.set_maintenance,
+                          NODE1['uuid'], 'bad')
+
+    def test_node_set_maintenance_bool(self):
+        maintenance = self.mgr.set_maintenance(NODE1['uuid'], True,
+                                               maint_reason='reason')
+        body = {'reason': 'reason'}
+        expect = [
+            ('PUT', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(None, maintenance)
+
     def test_node_set_power_state(self):
         power_state = self.mgr.set_power_state(NODE1['uuid'], "on")
         body = {'target': 'power on'}
@@ -705,13 +739,17 @@ class NodeManagerTest(testtools.TestCase):
                          sorted(states.to_dict().keys()))
 
     def test_node_set_console_mode(self):
-        enabled = 'true'
-        self.mgr.set_console_mode(NODE1['uuid'], enabled)
-        body = {'enabled': enabled}
-        expect = [
-            ('PUT', '/v1/nodes/%s/states/console' % NODE1['uuid'], {}, body),
-        ]
-        self.assertEqual(expect, self.api.calls)
+        global ENABLE
+        for enabled in ['true', True, 'False', False]:
+            self.api.calls = []
+            ENABLE = enabled
+            self.mgr.set_console_mode(NODE1['uuid'], enabled)
+            body = {'enabled': enabled}
+            expect = [
+                ('PUT', '/v1/nodes/%s/states/console' % NODE1['uuid'], {},
+                 body),
+            ]
+            self.assertEqual(expect, self.api.calls)
 
     def test_node_get_console(self):
         info = self.mgr.get_console(NODE1['uuid'])

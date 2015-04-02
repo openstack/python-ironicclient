@@ -253,7 +253,8 @@ class IronicShell(object):
         parser = self.get_base_parser()
 
         self.subcommands = {}
-        subparsers = parser.add_subparsers(metavar='<subcommand>')
+        subparsers = parser.add_subparsers(metavar='<subcommand>',
+                                           dest='subparser_name')
         submodule = utils.import_versioned_module(version, 'shell')
         submodule.enhance_parser(parser, subparsers, self.subcommands)
         utils.define_commands_from_module(subparsers, self, self.subcommands)
@@ -536,6 +537,9 @@ class IronicShell(object):
             args.func(client, args)
         except exc.Unauthorized:
             raise exc.CommandError(_("Invalid OpenStack Identity credentials"))
+        except exc.CommandError as e:
+            subcommand_parser = self.subcommands[args.subparser_name]
+            subcommand_parser.error(e)
 
     @cliutils.arg('command', metavar='<subcommand>', nargs='?',
                   help='Display help for <subcommand>')
