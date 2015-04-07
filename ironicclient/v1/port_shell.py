@@ -15,8 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import argparse
-
 from ironicclient.common import utils
 from ironicclient.openstack.common import cliutils
 from ironicclient.v1 import resource_fields as res_fields
@@ -108,14 +106,11 @@ def do_port_list(cc, args):
     required=True,
     help='MAC address for this port.')
 @cliutils.arg(
-    '-n', '--node',
+    '-n', '--node', '--node_uuid',
     dest='node_uuid',
     metavar='<node>',
     required=True,
     help='UUID of the node that this port belongs to.')
-@cliutils.arg(
-    '--node_uuid',
-    help=argparse.SUPPRESS)
 @cliutils.arg(
     '-e', '--extra',
     metavar="<key=value>",
