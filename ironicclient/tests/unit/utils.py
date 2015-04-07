@@ -77,6 +77,9 @@ class FakeConnection(object):
     def getresponse(self):
         return self._response
 
+    def __repr__(self):
+        return ("FakeConnection(response=%s)" % (self._response))
+
 
 class FakeResponse(object):
     def __init__(self, headers, body=None, version=None, status=None,
@@ -100,6 +103,11 @@ class FakeResponse(object):
 
     def read(self, amt):
         return self.body.read(amt)
+
+    def __repr__(self):
+        return ("FakeResponse(%s, body=%s, version=%s, status=%s, reason=%s)" %
+                (self.headers, self.body, self.version, self.status,
+                 self.reason))
 
 
 class FakeServiceCatalog():
