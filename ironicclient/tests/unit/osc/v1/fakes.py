@@ -36,6 +36,17 @@ BAREMETAL = {
     'links': []
 }
 
+baremetal_port_uuid = 'zzz-zzzzzz-zzzz'
+baremetal_port_address = 'AA:BB:CC:DD:EE:FF'
+baremetal_port_extra = {}
+
+BAREMETAL_PORT = {
+    'uuid': baremetal_port_uuid,
+    'address': baremetal_port_address,
+    'extra': baremetal_port_extra,
+    'node_uuid': baremetal_uuid,
+}
+
 
 class TestBaremetal(utils.TestCommand):
 
