@@ -279,6 +279,60 @@ class ListBaremetal(ListBaremetalNode):
         return super(ListBaremetal, self).take_action(parsed_args)
 
 
+class PowerBaremetalNode(command.Command):
+    """Set power state of baremetal node"""
+
+    log = logging.getLogger(__name__ + ".PowerBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(PowerBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'power_state',
+            metavar='<on|off>',
+            choices=['on', 'off'],
+            help="Power node on or off"
+        )
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node."
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        baremetal_client.node.set_power_state(
+            parsed_args.node, parsed_args.power_state)
+
+
+class RebootBaremetalNode(command.Command):
+    """Reboot baremetal node"""
+
+    log = logging.getLogger(__name__ + ".RebootBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(RebootBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node.")
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        baremetal_client.node.set_power_state(
+            parsed_args.node, 'reboot')
+
+
 class SetBaremetalNode(command.Command):
     """Set baremetal properties"""
 

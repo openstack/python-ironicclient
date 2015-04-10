@@ -5,6 +5,8 @@ features:
     * openstack baremetal node create
     * openstack baremetal node delete - Supports deleting multiple nodes
     * openstack baremetal node list
+    * openstack baremetal node power
+    * openstack baremetal node reboot
     * openstack baremetal node set
     * openstack baremetal node show
     * openstack baremetal node unset

@@ -20,7 +20,7 @@ import mock
 from openstackclient.tests import utils as oscutils
 
 from ironicclient import exc
-from ironicclient.osc.v1 import baremetal
+from ironicclient.osc.v1 import baremetal_node
 from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 
@@ -46,7 +46,7 @@ class TestBaremetalCreate(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.CreateBaremetalNode(self.app, None)
+        self.cmd = baremetal_node.CreateBaremetalNode(self.app, None)
         self.arglist = ['--driver', 'fake_driver']
         self.verifylist = [('driver', 'fake_driver')]
         self.collist = (
@@ -175,7 +175,7 @@ class TestBaremetalDelete(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.DeleteBaremetalNode(self.app, None)
+        self.cmd = baremetal_node.DeleteBaremetalNode(self.app, None)
 
     def test_baremetal_delete(self):
         arglist = ['xxx-xxxxxx-xxxx']
@@ -241,7 +241,7 @@ class TestBaremetalList(TestBaremetal):
         ]
 
         # Get the command object to test
-        self.cmd = baremetal.ListBaremetalNode(self.app, None)
+        self.cmd = baremetal_node.ListBaremetalNode(self.app, None)
 
     def test_baremetal_list_no_options(self):
         arglist = []
@@ -495,6 +495,89 @@ class TestBaremetalList(TestBaremetal):
                           self.cmd, arglist, verifylist)
 
 
+class TestBaremetalPower(TestBaremetal):
+    def setUp(self):
+        super(TestBaremetalPower, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.PowerBaremetalNode(self.app, None)
+
+    def test_baremetal_power_just_on(self):
+        arglist = ['on']
+        verifylist = [('power_state', 'on')]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_power_just_off(self):
+        arglist = ['off']
+        verifylist = [('power_state', 'off')]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_power_uuid_only(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_power_on(self):
+        arglist = ['on', 'node_uuid']
+        verifylist = [('power_state', 'on'),
+                      ('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'on')
+
+    def test_baremetal_power_off(self):
+        arglist = ['off', 'node_uuid']
+        verifylist = [('power_state', 'off'),
+                      ('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'off')
+
+
+class TestBaremetalReboot(TestBaremetal):
+    def setUp(self):
+        super(TestBaremetalReboot, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.RebootBaremetalNode(self.app, None)
+
+    def test_baremetal_reboot_no_options(self):
+        arglist = []
+        verifylist = []
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_reboot_uuid_only(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'reboot')
+
+
 class TestBaremetalSet(TestBaremetal):
     def setUp(self):
         super(TestBaremetalSet, self).setUp()
@@ -507,7 +590,7 @@ class TestBaremetalSet(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.SetBaremetalNode(self.app, None)
+        self.cmd = baremetal_node.SetBaremetalNode(self.app, None)
 
     def test_baremetal_set_no_options(self):
         arglist = []
@@ -697,7 +780,7 @@ class TestBaremetalShow(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.ShowBaremetalNode(self.app, None)
+        self.cmd = baremetal_node.ShowBaremetalNode(self.app, None)
 
     def test_baremetal_show(self):
         arglist = ['xxx-xxxxxx-xxxx']
@@ -837,7 +920,7 @@ class TestBaremetalUnset(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.UnsetBaremetalNode(self.app, None)
+        self.cmd = baremetal_node.UnsetBaremetalNode(self.app, None)
 
     def test_baremetal_unset_no_options(self):
         arglist = []
