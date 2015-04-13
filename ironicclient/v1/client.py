@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from ironicclient.common import filecache
 from ironicclient.common import http
 from ironicclient.common.http import DEFAULT_VER
 from ironicclient.v1 import chassis
@@ -33,13 +34,22 @@ class Client(object):
 
     def __init__(self, *args, **kwargs):
         """Initialize a new client for the Ironic v1 API."""
-        # set the default API version header string, if none specified
-        if not kwargs.get('os_ironic_api_version'):
-            kwargs['os_ironic_api_version'] = DEFAULT_VER
-            kwargs['api_version_select_state'] = "default"
-        else:
+        if kwargs.get('os_ironic_api_version'):
             kwargs['api_version_select_state'] = "user"
+        else:
+            # If the user didn't specify a version, use a cached version if
+            # one has been stored
+            host, netport = http.get_server(args[0])
+            saved_version = filecache.retrieve_data(host=host, port=netport)
+            if saved_version:
+                kwargs['api_version_select_state'] = "cached"
+                kwargs['os_ironic_api_version'] = saved_version
+            else:
+                kwargs['api_version_select_state'] = "default"
+                kwargs['os_ironic_api_version'] = DEFAULT_VER
+
         self.http_client = http._construct_http_client(*args, **kwargs)
+
         self.chassis = chassis.ChassisManager(self.http_client)
         self.node = node.NodeManager(self.http_client)
         self.port = port.PortManager(self.http_client)

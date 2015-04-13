@@ -27,6 +27,7 @@ from keystoneclient import adapter
 import six
 import six.moves.urllib.parse as urlparse
 
+from ironicclient.common import filecache
 from ironicclient import exc
 
 
@@ -43,7 +44,7 @@ USER_AGENT = 'python-ironicclient'
 CHUNKSIZE = 1024 * 64  # 64kB
 
 API_VERSION = '/v1'
-API_VERSION_SELECTED_STATES = ('user', 'negotiated', 'default')
+API_VERSION_SELECTED_STATES = ('user', 'negotiated', 'cached', 'default')
 
 
 DEFAULT_MAX_RETRIES = 5
@@ -67,6 +68,14 @@ def _extract_error_json(body):
         pass
 
     return error_json
+
+
+def get_server(endpoint):
+    """Extract and return the server & port that we're connecting to."""
+    if endpoint is None:
+        return None, None
+    parts = urlparse.urlparse(endpoint)
+    return parts.hostname, str(parts.port)
 
 
 class VersionNegotiationMixin(object):
@@ -117,7 +126,6 @@ class VersionNegotiationMixin(object):
                 % {'req': self.os_ironic_api_version,
                    'min': min_ver, 'max': max_ver}))
 
-        # TODO(deva): cache the negotiated version for this server
         negotiated_ver = min(self.os_ironic_api_version, max_ver)
         if negotiated_ver < min_ver:
             negotiated_ver = min_ver
@@ -126,6 +134,10 @@ class VersionNegotiationMixin(object):
         self.api_version_select_state = 'negotiated'
         self.os_ironic_api_version = negotiated_ver
         LOG.debug('Negotiated API version is %s', negotiated_ver)
+
+        # Cache the negotiated version for this server
+        host, port = get_server(self.endpoint)
+        filecache.save_data(host=host, port=port, data=negotiated_ver)
 
         return negotiated_ver
 
@@ -444,11 +456,13 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
                  api_version_select_state,
                  max_retries,
                  retry_interval,
+                 endpoint,
                  **kwargs):
         self.os_ironic_api_version = os_ironic_api_version
         self.api_version_select_state = api_version_select_state
         self.conflict_max_retries = max_retries
         self.conflict_retry_interval = retry_interval
+        self.endpoint = endpoint
 
         super(SessionClient, self).__init__(**kwargs)
 
@@ -579,8 +593,8 @@ def _construct_http_client(endpoint,
                              api_version_select_state=api_version_select_state,
                              max_retries=max_retries,
                              retry_interval=retry_interval,
+                             endpoint=endpoint,
                              **kwargs)
-
     else:
         if kwargs:
             LOG.warn('The following arguments are being ignored when '
