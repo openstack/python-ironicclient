@@ -16,18 +16,11 @@
 #    under the License.
 
 from ironicclient.common import http
+from ironicclient.common.http import DEFAULT_VER
 from ironicclient.v1 import chassis
 from ironicclient.v1 import driver
 from ironicclient.v1 import node
 from ironicclient.v1 import port
-
-
-# NOTE(deva): Record the latest version that this client was tested with.
-#             We still have a lot of work to do in the client to implement
-#             microversion support in the client properly! See
-#             http://specs.openstack.org/openstack/ironic-specs/specs/kilo/api-microversions.html # noqa
-#             for full details.
-DEFAULT_VER = '1.6'
 
 
 class Client(object):
@@ -45,6 +38,9 @@ class Client(object):
         # set the default API version header string, if none specified
         if not kwargs.get('os_ironic_api_version'):
             kwargs['os_ironic_api_version'] = DEFAULT_VER
+            kwargs['api_version_select_state'] = "default"
+        else:
+            kwargs['api_version_select_state'] = "user"
         self.http_client = http._construct_http_client(*args, **kwargs)
         self.chassis = chassis.ChassisManager(self.http_client)
         self.node = node.NodeManager(self.http_client)

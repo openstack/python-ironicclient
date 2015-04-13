@@ -17,6 +17,7 @@
 
 import json
 
+import mock
 import six
 
 from ironicclient.common import http
@@ -38,6 +39,105 @@ def _get_error_body(faultstring=None, debuginfo=None):
     body = {'error_message': raw_error_body}
     raw_body = json.dumps(body)
     return raw_body
+
+
+class VersionNegotiationMixinTest(utils.BaseTestCase):
+
+    def setUp(self):
+        super(VersionNegotiationMixinTest, self).setUp()
+        self.test_object = http.VersionNegotiationMixin()
+        self.test_object.os_ironic_api_version = '1.6'
+        self.test_object.api_version_select_state = 'default'
+        self.mock_mcu = mock.MagicMock()
+        self.test_object._make_connection_url = self.mock_mcu
+        self.response = utils.FakeResponse({}, status=406)
+
+    def test__generic_parse_version_headers_has_headers(self):
+        response = {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
+                    'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
+                    }
+        expected = ('1.1', '1.6')
+        result = self.test_object._generic_parse_version_headers(response.get)
+        self.assertEqual(expected, result)
+
+    def test__generic_parse_version_headers_missing_headers(self):
+        response = {}
+        expected = (None, None)
+        result = self.test_object._generic_parse_version_headers(response.get)
+        self.assertEqual(expected, result)
+
+    def test_negotiate_version_bad_state(self):
+        # Test if bad api_version_select_state value
+        self.test_object.api_version_select_state = 'word of the day: augur'
+        self.assertRaises(
+            RuntimeError,
+            self.test_object.negotiate_version,
+            None, None)
+
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_older(self, mock_pvh):
+        # Test newer client and older server
+        mock_pvh.return_value = ('1.1', '1.5')
+        mock_conn = mock.MagicMock()
+        result = self.test_object.negotiate_version(mock_conn, self.response)
+        self.assertEqual('1.5', result)
+        self.assertEqual(1, mock_pvh.call_count)
+
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_newer(self, mock_pvh):
+        # Test newer server and older client
+        mock_pvh.return_value = ('1.1', '99.99')
+        mock_conn = mock.MagicMock()
+        result = self.test_object.negotiate_version(mock_conn, self.response)
+        self.assertEqual('1.6', result)
+        self.assertEqual(1, mock_pvh.call_count)
+
+    @mock.patch.object(http.VersionNegotiationMixin, '_make_simple_request',
+                       autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_no_version_on_error(
+            self, mock_pvh, mock_msr):
+        # Test older Ironic version which errored with no version number and
+        # have to retry with simple get
+        mock_pvh.side_effect = iter([(None, None), ('1.1', '1.2')])
+        mock_conn = mock.MagicMock()
+        result = self.test_object.negotiate_version(mock_conn, self.response)
+        self.assertEqual('1.2', result)
+        self.assertTrue(mock_msr.called)
+        self.assertEqual(2, mock_pvh.call_count)
+
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_explicit_too_high(self, mock_pvh):
+        # requested version is not supported because it is too large
+        mock_pvh.return_value = ('1.1', '1.6')
+        mock_conn = mock.MagicMock()
+        self.test_object.api_version_select_state = 'user'
+        self.test_object.os_ironic_api_version = '99.99'
+        self.assertRaises(
+            exc.UnsupportedVersion,
+            self.test_object.negotiate_version,
+            mock_conn, self.response)
+        self.assertEqual(1, mock_pvh.call_count)
+
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_explicit_not_supported(self, mock_pvh):
+        # requested version is supported by the server but the server returned
+        # 406 because the requested operation is not supported with the
+        # requested version
+        mock_pvh.return_value = ('1.1', '1.6')
+        mock_conn = mock.MagicMock()
+        self.test_object.api_version_select_state = 'negotiated'
+        self.test_object.os_ironic_api_version = '1.5'
+        self.assertRaises(
+            exc.UnsupportedVersion,
+            self.test_object.negotiate_version,
+            mock_conn, self.response)
+        self.assertEqual(1, mock_pvh.call_count)
 
 
 class HttpClientTest(utils.BaseTestCase):
@@ -232,6 +332,73 @@ class HttpClientTest(utils.BaseTestCase):
         self.assertRaises(exc.Unauthorized, client.json_request,
                           'GET', '/v1/resources')
 
+    def test__parse_version_headers(self):
+        # Test parsing of version headers from HTTPClient
+        error_body = _get_error_body()
+        fake_resp = utils.FakeResponse(
+            {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
+             'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
+             'content-type': 'text/plain',
+             },
+            six.StringIO(error_body),
+            version=1,
+            status=406)
+        expected_result = ('1.1', '1.6')
+        client = http.HTTPClient('http://localhost/')
+        result = client._parse_version_headers(fake_resp)
+        self.assertEqual(expected_result, result)
+
+    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
+    def test__http_request_client_fallback_fail(self, mock_getcon):
+        # Test when fallback to a supported version fails
+        error_body = _get_error_body()
+        fake_resp = utils.FakeResponse(
+            {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
+             'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
+             'content-type': 'text/plain',
+             },
+            six.StringIO(error_body),
+            version=1,
+            status=406)
+        client = http.HTTPClient('http://localhost/')
+        mock_getcon.return_value = utils.FakeConnection(fake_resp)
+        self.assertRaises(
+            exc.UnsupportedVersion,
+            client._http_request,
+            '/v1/resources',
+            'GET')
+
+    @mock.patch.object(http.VersionNegotiationMixin, 'negotiate_version',
+                       autospec=False)
+    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
+    def test__http_request_client_fallback_success(
+            self, mock_getcon, mock_negotiate):
+        # Test when fallback to a supported version succeeds
+        mock_negotiate.return_value = '1.6'
+        error_body = _get_error_body()
+        bad_resp = utils.FakeResponse(
+            {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
+             'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
+             'content-type': 'text/plain',
+             },
+            six.StringIO(error_body),
+            version=1,
+            status=406)
+        good_resp = utils.FakeResponse(
+            {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
+             'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
+             'content-type': 'text/plain',
+             },
+            six.StringIO("We got some text"),
+            version=1,
+            status=200)
+        client = http.HTTPClient('http://localhost/')
+        mock_getcon.side_effect = iter([utils.FakeConnection(bad_resp),
+                                        utils.FakeConnection(good_resp)])
+        response, body_iter = client._http_request('/v1/resources', 'GET')
+        self.assertEqual(200, response.status)
+        self.assertTrue(1, mock_negotiate.call_count)
+
 
 class SessionClientTest(utils.BaseTestCase):
 
@@ -281,3 +448,22 @@ class SessionClientTest(utils.BaseTestCase):
                                   'GET', '/v1/resources')
 
         self.assertEqual('Internal Server Error (HTTP 500)', str(error))
+
+    def test__parse_version_headers(self):
+        # Test parsing of version headers from SessionClient
+        fake_session = utils.FakeSession(
+            {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
+             'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
+             'content-type': 'text/plain',
+             },
+            None,
+            506)
+        expected_result = ('1.1', '1.6')
+        client = http.SessionClient(session=fake_session,
+                                    auth=None,
+                                    interface=None,
+                                    service_type='publicURL',
+                                    region_name='',
+                                    service_name=None)
+        result = client._parse_version_headers(fake_session)
+        self.assertEqual(expected_result, result)

@@ -21,6 +21,7 @@ import logging
 import os
 import socket
 import ssl
+import textwrap
 
 from keystoneclient import adapter
 import six
@@ -29,11 +30,20 @@ import six.moves.urllib.parse as urlparse
 from ironicclient import exc
 
 
+# NOTE(deva): Record the latest version that this client was tested with.
+#             We still have a lot of work to do in the client to implement
+#             microversion support in the client properly! See
+#             http://specs.openstack.org/openstack/ironic-specs/specs/kilo/api-microversions.html # noqa
+#             for full details.
+DEFAULT_VER = '1.6'
+
+
 LOG = logging.getLogger(__name__)
 USER_AGENT = 'python-ironicclient'
 CHUNKSIZE = 1024 * 64  # 64kB
 
 API_VERSION = '/v1'
+API_VERSION_SELECTED_STATES = ('user', 'negotiated', 'default')
 
 
 def _trim_endpoint_api_version(url):
@@ -55,14 +65,93 @@ def _extract_error_json(body):
     return error_json
 
 
-class HTTPClient(object):
+class VersionNegotiationMixin(object):
+    def negotiate_version(self, conn, resp):
+        """Negotiate the server version
+
+        Assumption: Called after receiving a 406 error when doing a request.
+
+        param conn: A connection object
+        param resp: The response object from http request
+        """
+        if self.api_version_select_state not in API_VERSION_SELECTED_STATES:
+            raise RuntimeError(
+                'Error: self.api_version_select_state should be one of the '
+                'values in: "%(valid)s" but had the value: "%(value)s"' %
+                {'valid': ', '.join(API_VERSION_SELECTED_STATES),
+                 'value': self.api_version_select_state})
+        min_ver, max_ver = self._parse_version_headers(resp)
+        # NOTE: servers before commit 32fb6e99 did not return version headers
+        # on error, so we need to perform a GET to determine
+        # the supported version range
+        if not max_ver:
+            LOG.debug('No version header in response, requesting from server')
+            if self.os_ironic_api_version:
+                base_version = ("/v%s" %
+                                str(self.os_ironic_api_version).split('.')[0])
+            else:
+                base_version = API_VERSION
+            resp = self._make_simple_request(conn, 'GET', base_version)
+            min_ver, max_ver = self._parse_version_headers(resp)
+        # If the user requested an explicit version or we have negotiated a
+        # version and still failing then error now.  The server could
+        # support the version requested but the requested operation may not
+        # be supported by the requested version.
+        if self.api_version_select_state == 'user':
+            raise exc.UnsupportedVersion(textwrap.fill(
+                "Requested API version %(req)s is not supported by the "
+                "server or the requested operation is not supported by the "
+                "requested version.  Supported version range is %(min)s to "
+                "%(max)s"
+                % {'req': self.os_ironic_api_version,
+                   'min': min_ver, 'max': max_ver}))
+        if self.api_version_select_state == 'negotiated':
+            raise exc.UnsupportedVersion(textwrap.fill(
+                "No API version was specified and the requested operation was "
+                "not supported by the client's negotiated API version "
+                "%(req)s.  Supported version range is: %(min)s to %(max)s"
+                % {'req': self.os_ironic_api_version,
+                   'min': min_ver, 'max': max_ver}))
+
+        # TODO(deva): cache the negotiated version for this server
+        negotiated_ver = min(self.os_ironic_api_version, max_ver)
+        if negotiated_ver < min_ver:
+            negotiated_ver = min_ver
+        # server handles microversions, but doesn't support
+        # the requested version, so try a negotiated version
+        self.api_version_select_state = 'negotiated'
+        self.os_ironic_api_version = negotiated_ver
+        LOG.debug('Negotiated API version is %s', negotiated_ver)
+
+        return negotiated_ver
+
+    def _generic_parse_version_headers(self, accessor_func):
+        min_ver = accessor_func('X-OpenStack-Ironic-API-Minimum-Version',
+                                None)
+        max_ver = accessor_func('X-OpenStack-Ironic-API-Maximum-Version',
+                                None)
+        return min_ver, max_ver
+
+    def _parse_version_headers(self, accessor_func):
+        # NOTE(jlvillal): Declared for unit testing purposes
+        raise NotImplementedError()
+
+    def _make_simple_request(self, conn, method, url):
+        # NOTE(jlvillal): Declared for unit testing purposes
+        raise NotImplementedError()
+
+
+class HTTPClient(VersionNegotiationMixin):
 
     def __init__(self, endpoint, **kwargs):
         self.endpoint = endpoint
         self.endpoint_trimmed = _trim_endpoint_api_version(endpoint)
         self.auth_token = kwargs.get('token')
         self.auth_ref = kwargs.get('auth_ref')
-        self.os_ironic_api_version = kwargs.get('os_ironic_api_version')
+        self.os_ironic_api_version = kwargs.get('os_ironic_api_version',
+                                                DEFAULT_VER)
+        self.api_version_select_state = kwargs.get(
+            'api_version_select_state', 'default')
         self.connection_params = self.get_connection_params(endpoint, **kwargs)
 
     @staticmethod
@@ -138,6 +227,13 @@ class HTTPClient(object):
         base_url = _args[2]
         return '%s/%s' % (base_url, url.lstrip('/'))
 
+    def _parse_version_headers(self, resp):
+        return self._generic_parse_version_headers(resp.getheader)
+
+    def _make_simple_request(self, conn, method, url):
+        conn.request(method, self._make_connection_url(url))
+        return conn.getresponse()
+
     def _http_request(self, url, method, **kwargs):
         """Send an http request with the specified characteristics.
 
@@ -160,6 +256,17 @@ class HTTPClient(object):
             conn_url = self._make_connection_url(url)
             conn.request(method, conn_url, **kwargs)
             resp = conn.getresponse()
+
+            # TODO(deva): implement graceful client downgrade when connecting
+            # to servers that did not support microversions. Details here:
+            # http://specs.openstack.org/openstack/ironic-specs/specs/kilo/api-microversions.html#use-case-3b-new-client-communicating-with-a-old-ironic-user-specified  # noqa
+
+            if resp.status == 406:
+                negotiated_ver = self.negotiate_version(conn, resp)
+                kwargs['headers']['X-OpenStack-Ironic-API-Version'] = (
+                    negotiated_ver)
+                return self._http_request(url, method, **kwargs)
+
         except socket.gaierror as e:
             message = ("Error finding address for %(url)s: %(e)s"
                        % dict(url=url, e=e))
@@ -291,8 +398,15 @@ class VerifiedHTTPSConnection(six.moves.http_client.HTTPSConnection):
         return None
 
 
-class SessionClient(adapter.LegacyJsonAdapter):
+class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
     """HTTP client based on Keystone client session."""
+
+    def _parse_version_headers(self, resp):
+        return self._generic_parse_version_headers(resp.headers.get)
+
+    def _make_simple_request(self, conn, method, url):
+        # NOTE: conn is self.session for this class
+        return conn.request(url, method, raise_exc=False)
 
     def _http_request(self, url, method, **kwargs):
         kwargs.setdefault('user_agent', USER_AGENT)
@@ -308,6 +422,11 @@ class SessionClient(adapter.LegacyJsonAdapter):
 
         resp = self.session.request(url, method,
                                     raise_exc=False, **kwargs)
+        if resp.status_code == 406:
+            negotiated_ver = self.negotiate_version(self.session, resp)
+            kwargs['headers']['X-OpenStack-Ironic-API-Version'] = (
+                negotiated_ver)
+            return self._http_request(url, method, **kwargs)
         if 400 <= resp.status_code < 600:
             error_json = _extract_error_json(resp.content)
             raise exc.from_response(resp, error_json.get('faultstring'),
@@ -377,7 +496,8 @@ def _construct_http_client(*args, **kwargs):
         service_type = kwargs.pop('service_type', 'baremetal')
         interface = kwargs.pop('endpoint_type', None)
         region_name = kwargs.pop('region_name', None)
-        os_ironic_api_version = kwargs.pop('os_ironic_api_version', None)
+        os_ironic_api_version = kwargs.pop('os_ironic_api_version',
+                                           DEFAULT_VER)
         session_client = SessionClient(session=session,
                                        auth=auth,
                                        interface=interface,
@@ -387,6 +507,8 @@ def _construct_http_client(*args, **kwargs):
                                        user_agent='python-ironicclient')
         # Append an ironic specific variable to session
         session_client.os_ironic_api_version = os_ironic_api_version
+        session_client.api_version_select_state = (
+            kwargs.pop('api_version_select_state', 'default'))
         return session_client
     else:
         return HTTPClient(*args, **kwargs)
