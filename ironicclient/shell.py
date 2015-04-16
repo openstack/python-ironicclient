@@ -34,6 +34,7 @@ import six.moves.urllib.parse as urlparse
 
 import ironicclient
 from ironicclient import client as iroclient
+from ironicclient.common import http
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
@@ -220,6 +221,25 @@ class IronicShell(object):
 
         parser.add_argument('--os_endpoint_type',
                             help=argparse.SUPPRESS)
+
+        parser.add_argument('--max-retries', type=int,
+                            help='Maximum number of retries in case of '
+                            'conflict error (HTTP 409). '
+                            'Defaults to env[IRONIC_MAX_RETRIES] or %d. '
+                            'Use 0 to disable retrying.'
+                            % http.DEFAULT_MAX_RETRIES,
+                            default=cliutils.env(
+                                'IRONIC_MAX_RETRIES',
+                                default=str(http.DEFAULT_MAX_RETRIES)))
+
+        parser.add_argument('--retry-interval', type=int,
+                            help='Amount of time (in seconds) between retries '
+                            'in case of conflict error (HTTP 409). '
+                            'Defaults to env[IRONIC_RETRY_INTERVAL] or %d.'
+                            % http.DEFAULT_RETRY_INTERVAL,
+                            default=cliutils.env(
+                                'IRONIC_RETRY_INTERVAL',
+                                default=str(http.DEFAULT_RETRY_INTERVAL)))
 
         # FIXME(gyee): this method should come from python-keystoneclient.
         # Will refactor this code once it is available.
@@ -502,6 +522,14 @@ class IronicShell(object):
                 'password': args.os_password,
             }
         kwargs['os_ironic_api_version'] = os_ironic_api_version
+        if args.max_retries < 0:
+            raise exc.CommandError(_("You must provide value >= 0 for "
+                                     "--max-retries"))
+        if args.retry_interval < 1:
+            raise exc.CommandError(_("You must provide value >= 1 for "
+                                     "--retry-interval"))
+        kwargs['max_retries'] = args.max_retries
+        kwargs['retry_interval'] = args.retry_interval
         client = iroclient.Client(api_major_version, endpoint, **kwargs)
 
         try:

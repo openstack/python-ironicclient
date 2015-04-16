@@ -16,12 +16,14 @@
 #    under the License.
 
 import copy
+import functools
 import json
 import logging
 import os
 import socket
 import ssl
 import textwrap
+import time
 
 from keystoneclient import adapter
 import six
@@ -44,6 +46,10 @@ CHUNKSIZE = 1024 * 64  # 64kB
 
 API_VERSION = '/v1'
 API_VERSION_SELECTED_STATES = ('user', 'negotiated', 'default')
+
+
+DEFAULT_MAX_RETRIES = 5
+DEFAULT_RETRY_INTERVAL = 2
 
 
 def _trim_endpoint_api_version(url):
@@ -141,6 +147,35 @@ class VersionNegotiationMixin(object):
         raise NotImplementedError()
 
 
+def with_retries(func):
+    """Wrapper for _http_request adding support for retries."""
+    @functools.wraps(func)
+    def wrapper(self, url, method, **kwargs):
+        if self.conflict_max_retries is None:
+            self.conflict_max_retries = DEFAULT_MAX_RETRIES
+        if self.conflict_retry_interval is None:
+            self.conflict_retry_interval = DEFAULT_RETRY_INTERVAL
+
+        num_attempts = self.conflict_max_retries + 1
+        for attempt in range(1, num_attempts + 1):
+            try:
+                return func(self, url, method, **kwargs)
+            except exc.Conflict as error:
+                msg = ("Error contacting Ironic server: %(error)s. "
+                       "Attempt %(attempt)d of %(total)d" %
+                       {'attempt': attempt,
+                        'total': num_attempts,
+                        'error': error})
+                if attempt == num_attempts:
+                    LOG.error(msg)
+                    raise
+                else:
+                    LOG.warn(msg)
+                    time.sleep(self.conflict_retry_interval)
+
+    return wrapper
+
+
 class HTTPClient(VersionNegotiationMixin):
 
     def __init__(self, endpoint, **kwargs):
@@ -152,6 +187,10 @@ class HTTPClient(VersionNegotiationMixin):
                                                 DEFAULT_VER)
         self.api_version_select_state = kwargs.get(
             'api_version_select_state', 'default')
+        self.conflict_max_retries = kwargs.pop('max_retries',
+                                               DEFAULT_MAX_RETRIES)
+        self.conflict_retry_interval = kwargs.pop('retry_interval',
+                                                  DEFAULT_RETRY_INTERVAL)
         self.connection_params = self.get_connection_params(endpoint, **kwargs)
 
     @staticmethod
@@ -234,6 +273,7 @@ class HTTPClient(VersionNegotiationMixin):
         conn.request(method, self._make_connection_url(url))
         return conn.getresponse()
 
+    @with_retries
     def _http_request(self, url, method, **kwargs):
         """Send an http request with the specified characteristics.
 
@@ -401,6 +441,9 @@ class VerifiedHTTPSConnection(six.moves.http_client.HTTPSConnection):
 class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
     """HTTP client based on Keystone client session."""
 
+    conflict_max_retries = DEFAULT_MAX_RETRIES
+    conflict_retry_interval = DEFAULT_RETRY_INTERVAL
+
     def _parse_version_headers(self, resp):
         return self._generic_parse_version_headers(resp.headers.get)
 
@@ -408,6 +451,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         # NOTE: conn is self.session for this class
         return conn.request(url, method, raise_exc=False)
 
+    @with_retries
     def _http_request(self, url, method, **kwargs):
         kwargs.setdefault('user_agent', USER_AGENT)
         kwargs.setdefault('auth', self.auth)
@@ -509,6 +553,8 @@ def _construct_http_client(*args, **kwargs):
         session_client.os_ironic_api_version = os_ironic_api_version
         session_client.api_version_select_state = (
             kwargs.pop('api_version_select_state', 'default'))
+        session_client.conflict_max_retries = kwargs.get('max_retries')
+        session_client.conflict_retry_interval = kwargs.get('retry_interval')
         return session_client
     else:
         return HTTPClient(*args, **kwargs)

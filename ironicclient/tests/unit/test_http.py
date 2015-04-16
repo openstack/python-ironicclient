@@ -397,7 +397,7 @@ class HttpClientTest(utils.BaseTestCase):
                                         utils.FakeConnection(good_resp)])
         response, body_iter = client._http_request('/v1/resources', 'GET')
         self.assertEqual(200, response.status)
-        self.assertTrue(1, mock_negotiate.call_count)
+        self.assertEqual(1, mock_negotiate.call_count)
 
 
 class SessionClientTest(utils.BaseTestCase):
@@ -467,3 +467,184 @@ class SessionClientTest(utils.BaseTestCase):
                                     service_name=None)
         result = client._parse_version_headers(fake_session)
         self.assertEqual(expected_result, result)
+
+
+class RetriesTestCase(utils.BaseTestCase):
+    def setUp(self):
+        super(RetriesTestCase, self).setUp()
+        old_retry_delay = http.DEFAULT_RETRY_INTERVAL
+        http.DEFAULT_RETRY_INTERVAL = 0.001
+        http.SessionClient.conflict_retry_interval = 0.001
+        self.addCleanup(setattr, http, 'DEFAULT_RETRY_INTERVAL',
+                        old_retry_delay)
+        self.addCleanup(setattr, http.SessionClient, 'conflict_retry_interval',
+                        old_retry_delay)
+
+    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
+    def test_http_no_retry(self, mock_getcon):
+        error_body = _get_error_body()
+        bad_resp = utils.FakeResponse(
+            {'content-type': 'text/plain'},
+            six.StringIO(error_body),
+            version=1,
+            status=409)
+        client = http.HTTPClient('http://localhost/', max_retries=0)
+        mock_getcon.return_value = utils.FakeConnection(bad_resp)
+        self.assertRaises(exc.Conflict, client._http_request,
+                          '/v1/resources', 'GET')
+        self.assertEqual(1, mock_getcon.call_count)
+
+    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
+    def test_http_retry(self, mock_getcon):
+        error_body = _get_error_body()
+        bad_resp = utils.FakeResponse(
+            {'content-type': 'text/plain'},
+            six.StringIO(error_body),
+            version=1,
+            status=409)
+        good_resp = utils.FakeResponse(
+            {'content-type': 'text/plain'},
+            six.StringIO("meow"),
+            version=1,
+            status=200)
+        client = http.HTTPClient('http://localhost/')
+        mock_getcon.side_effect = iter((utils.FakeConnection(bad_resp),
+                                        utils.FakeConnection(good_resp)))
+        response, body_iter = client._http_request('/v1/resources', 'GET')
+        self.assertEqual(200, response.status)
+        self.assertEqual(2, mock_getcon.call_count)
+
+    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
+    def test_http_failed_retry(self, mock_getcon):
+        error_body = _get_error_body()
+        bad_resp = utils.FakeResponse(
+            {'content-type': 'text/plain'},
+            six.StringIO(error_body),
+            version=1,
+            status=409)
+        client = http.HTTPClient('http://localhost/')
+        mock_getcon.return_value = utils.FakeConnection(bad_resp)
+        self.assertRaises(exc.Conflict, client._http_request,
+                          '/v1/resources', 'GET')
+        self.assertEqual(http.DEFAULT_MAX_RETRIES + 1, mock_getcon.call_count)
+
+    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
+    def test_http_max_retries_none(self, mock_getcon):
+        error_body = _get_error_body()
+        bad_resp = utils.FakeResponse(
+            {'content-type': 'text/plain'},
+            six.StringIO(error_body),
+            version=1,
+            status=409)
+        client = http.HTTPClient('http://localhost/', max_retries=None)
+        mock_getcon.return_value = utils.FakeConnection(bad_resp)
+        self.assertRaises(exc.Conflict, client._http_request,
+                          '/v1/resources', 'GET')
+        self.assertEqual(http.DEFAULT_MAX_RETRIES + 1, mock_getcon.call_count)
+
+    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
+    def test_http_change_max_retries(self, mock_getcon):
+        error_body = _get_error_body()
+        bad_resp = utils.FakeResponse(
+            {'content-type': 'text/plain'},
+            six.StringIO(error_body),
+            version=1,
+            status=409)
+        client = http.HTTPClient('http://localhost/',
+                                 max_retries=http.DEFAULT_MAX_RETRIES + 1)
+        mock_getcon.return_value = utils.FakeConnection(bad_resp)
+        self.assertRaises(exc.Conflict, client._http_request,
+                          '/v1/resources', 'GET')
+        self.assertEqual(http.DEFAULT_MAX_RETRIES + 2, mock_getcon.call_count)
+
+    def test_session_retry(self):
+        error_body = _get_error_body()
+
+        fake_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'application/json'},
+            error_body,
+            409)
+        ok_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'application/json'},
+            b"OK",
+            200)
+        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session.request.side_effect = iter((fake_resp, ok_resp))
+
+        client = http.SessionClient(session=fake_session,
+                                    auth=None,
+                                    interface=None,
+                                    service_type='publicURL',
+                                    region_name='',
+                                    service_name=None)
+
+        client.json_request('GET', '/v1/resources')
+        self.assertEqual(2, fake_session.request.call_count)
+
+    def test_session_retry_fail(self):
+        error_body = _get_error_body()
+
+        fake_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'application/json'},
+            error_body,
+            409)
+        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session.request.return_value = fake_resp
+
+        client = http.SessionClient(session=fake_session,
+                                    auth=None,
+                                    interface=None,
+                                    service_type='publicURL',
+                                    region_name='',
+                                    service_name=None)
+
+        self.assertRaises(exc.Conflict, client.json_request,
+                          'GET', '/v1/resources')
+        self.assertEqual(http.DEFAULT_MAX_RETRIES + 1,
+                         fake_session.request.call_count)
+
+    def test_session_max_retries_none(self):
+        error_body = _get_error_body()
+
+        fake_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'application/json'},
+            error_body,
+            409)
+        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session.request.return_value = fake_resp
+
+        client = http.SessionClient(session=fake_session,
+                                    auth=None,
+                                    interface=None,
+                                    service_type='publicURL',
+                                    region_name='',
+                                    service_name=None)
+        client.conflict_max_retries = None
+
+        self.assertRaises(exc.Conflict, client.json_request,
+                          'GET', '/v1/resources')
+        self.assertEqual(http.DEFAULT_MAX_RETRIES + 1,
+                         fake_session.request.call_count)
+
+    def test_session_change_max_retries(self):
+        error_body = _get_error_body()
+
+        fake_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'application/json'},
+            error_body,
+            409)
+        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session.request.return_value = fake_resp
+
+        client = http.SessionClient(session=fake_session,
+                                    auth=None,
+                                    interface=None,
+                                    service_type='publicURL',
+                                    region_name='',
+                                    service_name=None)
+        client.conflict_max_retries = http.DEFAULT_MAX_RETRIES + 1
+
+        self.assertRaises(exc.Conflict, client.json_request,
+                          'GET', '/v1/resources')
+        self.assertEqual(http.DEFAULT_MAX_RETRIES + 2,
+                         fake_session.request.call_count)
