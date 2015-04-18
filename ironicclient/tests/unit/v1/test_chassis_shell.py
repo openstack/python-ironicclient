@@ -16,6 +16,7 @@
 
 import mock
 
+from ironicclient.openstack.common.apiclient import exceptions
 from ironicclient.openstack.common import cliutils
 from ironicclient.tests.unit import utils
 import ironicclient.v1.chassis_shell as c_shell
@@ -31,3 +32,19 @@ class ChassisShellTest(utils.BaseTestCase):
         exp = ['created_at', 'description', 'extra', 'updated_at', 'uuid']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
+
+    def test_do_chassis_show_space_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.chassis = '   '
+        self.assertRaises(exceptions.CommandError,
+                          c_shell.do_chassis_show,
+                          client_mock, args)
+
+    def test_do_chassis_show_empty_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.chassis = ''
+        self.assertRaises(exceptions.CommandError,
+                          c_shell.do_chassis_show,
+                          client_mock, args)

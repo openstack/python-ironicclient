@@ -17,6 +17,7 @@
 import mock
 
 from ironicclient.common import utils as commonutils
+from ironicclient.openstack.common.apiclient import exceptions
 from ironicclient.openstack.common import cliutils
 from ironicclient.tests.unit import utils
 import ironicclient.v1.port_shell as p_shell
@@ -45,6 +46,24 @@ class PortShellTest(utils.BaseTestCase):
         client_mock.port.get.assert_called_once_with('port_uuid')
         # assert get_by_address() wasn't called
         self.assertFalse(client_mock.port.get_by_address.called)
+
+    def test_do_port_show_space_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.port = '   '
+        args.address = False
+        self.assertRaises(exceptions.CommandError,
+                          p_shell.do_port_show,
+                          client_mock, args)
+
+    def test_do_port_show_empty_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.port = ''
+        args.address = False
+        self.assertRaises(exceptions.CommandError,
+                          p_shell.do_port_show,
+                          client_mock, args)
 
     def test_do_port_show_by_address(self):
         client_mock = mock.MagicMock()

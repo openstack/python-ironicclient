@@ -179,6 +179,42 @@ class NodeShellTest(utils.BaseTestCase):
         # assert get() wasn't called
         self.assertFalse(client_mock.node.get.called)
 
+    def test_do_node_show_by_space_node_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = '   '
+        args.instance_uuid = False
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_show,
+                          client_mock, args)
+
+    def test_do_node_show_by_space_instance_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = '   '
+        args.instance_uuid = True
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_show,
+                          client_mock, args)
+
+    def test_do_node_show_by_empty_node_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = ''
+        args.instance_uuid = False
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_show,
+                          client_mock, args)
+
+    def test_do_node_show_by_empty_instance_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = ''
+        args.instance_uuid = True
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_show,
+                          client_mock, args)
+
     def test_do_node_set_maintenance_true(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()

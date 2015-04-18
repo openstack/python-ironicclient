@@ -44,6 +44,7 @@ def _print_node_show(node):
     help='<id> is an instance UUID.')
 def do_node_show(cc, args):
     """Show detailed information about a node."""
+    utils.check_empty_arg(args.node, '<id>')
     if args.instance_uuid:
         node = cc.node.get_by_instance_uuid(args.node)
     else:
