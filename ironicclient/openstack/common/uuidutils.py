@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2012 Intel Corporation.
 # All Rights Reserved.
 #
