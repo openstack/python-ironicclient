@@ -29,6 +29,8 @@ from keystoneclient.auth.identity import v3 as v3_auth
 from keystoneclient import discover
 from keystoneclient.openstack.common.apiclient import exceptions as ks_exc
 from keystoneclient import session as kssession
+from oslo_utils import encodeutils
+import six
 import six.moves.urllib.parse as urlparse
 
 
@@ -565,7 +567,7 @@ def main():
         print("... terminating ironic client", file=sys.stderr)
         sys.exit(130)
     except Exception as e:
-        print(str(e), file=sys.stderr)
+        print(encodeutils.safe_encode(six.text_type(e)), file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
