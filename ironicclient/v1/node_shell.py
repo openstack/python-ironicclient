@@ -15,6 +15,7 @@
 
 import argparse
 
+import copy
 import six
 
 from ironicclient.common.i18n import _
@@ -96,16 +97,25 @@ def do_node_list(cc, args):
         params['maintenance'] = args.maintenance
     params['detail'] = args.detail
 
+    # The server cannot sort on "chassis_uuid" because it isn't a
+    # column in the "nodes" database table. "chassis_id" is stored,
+    # but it is internal to ironic. See bug #1443003 for more details.
     if args.detail:
         fields = res_fields.NODE_FIELDS
         field_labels = res_fields.NODE_FIELD_LABELS
+        sort_fields = copy.deepcopy(fields)
+        sort_field_labels = copy.deepcopy(field_labels)
+        sort_fields.remove('chassis_uuid')
+        sort_field_labels.remove('Chassis UUID')
     else:
         fields = res_fields.NODE_LIST_FIELDS
         field_labels = res_fields.NODE_LIST_FIELD_LABELS
+        sort_fields = fields
+        sort_field_labels = field_labels
 
     params.update(utils.common_params_for_list(args,
-                                               fields,
-                                               field_labels))
+                                               sort_fields,
+                                               sort_field_labels))
     nodes = cc.node.list(**params)
     cliutils.print_list(nodes, fields,
                         field_labels=field_labels,

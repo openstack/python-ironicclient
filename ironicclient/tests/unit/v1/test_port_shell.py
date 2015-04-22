@@ -84,3 +84,67 @@ class PortShellTest(utils.BaseTestCase):
         p_shell.do_port_update(client_mock, args)
         patch = commonutils.args_array_to_patch(args.op, args.attributes[0])
         client_mock.port.update.assert_called_once_with('port_uuid', patch)
+
+    def _get_client_mock_args(self, address=None, marker=None, limit=None,
+                              sort_dir=None, sort_key=None, detail=False):
+        args = mock.MagicMock()
+        args.address = address
+        args.marker = marker
+        args.limit = limit
+        args.sort_dir = sort_dir
+        args.sort_key = sort_key
+        args.detail = detail
+
+        return args
+
+    def test_do_port_list(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args()
+
+        p_shell.do_port_list(client_mock, args)
+        client_mock.port.list.assert_called_once_with(detail=False)
+
+    def test_do_port_list_detail(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(detail=True)
+
+        p_shell.do_port_list(client_mock, args)
+        client_mock.port.list.assert_called_once_with(detail=True)
+
+    def test_do_port_list_sort_key(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(sort_key='uuid',
+                                          detail=False)
+
+        p_shell.do_port_list(client_mock, args)
+        client_mock.port.list.assert_called_once_with(sort_key='uuid',
+                                                      detail=False)
+
+    def test_do_port_list_wrong_sort_key(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(sort_key='node_uuid',
+                                          detail=False)
+
+        self.assertRaises(exceptions.CommandError,
+                          p_shell.do_port_list,
+                          client_mock, args)
+        self.assertFalse(client_mock.port.list.called)
+
+    def test_do_port_list_detail_sort_key(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(sort_key='uuid',
+                                          detail=True)
+
+        p_shell.do_port_list(client_mock, args)
+        client_mock.port.list.assert_called_once_with(sort_key='uuid',
+                                                      detail=True)
+
+    def test_do_port_list_detail_wrong_sort_key(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(sort_key='node_uuid',
+                                          detail=True)
+
+        self.assertRaises(exceptions.CommandError,
+                          p_shell.do_port_list,
+                          client_mock, args)
+        self.assertFalse(client_mock.port.list.called)

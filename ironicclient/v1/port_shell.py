@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 from ironicclient.common import utils
 from ironicclient.openstack.common import cliutils
 from ironicclient.v1 import resource_fields as res_fields
@@ -82,16 +84,26 @@ def do_port_list(cc, args):
 
     if args.address is not None:
         params['address'] = args.address
+
+    # The server cannot sort on "node_uuid" because it isn't a
+    # column in the "ports" database table. "node_id" is stored,
+    # but it is internal to ironic. See bug #1443003 for more details.
     if args.detail:
         fields = res_fields.PORT_FIELDS
         field_labels = res_fields.PORT_FIELD_LABELS
+        sort_fields = copy.deepcopy(fields)
+        sort_field_labels = copy.deepcopy(field_labels)
+        sort_fields.remove('node_uuid')
+        sort_field_labels.remove('Node UUID')
     else:
         fields = res_fields.PORT_LIST_FIELDS
         field_labels = res_fields.PORT_LIST_FIELD_LABELS
+        sort_fields = fields
+        sort_field_labels = field_labels
 
     params.update(utils.common_params_for_list(args,
-                                               fields,
-                                               field_labels))
+                                               sort_fields,
+                                               sort_field_labels))
 
     port = cc.port.list(**params)
     cliutils.print_list(port, fields,
