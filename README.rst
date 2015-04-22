@@ -69,9 +69,10 @@ available, run::
 
     ironic help
 
-For more information, see:
-
-    `<http://docs.openstack.org/developer/python-ironicclient/>`_.
+* License: Apache License, Version 2.0
+* Documentation: http://docs.openstack.org/developer/python-ironicclient
+* Source: http://git.openstack.org/cgit/openstack/python-ironicclient
+* Bugs: http://bugs.launchpad.net/python-ironicclient
 
 Change logs with information about specific versions (or tags) are
 available at:
