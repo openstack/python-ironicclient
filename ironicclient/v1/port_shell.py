@@ -40,6 +40,7 @@ def do_port_show(cc, args):
     if args.address:
         port = cc.port.get_by_address(args.port)
     else:
+        utils.check_empty_arg(args.port, '<id>')
         port = cc.port.get(args.port)
     _print_port_show(port)
 

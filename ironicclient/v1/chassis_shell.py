@@ -27,6 +27,7 @@ def _print_chassis_show(chassis):
 @cliutils.arg('chassis', metavar='<chassis>', help="UUID of the chassis.")
 def do_chassis_show(cc, args):
     """Show detailed information about a chassis."""
+    utils.check_empty_arg(args.chassis, '<chassis>')
     chassis = cc.chassis.get(args.chassis)
     _print_chassis_show(chassis)
 

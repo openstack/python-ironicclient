@@ -243,3 +243,9 @@ def make_configdrive(path):
 
             tmpzipfile.seek(0)
             return base64.b64encode(tmpzipfile.read())
+
+
+def check_empty_arg(arg, arg_descriptor):
+    if not arg.strip():
+        raise exc.CommandError(_('%(arg)s cannot be empty or only have blank'
+                                 ' spaces') % {'arg': arg_descriptor})
