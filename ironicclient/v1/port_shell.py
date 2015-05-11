@@ -84,13 +84,13 @@ def do_port_list(cc, args):
         params['address'] = args.address
 
     if args.detail:
-        fields = res_fields.PORT_FIELDS
-        field_labels = res_fields.PORT_FIELD_LABELS
-        sort_fields = res_fields.PORT_SORT_FIELDS
-        sort_field_labels = res_fields.PORT_SORT_FIELD_LABELS
+        fields = res_fields.PORT_DETAILED_RESOURCE.fields
+        field_labels = res_fields.PORT_DETAILED_RESOURCE.labels
+        sort_fields = res_fields.PORT_DETAILED_RESOURCE.sort_fields
+        sort_field_labels = res_fields.PORT_DETAILED_RESOURCE.sort_labels
     else:
-        fields = res_fields.PORT_LIST_FIELDS
-        field_labels = res_fields.PORT_LIST_FIELD_LABELS
+        fields = res_fields.PORT_RESOURCE.fields
+        field_labels = res_fields.PORT_RESOURCE.labels
         sort_fields = fields
         sort_field_labels = field_labels
 

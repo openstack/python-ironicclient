@@ -25,7 +25,9 @@ from ironicclient.v1 import resource_fields as res_fields
 
 
 def _print_node_show(node):
-    data = dict([(f, getattr(node, f, '')) for f in res_fields.NODE_FIELDS])
+    data = dict(
+        [(f, getattr(node, f, ''))
+         for f in res_fields.NODE_DETAILED_RESOURCE.fields])
     cliutils.print_dict(data, wrap=72)
 
 
@@ -97,13 +99,13 @@ def do_node_list(cc, args):
     params['detail'] = args.detail
 
     if args.detail:
-        fields = res_fields.NODE_FIELDS
-        field_labels = res_fields.NODE_FIELD_LABELS
-        sort_fields = res_fields.NODE_SORT_FIELDS
-        sort_field_labels = res_fields.NODE_SORT_FIELD_LABELS
+        fields = res_fields.NODE_DETAILED_RESOURCE.fields
+        field_labels = res_fields.NODE_DETAILED_RESOURCE.labels
+        sort_fields = res_fields.NODE_DETAILED_RESOURCE.sort_fields
+        sort_field_labels = res_fields.NODE_DETAILED_RESOURCE.sort_labels
     else:
-        fields = res_fields.NODE_LIST_FIELDS
-        field_labels = res_fields.NODE_LIST_FIELD_LABELS
+        fields = res_fields.NODE_RESOURCE.fields
+        field_labels = res_fields.NODE_RESOURCE.labels
         sort_fields = fields
         sort_field_labels = field_labels
 
@@ -277,11 +279,11 @@ def do_node_vendor_passthru(cc, args):
 def do_node_port_list(cc, args):
     """List the ports associated with a node."""
     if args.detail:
-        fields = res_fields.PORT_FIELDS
-        field_labels = res_fields.PORT_FIELD_LABELS
+        fields = res_fields.PORTS_DETAILED_RESOURCE.fields
+        field_labels = res_fields.PORTS_DETAILED_RESOURCE.labels
     else:
-        fields = res_fields.PORT_LIST_FIELDS
-        field_labels = res_fields.PORT_LIST_FIELD_LABELS
+        fields = res_fields.PORT_RESOURCE.fields
+        field_labels = res_fields.PORT_RESOURCE.labels
 
     params = utils.common_params_for_list(args, fields, field_labels)
 

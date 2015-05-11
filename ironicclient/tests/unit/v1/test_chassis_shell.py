@@ -21,6 +21,18 @@ import ironicclient.v1.chassis_shell as c_shell
 
 
 class ChassisShellTest(utils.BaseTestCase):
+    def _get_client_mock_args(self, chassis=None, marker=None, limit=None,
+                              sort_dir=None, sort_key=None, detail=False):
+        args = mock.MagicMock()
+        args.chassis = chassis
+        args.marker = marker
+        args.limit = limit
+        args.sort_dir = sort_dir
+        args.sort_key = sort_key
+        args.detail = detail
+
+        return args
+
     def test_chassis_show(self):
         actual = {}
         fake_print_dict = lambda data, *args, **kwargs: actual.update(data)
@@ -46,17 +58,6 @@ class ChassisShellTest(utils.BaseTestCase):
         self.assertRaises(exceptions.CommandError,
                           c_shell.do_chassis_show,
                           client_mock, args)
-
-    def _get_client_mock_args(self, marker=None, limit=None, sort_dir=None,
-                              sort_key=None, detail=False):
-        args = mock.MagicMock()
-        args.marker = marker
-        args.limit = limit
-        args.sort_dir = sort_dir
-        args.sort_key = sort_key
-        args.detail = detail
-
-        return args
 
     def test_do_chassis_list(self):
         client_mock = mock.MagicMock()
@@ -109,3 +110,21 @@ class ChassisShellTest(utils.BaseTestCase):
                           c_shell.do_chassis_list,
                           client_mock, args)
         self.assertFalse(client_mock.chassis.list.called)
+
+    def test_do_chassis_node_list(self):
+        client_mock = mock.MagicMock()
+        chassis_mock = mock.MagicMock(spec_set=[])
+        args = self._get_client_mock_args(chassis=chassis_mock)
+
+        c_shell.do_chassis_node_list(client_mock, args)
+        client_mock.chassis.list_nodes.assert_called_once_with(
+            chassis_mock, detail=False)
+
+    def test_do_chassis_node_list_details(self):
+        client_mock = mock.MagicMock()
+        chassis_mock = mock.MagicMock(spec_set=[])
+        args = self._get_client_mock_args(chassis=chassis_mock, detail=True)
+
+        c_shell.do_chassis_node_list(client_mock, args)
+        client_mock.chassis.list_nodes.assert_called_once_with(
+            chassis_mock, detail=True)

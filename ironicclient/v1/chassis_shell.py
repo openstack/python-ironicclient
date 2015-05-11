@@ -63,13 +63,13 @@ def do_chassis_show(cc, args):
 def do_chassis_list(cc, args):
     """List the chassis."""
     if args.detail:
-        fields = res_fields.CHASSIS_FIELDS
-        field_labels = res_fields.CHASSIS_FIELD_LABELS
-        sort_fields = res_fields.CHASSIS_SORT_FIELDS
-        sort_field_labels = res_fields.CHASSIS_SORT_FIELD_LABELS
+        fields = res_fields.CHASSIS_DETAILED_RESOURCE.fields
+        field_labels = res_fields.CHASSIS_DETAILED_RESOURCE.labels
+        sort_fields = res_fields.CHASSIS_DETAILED_RESOURCE.sort_fields
+        sort_field_labels = res_fields.CHASSIS_DETAILED_RESOURCE.sort_labels
     else:
-        fields = res_fields.CHASSIS_LIST_FIELDS
-        field_labels = res_fields.CHASSIS_LIST_FIELD_LABELS
+        fields = res_fields.CHASSIS_RESOURCE.fields
+        field_labels = res_fields.CHASSIS_RESOURCE.labels
         sort_fields = fields
         sort_field_labels = field_labels
 
@@ -169,11 +169,11 @@ def do_chassis_update(cc, args):
 def do_chassis_node_list(cc, args):
     """List the nodes contained in a chassis."""
     if args.detail:
-        fields = res_fields.NODE_FIELDS
-        field_labels = res_fields.NODE_FIELD_LABELS
+        fields = res_fields.NODE_DETAILED_RESOURCE.fields
+        field_labels = res_fields.NODE_DETAILED_RESOURCE.labels
     else:
-        fields = res_fields.NODE_LIST_FIELDS
-        field_labels = res_fields.NODE_LIST_FIELD_LABELS
+        fields = res_fields.NODE_RESOURCE.fields
+        field_labels = res_fields.NODE_RESOURCE.labels
 
     params = utils.common_params_for_list(args, fields, field_labels)
 
