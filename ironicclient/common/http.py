@@ -439,8 +439,18 @@ class VerifiedHTTPSConnection(six.moves.http_client.HTTPSConnection):
 class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
     """HTTP client based on Keystone client session."""
 
-    conflict_max_retries = DEFAULT_MAX_RETRIES
-    conflict_retry_interval = DEFAULT_RETRY_INTERVAL
+    def __init__(self,
+                 os_ironic_api_version,
+                 api_version_select_state,
+                 max_retries,
+                 retry_interval,
+                 **kwargs):
+        self.os_ironic_api_version = os_ironic_api_version
+        self.api_version_select_state = api_version_select_state
+        self.conflict_max_retries = max_retries
+        self.conflict_retry_interval = retry_interval
+
+        super(SessionClient, self).__init__(**kwargs)
 
     def _parse_version_headers(self, resp):
         return self._generic_parse_version_headers(resp.headers.get)
@@ -530,29 +540,61 @@ class ResponseBodyIterator(object):
             raise StopIteration()
 
 
-def _construct_http_client(*args, **kwargs):
-    session = kwargs.pop('session', None)
-    auth = kwargs.pop('auth', None)
-
+def _construct_http_client(endpoint,
+                           session=None,
+                           token=None,
+                           auth_ref=None,
+                           os_ironic_api_version=DEFAULT_VER,
+                           api_version_select_state='default',
+                           max_retries=DEFAULT_MAX_RETRIES,
+                           retry_interval=DEFAULT_RETRY_INTERVAL,
+                           timeout=600,
+                           ca_file=None,
+                           cert_file=None,
+                           key_file=None,
+                           insecure=None,
+                           **kwargs):
     if session:
-        service_type = kwargs.pop('service_type', 'baremetal')
-        interface = kwargs.pop('endpoint_type', None)
-        region_name = kwargs.pop('region_name', None)
-        os_ironic_api_version = kwargs.pop('os_ironic_api_version',
-                                           DEFAULT_VER)
-        session_client = SessionClient(session=session,
-                                       auth=auth,
-                                       interface=interface,
-                                       service_type=service_type,
-                                       region_name=region_name,
-                                       service_name=None,
-                                       user_agent='python-ironicclient')
-        # Append an ironic specific variable to session
-        session_client.os_ironic_api_version = os_ironic_api_version
-        session_client.api_version_select_state = (
-            kwargs.pop('api_version_select_state', 'default'))
-        session_client.conflict_max_retries = kwargs.get('max_retries')
-        session_client.conflict_retry_interval = kwargs.get('retry_interval')
-        return session_client
+        kwargs.setdefault('service_type', 'baremetal')
+        kwargs.setdefault('user_agent', 'python-ironicclient')
+        kwargs.setdefault('interface', kwargs.pop('endpoint_type', None))
+        kwargs.setdefault('endpoint_override', endpoint)
+
+        ignored = {'token': token,
+                   'auth_ref': auth_ref,
+                   'timeout': timeout != 600,
+                   'ca_file': ca_file,
+                   'cert_file': cert_file,
+                   'key_file': key_file,
+                   'insecure': insecure}
+
+        dvars = [k for k, v in six.iteritems(ignored) if v]
+
+        if dvars:
+            LOG.warn('The following arguments are ignored when using the '
+                     'session to construct a client: %s', ', '.join(dvars))
+
+        return SessionClient(session=session,
+                             os_ironic_api_version=os_ironic_api_version,
+                             api_version_select_state=api_version_select_state,
+                             max_retries=max_retries,
+                             retry_interval=retry_interval,
+                             **kwargs)
+
     else:
-        return HTTPClient(*args, **kwargs)
+        if kwargs:
+            LOG.warn('The following arguments are being ignored when '
+                     'constructing the client: %s', ', '.join(kwargs))
+
+        return HTTPClient(endpoint=endpoint,
+                          token=token,
+                          auth_ref=auth_ref,
+                          os_ironic_api_version=os_ironic_api_version,
+                          api_version_select_state=api_version_select_state,
+                          max_retries=max_retries,
+                          retry_interval=retry_interval,
+                          timeout=timeout,
+                          ca_file=ca_file,
+                          cert_file=cert_file,
+                          key_file=key_file,
+                          insecure=insecure)

@@ -515,14 +515,11 @@ class IronicShell(object):
 
             endpoint_type = args.os_endpoint_type or 'publicURL'
             kwargs = {
-                'auth_url': args.os_auth_url,
                 'session': keystone_session,
                 'auth': keystone_auth,
                 'service_type': service_type,
                 'endpoint_type': endpoint_type,
                 'region_name': args.os_region_name,
-                'username': args.os_username,
-                'password': args.os_password,
             }
         kwargs['os_ironic_api_version'] = os_ironic_api_version
         if args.max_retries < 0:

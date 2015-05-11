@@ -39,6 +39,18 @@ def _get_error_body(faultstring=None, debuginfo=None):
     return raw_body
 
 
+def _session_client(**kwargs):
+    return http.SessionClient(os_ironic_api_version='1.6',
+                              api_version_select_state='default',
+                              max_retries=5,
+                              retry_interval=2,
+                              auth=None,
+                              interface=None,
+                              service_type='publicURL',
+                              region_name='',
+                              **kwargs)
+
+
 class VersionNegotiationMixinTest(utils.BaseTestCase):
 
     def setUp(self):
@@ -410,12 +422,7 @@ class SessionClientTest(utils.BaseTestCase):
                                          error_body,
                                          500)
 
-        client = http.SessionClient(session=fake_session,
-                                    auth=None,
-                                    interface=None,
-                                    service_type='publicURL',
-                                    region_name='',
-                                    service_name=None)
+        client = _session_client(session=fake_session)
 
         error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
@@ -434,12 +441,7 @@ class SessionClientTest(utils.BaseTestCase):
                                          error_body,
                                          500)
 
-        client = http.SessionClient(session=fake_session,
-                                    auth=None,
-                                    interface=None,
-                                    service_type='publicURL',
-                                    region_name='',
-                                    service_name=None)
+        client = _session_client(session=fake_session)
 
         error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
@@ -457,12 +459,7 @@ class SessionClientTest(utils.BaseTestCase):
             None,
             506)
         expected_result = ('1.1', '1.6')
-        client = http.SessionClient(session=fake_session,
-                                    auth=None,
-                                    interface=None,
-                                    service_type='publicURL',
-                                    region_name='',
-                                    service_name=None)
+        client = _session_client(session=fake_session)
         result = client._parse_version_headers(fake_session)
         self.assertEqual(expected_result, result)
 
@@ -569,13 +566,7 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.side_effect = iter((fake_resp, ok_resp))
 
-        client = http.SessionClient(session=fake_session,
-                                    auth=None,
-                                    interface=None,
-                                    service_type='publicURL',
-                                    region_name='',
-                                    service_name=None)
-
+        client = _session_client(session=fake_session)
         client.json_request('GET', '/v1/resources')
         self.assertEqual(2, fake_session.request.call_count)
 
@@ -589,12 +580,7 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.return_value = fake_resp
 
-        client = http.SessionClient(session=fake_session,
-                                    auth=None,
-                                    interface=None,
-                                    service_type='publicURL',
-                                    region_name='',
-                                    service_name=None)
+        client = _session_client(session=fake_session)
 
         self.assertRaises(exc.Conflict, client.json_request,
                           'GET', '/v1/resources')
@@ -611,12 +597,7 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.return_value = fake_resp
 
-        client = http.SessionClient(session=fake_session,
-                                    auth=None,
-                                    interface=None,
-                                    service_type='publicURL',
-                                    region_name='',
-                                    service_name=None)
+        client = _session_client(session=fake_session)
         client.conflict_max_retries = None
 
         self.assertRaises(exc.Conflict, client.json_request,
@@ -634,12 +615,7 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.return_value = fake_resp
 
-        client = http.SessionClient(session=fake_session,
-                                    auth=None,
-                                    interface=None,
-                                    service_type='publicURL',
-                                    region_name='',
-                                    service_name=None)
+        client = _session_client(session=fake_session)
         client.conflict_max_retries = http.DEFAULT_MAX_RETRIES + 1
 
         self.assertRaises(exc.Conflict, client.json_request,
