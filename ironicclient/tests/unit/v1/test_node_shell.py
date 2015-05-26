@@ -528,3 +528,11 @@ class NodeShellTest(utils.BaseTestCase):
                           n_shell.do_node_list,
                           client_mock, args)
         self.assertFalse(client_mock.node.list.called)
+
+    def test_do_node_show_states(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+
+        n_shell.do_node_show_states(client_mock, args)
+        client_mock.node.states.assert_called_once_with('node_uuid')

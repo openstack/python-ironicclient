@@ -419,3 +419,10 @@ def do_node_get_supported_boot_devices(cc, args):
     boot_device_list = boot_devices.get('supported_boot_devices', [])
     boot_devices['supported_boot_devices'] = ', '.join(boot_device_list)
     cliutils.print_dict(boot_devices, wrap=72)
+
+
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
+def do_node_show_states(cc, args):
+    """Show information about the node's states."""
+    states = cc.node.states(args.node)
+    cliutils.print_dict(states.to_dict(), wrap=72)
