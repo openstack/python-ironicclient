@@ -21,6 +21,10 @@ CHASSIS_FIELDS = ['uuid', 'description', 'created_at', 'updated_at', 'extra']
 CHASSIS_FIELD_LABELS = ['UUID', 'Description', 'Created At', 'Updated At',
                         'Extra']
 
+CHASSIS_SORT_FIELDS = ['uuid', 'description', 'created_at', 'updated_at']
+
+CHASSIS_SORT_FIELD_LABELS = ['UUID', 'Description', 'Created At', 'Updated At']
+
 CHASSIS_LIST_FIELDS = ['uuid', 'description']
 
 CHASSIS_LIST_FIELD_LABELS = ['UUID', 'Description']
@@ -46,6 +50,18 @@ NODE_FIELD_LABELS = ['Chassis UUID', 'Created At', 'Console Enabled', 'Driver',
                      'Updated At', 'Inspection Finished At',
                      'Inspection Started At', 'UUID', 'Name']
 
+# The server cannot sort on "chassis_uuid" because it isn't a
+# column in the "nodes" database table. "chassis_id" is stored,
+# but it is internal to ironic. See bug #1443003 for more details.
+NODE_SORT_FIELDS = [x for x in NODE_FIELDS if x not in [
+                    'chassis_uuid', 'driver_info', 'driver_internal_info',
+                    'extra', 'instance_info', 'properties']]
+
+NODE_SORT_FIELD_LABELS = [x for x in NODE_FIELD_LABELS if x not in [
+                          'Chassis UUID', 'Driver Info',
+                          'Driver Internal Info', 'EXTRA',
+                          'Instance Info', 'Properties']]
+
 NODE_LIST_FIELDS = ['uuid', 'name', 'instance_uuid', 'power_state',
                     'provision_state', 'maintenance']
 
@@ -60,6 +76,13 @@ PORT_FIELDS = ['uuid', 'address', 'created_at', 'extra', 'node_uuid',
 
 PORT_FIELD_LABELS = ['UUID', 'Address', 'Created At', 'Extra', 'Node UUID',
                      'Updated At']
+
+# The server cannot sort on "node_uuid" because it isn't a
+# column in the "ports" database table. "node_id" is stored,
+# but it is internal to ironic. See bug #1443003 for more details.
+PORT_SORT_FIELDS = ['uuid', 'address', 'created_at', 'updated_at']
+
+PORT_SORT_FIELD_LABELS = ['UUID', 'Address', 'Created At', 'Updated At']
 
 PORT_LIST_FIELDS = ['uuid', 'address']
 
