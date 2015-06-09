@@ -96,6 +96,14 @@ class IronicShell(object):
             formatter_class=HelpFormatter,
         )
 
+        # FIXME(gyee): this method should come from python-keystoneclient.
+        # Will refactor this code once it is available.
+        # https://bugs.launchpad.net/python-keystoneclient/+bug/1332337
+
+        # Register global Keystone args first so their defaults are respected.
+        # See https://bugs.launchpad.net/python-ironicclient/+bug/1463581
+        self._append_global_identity_args(parser)
+
         # Global arguments
         parser.add_argument('-h', '--help',
                             action='store_true',
@@ -240,12 +248,6 @@ class IronicShell(object):
                             default=cliutils.env(
                                 'IRONIC_RETRY_INTERVAL',
                                 default=str(http.DEFAULT_RETRY_INTERVAL)))
-
-        # FIXME(gyee): this method should come from python-keystoneclient.
-        # Will refactor this code once it is available.
-        # https://bugs.launchpad.net/python-keystoneclient/+bug/1332337
-
-        self._append_global_identity_args(parser)
 
         return parser
 

@@ -183,7 +183,7 @@ class TestCase(testtools.TestCase):
         client_env = ('OS_USERNAME', 'OS_PASSWORD', 'OS_TENANT_ID',
                       'OS_TENANT_NAME', 'OS_AUTH_URL', 'OS_REGION_NAME',
                       'OS_AUTH_TOKEN', 'OS_NO_CLIENT_AUTH', 'OS_SERVICE_TYPE',
-                      'OS_ENDPOINT_TYPE')
+                      'OS_ENDPOINT_TYPE', 'OS_CACERT', 'OS_CERT', 'OS_KEY')
 
         for key in client_env:
             self.useFixture(
@@ -302,3 +302,17 @@ class ShellTestNoMoxV3(ShellTestNoMox):
 
     def _set_fake_env(self):
         self.set_fake_env(FAKE_ENV_KEYSTONE_V3)
+
+
+class ShellParserTest(TestCase):
+    def test_deprecated_defaults(self):
+        cert_env = {}
+        cert_env['OS_CACERT'] = '/fake/cacert.pem'
+        cert_env['OS_CERT'] = '/fake/cert.pem'
+        cert_env['OS_KEY'] = '/fake/key.pem'
+        self.set_fake_env(cert_env)
+        parser = ironic_shell.IronicShell().get_base_parser()
+        options, _ = parser.parse_known_args([])
+        self.assertEqual(cert_env['OS_CACERT'], options.os_cacert)
+        self.assertEqual(cert_env['OS_CERT'], options.os_cert)
+        self.assertEqual(cert_env['OS_KEY'], options.os_key)
