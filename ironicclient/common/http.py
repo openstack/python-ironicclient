@@ -158,7 +158,7 @@ def with_retries(func):
         for attempt in range(1, num_attempts + 1):
             try:
                 return func(self, url, method, **kwargs)
-            except exc.Conflict as error:
+            except (exc.Conflict, exc.ServiceUnavailable) as error:
                 msg = ("Error contacting Ironic server: %(error)s. "
                        "Attempt %(attempt)d of %(total)d" %
                        {'attempt': attempt,

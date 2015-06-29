@@ -510,6 +510,26 @@ class RetriesTestCase(utils.BaseTestCase):
         self.assertEqual(2, mock_getcon.call_count)
 
     @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
+    def test_http_retry_503(self, mock_getcon):
+        error_body = _get_error_body()
+        bad_resp = utils.FakeResponse(
+            {'content-type': 'text/plain'},
+            six.StringIO(error_body),
+            version=1,
+            status=503)
+        good_resp = utils.FakeResponse(
+            {'content-type': 'text/plain'},
+            six.StringIO("meow"),
+            version=1,
+            status=200)
+        client = http.HTTPClient('http://localhost/')
+        mock_getcon.side_effect = iter((utils.FakeConnection(bad_resp),
+                                        utils.FakeConnection(good_resp)))
+        response, body_iter = client._http_request('/v1/resources', 'GET')
+        self.assertEqual(200, response.status)
+        self.assertEqual(2, mock_getcon.call_count)
+
+    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
     def test_http_failed_retry(self, mock_getcon):
         error_body = _get_error_body()
         bad_resp = utils.FakeResponse(
@@ -559,6 +579,24 @@ class RetriesTestCase(utils.BaseTestCase):
             {'Content-Type': 'application/json'},
             error_body,
             409)
+        ok_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'application/json'},
+            b"OK",
+            200)
+        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session.request.side_effect = iter((fake_resp, ok_resp))
+
+        client = _session_client(session=fake_session)
+        client.json_request('GET', '/v1/resources')
+        self.assertEqual(2, fake_session.request.call_count)
+
+    def test_session_retry_503(self):
+        error_body = _get_error_body()
+
+        fake_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'application/json'},
+            error_body,
+            503)
         ok_resp = utils.FakeSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
