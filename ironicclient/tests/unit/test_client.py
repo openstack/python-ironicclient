@@ -11,8 +11,11 @@
 #    under the License.
 
 import fixtures
+import mock
 
+import ironicclient
 from ironicclient.client import get_client
+from ironicclient.common import filecache
 from ironicclient import exc
 from ironicclient.tests.unit import utils
 from ironicclient.v1 import client as v1
@@ -140,24 +143,36 @@ class ClientTest(utils.BaseTestCase):
 
         self.assertEqual(ksclient().auth_ref, client.http_client.auth_ref)
 
-    def test_get_client_with_api_version(self):
-        self.useFixture(fixtures.MonkeyPatch(
-            'ironicclient.client._get_ksclient', fake_get_ksclient))
+    @mock.patch.object(filecache, 'retrieve_data', autospec=True)
+    @mock.patch.object(ironicclient.client, '_get_ksclient', autospec=True)
+    def _get_client_with_api_version(self, version, mock_ksclient,
+                                     mock_retrieve_data):
+        mock_ksclient.return_value = fake_get_ksclient()
         kwargs = {
             'os_tenant_name': 'TENANT_NAME',
             'os_username': 'USERNAME',
             'os_password': 'PASSWORD',
             'os_auth_url': 'http://localhost:35357/v2.0',
             'os_auth_token': '',
-            'os_ironic_api_version': 'latest',
+            'os_ironic_api_version': version,
         }
         client = get_client('1', **kwargs)
+        self.assertEqual(0, mock_retrieve_data.call_count)
+        self.assertEqual(version, client.http_client.os_ironic_api_version)
+        self.assertEqual('user', client.http_client.api_version_select_state)
 
-        self.assertEqual('latest', client.http_client.os_ironic_api_version)
+    def test_get_client_with_api_version_latest(self):
+        self._get_client_with_api_version("latest")
 
-    def test_get_client_default_version_set(self):
-        self.useFixture(fixtures.MonkeyPatch(
-            'ironicclient.client._get_ksclient', fake_get_ksclient))
+    def test_get_client_with_api_version_numeric(self):
+        self._get_client_with_api_version("1.4")
+
+    @mock.patch.object(filecache, 'retrieve_data', autospec=True)
+    @mock.patch.object(ironicclient.client, '_get_ksclient', autospec=True)
+    def test_get_client_default_version_set_no_cache(self, mock_ksclient,
+                                                     mock_retrieve_data):
+        mock_ksclient.return_value = fake_get_ksclient()
+        mock_retrieve_data.return_value = None
         kwargs = {
             'os_tenant_name': 'TENANT_NAME',
             'os_username': 'USERNAME',
@@ -166,6 +181,32 @@ class ClientTest(utils.BaseTestCase):
             'os_auth_token': '',
         }
         client = get_client('1', **kwargs)
-
+        mock_retrieve_data.assert_called_once_with(
+            host=utils.DEFAULT_TEST_HOST,
+            port=utils.DEFAULT_TEST_PORT)
         self.assertEqual(v1.DEFAULT_VER,
                          client.http_client.os_ironic_api_version)
+        self.assertEqual('default',
+                         client.http_client.api_version_select_state)
+
+    @mock.patch.object(filecache, 'retrieve_data', autospec=True)
+    @mock.patch.object(ironicclient.client, '_get_ksclient', autospec=True)
+    def test_get_client_default_version_set_cached(self, mock_ksclient,
+                                                   mock_retrieve_data):
+        version = '1.3'
+        # Make sure we don't coincidentally succeed
+        self.assertNotEqual(v1.DEFAULT_VER, version)
+        mock_ksclient.return_value = fake_get_ksclient()
+        mock_retrieve_data.return_value = version
+        kwargs = {
+            'os_tenant_name': 'TENANT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': 'http://localhost:35357/v2.0',
+            'os_auth_token': '',
+        }
+        client = get_client('1', **kwargs)
+        mock_retrieve_data.assert_called_once_with(host=mock.ANY,
+                                                   port=mock.ANY)
+        self.assertEqual(version, client.http_client.os_ironic_api_version)
+        self.assertEqual('cached', client.http_client.api_version_select_state)

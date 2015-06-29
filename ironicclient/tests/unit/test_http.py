@@ -18,6 +18,7 @@ import json
 import mock
 import six
 
+from ironicclient.common import filecache
 from ironicclient.common import http
 from ironicclient import exc
 from ironicclient.tests.unit import utils
@@ -26,6 +27,9 @@ from ironicclient.tests.unit import utils
 HTTP_CLASS = six.moves.http_client.HTTPConnection
 HTTPS_CLASS = http.VerifiedHTTPSConnection
 DEFAULT_TIMEOUT = 600
+
+DEFAULT_HOST = 'localhost'
+DEFAULT_PORT = '1234'
 
 
 def _get_error_body(faultstring=None, debuginfo=None):
@@ -48,6 +52,8 @@ def _session_client(**kwargs):
                               interface=None,
                               service_type='publicURL',
                               region_name='',
+                              endpoint='http://%s:%s' % (DEFAULT_HOST,
+                                                         DEFAULT_PORT),
                               **kwargs)
 
 
@@ -58,9 +64,12 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         self.test_object = http.VersionNegotiationMixin()
         self.test_object.os_ironic_api_version = '1.6'
         self.test_object.api_version_select_state = 'default'
+        self.test_object.endpoint = "http://localhost:1234"
         self.mock_mcu = mock.MagicMock()
         self.test_object._make_connection_url = self.mock_mcu
         self.response = utils.FakeResponse({}, status=406)
+        self.test_object.get_server = mock.MagicMock(
+            return_value=('localhost', '1234'))
 
     def test__generic_parse_version_headers_has_headers(self):
         response = {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
@@ -76,40 +85,52 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         result = self.test_object._generic_parse_version_headers(response.get)
         self.assertEqual(expected, result)
 
-    def test_negotiate_version_bad_state(self):
+    @mock.patch.object(filecache, 'save_data', autospec=True)
+    def test_negotiate_version_bad_state(self, mock_save_data):
         # Test if bad api_version_select_state value
         self.test_object.api_version_select_state = 'word of the day: augur'
         self.assertRaises(
             RuntimeError,
             self.test_object.negotiate_version,
             None, None)
+        self.assertEqual(0, mock_save_data.call_count)
 
+    @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
-    def test_negotiate_version_server_older(self, mock_pvh):
+    def test_negotiate_version_server_older(self, mock_pvh, mock_save_data):
         # Test newer client and older server
-        mock_pvh.return_value = ('1.1', '1.5')
+        latest_ver = '1.5'
+        mock_pvh.return_value = ('1.1', latest_ver)
         mock_conn = mock.MagicMock()
         result = self.test_object.negotiate_version(mock_conn, self.response)
-        self.assertEqual('1.5', result)
+        self.assertEqual(latest_ver, result)
         self.assertEqual(1, mock_pvh.call_count)
+        host, port = http.get_server(self.test_object.endpoint)
+        mock_save_data.assert_called_once_with(host=host, port=port,
+                                               data=latest_ver)
 
+    @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
-    def test_negotiate_version_server_newer(self, mock_pvh):
+    def test_negotiate_version_server_newer(self, mock_pvh, mock_save_data):
         # Test newer server and older client
         mock_pvh.return_value = ('1.1', '99.99')
         mock_conn = mock.MagicMock()
         result = self.test_object.negotiate_version(mock_conn, self.response)
         self.assertEqual('1.6', result)
         self.assertEqual(1, mock_pvh.call_count)
+        mock_save_data.assert_called_once_with(host=DEFAULT_HOST,
+                                               port=DEFAULT_PORT,
+                                               data='1.6')
 
+    @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_make_simple_request',
                        autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
     def test_negotiate_version_server_no_version_on_error(
-            self, mock_pvh, mock_msr):
+            self, mock_pvh, mock_msr, mock_save_data):
         # Test older Ironic version which errored with no version number and
         # have to retry with simple get
         mock_pvh.side_effect = iter([(None, None), ('1.1', '1.2')])
@@ -118,10 +139,13 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         self.assertEqual('1.2', result)
         self.assertTrue(mock_msr.called)
         self.assertEqual(2, mock_pvh.call_count)
+        self.assertEqual(1, mock_save_data.call_count)
 
+    @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
-    def test_negotiate_version_server_explicit_too_high(self, mock_pvh):
+    def test_negotiate_version_server_explicit_too_high(self, mock_pvh,
+                                                        mock_save_data):
         # requested version is not supported because it is too large
         mock_pvh.return_value = ('1.1', '1.6')
         mock_conn = mock.MagicMock()
@@ -132,10 +156,13 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
             self.test_object.negotiate_version,
             mock_conn, self.response)
         self.assertEqual(1, mock_pvh.call_count)
+        self.assertEqual(0, mock_save_data.call_count)
 
+    @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
-    def test_negotiate_version_server_explicit_not_supported(self, mock_pvh):
+    def test_negotiate_version_server_explicit_not_supported(self, mock_pvh,
+                                                             mock_save_data):
         # requested version is supported by the server but the server returned
         # 406 because the requested operation is not supported with the
         # requested version
@@ -148,6 +175,13 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
             self.test_object.negotiate_version,
             mock_conn, self.response)
         self.assertEqual(1, mock_pvh.call_count)
+        self.assertEqual(0, mock_save_data.call_count)
+
+    def test_get_server(self):
+        host = 'ironic-host'
+        port = '6385'
+        endpoint = 'http://%s:%s/ironic/v1/' % (host, port)
+        self.assertEqual((host, port), http.get_server(endpoint))
 
 
 class HttpClientTest(utils.BaseTestCase):
@@ -358,25 +392,30 @@ class HttpClientTest(utils.BaseTestCase):
         result = client._parse_version_headers(fake_resp)
         self.assertEqual(expected_result, result)
 
+    @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test__http_request_client_fallback_fail(self, mock_getcon):
+    def test__http_request_client_fallback_fail(self, mock_getcon,
+                                                mock_save_data):
         # Test when fallback to a supported version fails
+        host, port, latest_ver = 'localhost', '1234', '1.6'
         error_body = _get_error_body()
         fake_resp = utils.FakeResponse(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
-             'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
+             'X-OpenStack-Ironic-API-Maximum-Version': latest_ver,
              'content-type': 'text/plain',
              },
             six.StringIO(error_body),
             version=1,
             status=406)
-        client = http.HTTPClient('http://localhost/')
+        client = http.HTTPClient('http://%s:%s/' % (host, port))
         mock_getcon.return_value = utils.FakeConnection(fake_resp)
         self.assertRaises(
             exc.UnsupportedVersion,
             client._http_request,
             '/v1/resources',
             'GET')
+        mock_save_data.assert_called_once_with(host=host, data=latest_ver,
+                                               port=port)
 
     @mock.patch.object(http.VersionNegotiationMixin, 'negotiate_version',
                        autospec=False)

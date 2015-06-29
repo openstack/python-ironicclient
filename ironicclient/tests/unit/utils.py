@@ -25,6 +25,11 @@ import testtools
 from ironicclient.common import http
 
 
+DEFAULT_TEST_HOST = 'localhost'
+DEFAULT_TEST_REGION = 'regionhost'
+DEFAULT_TEST_PORT = '6385'
+
+
 class BaseTestCase(testtools.TestCase):
 
     def setUp(self):
@@ -112,9 +117,11 @@ class FakeServiceCatalog(object):
     def url_for(self, endpoint_type, service_type, attr=None,
                 filter_value=None):
         if attr == 'region' and filter_value:
-            return 'http://regionhost:6385/v1/f14b41234'
+            return 'http://%s:%s/v1/f14b41234' % (DEFAULT_TEST_REGION,
+                                                  DEFAULT_TEST_PORT)
         else:
-            return 'http://localhost:6385/v1/f14b41234'
+            return 'http://%s:%s/v1/f14b41234' % (DEFAULT_TEST_HOST,
+                                                  DEFAULT_TEST_PORT)
 
 
 class FakeKeystone(object):
