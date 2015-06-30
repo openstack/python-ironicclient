@@ -96,6 +96,10 @@ def do_node_show(cc, args):
     metavar='<boolean>',
     help="List nodes by instance association: 'true' or 'false'.")
 @cliutils.arg(
+    '--provision-state',
+    metavar='<provision-state>',
+    help="List nodes in specified provision state.")
+@cliutils.arg(
     '--detail',
     dest='detail',
     action='store_true',
@@ -119,6 +123,8 @@ def do_node_list(cc, args):
     if args.maintenance is not None:
         params['maintenance'] = utils.bool_argument_value("--maintenance",
                                                           args.maintenance)
+    if args.provision_state is not None:
+        params['provision_state'] = args.provision_state
     params['detail'] = args.detail
 
     if args.detail:

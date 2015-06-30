@@ -38,7 +38,8 @@ class NodeManager(base.Manager):
         return '/v1/nodes/%s' % id if id else '/v1/nodes'
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
-             detail=False, sort_key=None, sort_dir=None, fields=None):
+             detail=False, sort_key=None, sort_dir=None, fields=None,
+             provision_state=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -50,6 +51,8 @@ class NodeManager(base.Manager):
                             to return nodes in maintenance mode (True or
                             "True"), or not in maintenance mode (False or
                             "False").
+        :param provision_state: Optional. String value to get only nodes in
+                                that provision state.
         :param marker: Optional, the UUID of a node, eg the last
                        node from a previous result set. Return
                        the next result set.
@@ -90,6 +93,8 @@ class NodeManager(base.Manager):
             filters.append('associated=%s' % associated)
         if maintenance is not None:
             filters.append('maintenance=%s' % maintenance)
+        if provision_state is not None:
+            filters.append('provision_state=%s' % provision_state)
 
         path = ''
         if detail:
