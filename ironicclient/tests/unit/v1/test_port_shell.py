@@ -87,7 +87,7 @@ class PortShellTest(utils.BaseTestCase):
 
     def _get_client_mock_args(self, address=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False):
-        args = mock.MagicMock()
+        args = mock.MagicMock(spec=True)
         args.address = address
         args.marker = marker
         args.limit = limit

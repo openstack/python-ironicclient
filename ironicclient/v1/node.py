@@ -38,7 +38,7 @@ class NodeManager(base.Manager):
         return '/v1/nodes/%s' % id if id else '/v1/nodes'
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
-             detail=False, sort_key=None, sort_dir=None):
+             detail=False, sort_key=None, sort_dir=None, fields=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -70,13 +70,22 @@ class NodeManager(base.Manager):
         :param sort_dir: Optional, direction of sorting, either 'asc' (the
                          default) or 'desc'.
 
+        :param fields: Optional, a list with a specified set of fields
+                       of the resource to be returned. Can not be used
+                       when 'detail' is set.
+
         :returns: A list of nodes.
 
         """
         if limit is not None:
             limit = int(limit)
 
-        filters = utils.common_filters(marker, limit, sort_key, sort_dir)
+        if detail and fields:
+            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
+                                         "with 'detail' set"))
+
+        filters = utils.common_filters(marker, limit, sort_key, sort_dir,
+                                       fields)
         if associated is not None:
             filters.append('associated=%s' % associated)
         if maintenance is not None:
@@ -95,7 +104,7 @@ class NodeManager(base.Manager):
                                          limit=limit)
 
     def list_ports(self, node_id, marker=None, limit=None, sort_key=None,
-                   sort_dir=None, detail=False):
+                   sort_dir=None, detail=False, fields=None):
         """List all the ports for a given node.
 
         :param node_id: The UUID of the node.
@@ -119,13 +128,22 @@ class NodeManager(base.Manager):
         :param detail: Optional, boolean whether to return detailed information
                        about ports.
 
+        :param fields: Optional, a list with a specified set of fields
+                       of the resource to be returned. Can not be used
+                       when 'detail' is set.
+
         :returns: A list of ports.
 
         """
         if limit is not None:
             limit = int(limit)
 
-        filters = utils.common_filters(marker, limit, sort_key, sort_dir)
+        if detail and fields:
+            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
+                                         "with 'detail' set"))
+
+        filters = utils.common_filters(marker, limit, sort_key, sort_dir,
+                                       fields)
 
         path = "%s/ports" % node_id
         if detail:
@@ -140,14 +158,23 @@ class NodeManager(base.Manager):
             return self._list_pagination(self._path(path), "ports",
                                          limit=limit)
 
-    def get(self, node_id):
+    def get(self, node_id, fields=None):
+        if fields is not None:
+            node_id = '%s?fields=' % node_id
+            node_id += ','.join(fields)
+
         try:
             return self._list(self._path(node_id))[0]
         except IndexError:
             return None
 
-    def get_by_instance_uuid(self, instance_uuid):
-        path = "detail?instance_uuid=%s" % instance_uuid
+    def get_by_instance_uuid(self, instance_uuid, fields=None):
+        path = '?instance_uuid=%s' % instance_uuid
+        if fields is not None:
+            path += '&fields=' + ','.join(fields)
+        else:
+            path = 'detail' + path
+
         nodes = self._list(self._path(path), 'nodes')
         # get all the details of the node assuming that
         # filtering by instance_uuid returns a collection

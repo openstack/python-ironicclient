@@ -160,9 +160,10 @@ class NodeShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.node = 'node_uuid'
         args.instance_uuid = False
+        args.fields = None
 
         n_shell.do_node_show(client_mock, args)
-        client_mock.node.get.assert_called_once_with('node_uuid')
+        client_mock.node.get.assert_called_once_with('node_uuid', fields=None)
         # assert get_by_instance_uuid() wasn't called
         self.assertFalse(client_mock.node.get_by_instance_uuid.called)
 
@@ -171,10 +172,11 @@ class NodeShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.node = 'instance_uuid'
         args.instance_uuid = True
+        args.fields = None
 
         n_shell.do_node_show(client_mock, args)
         client_mock.node.get_by_instance_uuid.assert_called_once_with(
-            'instance_uuid')
+            'instance_uuid', fields=None)
         # assert get() wasn't called
         self.assertFalse(client_mock.node.get.called)
 
@@ -213,6 +215,25 @@ class NodeShellTest(utils.BaseTestCase):
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_show,
                           client_mock, args)
+
+    def test_do_node_show_fields(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.instance_uuid = False
+        args.fields = [['uuid', 'power_state']]
+        n_shell.do_node_show(client_mock, args)
+        client_mock.node.get.assert_called_once_with(
+            'node_uuid', fields=['uuid', 'power_state'])
+
+    def test_do_node_show_invalid_fields(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.instance_uuid = False
+        args.fields = [['foo', 'bar']]
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_show, client_mock, args)
 
     def test_do_node_set_maintenance_true(self):
         client_mock = mock.MagicMock()
@@ -464,10 +485,12 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock.node.get_supported_boot_devices.assert_called_once_with(
             'node_uuid')
 
-    def _get_client_mock_args(self, associated=None, maintenance=None,
-                              marker=None, limit=None, sort_dir=None,
-                              sort_key=None, detail=False):
+    def _get_client_mock_args(self, node=None, associated=None,
+                              maintenance=None, marker=None, limit=None,
+                              sort_dir=None, sort_key=None, detail=False,
+                              fields=None):
         args = mock.MagicMock()
+        args.node = node
         args.associated = associated
         args.maintenance = maintenance
         args.marker = marker
@@ -475,6 +498,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.sort_dir = sort_dir
         args.sort_key = sort_key
         args.detail = detail
+        args.fields = fields
 
         return args
 
@@ -530,6 +554,19 @@ class NodeShellTest(utils.BaseTestCase):
                           client_mock, args)
         self.assertFalse(client_mock.node.list.called)
 
+    def test_do_node_list_fields(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(fields=[['uuid', 'provision_state']])
+        n_shell.do_node_list(client_mock, args)
+        client_mock.node.list.assert_called_once_with(
+            fields=['uuid', 'provision_state'], detail=False)
+
+    def test_do_node_list_invalid_fields(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(fields=[['foo', 'bar']])
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_list, client_mock, args)
+
     def test_do_node_show_states(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
@@ -537,3 +574,20 @@ class NodeShellTest(utils.BaseTestCase):
 
         n_shell.do_node_show_states(client_mock, args)
         client_mock.node.states.assert_called_once_with('node_uuid')
+
+    def test_do_node_port_list_fields(self):
+        client_mock = mock.MagicMock()
+        node_mock = mock.MagicMock(spec_set=[])
+        args = self._get_client_mock_args(node=node_mock,
+                                          fields=[['uuid', 'address']])
+        n_shell.do_node_port_list(client_mock, args)
+        client_mock.node.list_ports.assert_called_once_with(
+            node_mock, fields=['uuid', 'address'], detail=False)
+
+    def test_do_node_port_list_invalid_fields(self):
+        client_mock = mock.MagicMock()
+        node_mock = mock.MagicMock(spec_set=[])
+        args = self._get_client_mock_args(node=node_mock,
+                                          fields=[['foo', 'bar']])
+        self.assertRaises(exceptions.CommandError,
+                          n_shell.do_node_port_list, client_mock, args)

@@ -24,10 +24,12 @@ from ironicclient.openstack.common import cliutils
 from ironicclient.v1 import resource_fields as res_fields
 
 
-def _print_node_show(node):
+def _print_node_show(node, fields=None):
+    if fields is None:
+        fields = res_fields.NODE_DETAILED_RESOURCE.fields
+
     data = dict(
-        [(f, getattr(node, f, ''))
-         for f in res_fields.NODE_DETAILED_RESOURCE.fields])
+        [(f, getattr(node, f, '')) for f in fields])
     cliutils.print_dict(data, wrap=72)
 
 
@@ -42,14 +44,26 @@ def _print_node_show(node):
     action='store_true',
     default=False,
     help='<id> is an instance UUID.')
+@cliutils.arg(
+    '--fields',
+    nargs='+',
+    dest='fields',
+    metavar='<field>',
+    action='append',
+    default=[],
+    help="One or more node fields. Only these fields will be fetched from "
+         "the server.")
 def do_node_show(cc, args):
     """Show detailed information about a node."""
+    fields = args.fields[0] if args.fields else None
     utils.check_empty_arg(args.node, '<id>')
+    utils.check_for_invalid_fields(
+        fields, res_fields.NODE_DETAILED_RESOURCE.fields)
     if args.instance_uuid:
-        node = cc.node.get_by_instance_uuid(args.node)
+        node = cc.node.get_by_instance_uuid(args.node, fields=fields)
     else:
-        node = cc.node.get(args.node)
-    _print_node_show(node)
+        node = cc.node.get(args.node, fields=fields)
+    _print_node_show(node, fields=fields)
 
 
 @cliutils.arg(
@@ -87,6 +101,15 @@ def do_node_show(cc, args):
     action='store_true',
     default=False,
     help="Show detailed information about the nodes.")
+@cliutils.arg(
+    '--fields',
+    nargs='+',
+    dest='fields',
+    metavar='<field>',
+    action='append',
+    default=[],
+    help="One or more node fields. Only these fields will be fetched from "
+         "the server. Can not be used when '--detail' is specified.")
 def do_node_list(cc, args):
     """List the nodes which are registered with the Ironic service."""
     params = {}
@@ -101,6 +124,14 @@ def do_node_list(cc, args):
     if args.detail:
         fields = res_fields.NODE_DETAILED_RESOURCE.fields
         field_labels = res_fields.NODE_DETAILED_RESOURCE.labels
+        sort_fields = res_fields.NODE_DETAILED_RESOURCE.sort_fields
+        sort_field_labels = res_fields.NODE_DETAILED_RESOURCE.sort_labels
+    elif args.fields:
+        utils.check_for_invalid_fields(
+            args.fields[0], res_fields.NODE_DETAILED_RESOURCE.fields)
+        resource = res_fields.Resource(args.fields[0])
+        fields = resource.fields
+        field_labels = resource.labels
         sort_fields = res_fields.NODE_DETAILED_RESOURCE.sort_fields
         sort_field_labels = res_fields.NODE_DETAILED_RESOURCE.sort_labels
     else:
@@ -276,11 +307,26 @@ def do_node_vendor_passthru(cc, args):
     choices=['asc', 'desc'],
     help='Sort direction: "asc" (the default) or "desc".')
 @cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg(
+    '--fields',
+    nargs='+',
+    dest='fields',
+    metavar='<field>',
+    action='append',
+    default=[],
+    help="One or more port fields. Only these fields will be fetched from "
+         "the server. Can not be used when '--detail' is specified.")
 def do_node_port_list(cc, args):
     """List the ports associated with a node."""
     if args.detail:
         fields = res_fields.PORTS_DETAILED_RESOURCE.fields
         field_labels = res_fields.PORTS_DETAILED_RESOURCE.labels
+    elif args.fields:
+        utils.check_for_invalid_fields(
+            args.fields[0], res_fields.PORT_DETAILED_RESOURCE.fields)
+        resource = res_fields.Resource(args.fields[0])
+        fields = resource.fields
+        field_labels = resource.labels
     else:
         fields = res_fields.PORT_RESOURCE.fields
         field_labels = res_fields.PORT_RESOURCE.labels

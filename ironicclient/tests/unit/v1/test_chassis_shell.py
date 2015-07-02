@@ -23,7 +23,7 @@ import ironicclient.v1.chassis_shell as c_shell
 class ChassisShellTest(utils.BaseTestCase):
     def _get_client_mock_args(self, chassis=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False):
-        args = mock.MagicMock()
+        args = mock.MagicMock(spec=True)
         args.chassis = chassis
         args.marker = marker
         args.limit = limit

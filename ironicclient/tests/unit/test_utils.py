@@ -114,13 +114,19 @@ class UtilsTest(test_utils.BaseTestCase):
         self.assertEqual('foo', utils.bool_argument_value('arg', 'ee',
                          strict=False, default='foo'))
 
+    def test_check_for_invalid_fields(self):
+        self.assertIsNone(utils.check_for_invalid_fields(
+                          ['a', 'b'], ['a', 'b', 'c']))
+        # 'd' is not a valid field
+        self.assertRaises(exc.CommandError, utils.check_for_invalid_fields,
+                          ['a', 'd'], ['a', 'b', 'c'])
+
 
 class CommonParamsForListTest(test_utils.BaseTestCase):
     def setUp(self):
         super(CommonParamsForListTest, self).setUp()
-        self.args = mock.Mock(marker=None, limit=None,
-                              sort_key=None, sort_dir=None)
-        self.args.detail = False
+        self.args = mock.Mock(marker=None, limit=None, sort_key=None,
+                              sort_dir=None, detail=False, spec=True)
         self.expected_params = {'detail': False}
 
     def test_nothing_set(self):
@@ -179,6 +185,12 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
         self.assertEqual(self.expected_params,
                          utils.common_params_for_list(self.args, [], []))
 
+    def test_fields(self):
+        self.args.fields = [['a', 'b', 'c']]
+        self.expected_params.update({'fields': ['a', 'b', 'c']})
+        self.assertEqual(self.expected_params,
+                         utils.common_params_for_list(self.args, [], []))
+
 
 class CommonFiltersTest(test_utils.BaseTestCase):
     def test_limit(self):
@@ -193,6 +205,10 @@ class CommonFiltersTest(test_utils.BaseTestCase):
         for key in ('marker', 'sort_key', 'sort_dir'):
             result = utils.common_filters(**{key: 'test'})
             self.assertEqual(['%s=test' % key], result)
+
+    def test_fields(self):
+        result = utils.common_filters(fields=['a', 'b', 'c'])
+        self.assertEqual(['fields=a,b,c'], result)
 
 
 @mock.patch.object(subprocess, 'Popen')

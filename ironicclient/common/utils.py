@@ -167,16 +167,24 @@ def common_params_for_list(args, fields, field_labels):
 
     params['detail'] = args.detail
 
+    if hasattr(args, 'fields'):
+        requested_fields = args.fields[0] if args.fields else None
+        if requested_fields is not None:
+            params['fields'] = requested_fields
+
     return params
 
 
-def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None):
+def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None,
+                   fields=None):
     """Generate common filters for any list request.
 
     :param marker: entity ID from which to start returning entities.
     :param limit: maximum number of entities to return.
     :param sort_key: field to use for sorting.
     :param sort_dir: direction of sorting: 'asc' or 'desc'.
+    :param fields: a list with a specified set of fields of the resource
+                   to be returned.
     :returns: list of string filters.
     """
     filters = []
@@ -188,6 +196,8 @@ def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None):
         filters.append('sort_key=%s' % sort_key)
     if sort_dir is not None:
         filters.append('sort_dir=%s' % sort_dir)
+    if fields is not None:
+        filters.append('fields=%s' % ','.join(fields))
     return filters
 
 
@@ -277,3 +287,19 @@ def bool_argument_value(arg_name, bool_str, strict=True, default=False):
         raise exc.CommandError(_("argument %(arg)s: %(err)s.")
                                % {'arg': arg_name, 'err': e})
     return val
+
+
+def check_for_invalid_fields(fields, valid_fields):
+    """Check for invalid fields.
+
+    :param fields: A list of fields specified by the user.
+    :param valid_fields: A list of valid fields.
+    raises: CommandError: If invalid fields were specified by the user.
+    """
+    if not fields:
+        return
+
+    invalid_attr = set(fields) - set(valid_fields)
+    if invalid_attr:
+        raise exc.CommandError(_('Invalid field(s): %s') %
+                               ', '.join(invalid_attr))
