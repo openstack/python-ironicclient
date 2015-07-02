@@ -14,6 +14,7 @@
 #    under the License.
 
 import json
+import time
 
 import mock
 import six
@@ -503,16 +504,8 @@ class SessionClientTest(utils.BaseTestCase):
         self.assertEqual(expected_result, result)
 
 
+@mock.patch.object(time, 'sleep', lambda *_: None)
 class RetriesTestCase(utils.BaseTestCase):
-    def setUp(self):
-        super(RetriesTestCase, self).setUp()
-        old_retry_delay = http.DEFAULT_RETRY_INTERVAL
-        http.DEFAULT_RETRY_INTERVAL = 0.001
-        http.SessionClient.conflict_retry_interval = 0.001
-        self.addCleanup(setattr, http, 'DEFAULT_RETRY_INTERVAL',
-                        old_retry_delay)
-        self.addCleanup(setattr, http.SessionClient, 'conflict_retry_interval',
-                        old_retry_delay)
 
     @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
     def test_http_no_retry(self, mock_getcon):
