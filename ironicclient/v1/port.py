@@ -15,6 +15,7 @@
 #    under the License.
 
 from ironicclient.common import base
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 
@@ -34,7 +35,7 @@ class PortManager(base.Manager):
         return '/v1/ports/%s' % id if id else '/v1/ports'
 
     def list(self, address=None, limit=None, marker=None, sort_key=None,
-             sort_dir=None, detail=False):
+             sort_dir=None, detail=False, fields=None):
         """Retrieve a list of port.
 
         :param address: Optional, MAC address of a port, to get
@@ -59,13 +60,22 @@ class PortManager(base.Manager):
         :param detail: Optional, boolean whether to return detailed information
                        about ports.
 
+        :param fields: Optional, a list with a specified set of fields
+                       of the resource to be returned. Can not be used
+                       when 'detail' is set.
+
         :returns: A list of ports.
 
         """
         if limit is not None:
             limit = int(limit)
 
-        filters = utils.common_filters(marker, limit, sort_key, sort_dir)
+        if detail and fields:
+            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
+                                         "with 'detail' set"))
+
+        filters = utils.common_filters(marker, limit, sort_key, sort_dir,
+                                       fields)
         if address is not None:
             filters.append('address=%s' % address)
 
@@ -81,14 +91,23 @@ class PortManager(base.Manager):
             return self._list_pagination(self._path(path), "ports",
                                          limit=limit)
 
-    def get(self, port_id):
+    def get(self, port_id, fields=None):
+        if fields is not None:
+            port_id = '%s?fields=' % port_id
+            port_id += ','.join(fields)
+
         try:
             return self._list(self._path(port_id))[0]
         except IndexError:
             return None
 
-    def get_by_address(self, address):
-        path = "detail?address=%s" % address
+    def get_by_address(self, address, fields=None):
+        path = '?address=%s' % address
+        if fields is not None:
+            path += '&fields=' + ','.join(fields)
+        else:
+            path = 'detail' + path
+
         ports = self._list(self._path(path), 'ports')
         # get all the details of the port assuming that filtering by
         # address returns a collection of one port if successful.

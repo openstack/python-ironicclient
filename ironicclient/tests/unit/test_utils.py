@@ -126,7 +126,8 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
     def setUp(self):
         super(CommonParamsForListTest, self).setUp()
         self.args = mock.Mock(marker=None, limit=None, sort_key=None,
-                              sort_dir=None, detail=False, spec=True)
+                              sort_dir=None, detail=False, fields=None,
+                              spec=True)
         self.expected_params = {'detail': False}
 
     def test_nothing_set(self):

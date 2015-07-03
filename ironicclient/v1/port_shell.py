@@ -18,9 +18,10 @@ from ironicclient.openstack.common import cliutils
 from ironicclient.v1 import resource_fields as res_fields
 
 
-def _print_port_show(port):
-    fields = ['address', 'created_at', 'extra', 'node_uuid', 'updated_at',
-              'uuid']
+def _print_port_show(port, fields=None):
+    if fields is None:
+        fields = res_fields.PORT_DETAILED_RESOURCE.fields
+
     data = dict([(f, getattr(port, f, '')) for f in fields])
     cliutils.print_dict(data, wrap=72)
 
@@ -35,14 +36,26 @@ def _print_port_show(port):
     action='store_true',
     default=False,
     help='<id> is the MAC address (instead of the UUID) of the port.')
+@cliutils.arg(
+    '--fields',
+    nargs='+',
+    dest='fields',
+    metavar='<field>',
+    action='append',
+    default=[],
+    help="One or more port fields. Only these fields will be fetched from "
+         "the server.")
 def do_port_show(cc, args):
     """Show detailed information about a port."""
+    fields = args.fields[0] if args.fields else None
+    utils.check_for_invalid_fields(
+        fields, res_fields.PORT_DETAILED_RESOURCE.fields)
     if args.address:
-        port = cc.port.get_by_address(args.port)
+        port = cc.port.get_by_address(args.port, fields=fields)
     else:
         utils.check_empty_arg(args.port, '<id>')
-        port = cc.port.get(args.port)
-    _print_port_show(port)
+        port = cc.port.get(args.port, fields=fields)
+    _print_port_show(port, fields=fields)
 
 
 @cliutils.arg(
@@ -76,6 +89,15 @@ def do_port_show(cc, args):
     metavar='<direction>',
     choices=['asc', 'desc'],
     help='Sort direction: "asc" (the default) or "desc".')
+@cliutils.arg(
+    '--fields',
+    nargs='+',
+    dest='fields',
+    metavar='<field>',
+    action='append',
+    default=[],
+    help="One or more port fields. Only these fields will be fetched from "
+         "the server. Can not be used when '--detail' is specified.")
 def do_port_list(cc, args):
     """List the ports."""
     params = {}
@@ -86,6 +108,14 @@ def do_port_list(cc, args):
     if args.detail:
         fields = res_fields.PORT_DETAILED_RESOURCE.fields
         field_labels = res_fields.PORT_DETAILED_RESOURCE.labels
+        sort_fields = res_fields.PORT_DETAILED_RESOURCE.sort_fields
+        sort_field_labels = res_fields.PORT_DETAILED_RESOURCE.sort_labels
+    elif args.fields:
+        utils.check_for_invalid_fields(
+            args.fields[0], res_fields.PORT_DETAILED_RESOURCE.fields)
+        resource = res_fields.Resource(args.fields[0])
+        fields = resource.fields
+        field_labels = resource.labels
         sort_fields = res_fields.PORT_DETAILED_RESOURCE.sort_fields
         sort_field_labels = res_fields.PORT_DETAILED_RESOURCE.sort_labels
     else:
