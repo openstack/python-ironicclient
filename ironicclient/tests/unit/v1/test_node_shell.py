@@ -29,6 +29,7 @@ class NodeShellTest(utils.BaseTestCase):
             node = object()
             n_shell._print_node_show(node)
         exp = ['chassis_uuid',
+               'clean_step',
                'created_at',
                'console_enabled',
                'driver',

@@ -33,6 +33,7 @@ class Resource(object):
     FIELDS = {
         'address': 'Address',
         'chassis_uuid': 'Chassis UUID',
+        'clean_step': 'Clean Step',
         'console_enabled': 'Console Enabled',
         'created_at': 'Created At',
         'description': 'Description',
@@ -119,6 +120,7 @@ CHASSIS_RESOURCE = Resource(
 NODE_DETAILED_RESOURCE = Resource(
     ['chassis_uuid',
      'created_at',
+     'clean_step',
      'console_enabled',
      'driver',
      'driver_info',
@@ -146,6 +148,7 @@ NODE_DETAILED_RESOURCE = Resource(
         # the "nodes" database table. "chassis_id" is stored, but it is
         # internal to ironic. See bug #1443003 for more details.
         'chassis_uuid',
+        'clean_step',
         'driver_info',
         'driver_internal_info',
         'extra',
