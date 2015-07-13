@@ -54,9 +54,10 @@ class FileCacheTest(utils.BaseTestCase):
         self.assertEqual(0, mock_exists.call_count)
         self.assertEqual(0, mock_makedirs.call_count)
 
-    @mock.patch.object(filecache, 'CACHE', autospec=True)
-    def test_save_data_ok(self, mock_cache):
-        mock_cache.set = mock.Mock(spec=dogpile.cache.region.CacheRegion.set)
+    @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
+    @mock.patch.object(filecache, '_get_cache', autospec=True)
+    def test_save_data_ok(self, mock_get_cache, mock_cache):
+        mock_get_cache.return_value = mock_cache
         host = 'fred'
         port = '1234'
         hostport = '%s:%s' % (host, port)
@@ -65,12 +66,13 @@ class FileCacheTest(utils.BaseTestCase):
         mock_cache.set.assert_called_once_with(hostport, data)
 
     @mock.patch.object(os.path, 'isfile', autospec=True)
-    @mock.patch.object(filecache, 'CACHE', autospec=True)
-    def test_retrieve_data_ok(self, mock_cache, mock_isfile):
+    @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
+    @mock.patch.object(filecache, '_get_cache', autospec=True)
+    def test_retrieve_data_ok(self, mock_get_cache, mock_cache, mock_isfile):
         s = 'spam'
         mock_isfile.return_value = True
-        mock_cache.get = mock.Mock(spec=dogpile.cache.region.CacheRegion.get,
-                                   return_value=s)
+        mock_cache.get.return_value = s
+        mock_get_cache.return_value = mock_cache
         host = 'fred'
         port = '1234'
         hostport = '%s:%s' % (host, port)
@@ -79,12 +81,14 @@ class FileCacheTest(utils.BaseTestCase):
         self.assertEqual(s, result)
 
     @mock.patch.object(os.path, 'isfile', autospec=True)
-    @mock.patch.object(filecache, 'CACHE', autospec=True)
-    def test_retrieve_data_ok_with_expiry(self, mock_cache, mock_isfile):
+    @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
+    @mock.patch.object(filecache, '_get_cache', autospec=True)
+    def test_retrieve_data_ok_with_expiry(self, mock_get_cache, mock_cache,
+                                          mock_isfile):
         s = 'spam'
         mock_isfile.return_value = True
-        mock_cache.get = mock.Mock(spec=dogpile.cache.region.CacheRegion.get,
-                                   return_value=s)
+        mock_cache.get.return_value = s
+        mock_get_cache.return_value = mock_cache
         host = 'fred'
         port = '1234'
         expiry = '987'
@@ -95,11 +99,13 @@ class FileCacheTest(utils.BaseTestCase):
         self.assertEqual(s, result)
 
     @mock.patch.object(os.path, 'isfile', autospec=True)
-    @mock.patch.object(filecache, 'CACHE', autospec=True)
-    def test_retrieve_data_not_found(self, mock_cache, mock_isfile):
+    @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
+    @mock.patch.object(filecache, '_get_cache', autospec=True)
+    def test_retrieve_data_not_found(self, mock_get_cache, mock_cache,
+                                     mock_isfile):
         mock_isfile.return_value = True
-        mock_cache.get = mock.Mock(spec=dogpile.cache.region.CacheRegion.get,
-                                   return_value=dogpile.cache.api.NO_VALUE)
+        mock_cache.get.return_value = dogpile.cache.api.NO_VALUE
+        mock_get_cache.return_value = mock_cache
         host = 'fred'
         port = '1234'
         hostport = '%s:%s' % (host, port)
