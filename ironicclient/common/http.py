@@ -36,7 +36,7 @@ from ironicclient import exc
 #             microversion support in the client properly! See
 #             http://specs.openstack.org/openstack/ironic-specs/specs/kilo/api-microversions.html # noqa
 #             for full details.
-DEFAULT_VER = '1.7'
+DEFAULT_VER = '1.8'
 
 
 LOG = logging.getLogger(__name__)
