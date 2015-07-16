@@ -116,7 +116,7 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
                        autospec=True)
     def test_negotiate_version_server_newer(self, mock_pvh, mock_save_data):
         # Test newer server and older client
-        mock_pvh.return_value = ('1.1', '99.99')
+        mock_pvh.return_value = ('1.1', '1.10')
         mock_conn = mock.MagicMock()
         result = self.test_object.negotiate_version(mock_conn, self.response)
         self.assertEqual('1.6', result)

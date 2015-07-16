@@ -14,6 +14,7 @@
 #    under the License.
 
 import copy
+from distutils.version import StrictVersion
 import functools
 import json
 import logging
@@ -126,7 +127,8 @@ class VersionNegotiationMixin(object):
                 % {'req': self.os_ironic_api_version,
                    'min': min_ver, 'max': max_ver}))
 
-        negotiated_ver = min(self.os_ironic_api_version, max_ver)
+        negotiated_ver = str(min(StrictVersion(self.os_ironic_api_version),
+                                 StrictVersion(max_ver)))
         if negotiated_ver < min_ver:
             negotiated_ver = min_ver
         # server handles microversions, but doesn't support
