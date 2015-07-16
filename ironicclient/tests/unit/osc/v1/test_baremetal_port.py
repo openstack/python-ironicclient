@@ -434,8 +434,8 @@ class TestBaremetalPortList(TestBaremetalPort):
         self.baremetal_mock.port.list.assert_called_with(**kwargs)
 
         collist = ('UUID', 'Address', 'Created At', 'Extra', 'Node UUID',
-                   'Local Link Connection', 'PXE boot enabled', 'Updated At',
-                   'Internal Info')
+                   'Local Link Connection', 'Portgroup UUID',
+                   'PXE boot enabled', 'Updated At', 'Internal Info')
         self.assertEqual(collist, columns)
 
         datalist = ((
@@ -444,6 +444,7 @@ class TestBaremetalPortList(TestBaremetalPort):
             '',
             oscutils.format_dict(baremetal_fakes.baremetal_port_extra),
             baremetal_fakes.baremetal_uuid,
+            '',
             '',
             '',
             '',
