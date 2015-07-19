@@ -51,7 +51,7 @@ def do_driver_properties(cc, args):
     """Get properties of a driver."""
     properties = cc.driver.properties(args.driver_name)
     obj_list = []
-    for key, value in properties.iteritems():
+    for key, value in properties.items():
         data = {'Property': key, 'Description': value}
         obj_list.append(type('iface', (object,), data))
     fields = ['Property', 'Description']
