@@ -488,11 +488,12 @@ class NodeShellTest(utils.BaseTestCase):
     def _get_client_mock_args(self, node=None, associated=None,
                               maintenance=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False,
-                              fields=None):
+                              fields=None, provision_state=None):
         args = mock.MagicMock()
         args.node = node
         args.associated = associated
         args.maintenance = maintenance
+        args.provision_state = provision_state
         args.marker = marker
         args.limit = limit
         args.sort_dir = sort_dir
@@ -508,6 +509,15 @@ class NodeShellTest(utils.BaseTestCase):
 
         n_shell.do_node_list(client_mock, args)
         client_mock.node.list.assert_called_once_with(detail=False)
+
+    def test_do_node_list_provison_state(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(provision_state='wait call-back')
+
+        n_shell.do_node_list(client_mock, args)
+        client_mock.node.list.assert_called_once_with(
+            provision_state='wait call-back',
+            detail=False)
 
     def test_do_node_list_detail(self):
         client_mock = mock.MagicMock()

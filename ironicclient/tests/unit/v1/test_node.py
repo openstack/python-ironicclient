@@ -28,6 +28,7 @@ NODE1 = {'id': 123,
          'uuid': '66666666-7777-8888-9999-000000000000',
          'chassis_uuid': 'aaaaaaaa-1111-bbbb-2222-cccccccccccc',
          'maintenance': False,
+         'provision_state': 'available',
          'driver': 'fake',
          'driver_info': {'user': 'foo', 'password': 'bar'},
          'properties': {'num_cpu': 4},
@@ -75,6 +76,7 @@ CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
 del CREATE_NODE['maintenance']
+del CREATE_NODE['provision_state']
 
 UPDATED_NODE = copy.deepcopy(NODE1)
 NEW_DRIVER = 'new-driver'
@@ -83,6 +85,7 @@ UPDATED_NODE['driver'] = NEW_DRIVER
 CREATE_WITH_UUID = copy.deepcopy(NODE1)
 del CREATE_WITH_UUID['id']
 del CREATE_WITH_UUID['maintenance']
+del CREATE_WITH_UUID['provision_state']
 
 fake_responses = {
     '/v1/nodes':
@@ -143,6 +146,13 @@ fake_responses = {
         'GET': (
             {},
             {"nodes": [NODE2]},
+        )
+    },
+    '/v1/nodes/?provision_state=available':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1]},
         )
     },
     '/v1/nodes/detail?instance_uuid=%s' % NODE2['instance_uuid']:
@@ -471,6 +481,19 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_provision_state(self):
+        nodes = self.mgr.list(provision_state="available")
+        expect = [
+            ('GET', '/v1/nodes/?provision_state=available', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_provision_state_fail(self):
+        self.assertRaises(KeyError, self.mgr.list,
+                          provision_state="test")
 
     def test_node_list_no_maintenance(self):
         nodes = self.mgr.list(maintenance=False)
