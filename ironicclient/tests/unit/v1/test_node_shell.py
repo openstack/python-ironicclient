@@ -45,6 +45,7 @@ class NodeShellTest(utils.BaseTestCase):
                'power_state',
                'properties',
                'provision_state',
+               'provision_updated_at',
                'reservation',
                'target_power_state',
                'target_provision_state',
