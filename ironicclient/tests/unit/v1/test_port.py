@@ -18,6 +18,7 @@ import copy
 import testtools
 from testtools.matchers import HasLength
 
+from ironicclient import exc
 from ironicclient.tests.unit import utils
 import ironicclient.v1.port
 
@@ -60,6 +61,13 @@ fake_responses = {
             {"ports": [PORT]},
         ),
     },
+    '/v1/ports/?fields=uuid,address':
+    {
+        'GET': (
+            {},
+            {"ports": [PORT]},
+        ),
+    },
     '/v1/ports/%s' % PORT['uuid']:
     {
         'GET': (
@@ -73,6 +81,13 @@ fake_responses = {
         'PATCH': (
             {},
             UPDATED_PORT,
+        ),
+    },
+    '/v1/ports/%s?fields=uuid,address' % PORT['uuid']:
+    {
+        'GET': (
+            {},
+            PORT,
         ),
     },
     '/v1/ports/detail?address=%s' % PORT['address']:
@@ -173,6 +188,18 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
 
+    def test_port_list_fields(self):
+        ports = self.mgr.list(fields=['uuid', 'address'])
+        expect = [
+            ('GET', '/v1/ports/?fields=uuid,address', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(ports))
+
+    def test_port_list_detail_and_fields_fail(self):
+        self.assertRaises(exc.InvalidAttribute, self.mgr.list,
+                          detail=True, fields=['uuid', 'address'])
+
     def test_ports_list_limit(self):
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.port.PortManager(self.api)
@@ -244,6 +271,16 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(PORT['uuid'], port.uuid)
         self.assertEqual(PORT['address'], port.address)
         self.assertEqual(PORT['node_uuid'], port.node_uuid)
+
+    def test_port_show_fields(self):
+        port = self.mgr.get(PORT['uuid'], fields=['uuid', 'address'])
+        expect = [
+            ('GET', '/v1/ports/%s?fields=uuid,address' %
+             PORT['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(PORT['uuid'], port.uuid)
+        self.assertEqual(PORT['address'], port.address)
 
     def test_create(self):
         port = self.mgr.create(**CREATE_PORT)

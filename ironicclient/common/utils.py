@@ -167,10 +167,9 @@ def common_params_for_list(args, fields, field_labels):
 
     params['detail'] = args.detail
 
-    if hasattr(args, 'fields'):
-        requested_fields = args.fields[0] if args.fields else None
-        if requested_fields is not None:
-            params['fields'] = requested_fields
+    requested_fields = args.fields[0] if args.fields else None
+    if requested_fields is not None:
+        params['fields'] = requested_fields
 
     return params
 
@@ -299,7 +298,9 @@ def check_for_invalid_fields(fields, valid_fields):
     if not fields:
         return
 
-    invalid_attr = set(fields) - set(valid_fields)
-    if invalid_attr:
-        raise exc.CommandError(_('Invalid field(s): %s') %
-                               ', '.join(invalid_attr))
+    invalid_fields = set(fields) - set(valid_fields)
+    if invalid_fields:
+        raise exc.CommandError(
+            _('Invalid field(s) requested: %(invalid)s. Valid fields '
+              'are: %(valid)s.') % {'invalid': ', '.join(invalid_fields),
+                                    'valid': ', '.join(valid_fields)})

@@ -18,18 +18,32 @@ from ironicclient.openstack.common import cliutils
 from ironicclient.v1 import resource_fields as res_fields
 
 
-def _print_chassis_show(chassis):
-    fields = ['uuid', 'description', 'created_at', 'updated_at', 'extra']
+def _print_chassis_show(chassis, fields=None):
+    if fields is None:
+        fields = res_fields.CHASSIS_DETAILED_RESOURCE.fields
+
     data = dict([(f, getattr(chassis, f, '')) for f in fields])
     cliutils.print_dict(data, wrap=72)
 
 
 @cliutils.arg('chassis', metavar='<chassis>', help="UUID of the chassis.")
+@cliutils.arg(
+    '--fields',
+    nargs='+',
+    dest='fields',
+    metavar='<field>',
+    action='append',
+    default=[],
+    help="One or more chassis fields. Only these fields will be fetched from "
+         "the server.")
 def do_chassis_show(cc, args):
     """Show detailed information about a chassis."""
     utils.check_empty_arg(args.chassis, '<chassis>')
-    chassis = cc.chassis.get(args.chassis)
-    _print_chassis_show(chassis)
+    fields = args.fields[0] if args.fields else None
+    utils.check_for_invalid_fields(
+        fields, res_fields.CHASSIS_DETAILED_RESOURCE.fields)
+    chassis = cc.chassis.get(args.chassis, fields=fields)
+    _print_chassis_show(chassis, fields=fields)
 
 
 @cliutils.arg(
@@ -60,11 +74,28 @@ def do_chassis_show(cc, args):
     metavar='<direction>',
     choices=['asc', 'desc'],
     help='Sort direction: "asc" (the default) or "desc".')
+@cliutils.arg(
+    '--fields',
+    nargs='+',
+    dest='fields',
+    metavar='<field>',
+    action='append',
+    default=[],
+    help="One or more chassis fields. Only these fields will be fetched from "
+         "the server. Can not be used when '--detail' is specified.")
 def do_chassis_list(cc, args):
     """List the chassis."""
     if args.detail:
         fields = res_fields.CHASSIS_DETAILED_RESOURCE.fields
         field_labels = res_fields.CHASSIS_DETAILED_RESOURCE.labels
+        sort_fields = res_fields.CHASSIS_DETAILED_RESOURCE.sort_fields
+        sort_field_labels = res_fields.CHASSIS_DETAILED_RESOURCE.sort_labels
+    elif args.fields:
+        utils.check_for_invalid_fields(
+            args.fields[0], res_fields.CHASSIS_DETAILED_RESOURCE.fields)
+        resource = res_fields.Resource(args.fields[0])
+        fields = resource.fields
+        field_labels = resource.labels
         sort_fields = res_fields.CHASSIS_DETAILED_RESOURCE.sort_fields
         sort_field_labels = res_fields.CHASSIS_DETAILED_RESOURCE.sort_labels
     else:
@@ -166,11 +197,26 @@ def do_chassis_update(cc, args):
     choices=['asc', 'desc'],
     help='Sort direction: "asc" (the default) or "desc".')
 @cliutils.arg('chassis', metavar='<chassis>', help="UUID of the chassis.")
+@cliutils.arg(
+    '--fields',
+    nargs='+',
+    dest='fields',
+    metavar='<field>',
+    action='append',
+    default=[],
+    help="One or more node fields. Only these fields will be fetched from "
+         "the server. Can not be used when '--detail' is specified.")
 def do_chassis_node_list(cc, args):
     """List the nodes contained in a chassis."""
     if args.detail:
         fields = res_fields.NODE_DETAILED_RESOURCE.fields
         field_labels = res_fields.NODE_DETAILED_RESOURCE.labels
+    elif args.fields:
+        utils.check_for_invalid_fields(
+            args.fields[0], res_fields.NODE_DETAILED_RESOURCE.fields)
+        resource = res_fields.Resource(args.fields[0])
+        fields = resource.fields
+        field_labels = resource.labels
     else:
         fields = res_fields.NODE_RESOURCE.fields
         field_labels = res_fields.NODE_RESOURCE.labels

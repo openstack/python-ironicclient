@@ -15,6 +15,7 @@
 #    under the License.
 
 from ironicclient.common import base
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 
@@ -35,7 +36,7 @@ class ChassisManager(base.Manager):
         return '/v1/chassis/%s' % id if id else '/v1/chassis'
 
     def list(self, marker=None, limit=None, sort_key=None,
-             sort_dir=None, detail=False):
+             sort_dir=None, detail=False, fields=None):
         """Retrieve a list of chassis.
 
         :param marker: Optional, the UUID of a chassis, eg the last
@@ -58,13 +59,22 @@ class ChassisManager(base.Manager):
         :param detail: Optional, boolean whether to return detailed information
                        about chassis.
 
+        :param fields: Optional, a list with a specified set of fields
+                       of the resource to be returned. Can not be used
+                       when 'detail' is set.
+
         :returns: A list of chassis.
 
         """
         if limit is not None:
             limit = int(limit)
 
-        filters = utils.common_filters(marker, limit, sort_key, sort_dir)
+        if detail and fields:
+            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
+                                         "with 'detail' set"))
+
+        filters = utils.common_filters(marker, limit, sort_key, sort_dir,
+                                       fields)
 
         path = ''
         if detail:
@@ -79,7 +89,7 @@ class ChassisManager(base.Manager):
                                          limit=limit)
 
     def list_nodes(self, chassis_id, marker=None, limit=None,
-                   sort_key=None, sort_dir=None, detail=False):
+                   sort_key=None, sort_dir=None, detail=False, fields=None):
         """List all the nodes for a given chassis.
 
         :param chassis_id: The UUID of the chassis.
@@ -103,13 +113,22 @@ class ChassisManager(base.Manager):
         :param detail: Optional, boolean whether to return detailed information
                        about nodes.
 
+        :param fields: Optional, a list with a specified set of fields
+                       of the resource to be returned. Can not be used
+                       when 'detail' is set.
+
         :returns: A list of nodes.
 
         """
         if limit is not None:
             limit = int(limit)
 
-        filters = utils.common_filters(marker, limit, sort_key, sort_dir)
+        if detail and fields:
+            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
+                                         "with 'detail' set"))
+
+        filters = utils.common_filters(marker, limit, sort_key, sort_dir,
+                                       fields)
 
         path = "%s/nodes" % chassis_id
         if detail:
@@ -124,7 +143,11 @@ class ChassisManager(base.Manager):
             return self._list_pagination(self._path(path), "nodes",
                                          limit=limit)
 
-    def get(self, chassis_id):
+    def get(self, chassis_id, fields=None):
+        if fields is not None:
+            chassis_id = '%s?fields=' % chassis_id
+            chassis_id += ','.join(fields)
+
         try:
             return self._list(self._path(chassis_id))[0]
         except IndexError:

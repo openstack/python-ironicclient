@@ -18,6 +18,7 @@ import copy
 import testtools
 from testtools.matchers import HasLength
 
+from ironicclient import exc
 from ironicclient.tests.unit import utils
 import ironicclient.v1.chassis
 
@@ -67,6 +68,13 @@ fake_responses = {
             {"chassis": [CHASSIS]},
         ),
     },
+    '/v1/chassis/?fields=uuid,extra':
+    {
+        'GET': (
+            {},
+            {"chassis": [CHASSIS]},
+        ),
+    },
     '/v1/chassis/%s' % CHASSIS['uuid']:
     {
         'GET': (
@@ -82,6 +90,13 @@ fake_responses = {
             UPDATED_CHASSIS,
         ),
     },
+    '/v1/chassis/%s?fields=uuid,description' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            CHASSIS,
+        ),
+    },
     '/v1/chassis/%s/nodes' % CHASSIS['uuid']:
     {
         'GET': (
@@ -90,6 +105,13 @@ fake_responses = {
         ),
     },
     '/v1/chassis/%s/nodes/detail' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE]},
+        ),
+    },
+    '/v1/chassis/%s/nodes?fields=uuid,extra' % CHASSIS['uuid']:
     {
         'GET': (
             {},
@@ -243,10 +265,32 @@ class ChassisManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(chassis))
 
+    def test_chassis_list_fields(self):
+        nodes = self.mgr.list(fields=['uuid', 'extra'])
+        expect = [
+            ('GET', '/v1/chassis/?fields=uuid,extra', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(nodes))
+
+    def test_chassis_list_detail_and_fields_fail(self):
+        self.assertRaises(exc.InvalidAttribute, self.mgr.list,
+                          detail=True, fields=['uuid', 'extra'])
+
     def test_chassis_show(self):
         chassis = self.mgr.get(CHASSIS['uuid'])
         expect = [
             ('GET', '/v1/chassis/%s' % CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(CHASSIS['uuid'], chassis.uuid)
+        self.assertEqual(CHASSIS['description'], chassis.description)
+
+    def test_chassis_show_fields(self):
+        chassis = self.mgr.get(CHASSIS['uuid'], fields=['uuid', 'description'])
+        expect = [
+            ('GET', '/v1/chassis/%s?fields=uuid,description' %
+             CHASSIS['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(CHASSIS['uuid'], chassis.uuid)
@@ -296,6 +340,20 @@ class ChassisManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(nodes))
         self.assertEqual(NODE['uuid'], nodes[0].uuid)
+
+    def test_chassis_node_list_fields(self):
+        nodes = self.mgr.list_nodes(CHASSIS['uuid'], fields=['uuid', 'extra'])
+        expect = [
+            ('GET', '/v1/chassis/%s/nodes?fields=uuid,extra' %
+             CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(nodes))
+
+    def test_chassis_node_list_detail_and_fields_fail(self):
+        self.assertRaises(exc.InvalidAttribute, self.mgr.list_nodes,
+                          CHASSIS['uuid'], detail=True,
+                          fields=['uuid', 'extra'])
 
     def test_chassis_node_list_limit(self):
         self.api = utils.FakeAPI(fake_responses_pagination)
