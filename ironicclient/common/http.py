@@ -159,6 +159,10 @@ class VersionNegotiationMixin(object):
         raise NotImplementedError()
 
 
+_RETRY_EXCEPTIONS = (exc.Conflict, exc.ServiceUnavailable,
+                     exc.ConnectionRefused)
+
+
 def with_retries(func):
     """Wrapper for _http_request adding support for retries."""
     @functools.wraps(func)
@@ -172,7 +176,7 @@ def with_retries(func):
         for attempt in range(1, num_attempts + 1):
             try:
                 return func(self, url, method, **kwargs)
-            except (exc.Conflict, exc.ServiceUnavailable) as error:
+            except _RETRY_EXCEPTIONS as error:
                 msg = ("Error contacting Ironic server: %(error)s. "
                        "Attempt %(attempt)d of %(total)d" %
                        {'attempt': attempt,
