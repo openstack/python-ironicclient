@@ -147,8 +147,7 @@ class PortShellTest(utils.BaseTestCase):
 
     def test_do_port_list_wrong_sort_key(self):
         client_mock = mock.MagicMock()
-        args = self._get_client_mock_args(sort_key='node_uuid',
-                                          detail=False)
+        args = self._get_client_mock_args(sort_key='node_uuid', detail=False)
 
         self.assertRaises(exceptions.CommandError,
                           p_shell.do_port_list,
@@ -188,3 +187,16 @@ class PortShellTest(utils.BaseTestCase):
         self.assertRaises(exceptions.CommandError,
                           p_shell.do_port_list,
                           client_mock, args)
+
+    def test_do_port_create(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        p_shell.do_port_create(client_mock, args)
+        client_mock.port.create.assert_called_once_with()
+
+    def test_do_port_delete(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.port = ['port_uuid']
+        p_shell.do_port_delete(client_mock, args)
+        client_mock.port.delete.assert_called_once_with('port_uuid')

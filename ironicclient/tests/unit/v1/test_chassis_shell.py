@@ -14,6 +14,7 @@
 
 import mock
 
+from ironicclient.common import utils as commonutils
 from ironicclient.openstack.common.apiclient import exceptions
 from ironicclient.openstack.common import cliutils
 from ironicclient.tests.unit import utils
@@ -179,3 +180,35 @@ class ChassisShellTest(utils.BaseTestCase):
                                           fields=[['foo', 'bar']])
         self.assertRaises(exceptions.CommandError,
                           c_shell.do_chassis_node_list, client_mock, args)
+
+    def test_do_chassis_create(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        c_shell.do_chassis_create(client_mock, args)
+        client_mock.chassis.create.assert_called_once_with()
+
+    def test_do_chassis_delete(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.chassis = ['chassis_uuid']
+        c_shell.do_chassis_delete(client_mock, args)
+        client_mock.chassis.delete.assert_called_once_with('chassis_uuid')
+
+    def test_do_chassis_delete_multiple(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.chassis = ['chassis_uuid1', 'chassis_uuid2']
+        c_shell.do_chassis_delete(client_mock, args)
+        client_mock.chassis.delete.assert_has_calls([
+            mock.call('chassis_uuid1'), mock.call('chassis_uuid2')])
+
+    def test_do_chassis_update(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.chassis = 'chassis_uuid'
+        args.op = 'add'
+        args.attributes = [['arg1=val1', 'arg2=val2']]
+        c_shell.do_chassis_update(client_mock, args)
+        patch = commonutils.args_array_to_patch(args.op, args.attributes[0])
+        client_mock.chassis.update.assert_called_once_with('chassis_uuid',
+                                                           patch)

@@ -55,3 +55,26 @@ class DriverShellTest(utils.BaseTestCase):
         client_mock.driver.vendor_passthru.assert_called_once_with(
             args.driver_name, args.method, args={},
             http_method=args.http_method)
+
+    def test_do_driver_properties(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.driver_name = 'driver_name'
+
+        d_shell.do_driver_properties(client_mock, args)
+        client_mock.driver.properties_called_once_with("driver_name")
+
+    def test_do_driver_show(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.driver_name = 'fake'
+
+        d_shell.do_driver_show(client_mock, args)
+        client_mock.driver.get.assert_called_once_with('fake')
+
+    def test_do_driver_list(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+
+        d_shell.do_driver_list(client_mock, args)
+        client_mock.driver.list.assert_called_once_with()
