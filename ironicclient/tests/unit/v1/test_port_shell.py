@@ -108,6 +108,17 @@ class PortShellTest(utils.BaseTestCase):
         patch = commonutils.args_array_to_patch(args.op, args.attributes[0])
         client_mock.port.update.assert_called_once_with('port_uuid', patch)
 
+    def test_do_port_update_wrong_op(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.port = 'port_uuid'
+        args.op = 'foo'
+        args.attributes = [['arg1=val1', 'arg2=val2']]
+        self.assertRaises(exceptions.CommandError,
+                          p_shell.do_port_update,
+                          client_mock, args)
+        self.assertFalse(client_mock.port.update.called)
+
     def _get_client_mock_args(self, address=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False,
                               fields=None):
@@ -188,11 +199,58 @@ class PortShellTest(utils.BaseTestCase):
                           p_shell.do_port_list,
                           client_mock, args)
 
+    def test_do_port_list_sort_dir(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(sort_dir='desc',
+                                          detail=False)
+
+        p_shell.do_port_list(client_mock, args)
+        client_mock.port.list.assert_called_once_with(sort_dir='desc',
+                                                      detail=False)
+
+    def test_do_port_list_detail_sort_dir(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(sort_dir='asc',
+                                          detail=True)
+
+        p_shell.do_port_list(client_mock, args)
+        client_mock.port.list.assert_called_once_with(sort_dir='asc',
+                                                      detail=True)
+
+    def test_do_port_list_wrong_sort_dir(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(sort_dir='abc',
+                                          detail=False)
+        self.assertRaises(exceptions.CommandError,
+                          p_shell.do_port_list,
+                          client_mock, args)
+        self.assertFalse(client_mock.port.list.called)
+
     def test_do_port_create(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         p_shell.do_port_create(client_mock, args)
         client_mock.port.create.assert_called_once_with()
+
+    def test_do_port_create_valid_fields_values(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.address = 'address'
+        args.node_uuid = 'uuid'
+        args.extra = ["key1=val1", "key2=val2"]
+        p_shell.do_port_create(client_mock, args)
+        client_mock.port.create.assert_called_once_with(
+            address='address', node_uuid='uuid', extra={'key1': 'val1',
+                                                        'key2': 'val2'})
+
+    def test_do_port_create_invalid_extra_fields_values(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.address = 'address'
+        args.node_uuid = 'uuid'
+        args.extra = ["foo"]
+        self.assertRaises(exceptions.CommandError,
+                          p_shell.do_port_create, client_mock, args)
 
     def test_do_port_delete(self):
         client_mock = mock.MagicMock()
