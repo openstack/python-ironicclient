@@ -13,78 +13,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
-
-import six.moves.configparser as config_parser
-import testtools
-
-import ironicclient
-from ironicclient import exc
-
-DEFAULT_CONFIG = os.path.join(os.path.dirname(__file__), 'test.conf')
+from ironicclient.tests.functional import base
 
 
-class TestIronicClient(testtools.TestCase):
-    def setUp(self):
-        super(TestIronicClient, self).setUp()
-        self.client = ironicclient.client.get_client(**self._get_config())
-
-    def _get_config(self):
-        config_file = os.environ.get('IRONICCLIENT_TEST_CONFIG',
-                                     DEFAULT_CONFIG)
-        config = config_parser.SafeConfigParser()
-        if not config.read(config_file):
-            self.skipTest('Skipping, no test config found @ %s' % config_file)
-        try:
-            auth_strategy = config.get('functional', 'auth_strategy')
-        except config_parser.NoOptionError:
-            auth_strategy = 'keystone'
-        if auth_strategy not in ['keystone', 'noauth']:
-            raise self.fail(
-                'Invalid auth type specified in functional must be one of: '
-                'keystone, noauth')
-        out = {}
-        conf_settings = ['api_version']
-        if auth_strategy == 'keystone':
-            conf_settings += ['os_auth_url', 'os_username',
-                              'os_password', 'os_tenant_name']
-
-        else:
-            conf_settings += ['os_auth_token', 'ironic_url']
-
-        for c in conf_settings:
-            try:
-                out[c] = config.get('functional', c)
-            except config_parser.NoOptionError:
-                out[c] = None
-        missing = [k for k, v in out.items() if not v]
-        if missing:
-                self.fail('Missing required setting in test.conf (%s) for '
-                          'auth_strategy=%s: %s' %
-                          (config_file, auth_strategy, ','.join(missing)))
-        return out
-
-    def _try_delete_resource(self, resource, id):
-        mgr = getattr(self.client, resource)
-        try:
-            mgr.delete(id)
-        except exc.NotFound:
-            pass
-
-    def _create_node(self, **kwargs):
-        if 'driver' not in kwargs:
-            kwargs['driver'] = 'fake'
-        node = self.client.node.create(**kwargs)
-        self.addCleanup(self._try_delete_resource, 'node', node.uuid)
-        return node
-
+class TestIronicClient(base.FunctionalTestBase):
     def test_node_list(self):
-        self.assertTrue(isinstance(self.client.node.list(), list))
+        list = self.ironic('node-list')
+        self.assertTableHeaders(['UUID', 'Name', 'Instance UUID',
+                                 'Power State', 'Provisioning State',
+                                 'Maintenance'], list)
 
     def test_node_create_get_delete(self):
-        node = self._create_node()
-        self.assertTrue(isinstance(node, ironicclient.v1.node.Node))
-        got = self.client.node.get(node.uuid)
-        self.assertTrue(isinstance(got, ironicclient.v1.node.Node))
-        self.client.node.delete(node.uuid)
-        self.assertRaises(exc.NotFound, self.client.node.get, node.uuid)
+        node = self.create_node()
+        got = self.ironic('node-show', params=node['uuid'])
+        expected_node = self.get_dict_from_output(got)
+        self.assertEqual(expected_node['uuid'], node['uuid'])
+        self.ironic('node-delete', params=node['uuid'])
+        self.assertNodeDeleted(node['uuid'])
