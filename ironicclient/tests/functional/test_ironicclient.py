@@ -13,9 +13,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import ConfigParser
 import os
 
+import six.moves.configparser as config_parser
 import testtools
 
 import ironicclient
@@ -32,12 +32,12 @@ class TestIronicClient(testtools.TestCase):
     def _get_config(self):
         config_file = os.environ.get('IRONICCLIENT_TEST_CONFIG',
                                      DEFAULT_CONFIG)
-        config = ConfigParser.SafeConfigParser()
+        config = config_parser.SafeConfigParser()
         if not config.read(config_file):
             self.skipTest('Skipping, no test config found @ %s' % config_file)
         try:
             auth_strategy = config.get('functional', 'auth_strategy')
-        except ConfigParser.NoOptionError:
+        except config_parser.NoOptionError:
             auth_strategy = 'keystone'
         if auth_strategy not in ['keystone', 'noauth']:
             raise self.fail(
@@ -55,7 +55,7 @@ class TestIronicClient(testtools.TestCase):
         for c in conf_settings:
             try:
                 out[c] = config.get('functional', c)
-            except ConfigParser.NoOptionError:
+            except config_parser.NoOptionError:
                 out[c] = None
         missing = [k for k, v in out.items() if not v]
         if missing:
