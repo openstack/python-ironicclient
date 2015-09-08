@@ -38,7 +38,7 @@ def _get_cache():
         if not os.path.exists(CACHE_DIR):
             os.makedirs(CACHE_DIR)
 
-        CACHE = dogpile.cache.make_region().configure(
+        CACHE = dogpile.cache.make_region(key_mangler=str).configure(
             'dogpile.cache.dbm',
             expiration_time=DEFAULT_EXPIRY,
             arguments={
