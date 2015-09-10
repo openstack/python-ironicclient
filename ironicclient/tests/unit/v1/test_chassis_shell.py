@@ -24,7 +24,8 @@ import ironicclient.v1.chassis_shell as c_shell
 class ChassisShellTest(utils.BaseTestCase):
     def _get_client_mock_args(self, chassis=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False,
-                              fields=None):
+                              fields=None, associated=None, maintenance=None,
+                              provision_state=None):
         args = mock.MagicMock(spec=True)
         args.chassis = chassis
         args.marker = marker
@@ -33,6 +34,9 @@ class ChassisShellTest(utils.BaseTestCase):
         args.sort_key = sort_key
         args.detail = detail
         args.fields = fields
+        args.associated = associated
+        args.maintenance = maintenance
+        args.provision_state = provision_state
 
         return args
 
@@ -258,6 +262,33 @@ class ChassisShellTest(utils.BaseTestCase):
         c_shell.do_chassis_node_list(client_mock, args)
         client_mock.chassis.list_nodes.assert_called_once_with(
             chassis_mock, fields=['uuid', 'power_state'], detail=False)
+
+    def test_do_chassis_node_list_associated(self):
+        client_mock = mock.MagicMock()
+        chassis_mock = mock.MagicMock(spec_set=[])
+        args = self._get_client_mock_args(chassis=chassis_mock,
+                                          associated=True)
+        c_shell.do_chassis_node_list(client_mock, args)
+        client_mock.chassis.list_nodes.assert_called_once_with(
+            chassis_mock, associated=True, detail=False)
+
+    def test_do_chassis_node_list_maintenance(self):
+        client_mock = mock.MagicMock()
+        chassis_mock = mock.MagicMock(spec_set=[])
+        args = self._get_client_mock_args(chassis=chassis_mock,
+                                          maintenance=True)
+        c_shell.do_chassis_node_list(client_mock, args)
+        client_mock.chassis.list_nodes.assert_called_once_with(
+            chassis_mock, maintenance=True, detail=False)
+
+    def test_do_chassis_node_list_provision_state(self):
+        client_mock = mock.MagicMock()
+        chassis_mock = mock.MagicMock(spec_set=[])
+        args = self._get_client_mock_args(chassis=chassis_mock,
+                                          provision_state='wait call-back')
+        c_shell.do_chassis_node_list(client_mock, args)
+        client_mock.chassis.list_nodes.assert_called_once_with(
+            chassis_mock, provision_state='wait call-back', detail=False)
 
     def test_do_chassis_node_list_invalid_fields(self):
         client_mock = mock.MagicMock()

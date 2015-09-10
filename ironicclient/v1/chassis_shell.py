@@ -206,8 +206,30 @@ def do_chassis_update(cc, args):
     default=[],
     help="One or more node fields. Only these fields will be fetched from "
          "the server. Can not be used when '--detail' is specified.")
+@cliutils.arg(
+    '--maintenance',
+    metavar='<boolean>',
+    help="List nodes in maintenance mode: 'true' or 'false'.")
+@cliutils.arg(
+    '--associated',
+    metavar='<boolean>',
+    help="List nodes by instance association: 'true' or 'false'.")
+@cliutils.arg(
+    '--provision-state',
+    metavar='<provision-state>',
+    help="List nodes in specified provision state.")
 def do_chassis_node_list(cc, args):
     """List the nodes contained in a chassis."""
+    params = {}
+    if args.associated is not None:
+        params['associated'] = utils.bool_argument_value("--associated",
+                                                         args.associated)
+    if args.maintenance is not None:
+        params['maintenance'] = utils.bool_argument_value("--maintenance",
+                                                          args.maintenance)
+    if args.provision_state is not None:
+        params['provision_state'] = args.provision_state
+
     if args.detail:
         fields = res_fields.NODE_DETAILED_RESOURCE.fields
         field_labels = res_fields.NODE_DETAILED_RESOURCE.labels
@@ -221,7 +243,9 @@ def do_chassis_node_list(cc, args):
         fields = res_fields.NODE_RESOURCE.fields
         field_labels = res_fields.NODE_RESOURCE.labels
 
-    params = utils.common_params_for_list(args, fields, field_labels)
+    params.update(utils.common_params_for_list(args,
+                                               fields,
+                                               field_labels))
 
     nodes = cc.chassis.list_nodes(args.chassis, **params)
     cliutils.print_list(nodes, fields,

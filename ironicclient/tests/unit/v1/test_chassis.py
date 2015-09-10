@@ -36,6 +36,7 @@ CHASSIS2 = {'id': 43,
 NODE = {'id': 123,
         'uuid': '66666666-7777-8888-9999-000000000000',
         'chassis_id': 42,
+        'provision_state': 'available',
         'driver': 'fake',
         'driver_info': {'user': 'foo', 'password': 'bar'},
         'properties': {'num_cpu': 4},
@@ -117,6 +118,27 @@ fake_responses = {
             {},
             {"nodes": [NODE]},
         ),
+    },
+    '/v1/chassis/%s/nodes?associated=True' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE]},
+        )
+    },
+    '/v1/chassis/%s/nodes?maintenance=False' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE]},
+        )
+    },
+    '/v1/chassis/%s/nodes?provision_state=available' % CHASSIS['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE]},
+        )
     },
 }
 
@@ -345,6 +367,34 @@ class ChassisManagerTest(testtools.TestCase):
         nodes = self.mgr.list_nodes(CHASSIS['uuid'], fields=['uuid', 'extra'])
         expect = [
             ('GET', '/v1/chassis/%s/nodes?fields=uuid,extra' %
+             CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(nodes))
+
+    def test_chassis_node_list_maintenance(self):
+        nodes = self.mgr.list_nodes(CHASSIS['uuid'], maintenance=False)
+        expect = [
+            ('GET', '/v1/chassis/%s/nodes?maintenance=False' %
+             CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(nodes))
+
+    def test_chassis_node_list_associated(self):
+        nodes = self.mgr.list_nodes(CHASSIS['uuid'], associated=True)
+        expect = [
+            ('GET', '/v1/chassis/%s/nodes?associated=True' %
+             CHASSIS['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(nodes))
+
+    def test_chassis_node_list_provision_state(self):
+        nodes = self.mgr.list_nodes(CHASSIS['uuid'],
+                                    provision_state="available")
+        expect = [
+            ('GET', '/v1/chassis/%s/nodes?provision_state=available' %
              CHASSIS['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
