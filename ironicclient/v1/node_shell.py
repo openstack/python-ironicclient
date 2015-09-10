@@ -125,7 +125,6 @@ def do_node_list(cc, args):
                                                           args.maintenance)
     if args.provision_state is not None:
         params['provision_state'] = args.provision_state
-    params['detail'] = args.detail
 
     if args.detail:
         fields = res_fields.NODE_DETAILED_RESOURCE.fields
