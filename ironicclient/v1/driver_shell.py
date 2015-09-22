@@ -62,6 +62,22 @@ def do_driver_properties(cc, args):
         dict_value='Description')
 
 
+@cliutils.arg('driver_name', metavar='<driver>',
+              help="Name of the driver.")
+@cliutils.arg('--wrap', dest='wrap', metavar='<integer>',
+              type=int, default=0,
+              help=('Wrap the output to a specified length. '
+                    'Positive number can realize wrap functionality. '
+                    '0 is default for disabled.'))
+def do_driver_raid_logical_disk_properties(cc, args):
+    """Get RAID logical disk properties for a driver."""
+    properties = cc.driver.raid_logical_disk_properties(args.driver_name)
+    cliutils.print_dict(
+        properties,
+        wrap=args.wrap,
+        dict_value='Description')
+
+
 @cliutils.arg('driver_name',
               metavar='<driver>',
               help='Name of the driver.')

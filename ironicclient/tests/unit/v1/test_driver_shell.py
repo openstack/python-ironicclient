@@ -104,6 +104,30 @@ class DriverShellTest(utils.BaseTestCase):
             dict_value='Description',
             wrap=80)
 
+    @mock.patch('ironicclient.common.cliutils.print_dict')
+    def _test_do_driver_raid_logical_disk(self, print_dict_mock, wrap=0):
+        cli_mock = self.client_mock
+        cli_mock.driver.raid_logical_disk_properties.return_value = {
+            'foo': 'bar'}
+        args = mock.MagicMock()
+        args.driver_name = 'driver_name'
+        args.wrap = wrap
+
+        d_shell.do_driver_raid_logical_disk_properties(cli_mock, args)
+
+        cli_mock.driver.raid_logical_disk_properties.assert_called_once_with(
+            "driver_name")
+        print_dict_mock.assert_called_with(
+            {'foo': 'bar'},
+            dict_value='Description',
+            wrap=wrap)
+
+    def test_do_driver_raid_logical_disk_default_wrap(self):
+        self._test_do_driver_raid_logical_disk()
+
+    def test_do_driver_raid_logical_disk_with_wrap(self):
+        self._test_do_driver_raid_logical_disk(wrap=80)
+
     def test_do_driver_show(self):
         client_mock = self.client_mock
         args = mock.MagicMock()

@@ -57,9 +57,11 @@ class Resource(object):
         'properties': 'Properties',
         'provision_state': 'Provisioning State',
         'provision_updated_at': 'Provision Updated At',
+        'raid_config': 'Current RAID configuration',
         'reservation': 'Reservation',
         'target_power_state': 'Target Power State',
         'target_provision_state': 'Target Provision State',
+        'target_raid_config': 'Target RAID configuration',
         'updated_at': 'Updated At',
         'uuid': 'UUID',
     }
@@ -139,9 +141,11 @@ NODE_DETAILED_RESOURCE = Resource(
      'properties',
      'provision_state',
      'provision_updated_at',
+     'raid_config',
      'reservation',
      'target_power_state',
      'target_provision_state',
+     'target_raid_config',
      'updated_at',
      'inspection_finished_at',
      'inspection_started_at',
@@ -159,6 +163,8 @@ NODE_DETAILED_RESOURCE = Resource(
         'extra',
         'instance_info',
         'properties',
+        'raid_config',
+        'target_raid_config',
     ])
 NODE_RESOURCE = Resource(
     ['uuid',
