@@ -324,8 +324,8 @@ def do_node_vendor_passthru(cc, args):
 def do_node_port_list(cc, args):
     """List the ports associated with a node."""
     if args.detail:
-        fields = res_fields.PORTS_DETAILED_RESOURCE.fields
-        field_labels = res_fields.PORTS_DETAILED_RESOURCE.labels
+        fields = res_fields.PORT_DETAILED_RESOURCE.fields
+        field_labels = res_fields.PORT_DETAILED_RESOURCE.labels
     elif args.fields:
         utils.check_for_invalid_fields(
             args.fields[0], res_fields.PORT_DETAILED_RESOURCE.fields)
