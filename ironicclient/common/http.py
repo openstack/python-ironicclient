@@ -560,7 +560,7 @@ class ResponseBodyIterator(object):
             raise StopIteration()
 
 
-def _construct_http_client(endpoint,
+def _construct_http_client(endpoint=None,
                            session=None,
                            token=None,
                            auth_ref=None,
