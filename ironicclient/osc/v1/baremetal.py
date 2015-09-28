@@ -15,7 +15,6 @@
 #
 
 import logging
-import six
 
 from cliff import command
 from cliff import lister
@@ -283,7 +282,7 @@ class ShowBaremetal(show.ShowOne):
             for field in self.LONG_FIELDS:
                 node.pop(field, None)
 
-        return zip(*sorted(six.iteritems(node)))
+        return zip(*sorted(node.items()))
 
 
 class UnsetBaremetal(command.Command):
