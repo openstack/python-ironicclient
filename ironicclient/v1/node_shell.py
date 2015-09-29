@@ -257,7 +257,7 @@ def do_node_update(cc, args):
               action='append',
               default=[],
               help=("Argument to be passed to the vendor-passthru method. Can "
-                    "be specified mutiple times."))
+                    "be specified multiple times."))
 @cliutils.arg('--http-method',
               metavar='<http-method>',
               choices=['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
