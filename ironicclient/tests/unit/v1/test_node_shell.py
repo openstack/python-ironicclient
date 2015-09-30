@@ -457,6 +457,17 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'provide', configdrive=None)
 
+    def test_do_node_set_provision_state_abort(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'abort'
+        args.config_drive = None
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'abort', configdrive=None)
+
     def test_do_node_set_console_mode(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()

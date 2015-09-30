@@ -382,9 +382,9 @@ def do_node_set_power_state(cc, args):
     'provision_state',
     metavar='<provision-state>',
     choices=['active', 'deleted', 'rebuild', 'inspect', 'provide',
-             'manage'],
+             'manage', 'abort'],
     help="Supported states: 'active', 'deleted', 'rebuild', "
-         "'inspect', 'provide' or 'manage'")
+         "'inspect', 'provide', 'manage' or 'abort'")
 @cliutils.arg(
     '--config-drive',
     metavar='<config-drive>',
@@ -395,7 +395,7 @@ def do_node_set_power_state(cc, args):
           "config drive will be generated from it. This parameter is only "
           "valid when setting provision state to 'active'."))
 def do_node_set_provision_state(cc, args):
-    """Provision, rebuild, delete, inspect, provide or manage an instance."""
+    """Initiate a provisioning state change for a node."""
     if args.config_drive and args.provision_state != 'active':
         raise exceptions.CommandError(_('--config-drive is only valid when '
                                         'setting provision state to "active"'))
