@@ -7,8 +7,10 @@ ironicclient Python API
 The ironicclient python API lets you access ironic, the OpenStack
 Bare Metal Provisioning Service.
 
-For example, to manipulate nodes, you interact with an `ironicclient.v1.node`_ object.
-You obtain access to nodes via attributes of the `ironicclient.v1.client.Client`_ object.
+For example, to manipulate nodes, you interact with an
+`ironicclient.v1.node`_ object.
+You obtain access to nodes via attributes of the
+`ironicclient.v1.client.Client`_ object.
 
 Usage
 =====
