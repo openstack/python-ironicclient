@@ -18,11 +18,10 @@ import datetime
 import os
 
 import fixtures
+import mock
 from oslo_utils import strutils
 import six
 import testtools
-
-from ironicclient.common import http
 
 
 DEFAULT_TEST_HOST = 'localhost'
@@ -58,7 +57,7 @@ class FakeAPI(object):
 
     def raw_request(self, *args, **kwargs):
         response = self._request(*args, **kwargs)
-        body_iter = http.ResponseBodyIterator(six.StringIO(response[1]))
+        body_iter = iter(six.StringIO(response[1]))
         return FakeResponse(response[0]), body_iter
 
     def json_request(self, *args, **kwargs):
@@ -94,8 +93,9 @@ class FakeResponse(object):
         """
         self.headers = headers
         self.body = body
-        self.version = version
-        self.status = status
+        self.raw = mock.Mock()
+        self.raw.version = version
+        self.status_code = status
         self.reason = reason
 
     def getheaders(self):
@@ -139,19 +139,29 @@ class FakeKeystone(object):
 
 class FakeSessionResponse(object):
 
-    def __init__(self, headers, content=None, status_code=None):
+    def __init__(self, headers, content=None, status_code=None, version=None):
         self.headers = headers
         self.content = content
         self.status_code = status_code
+        self.raw = mock.Mock()
+        self.raw.version = version
+        self.reason = ''
+
+    def iter_content(self, chunk_size):
+        return iter(self.content)
 
 
 class FakeSession(object):
 
-    def __init__(self, headers, content=None, status_code=None):
+    def __init__(self, headers, content=None, status_code=None, version=None):
         self.headers = headers
         self.content = content
         self.status_code = status_code
+        self.version = version
+        self.verify = False
+        self.cert = ('test_cert', 'test_key')
 
     def request(self, url, method, **kwargs):
-        return FakeSessionResponse(self.headers, self.content,
-                                   self.status_code)
+        request = FakeSessionResponse(
+            self.headers, self.content, self.status_code, self.version)
+        return request
