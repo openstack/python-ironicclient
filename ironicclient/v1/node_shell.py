@@ -15,8 +15,6 @@
 
 import argparse
 
-import six
-
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient.openstack.common.apiclient import exceptions
@@ -408,7 +406,7 @@ def do_node_validate(cc, args):
     """Validate a node's driver interfaces."""
     ifaces = cc.node.validate(args.node)
     obj_list = []
-    for key, value in six.iteritems(ifaces.to_dict()):
+    for key, value in ifaces.to_dict().items():
         data = {'interface': key}
         data.update(value)
         obj_list.append(type('iface', (object,), data))

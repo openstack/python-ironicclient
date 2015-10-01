@@ -16,8 +16,6 @@
 
 import sys
 
-import six
-
 
 AUTH_TOKEN = "foobar"
 AUTH_URL = "http://0.0.0.0"
@@ -48,7 +46,7 @@ class FakeResource(object):
         self._loaded = loaded
 
     def _add_details(self, info):
-        for (k, v) in six.iteritems(info):
+        for (k, v) in info.items():
             setattr(self, k, v)
 
     def __repr__(self):
