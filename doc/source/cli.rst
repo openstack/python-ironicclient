@@ -37,7 +37,8 @@ environment variables::
 The command-line tool will attempt to reauthenticate using the provided
 credentials for every request. You can override this behavior by manually
 supplying an auth token using :option:`--ironic-url` and
-:option:`--os-auth-token`, or by setting the corresponding environment variables::
+:option:`--os-auth-token`, or by setting the corresponding environment
+variables::
 
     export IRONIC_URL=http://ironic.example.org:6385/
     export OS_AUTH_TOKEN=3bcc3d3a03f44e3d8377f9247b0ad155
