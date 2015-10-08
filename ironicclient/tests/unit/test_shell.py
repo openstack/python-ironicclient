@@ -119,13 +119,28 @@ class ShellTest(utils.BaseTestCase):
         self.make_env(exclude='OS_USERNAME')
         self.test_help()
 
+    @mock.patch.object(ironic_shell.IronicShell, '_get_keystone_auth',
+                       side_effect=keystone_exc.ConnectionRefused)
     @mock.patch('sys.stdin', side_effect=mock.MagicMock)
     @mock.patch('getpass.getpass', return_value='password')
-    def test_password_prompted(self, mock_getpass, mock_stdin):
+    def test_password_prompted(self, mock_getpass, mock_stdin, mock_ks):
         self.make_env(exclude='OS_PASSWORD')
         # We will get a Connection Refused because there is no keystone.
         self.assertRaises(keystone_exc.ConnectionRefused,
                           self.shell, 'node-list')
+        expected_kwargs = {
+            'username': FAKE_ENV['OS_USERNAME'],
+            'user_domain_id': '',
+            'user_domain_name': '',
+            'password': FAKE_ENV['OS_PASSWORD'],
+            'auth_token': '',
+            'project_id': '',
+            'project_name': FAKE_ENV['OS_TENANT_NAME'],
+            'project_domain_id': '',
+            'project_domain_name': '',
+        }
+        mock_ks.assert_called_once_with(mock.ANY, FAKE_ENV['OS_AUTH_URL'],
+                                        **expected_kwargs)
         # Make sure we are actually prompted.
         mock_getpass.assert_called_with('OpenStack Password: ')
 
