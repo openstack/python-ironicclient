@@ -89,7 +89,8 @@ class ChassisManager(base.Manager):
                                          limit=limit)
 
     def list_nodes(self, chassis_id, marker=None, limit=None,
-                   sort_key=None, sort_dir=None, detail=False, fields=None):
+                   sort_key=None, sort_dir=None, detail=False, fields=None,
+                   associated=None, maintenance=None, provision_state=None):
         """List all the nodes for a given chassis.
 
         :param chassis_id: The UUID of the chassis.
@@ -117,6 +118,20 @@ class ChassisManager(base.Manager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param associated: Optional. Either a Boolean or a string
+                           representation of a Boolean that indicates whether
+                           to return a list of associated (True or "True") or
+                           unassociated (False or "False") nodes.
+
+        :param maintenance: Optional. Either a Boolean or a string
+                            representation of a Boolean that indicates whether
+                            to return nodes in maintenance mode (True or
+                            "True"), or not in maintenance mode (False or
+                            "False").
+
+        :param provision_state: Optional. String value to get only nodes in
+                                that provision state.
+
         :returns: A list of nodes.
 
         """
@@ -129,6 +144,13 @@ class ChassisManager(base.Manager):
 
         filters = utils.common_filters(marker, limit, sort_key, sort_dir,
                                        fields)
+
+        if associated is not None:
+            filters.append('associated=%s' % associated)
+        if maintenance is not None:
+            filters.append('maintenance=%s' % maintenance)
+        if provision_state is not None:
+            filters.append('provision_state=%s' % provision_state)
 
         path = "%s/nodes" % chassis_id
         if detail:
