@@ -100,11 +100,11 @@ class ChassisShellTest(utils.BaseTestCase):
 
     def test_do_chassis_list_sort_key(self):
         client_mock = mock.MagicMock()
-        args = self._get_client_mock_args(sort_key='uuid',
+        args = self._get_client_mock_args(sort_key='created_at',
                                           detail=False)
 
         c_shell.do_chassis_list(client_mock, args)
-        client_mock.chassis.list.assert_called_once_with(sort_key='uuid',
+        client_mock.chassis.list.assert_called_once_with(sort_key='created_at',
                                                          detail=False)
 
     def test_do_chassis_list_wrong_sort_key(self):
@@ -197,18 +197,19 @@ class ChassisShellTest(utils.BaseTestCase):
     def test_do_chassis_node_list_sort_key(self):
         client_mock = mock.MagicMock()
         chassis_mock = mock.MagicMock(spec_set=[])
-        args = self._get_client_mock_args(chassis_mock, sort_key='uuid',
+        args = self._get_client_mock_args(chassis_mock, sort_key='created_at',
                                           detail=False)
 
         c_shell.do_chassis_node_list(client_mock, args)
         client_mock.chassis.list_nodes.assert_called_once_with(
-            chassis_mock, sort_key='uuid', detail=False)
+            chassis_mock, sort_key='created_at', detail=False)
 
     def test_do_chassis_node_list_wrong_sort_key(self):
         client_mock = mock.MagicMock()
         chassis_mock = mock.MagicMock(spec_set=[])
         args = self._get_client_mock_args(chassis_mock, sort_key='extra',
                                           detail=False)
+
         self.assertRaises(exceptions.CommandError,
                           c_shell.do_chassis_node_list,
                           client_mock, args)
@@ -223,6 +224,17 @@ class ChassisShellTest(utils.BaseTestCase):
         c_shell.do_chassis_node_list(client_mock, args)
         client_mock.chassis.list_nodes.assert_called_once_with(
             chassis_mock, sort_key='created_at', detail=True)
+
+    def test_do_chassis_node_list_detail_wrong_sort_key(self):
+        client_mock = mock.MagicMock()
+        chassis_mock = mock.MagicMock(spec_set=[])
+        args = self._get_client_mock_args(chassis_mock, sort_key='extra',
+                                          detail=True)
+
+        self.assertRaises(exceptions.CommandError,
+                          c_shell.do_chassis_node_list,
+                          client_mock, args)
+        self.assertFalse(client_mock.chassis.list_nodes.called)
 
     def test_do_chassis_node_list_sort_dir(self):
         client_mock = mock.MagicMock()
