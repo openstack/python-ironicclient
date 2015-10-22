@@ -17,11 +17,6 @@ from ironicclient.tests.functional import base
 
 
 class TestIronicClient(base.FunctionalTestBase):
-    def test_node_list(self):
-        list = self.ironic('node-list')
-        self.assertTableHeaders(['UUID', 'Name', 'Instance UUID',
-                                 'Power State', 'Provisioning State',
-                                 'Maintenance'], list)
 
     def test_node_create_get_delete(self):
         node = self.create_node()
