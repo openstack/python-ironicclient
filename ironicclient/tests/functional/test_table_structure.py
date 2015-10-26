@@ -1,3 +1,5 @@
+# Copyright (c) 2015 Mirantis, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -21,40 +23,40 @@ class TableStructureIronicCLITests(base.FunctionalTestBase):
     """
 
     def test_chassis_list_table_structure(self):
-        """Test scenario:
+        """Test steps:
 
             1) get chassis-list
             2) check table structure
         """
-        chassis_list = self.ironic('chassis-list')
-        self.assertTableHeaders(['Description', 'UUID'], chassis_list)
+        chassis_list_header = self.get_table_headers('chassis-list')
+        self.assertTableHeaders(['Description', 'UUID'], chassis_list_header)
 
     def test_node_list_table_structure(self):
-        """Test scenario:
+        """Test steps:
 
             1) get node-list
             2) check table structure
         """
-        node_list = self.ironic('node-list')
+        node_list_header = self.get_table_headers('node-list')
         self.assertTableHeaders(['UUID', 'Name', 'Instance UUID',
                                  'Power State', 'Provisioning State',
-                                 'Maintenance'], node_list)
+                                 'Maintenance'], node_list_header)
 
     def test_port_list_table_structure(self):
-        """Test scenario:
+        """Test steps:
 
             1) get port-list
             2) check table structure
         """
-        port_list = self.ironic('port-list')
-        self.assertTableHeaders(['UUID', 'Address'], port_list)
+        port_list_header = self.get_table_headers('port-list')
+        self.assertTableHeaders(['UUID', 'Address'], port_list_header)
 
     def test_driver_list_table_structure(self):
-        """Test scenario:
+        """Test steps:
 
             1) get driver-list
             2) check table structure
         """
-        driver_list = self.ironic('driver-list')
+        driver_list_header = self.get_table_headers('driver-list')
         self.assertTableHeaders(['Supported driver(s)', 'Active host(s)'],
-                                driver_list)
+                                driver_list_header)
