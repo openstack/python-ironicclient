@@ -1,0 +1,71 @@
+#  Copyright (c) 2016 Mirantis, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+from ironicclient.tests.functional import base
+
+
+class ChassisSanityTestIronicClient(base.FunctionalTestBase):
+    """Sanity tests for testing actions with Chassis.
+
+    Smoke test for the Ironic CLI commands which checks basic actions with
+    chassis command like create, show, update, delete etc.
+    """
+    def setUp(self):
+        super(ChassisSanityTestIronicClient, self).setUp()
+        self.chassis = self.create_chassis()
+
+    def test_chassis_create(self):
+        """Test steps:
+
+        1) create chassis
+        2) check that chassis has been successfully created
+        """
+        chassis_list_uuid = self.get_chassis_uuids_from_chassis_list()
+        self.assertIn(self.chassis['uuid'], chassis_list_uuid)
+
+    def test_chassis_delete(self):
+        """Test steps:
+
+        1) create chassis
+        2) check that chassis has been successfully created
+        3) delete chassis
+        4) check that chassis has been successfully deleted
+        """
+        self.delete_chassis(self.chassis['uuid'])
+        chassis_list_uuid = self.get_chassis_uuids_from_chassis_list()
+
+        self.assertNotIn(self.chassis['uuid'], chassis_list_uuid)
+
+    def test_chassis_show(self):
+        """Test steps:
+
+        1) create chassis
+        2) check that chassis-show returns the same chassis UUID
+        3) chassis-create
+        """
+        chassis_show = self.show_chassis(self.chassis['uuid'])
+        self.assertEqual(self.chassis['uuid'], chassis_show['uuid'])
+
+    def test_chassis_update(self):
+        """Test steps:
+
+        1) create chassis
+        2) update chassis
+        3) check that chassis has been successfully updated
+        """
+        updated_chassis = self.update_chassis(
+            self.chassis['uuid'], 'add', 'description=test-chassis')
+        self.assertEqual('test-chassis', updated_chassis['description'])
+        self.assertNotEqual(self.chassis['description'],
+                            updated_chassis['description'])

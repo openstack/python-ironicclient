@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Mirantis, Inc.
+# Copyright (c) 2016 Mirantis, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -253,3 +253,37 @@ class FunctionalTestBase(base.ClientTestBase):
     def get_drivers_names(self):
         driver_list = self.list_driver()
         return [x['Supported driver(s)'] for x in driver_list]
+
+    def delete_chassis(self, chassis_id):
+        chassis_list = self.list_chassis()
+
+        if utils.get_object(chassis_list, chassis_id):
+            self.ironic('chassis-delete', params=chassis_id)
+
+    def get_chassis_uuids_from_chassis_list(self):
+        chassis_list = self.list_chassis()
+        return [x['UUID'] for x in chassis_list]
+
+    def create_chassis(self, params=''):
+        chassis = self.ironic('chassis-create', params=params)
+
+        if not chassis:
+            self.fail('Ironic chassis has not been created!')
+
+        chassis = utils.get_dict_from_output(chassis)
+        self.addCleanup(self.delete_chassis, chassis['uuid'])
+        return chassis
+
+    def list_chassis(self, params=''):
+        return self.ironic('chassis-list', params=params)
+
+    def show_chassis(self, chassis_id, params=''):
+        chassis_show = self.ironic('chassis-show',
+                                   params='{0} {1}'.format(chassis_id, params))
+        return utils.get_dict_from_output(chassis_show)
+
+    def update_chassis(self, chassis_id, operation, params):
+        updated_chassis = self.ironic(
+            'chassis-update',
+            params='{0} {1} {2}'.format(chassis_id, operation, params))
+        return utils.get_dict_from_output(updated_chassis)
