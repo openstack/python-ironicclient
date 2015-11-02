@@ -15,6 +15,7 @@ Contents
    api_v1
    cli
    contributing
+   testing
 
 Indices and tables
 ==================
