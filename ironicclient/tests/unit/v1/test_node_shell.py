@@ -570,11 +570,11 @@ class NodeShellTest(utils.BaseTestCase):
 
     def test_do_node_list_sort_key(self):
         client_mock = mock.MagicMock()
-        args = self._get_client_mock_args(sort_key='uuid',
+        args = self._get_client_mock_args(sort_key='created_at',
                                           detail=False)
 
         n_shell.do_node_list(client_mock, args)
-        client_mock.node.list.assert_called_once_with(sort_key='uuid',
+        client_mock.node.list.assert_called_once_with(sort_key='created_at',
                                                       detail=False)
 
     def test_do_node_list_wrong_sort_key(self):
@@ -710,18 +710,19 @@ class NodeShellTest(utils.BaseTestCase):
     def test_do_node_port_list_sort_key(self):
         client_mock = mock.MagicMock()
         node_mock = mock.MagicMock(spec_set=[])
-        args = self._get_client_mock_args(node=node_mock, sort_key='uuid',
+        args = self._get_client_mock_args(node=node_mock,
+                                          sort_key='created_at',
                                           detail=False)
 
         n_shell.do_node_port_list(client_mock, args)
         client_mock.node.list_ports.assert_called_once_with(
-            node_mock, sort_key='uuid', detail=False)
+            node_mock, sort_key='created_at', detail=False)
 
     def test_do_node_port_list_wrong_sort_key(self):
         client_mock = mock.MagicMock()
         node_mock = mock.MagicMock(spec_set=[])
         args = self._get_client_mock_args(node=node_mock,
-                                          sort_key='chassis_uuid',
+                                          sort_key='node_uuid',
                                           detail=False)
 
         self.assertRaises(exceptions.CommandError,
@@ -744,7 +745,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         node_mock = mock.MagicMock(spec_set=[])
         args = self._get_client_mock_args(node=node_mock,
-                                          sort_key='chassis_uuid',
+                                          sort_key='node_uuid',
                                           detail=True)
 
         self.assertRaises(exceptions.CommandError,

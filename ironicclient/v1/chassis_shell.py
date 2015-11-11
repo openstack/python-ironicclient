@@ -88,21 +88,18 @@ def do_chassis_list(cc, args):
     if args.detail:
         fields = res_fields.CHASSIS_DETAILED_RESOURCE.fields
         field_labels = res_fields.CHASSIS_DETAILED_RESOURCE.labels
-        sort_fields = res_fields.CHASSIS_DETAILED_RESOURCE.sort_fields
-        sort_field_labels = res_fields.CHASSIS_DETAILED_RESOURCE.sort_labels
     elif args.fields:
         utils.check_for_invalid_fields(
             args.fields[0], res_fields.CHASSIS_DETAILED_RESOURCE.fields)
         resource = res_fields.Resource(args.fields[0])
         fields = resource.fields
         field_labels = resource.labels
-        sort_fields = res_fields.CHASSIS_DETAILED_RESOURCE.sort_fields
-        sort_field_labels = res_fields.CHASSIS_DETAILED_RESOURCE.sort_labels
     else:
         fields = res_fields.CHASSIS_RESOURCE.fields
         field_labels = res_fields.CHASSIS_RESOURCE.labels
-        sort_fields = fields
-        sort_field_labels = field_labels
+
+    sort_fields = res_fields.CHASSIS_DETAILED_RESOURCE.sort_fields
+    sort_field_labels = res_fields.CHASSIS_DETAILED_RESOURCE.sort_labels
 
     params = utils.common_params_for_list(args, sort_fields,
                                           sort_field_labels)
@@ -243,9 +240,12 @@ def do_chassis_node_list(cc, args):
         fields = res_fields.NODE_RESOURCE.fields
         field_labels = res_fields.NODE_RESOURCE.labels
 
+    sort_fields = res_fields.NODE_DETAILED_RESOURCE.sort_fields
+    sort_field_labels = res_fields.NODE_DETAILED_RESOURCE.sort_labels
+
     params.update(utils.common_params_for_list(args,
-                                               fields,
-                                               field_labels))
+                                               sort_fields,
+                                               sort_field_labels))
 
     nodes = cc.chassis.list_nodes(args.chassis, **params)
     cliutils.print_list(nodes, fields,
