@@ -15,10 +15,10 @@
 
 import argparse
 
+from ironicclient.common.apiclient import exceptions
+from ironicclient.common import cliutils
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
-from ironicclient.openstack.common.apiclient import exceptions
-from ironicclient.openstack.common import cliutils
 from ironicclient.v1 import resource_fields as res_fields
 
 

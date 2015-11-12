@@ -14,7 +14,7 @@
 
 import mock
 
-from ironicclient.openstack.common import cliutils
+from ironicclient.common import cliutils
 from ironicclient.tests.unit import utils
 import ironicclient.v1.driver_shell as d_shell
 

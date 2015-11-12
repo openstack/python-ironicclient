@@ -30,7 +30,7 @@ import prettytable
 import six
 from six import moves
 
-from ironicclient.openstack.common._i18n import _
+from ironicclient.common.i18n import _
 
 
 class MissingArgs(Exception):

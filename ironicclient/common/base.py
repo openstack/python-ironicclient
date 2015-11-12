@@ -21,7 +21,7 @@ import copy
 
 import six.moves.urllib.parse as urlparse
 
-from ironicclient.openstack.common.apiclient import base
+from ironicclient.common.apiclient import base
 
 
 def getid(obj):

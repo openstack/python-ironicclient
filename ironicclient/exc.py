@@ -10,8 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from ironicclient.openstack.common.apiclient import exceptions
-from ironicclient.openstack.common.apiclient.exceptions import *  # noqa
+from ironicclient.common.apiclient import exceptions
+from ironicclient.common.apiclient.exceptions import *  # noqa
 
 
 # NOTE(akurilin): This alias is left here since v.0.1.3 to support backwards

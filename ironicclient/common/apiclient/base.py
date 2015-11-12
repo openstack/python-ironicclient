@@ -20,19 +20,6 @@
 Base utilities to build API operation managers and objects on top of.
 """
 
-########################################################################
-#
-# THIS MODULE IS DEPRECATED
-#
-# Please refer to
-# https://etherpad.openstack.org/p/kilo-ironicclient-library-proposals for
-# the discussion leading to this deprecation.
-#
-# We recommend checking out the python-openstacksdk project
-# (https://launchpad.net/python-openstacksdk) instead.
-#
-########################################################################
-
 
 # E1102: %s is not callable
 # pylint: disable=E1102
@@ -44,8 +31,8 @@ from oslo_utils import strutils
 import six
 from six.moves.urllib import parse
 
-from ironicclient.openstack.common._i18n import _
-from ironicclient.openstack.common.apiclient import exceptions
+from ironicclient.common.apiclient import exceptions
+from ironicclient.common.i18n import _
 
 
 def getid(obj):
@@ -467,8 +454,7 @@ class Resource(object):
 
     @property
     def human_id(self):
-        """Human-readable ID which can be used for bash completion.
-        """
+        """Human-readable ID which can be used for bash completion."""
         if self.HUMAN_ID:
             name = getattr(self, self.NAME_ATTR, None)
             if name is not None:

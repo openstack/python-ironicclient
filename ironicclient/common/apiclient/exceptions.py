@@ -20,30 +20,17 @@
 Exception definitions.
 """
 
-########################################################################
-#
-# THIS MODULE IS DEPRECATED
-#
-# Please refer to
-# https://etherpad.openstack.org/p/kilo-ironicclient-library-proposals for
-# the discussion leading to this deprecation.
-#
-# We recommend checking out the python-openstacksdk project
-# (https://launchpad.net/python-openstacksdk) instead.
-#
-########################################################################
 
 import inspect
 import sys
 
 import six
 
-from ironicclient.openstack.common._i18n import _
+from ironicclient.common.i18n import _
 
 
 class ClientException(Exception):
-    """The base exception class for all exceptions this library raises.
-    """
+    """The base exception class for all exceptions this library raises."""
     pass
 
 
@@ -118,8 +105,7 @@ class AmbiguousEndpoints(EndpointException):
 
 
 class HttpError(ClientException):
-    """The base exception class for all HTTP exceptions.
-    """
+    """The base exception class for all HTTP exceptions."""
     http_status = 0
     message = _("HTTP Error")
 

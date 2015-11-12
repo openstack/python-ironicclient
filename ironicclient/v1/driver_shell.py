@@ -15,8 +15,8 @@
 
 import argparse
 
+from ironicclient.common import cliutils
 from ironicclient.common import utils
-from ironicclient.openstack.common import cliutils
 
 
 def _print_driver_show(driver):

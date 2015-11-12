@@ -13,8 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from ironicclient.common import cliutils
 from ironicclient.common import utils
-from ironicclient.openstack.common import cliutils
 from ironicclient.v1 import resource_fields as res_fields
 
 
