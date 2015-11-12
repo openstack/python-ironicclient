@@ -789,3 +789,11 @@ class NodeShellTest(utils.BaseTestCase):
                                           fields=[['foo', 'bar']])
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_port_list, client_mock, args)
+
+    def test_do_node_get_vendor_passthru_methods(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        n_shell.do_node_get_vendor_passthru_methods(client_mock, args)
+        client_mock.node.get_vendor_passthru_methods.assert_called_once_with(
+            'node_uuid')

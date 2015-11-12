@@ -72,6 +72,11 @@ CONSOLE_ENABLE = 'true'
 BOOT_DEVICE = {'boot_device': 'pxe', 'persistent': False}
 SUPPORTED_BOOT_DEVICE = {'supported_boot_devices': ['pxe']}
 
+NODE_VENDOR_PASSTHRU_METHOD = {"heartbeat": {"attach": "false",
+                                             "http_methods": ["POST"],
+                                             "description": "",
+                                             "async": "true"}}
+
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
@@ -292,6 +297,13 @@ fake_responses = {
         'GET': (
             {},
             SUPPORTED_BOOT_DEVICE,
+        ),
+    },
+    '/v1/nodes/%s/vendor_passthru/methods' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            NODE_VENDOR_PASSTHRU_METHOD,
         ),
     },
 }
@@ -931,3 +943,12 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(SUPPORTED_BOOT_DEVICE, boot_device)
+
+    def test_node_get_vendor_passthru_methods(self):
+        vendor_methods = self.mgr.get_vendor_passthru_methods(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/vendor_passthru/methods' % NODE1['uuid'],
+             {}, None)
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(NODE_VENDOR_PASSTHRU_METHOD, vendor_methods)
