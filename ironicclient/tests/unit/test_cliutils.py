@@ -588,7 +588,7 @@ class PrintResultStringTestCase(test_base.BaseTestCase):
     def test_print_dict_string(self):
         orig = sys.stdout
         sys.stdout = six.StringIO()
-        cliutils.print_dict({"Key": "Value"})
+        cliutils.print_dict({"K": "k", "Key": "Value"})
         out = sys.stdout.getvalue()
         sys.stdout.close()
         sys.stdout = orig
@@ -596,6 +596,7 @@ class PrintResultStringTestCase(test_base.BaseTestCase):
 +----------+-------+
 | Property | Value |
 +----------+-------+
+| K        | k     |
 | Key      | Value |
 +----------+-------+
 '''
@@ -604,16 +605,35 @@ class PrintResultStringTestCase(test_base.BaseTestCase):
     def test_print_dict_string_custom_headers(self):
         orig = sys.stdout
         sys.stdout = six.StringIO()
-        cliutils.print_dict({"Key": "Value"}, dict_property='Foo')
+        cliutils.print_dict({"K": "k", "Key": "Value"}, dict_property='Foo',
+                            dict_value='Bar')
         out = sys.stdout.getvalue()
         sys.stdout.close()
         sys.stdout = orig
         expected = '''\
 +-----+-------+
-| Foo | Value |
+| Foo | Bar   |
 +-----+-------+
+| K   | k     |
 | Key | Value |
 +-----+-------+
+'''
+        self.assertEqual(expected, out)
+
+    def test_print_dict_string_sorted(self):
+        orig = sys.stdout
+        sys.stdout = six.StringIO()
+        cliutils.print_dict({"Foo": "k", "Bar": "Value"})
+        out = sys.stdout.getvalue()
+        sys.stdout.close()
+        sys.stdout = orig
+        expected = '''\
++----------+-------+
+| Property | Value |
++----------+-------+
+| Bar      | Value |
+| Foo      | k     |
++----------+-------+
 '''
         self.assertEqual(expected, out)
 
