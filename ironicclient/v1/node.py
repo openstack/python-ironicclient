@@ -323,3 +323,7 @@ class NodeManager(base.Manager):
     def get_supported_boot_devices(self, node_uuid):
         path = "%s/management/boot_device/supported" % node_uuid
         return self.get(path).to_dict()
+
+    def get_vendor_passthru_methods(self, node_ident):
+        path = "%s/vendor_passthru/methods" % node_ident
+        return self.get(path).to_dict()

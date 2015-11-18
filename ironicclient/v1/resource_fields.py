@@ -32,6 +32,8 @@ class Resource(object):
 
     FIELDS = {
         'address': 'Address',
+        'async': 'Async',
+        'attach': 'Response is attachment',
         'chassis_uuid': 'Chassis UUID',
         'clean_step': 'Clean Step',
         'console_enabled': 'Console Enabled',
@@ -41,6 +43,7 @@ class Resource(object):
         'driver_info': 'Driver Info',
         'driver_internal_info': 'Driver Internal Info',
         'extra': 'Extra',
+        'http_methods': 'Supported HTTP methods',
         'inspection_finished_at': 'Inspection Finished At',
         'inspection_started_at': 'Inspection Started At',
         'instance_info': 'Instance Info',
@@ -164,6 +167,13 @@ NODE_RESOURCE = Resource(
      'power_state',
      'provision_state',
      'maintenance',
+     ])
+VENDOR_PASSTHRU_METHOD_RESOURCE = Resource(
+    ['name',
+     'http_methods',
+     'async',
+     'description',
+     'attach'
      ])
 
 # Ports
