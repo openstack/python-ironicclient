@@ -213,7 +213,7 @@ def do_node_create(cc, args):
               nargs='+',
               help="Name or UUID of the node.")
 def do_node_delete(cc, args):
-    """Unregister a node from the Ironic service."""
+    """Unregister node(s) from the Ironic service."""
     for n in args.node:
         cc.node.delete(n)
         print(_('Deleted node %s') % n)
