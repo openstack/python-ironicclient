@@ -309,7 +309,7 @@ def do_node_vendor_passthru(cc, args):
     metavar='<direction>',
     choices=['asc', 'desc'],
     help='Sort direction: "asc" (the default) or "desc".')
-@cliutils.arg('node', metavar='<node>', help="UUID of the node.")
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 @cliutils.arg(
     '--fields',
     nargs='+',
