@@ -19,20 +19,16 @@ from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 
-CREATION_ATTRIBUTES = ['address', 'extra', 'node_uuid']
-
 
 class Port(base.Resource):
     def __repr__(self):
         return "<Port %s>" % self._info
 
 
-class PortManager(base.Manager):
+class PortManager(base.CreateManager):
     resource_class = Port
-
-    @staticmethod
-    def _path(id=None):
-        return '/v1/ports/%s' % id if id else '/v1/ports'
+    _creation_attributes = ['address', 'extra', 'node_uuid']
+    _resource_name = 'ports'
 
     def list(self, address=None, limit=None, marker=None, sort_key=None,
              sort_dir=None, detail=False, fields=None):
@@ -91,16 +87,6 @@ class PortManager(base.Manager):
             return self._list_pagination(self._path(path), "ports",
                                          limit=limit)
 
-    def get(self, port_id, fields=None):
-        if fields is not None:
-            port_id = '%s?fields=' % port_id
-            port_id += ','.join(fields)
-
-        try:
-            return self._list(self._path(port_id))[0]
-        except IndexError:
-            return None
-
     def get_by_address(self, address, fields=None):
         path = '?address=%s' % address
         if fields is not None:
@@ -115,18 +101,3 @@ class PortManager(base.Manager):
             return ports[0]
         else:
             raise exc.NotFound()
-
-    def create(self, **kwargs):
-        new = {}
-        for (key, value) in kwargs.items():
-            if key in CREATION_ATTRIBUTES:
-                new[key] = value
-            else:
-                raise exc.InvalidAttribute()
-        return self._create(self._path(), new)
-
-    def delete(self, port_id):
-        return self._delete(self._path(port_id))
-
-    def update(self, port_id, patch):
-        return self._update(self._path(port_id), patch)
