@@ -17,6 +17,7 @@ import argparse
 
 from ironicclient.common import cliutils
 from ironicclient.common import utils
+from ironicclient.v1 import resource_fields as res_fields
 
 
 def _print_driver_show(driver):
@@ -95,3 +96,22 @@ def do_driver_vendor_passthru(cc, args):
     if resp:
         # Print the raw response we don't know how it should be formated
         print(str(resp.to_dict()))
+
+
+@cliutils.arg('driver_name',
+              metavar='<driver>',
+              help='Name of the driver.')
+def do_driver_get_vendor_passthru_methods(cc, args):
+    """Get the vendor passthru methods for a driver."""
+    methods = cc.driver.get_vendor_passthru_methods(args.driver_name)
+    data = []
+    for method, response in methods.items():
+        response['name'] = method
+        http_methods = ','.join(response['http_methods'])
+        response['http_methods'] = http_methods
+        data.append(response)
+    fields = res_fields.VENDOR_PASSTHRU_METHOD_RESOURCE.fields
+    field_labels = res_fields.VENDOR_PASSTHRU_METHOD_RESOURCE.labels
+    cliutils.print_list(data, fields,
+                        field_labels=field_labels,
+                        sortby_index=None)

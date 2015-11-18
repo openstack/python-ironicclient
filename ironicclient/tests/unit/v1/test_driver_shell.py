@@ -78,3 +78,11 @@ class DriverShellTest(utils.BaseTestCase):
 
         d_shell.do_driver_list(client_mock, args)
         client_mock.driver.list.assert_called_once_with()
+
+    def test_do_driver_get_vendor_passthru_methods(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.driver_name = 'fake'
+        d_shell.do_driver_get_vendor_passthru_methods(client_mock, args)
+        mock_method = client_mock.driver.get_vendor_passthru_methods
+        mock_method.assert_called_once_with('fake')

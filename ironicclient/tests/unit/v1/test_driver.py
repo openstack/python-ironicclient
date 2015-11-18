@@ -31,6 +31,11 @@ DRIVER2_PROPERTIES = {
     "address": "IP of the node. Required.",
 }
 
+DRIVER_VENDOR_PASSTHRU_METHOD = {"lookup": {"attach": "false",
+                                            "http_methods": ["POST"],
+                                            "description": "",
+                                            "async": "false"}}
+
 fake_responses = {
     '/v1/drivers':
     {
@@ -51,6 +56,13 @@ fake_responses = {
         'GET': (
             {},
             DRIVER2_PROPERTIES,
+        ),
+    },
+    '/v1/drivers/%s/vendor_passthru/methods' % DRIVER1['name']:
+    {
+        'GET': (
+            {},
+            DRIVER_VENDOR_PASSTHRU_METHOD,
         ),
     }
 }
@@ -141,3 +153,12 @@ class DriverManagerTest(testtools.TestCase):
             }
         self.assertRaises(exc.InvalidAttribute, self.mgr.vendor_passthru,
                           **kwargs)
+
+    def test_vendor_passthru_methods(self):
+        vendor_methods = self.mgr.get_vendor_passthru_methods(DRIVER1['name'])
+        expect = [
+            ('GET', '/v1/drivers/%s/vendor_passthru/methods' % DRIVER1['name'],
+             {}, None)
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(DRIVER_VENDOR_PASSTHRU_METHOD, vendor_methods)
