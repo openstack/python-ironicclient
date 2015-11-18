@@ -79,3 +79,7 @@ class DriverManager(base.Manager):
         else:
             raise exc.InvalidAttribute(
                 _('Unknown HTTP method: %s') % http_method)
+
+    def get_vendor_passthru_methods(self, driver_name):
+        path = "%s/vendor_passthru/methods" % driver_name
+        return self.get(path).to_dict()
