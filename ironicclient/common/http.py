@@ -186,7 +186,7 @@ def with_retries(func):
                     LOG.error(msg)
                     raise
                 else:
-                    LOG.warn(msg)
+                    LOG.warning(msg)
                     time.sleep(self.conflict_retry_interval)
 
     return wrapper
@@ -345,7 +345,7 @@ class HTTPClient(VersionNegotiationMixin):
             self.log_http_response(resp)
 
         if 400 <= resp.status < 600:
-            LOG.warn("Request returned failure status.")
+            LOG.warning("Request returned failure status.")
             error_json = _extract_error_json(body_str)
             raise exc.from_response(
                 resp, error_json.get('faultstring'),
@@ -591,8 +591,8 @@ def _construct_http_client(endpoint=None,
         dvars = [k for k, v in ignored.items() if v]
 
         if dvars:
-            LOG.warn('The following arguments are ignored when using the '
-                     'session to construct a client: %s', ', '.join(dvars))
+            LOG.warning('The following arguments are ignored when using the '
+                        'session to construct a client: %s', ', '.join(dvars))
 
         return SessionClient(session=session,
                              os_ironic_api_version=os_ironic_api_version,
@@ -603,8 +603,8 @@ def _construct_http_client(endpoint=None,
                              **kwargs)
     else:
         if kwargs:
-            LOG.warn('The following arguments are being ignored when '
-                     'constructing the client: %s', ', '.join(kwargs))
+            LOG.warning('The following arguments are being ignored when '
+                        'constructing the client: %s', ', '.join(kwargs))
 
         return HTTPClient(endpoint=endpoint,
                           token=token,
