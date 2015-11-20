@@ -72,6 +72,38 @@ class DriverShellTest(utils.BaseTestCase):
         d_shell.do_driver_properties(client_mock, args)
         client_mock.driver.properties.assert_called_once_with("driver_name")
 
+    @mock.patch('ironicclient.common.cliutils.print_dict')
+    def test_do_driver_properties_with_wrap_default(self, mock_print_dict):
+        client_mock = self.client_mock
+        client_mock.driver.properties.return_value = {
+            'foo': 'bar',
+            'baz': 'qux'}
+        args = mock.MagicMock()
+        args.driver_name = 'driver_name'
+        args.wrap = 0
+
+        d_shell.do_driver_properties(client_mock, args)
+        mock_print_dict.assert_called_with(
+            {'foo': 'bar', 'baz': 'qux'},
+            dict_value='Description',
+            wrap=0)
+
+    @mock.patch('ironicclient.common.cliutils.print_dict')
+    def test_do_driver_properties_with_wrap(self, mock_print_dict):
+        client_mock = self.client_mock
+        client_mock.driver.properties.return_value = {
+            'foo': 'bar',
+            'baz': 'qux'}
+        args = mock.MagicMock()
+        args.driver_name = 'driver_name'
+        args.wrap = 80
+
+        d_shell.do_driver_properties(client_mock, args)
+        mock_print_dict.assert_called_with(
+            {'foo': 'bar', 'baz': 'qux'},
+            dict_value='Description',
+            wrap=80)
+
     def test_do_driver_show(self):
         client_mock = self.client_mock
         args = mock.MagicMock()

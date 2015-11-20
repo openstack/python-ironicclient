@@ -48,15 +48,18 @@ def do_driver_show(cc, args):
 
 @cliutils.arg('driver_name', metavar='<driver>',
               help="Name of the driver.")
+@cliutils.arg('--wrap', dest='wrap', metavar='<integer>',
+              type=int, default=0,
+              help=('Wrap the output to a specified length. '
+                    'Positive number can realize wrap functionality. '
+                    '0 is default for disabled.'))
 def do_driver_properties(cc, args):
     """Get properties of a driver."""
     properties = cc.driver.properties(args.driver_name)
-    obj_list = []
-    for key, value in properties.items():
-        data = {'Property': key, 'Description': value}
-        obj_list.append(type('iface', (object,), data))
-    fields = ['Property', 'Description']
-    cliutils.print_list(obj_list, fields, mixed_case_fields=fields)
+    cliutils.print_dict(
+        properties,
+        wrap=args.wrap,
+        dict_value='Description')
 
 
 @cliutils.arg('driver_name',
