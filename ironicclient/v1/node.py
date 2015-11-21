@@ -28,6 +28,8 @@ _power_states = {
     'on': 'power on',
     'off': 'power off',
     'reboot': 'rebooting',
+    'soft off': 'soft power off',
+    'soft reboot': 'soft rebooting',
 }
 
 
@@ -273,10 +275,39 @@ class NodeManager(base.CreateManager):
         else:
             return self.delete(path)
 
-    def set_power_state(self, node_id, state):
+    def set_power_state(self, node_id, state, soft=False, timeout=None):
+        """Sets power state for a node.
+
+        :param node_id: Node identifier
+        :param state: One of target power state, 'on', 'off', or 'reboot'
+        :param soft: The flag for graceful power 'off' or 'reboot'
+        :param timeout: The timeout (in seconds) positive integer value (> 0)
+        :raises: ValueError if 'soft' or 'timeout' option is invalid
+        :returns: The status of the request
+        """
+        if state == 'on' and soft:
+            raise ValueError(
+                _("'soft' option is invalid for the power-state 'on'"))
+
         path = "%s/states/power" % node_id
-        target = {'target': _power_states.get(state, state)}
-        return self.update(path, target, http_method='PUT')
+
+        requested_state = 'soft ' + state if soft else state
+        target = _power_states.get(requested_state, state)
+
+        body = {'target': target}
+        if timeout is not None:
+            msg = _("'timeout' option for setting power state must have "
+                    "positive integer value (> 0)")
+            try:
+                timeout = int(timeout)
+            except (ValueError, TypeError):
+                raise ValueError(msg)
+
+            if timeout <= 0:
+                raise ValueError(msg)
+            body = {'target': target, 'timeout': timeout}
+
+        return self.update(path, body, http_method='PUT')
 
     def set_target_raid_config(self, node_ident, target_raid_config):
         """Sets target_raid_config for a node.

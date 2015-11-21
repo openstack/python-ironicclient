@@ -268,9 +268,10 @@ class FunctionalTestBase(base.ClientTestBase):
             'node-set-maintenance',
             params='{0} {1} {2}'.format(node_id, maintenance_mode, params))
 
-    def set_node_power_state(self, node_id, power_state):
+    def set_node_power_state(self, node_id, power_state, params=''):
         self.ironic('node-set-power-state',
-                    params='{0} {1}'.format(node_id, power_state))
+                    params='{0} {1} {2}'
+                    .format(node_id, power_state, params))
 
     def set_node_provision_state(self, node_id, provision_state, params=''):
         self.ironic('node-set-provision-state',

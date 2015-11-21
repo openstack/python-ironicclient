@@ -14,6 +14,7 @@
 #    under the License.
 
 import argparse
+import six
 
 from ironicclient.common.apiclient import exceptions
 from ironicclient.common import cliutils
@@ -409,9 +410,27 @@ def do_node_set_maintenance(cc, args):
     metavar='<power-state>',
     choices=['on', 'off', 'reboot'],
     help="'on', 'off', or 'reboot'.")
+@cliutils.arg(
+    '--soft',
+    dest='soft',
+    action='store_true',
+    default=False,
+    help=("Gracefully change the power state. Only valid for 'off' and "
+          "'reboot' power states."))
+@cliutils.arg(
+    '--power-timeout',
+    metavar='<power-timeout>',
+    type=int,
+    default=None,
+    help=("Timeout (in seconds, positive integer) to wait for the target "
+          "power state before erroring out."))
 def do_node_set_power_state(cc, args):
     """Power a node on or off or reboot."""
-    cc.node.set_power_state(args.node, args.power_state)
+    try:
+        cc.node.set_power_state(args.node, args.power_state, args.soft,
+                                timeout=args.power_timeout)
+    except ValueError as e:
+        raise exc.CommandError(six.text_type(e))
 
 
 @cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
