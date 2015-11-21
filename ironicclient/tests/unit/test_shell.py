@@ -10,44 +10,45 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
-import json
-import os
 import re
 import sys
+import uuid
 
 import fixtures
 import httplib2
-import httpretty
 from keystoneclient import exceptions as keystone_exc
-from keystoneclient.fixture import v2 as ks_v2_fixture
-from keystoneclient.fixture import v3 as ks_v3_fixture
+from keystoneclient import fixture as ks_fixture
 import mock
+import requests_mock
 import six
 import testtools
 from testtools import matchers
 
 from ironicclient import exc
 from ironicclient import shell as ironic_shell
-from ironicclient.tests.unit import keystone_client_fixtures
 from ironicclient.tests.unit import utils
+
+BASE_URL = 'http://no.where:5000'
+V2_URL = BASE_URL + '/v2.0'
+V3_URL = BASE_URL + '/v3'
 
 FAKE_ENV = {'OS_USERNAME': 'username',
             'OS_PASSWORD': 'password',
             'OS_TENANT_NAME': 'tenant_name',
-            'OS_AUTH_URL': 'http://no.where/v2.0/'}
+            'OS_AUTH_URL': V2_URL}
 
 FAKE_ENV_KEYSTONE_V2 = {
     'OS_USERNAME': 'username',
     'OS_PASSWORD': 'password',
     'OS_TENANT_NAME': 'tenant_name',
-    'OS_AUTH_URL': keystone_client_fixtures.BASE_URL,
+    'OS_AUTH_URL': V2_URL
 }
 
 FAKE_ENV_KEYSTONE_V3 = {
     'OS_USERNAME': 'username',
     'OS_PASSWORD': 'password',
     'OS_TENANT_NAME': 'tenant_name',
-    'OS_AUTH_URL': keystone_client_fixtures.BASE_URL,
+    'OS_AUTH_URL': V3_URL,
     'OS_USER_DOMAIN_ID': 'default',
     'OS_PROJECT_DOMAIN_ID': 'default',
 }
@@ -192,8 +193,6 @@ class ShellTest(utils.BaseTestCase):
 
 class TestCase(testtools.TestCase):
 
-    tokenid = keystone_client_fixtures.TOKENID
-
     def set_fake_env(self, fake_env):
         client_env = ('OS_USERNAME', 'OS_PASSWORD', 'OS_TENANT_ID',
                       'OS_TENANT_NAME', 'OS_AUTH_URL', 'OS_REGION_NAME',
@@ -215,41 +214,34 @@ class TestCase(testtools.TestCase):
                 msg, expected_regexp.pattern, text)
             raise self.failureException(msg)
 
-    def register_keystone_v2_token_fixture(self):
-        v2_token = ks_v2_fixture.Token(token_id=self.tokenid)
+    def register_keystone_v2_token_fixture(self, request_mocker):
+        v2_token = ks_fixture.V2Token()
         service = v2_token.add_service('baremetal')
         service.add_endpoint('http://ironic.example.com', region='RegionOne')
-        httpretty.register_uri(
-            httpretty.POST,
-            '%s/tokens' % (keystone_client_fixtures.V2_URL),
-            body=json.dumps(v2_token))
+        request_mocker.post('%s/tokens' % V2_URL,
+                            json=v2_token)
 
-    def register_keystone_v3_token_fixture(self):
-        v3_token = ks_v3_fixture.Token()
+    def register_keystone_v3_token_fixture(self, request_mocker):
+        v3_token = ks_fixture.V3Token()
         service = v3_token.add_service('baremetal')
         service.add_standard_endpoints(public='http://ironic.example.com')
-        httpretty.register_uri(
-            httpretty.POST,
-            '%s/auth/tokens' % (keystone_client_fixtures.V3_URL),
-            body=json.dumps(v3_token),
-            adding_headers={'X-Subject-Token': self.tokenid})
+        request_mocker.post(
+            '%s/auth/tokens' % V3_URL,
+            json=v3_token,
+            headers={'X-Subject-Token': uuid.uuid4().hex})
 
-    def register_keystone_auth_fixture(self):
-        self.register_keystone_v2_token_fixture()
-        self.register_keystone_v3_token_fixture()
-        httpretty.register_uri(
-            httpretty.GET,
-            keystone_client_fixtures.BASE_URL,
-            body=keystone_client_fixtures.keystone_request_callback)
+    def register_keystone_auth_fixture(self, request_mocker):
+        self.register_keystone_v2_token_fixture(request_mocker)
+        self.register_keystone_v3_token_fixture(request_mocker)
+
+        request_mocker.get(V2_URL, json=ks_fixture.V2Discovery(V2_URL))
+        request_mocker.get(V3_URL, json=ks_fixture.V3Discovery(V3_URL))
+        request_mocker.get(BASE_URL, json=ks_fixture.DiscoveryList(BASE_URL))
 
 
 class ShellTestNoMox(TestCase):
     def setUp(self):
         super(ShellTestNoMox, self).setUp()
-        # httpretty doesn't work as expected if http proxy environment
-        # variable is set.
-        os.environ = dict((k, v) for (k, v) in os.environ.items()
-                          if k.lower() not in ('http_proxy', 'https_proxy'))
         self.set_fake_env(FAKE_ENV_KEYSTONE_V2)
 
     def shell(self, argstr):
@@ -269,9 +261,9 @@ class ShellTestNoMox(TestCase):
 
         return out
 
-    @httpretty.activate
-    def test_node_list(self):
-        self.register_keystone_auth_fixture()
+    @requests_mock.mock()
+    def test_node_list(self, request_mocker):
+        self.register_keystone_auth_fixture(request_mocker)
         resp_dict = {"nodes": [
                      {"instance_uuid": "null",
                       "uuid": "351a82d6-9f04-4c36-b79a-a38b9e98ff71",
@@ -295,12 +287,10 @@ class ShellTestNoMox(TestCase):
                       "maintenance": "false",
                       "provision_state": "null",
                       "power_state": "power off"}]}
-        httpretty.register_uri(
-            httpretty.GET,
-            'http://ironic.example.com/v1/nodes',
-            status=200,
-            content_type='application/json; charset=UTF-8',
-            body=json.dumps(resp_dict))
+        headers = {'Content-Type': 'application/json; charset=UTF-8'}
+        request_mocker.get('http://ironic.example.com/v1/nodes',
+                           headers=headers,
+                           json=resp_dict)
 
         event_list_text = self.shell('node-list')
 
