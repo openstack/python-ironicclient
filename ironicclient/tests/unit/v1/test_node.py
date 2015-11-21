@@ -365,6 +365,13 @@ fake_responses = {
             None,
         ),
     },
+    '/v1/nodes/%s/management/inject_nmi' % NODE1['uuid']:
+    {
+        'PUT': (
+            {},
+            None,
+        ),
+    },
     '/v1/nodes/%s/management/boot_device/supported' % NODE1['uuid']:
     {
         'GET': (
@@ -1141,6 +1148,14 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(BOOT_DEVICE, boot_device)
+
+    def test_node_inject_nmi(self):
+        self.mgr.inject_nmi(NODE1['uuid'])
+        expect = [
+            ('PUT', '/v1/nodes/%s/management/inject_nmi' % NODE1['uuid'],
+             {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
 
     def test_node_get_supported_boot_devices(self):
         boot_device = self.mgr.get_supported_boot_devices(NODE1['uuid'])

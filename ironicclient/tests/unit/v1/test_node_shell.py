@@ -795,6 +795,14 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_get_boot_device(client_mock, args)
         client_mock.node.get_boot_device.assert_called_once_with('node_uuid')
 
+    def test_do_node_inject_nmi(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+
+        n_shell.do_node_inject_nmi(client_mock, args)
+        client_mock.node.inject_nmi.assert_called_once_with('node_uuid')
+
     def test_do_node_get_supported_boot_devices(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
