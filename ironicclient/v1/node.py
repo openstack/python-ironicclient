@@ -25,6 +25,13 @@ CREATION_ATTRIBUTES = ['chassis_uuid', 'driver', 'driver_info', 'extra',
                        'uuid', 'properties', 'name']
 
 
+_power_states = {
+    'on': 'power on',
+    'off': 'power off',
+    'reboot': 'rebooting',
+}
+
+
 class Node(base.Resource):
     def __repr__(self):
         return "<Node %s>" % self._info
@@ -264,11 +271,7 @@ class NodeManager(base.Manager):
 
     def set_power_state(self, node_id, state):
         path = "%s/states/power" % node_id
-        if state in ['on', 'off']:
-            state = "power %s" % state
-        if state in ['reboot']:
-            state = "rebooting"
-        target = {'target': state}
+        target = {'target': _power_states.get(state, state)}
         return self._update(self._path(path), target, method='PUT')
 
     def validate(self, node_uuid):
