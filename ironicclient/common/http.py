@@ -29,6 +29,9 @@ import six
 import six.moves.urllib.parse as urlparse
 
 from ironicclient.common import filecache
+from ironicclient.common.i18n import _
+from ironicclient.common.i18n import _LE
+from ironicclient.common.i18n import _LW
 from ironicclient import exc
 
 
@@ -90,8 +93,8 @@ class VersionNegotiationMixin(object):
         """
         if self.api_version_select_state not in API_VERSION_SELECTED_STATES:
             raise RuntimeError(
-                'Error: self.api_version_select_state should be one of the '
-                'values in: "%(valid)s" but had the value: "%(value)s"' %
+                _('Error: self.api_version_select_state should be one of the '
+                  'values in: "%(valid)s" but had the value: "%(value)s"') %
                 {'valid': ', '.join(API_VERSION_SELECTED_STATES),
                  'value': self.api_version_select_state})
         min_ver, max_ver = self._parse_version_headers(resp)
@@ -113,17 +116,17 @@ class VersionNegotiationMixin(object):
         # be supported by the requested version.
         if self.api_version_select_state == 'user':
             raise exc.UnsupportedVersion(textwrap.fill(
-                "Requested API version %(req)s is not supported by the "
-                "server or the requested operation is not supported by the "
-                "requested version.  Supported version range is %(min)s to "
-                "%(max)s"
+                _("Requested API version %(req)s is not supported by the "
+                  "server or the requested operation is not supported by the "
+                  "requested version.  Supported version range is %(min)s to "
+                  "%(max)s")
                 % {'req': self.os_ironic_api_version,
                    'min': min_ver, 'max': max_ver}))
         if self.api_version_select_state == 'negotiated':
             raise exc.UnsupportedVersion(textwrap.fill(
-                "No API version was specified and the requested operation was "
-                "not supported by the client's negotiated API version "
-                "%(req)s.  Supported version range is: %(min)s to %(max)s"
+                _("No API version was specified and the requested operation "
+                  "was not supported by the client's negotiated API version "
+                  "%(req)s.  Supported version range is: %(min)s to %(max)s")
                 % {'req': self.os_ironic_api_version,
                    'min': min_ver, 'max': max_ver}))
 
@@ -177,8 +180,8 @@ def with_retries(func):
             try:
                 return func(self, url, method, **kwargs)
             except _RETRY_EXCEPTIONS as error:
-                msg = ("Error contacting Ironic server: %(error)s. "
-                       "Attempt %(attempt)d of %(total)d" %
+                msg = (_LE("Error contacting Ironic server: %(error)s. "
+                           "Attempt %(attempt)d of %(total)d") %
                        {'attempt': attempt,
                         'total': num_attempts,
                         'error': error})
@@ -228,7 +231,7 @@ class HTTPClient(VersionNegotiationMixin):
         elif parts.scheme == 'http':
             _class = six.moves.http_client.HTTPConnection
         else:
-            msg = 'Unsupported scheme: %s' % parts.scheme
+            msg = _('Unsupported scheme: %s') % parts.scheme
             raise exc.EndpointException(msg)
 
         return (_class, _args, _kwargs)
@@ -324,12 +327,12 @@ class HTTPClient(VersionNegotiationMixin):
                 return self._http_request(url, method, **kwargs)
 
         except socket.gaierror as e:
-            message = ("Error finding address for %(url)s: %(e)s"
+            message = (_("Error finding address for %(url)s: %(e)s")
                        % dict(url=url, e=e))
             raise exc.EndpointNotFound(message)
         except (socket.error, socket.timeout) as e:
             endpoint = self.endpoint
-            message = ("Error communicating with %(endpoint)s %(e)s"
+            message = (_("Error communicating with %(endpoint)s %(e)s")
                        % dict(endpoint=endpoint, e=e))
             raise exc.ConnectionRefused(message)
 
@@ -345,7 +348,7 @@ class HTTPClient(VersionNegotiationMixin):
             self.log_http_response(resp)
 
         if 400 <= resp.status < 600:
-            LOG.warning("Request returned failure status.")
+            LOG.warning(_LW("Request returned failure status"))
             error_json = _extract_error_json(body_str)
             raise exc.from_response(
                 resp, error_json.get('faultstring'),
@@ -377,7 +380,7 @@ class HTTPClient(VersionNegotiationMixin):
             try:
                 body = json.loads(body)
             except ValueError:
-                LOG.error('Could not decode response body as JSON')
+                LOG.error(_LE('Could not decode response body as JSON'))
         else:
             body = None
 
@@ -529,7 +532,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
             try:
                 body = resp.json()
             except ValueError:
-                LOG.error('Could not decode response body as JSON')
+                LOG.error(_LE('Could not decode response body as JSON'))
         else:
             body = None
 
@@ -591,8 +594,9 @@ def _construct_http_client(endpoint=None,
         dvars = [k for k, v in ignored.items() if v]
 
         if dvars:
-            LOG.warning('The following arguments are ignored when using the '
-                        'session to construct a client: %s', ', '.join(dvars))
+            LOG.warning(_LW('The following arguments are ignored when using '
+                            'the session to construct a client: %s'),
+                        ', '.join(dvars))
 
         return SessionClient(session=session,
                              os_ironic_api_version=os_ironic_api_version,
@@ -603,8 +607,8 @@ def _construct_http_client(endpoint=None,
                              **kwargs)
     else:
         if kwargs:
-            LOG.warning('The following arguments are being ignored when '
-                        'constructing the client: %s', ', '.join(kwargs))
+            LOG.warning(_LW('The following arguments are being ignored when '
+                            'constructing the client: %s'), ', '.join(kwargs))
 
         return HTTPClient(endpoint=endpoint,
                           token=token,

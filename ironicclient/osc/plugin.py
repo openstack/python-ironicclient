@@ -19,6 +19,7 @@ import logging
 from openstackclient.common import exceptions
 from openstackclient.common import utils
 
+from ironicclient.common.i18n import _
 from ironicclient.osc import client as ironic_client
 
 LOG = logging.getLogger(__name__)
@@ -40,9 +41,11 @@ def make_client(instance):
         baremetal_client = ironic_client.get_client_class(
             instance._api_version[API_NAME])
     except Exception:
-        msg = "Invalid %s client version '%s'. Must be one of %s" % (
-            (API_NAME, instance._api_version[API_NAME],
-                ", ".join(sorted(API_VERSIONS))))
+        msg = (_("Invalid %(api_name)s client version '%(ver)s'. Must be one "
+                 "of %(supported_ver)s") %
+               {'api_name': API_NAME,
+                'ver': instance._api_version[API_NAME],
+                'supported_ver': ", ".join(sorted(API_VERSIONS))})
         raise exceptions.UnsupportedVersion(msg)
     LOG.debug('Instantiating baremetal client: %s', baremetal_client)
 
