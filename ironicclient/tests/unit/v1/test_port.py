@@ -291,7 +291,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertTrue(port)
 
     def test_delete(self):
-        port = self.mgr.delete(port_id=PORT['uuid'])
+        port = self.mgr.delete(resource_id=PORT['uuid'])
         expect = [
             ('DELETE', '/v1/ports/%s' % PORT['uuid'], {}, None),
         ]
@@ -302,7 +302,7 @@ class PortManagerTest(testtools.TestCase):
         patch = {'op': 'replace',
                  'value': NEW_ADDR,
                  'path': '/address'}
-        port = self.mgr.update(port_id=PORT['uuid'], patch=patch)
+        port = self.mgr.update(resource_id=PORT['uuid'], patch=patch)
         expect = [
             ('PATCH', '/v1/ports/%s' % PORT['uuid'], {}, patch),
         ]

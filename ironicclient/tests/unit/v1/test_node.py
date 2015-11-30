@@ -597,7 +597,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertTrue(node)
 
     def test_delete(self):
-        node = self.mgr.delete(node_id=NODE1['uuid'])
+        node = self.mgr.delete(resource_id=NODE1['uuid'])
         expect = [
             ('DELETE', '/v1/nodes/%s' % NODE1['uuid'], {}, None),
         ]
@@ -608,7 +608,7 @@ class NodeManagerTest(testtools.TestCase):
         patch = {'op': 'replace',
                  'value': NEW_DRIVER,
                  'path': '/driver'}
-        node = self.mgr.update(node_id=NODE1['uuid'], patch=patch)
+        node = self.mgr.update(resource_id=NODE1['uuid'], patch=patch)
         expect = [
             ('PATCH', '/v1/nodes/%s' % NODE1['uuid'], {}, patch),
         ]
@@ -863,7 +863,7 @@ class NodeManagerTest(testtools.TestCase):
         # anything to verify.
         vendor_passthru_args = {'arg1': 'val1'}
         kwargs = {
-            'node_id': 'node_uuid',
+            'resource_identifier': 'node_uuid',
             'method': 'method',
             'args': vendor_passthru_args
             }
@@ -880,7 +880,7 @@ class NodeManagerTest(testtools.TestCase):
     @mock.patch.object(node.NodeManager, 'get')
     def test_vendor_passthru_get(self, get_mock):
         kwargs = {
-            'node_id': 'node_uuid',
+            'resource_identifier': 'node_uuid',
             'method': 'method',
             'http_method': 'GET',
             }
@@ -892,7 +892,7 @@ class NodeManagerTest(testtools.TestCase):
     @mock.patch.object(node.NodeManager, 'delete')
     def test_vendor_passthru_delete(self, delete_mock):
         kwargs = {
-            'node_id': 'node_uuid',
+            'resource_identifier': 'node_uuid',
             'method': 'method',
             'http_method': 'DELETE',
             }
@@ -904,7 +904,7 @@ class NodeManagerTest(testtools.TestCase):
     @mock.patch.object(node.NodeManager, 'delete')
     def test_vendor_passthru_unknown_http_method(self, delete_mock):
         kwargs = {
-            'node_id': 'node_uuid',
+            'resource_identifier': 'node_uuid',
             'method': 'method',
             'http_method': 'UNKNOWN',
             }
