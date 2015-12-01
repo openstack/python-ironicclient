@@ -1,3 +1,5 @@
+# Copyright (c) 2015 Mirantis, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -12,16 +14,18 @@
 
 import os
 
-import six
 import six.moves.configparser as config_parser
 from tempest_lib.cli import base
+from tempest_lib import exceptions
 
+import ironicclient.tests.functional.utils as utils
 
 DEFAULT_CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'test.conf')
 
 
 class FunctionalTestBase(base.ClientTestBase):
     """Ironic base class, calls to ironicclient."""
+
     def setUp(self):
         super(FunctionalTestBase, self).setUp()
         self.client = self._get_clients()
@@ -84,7 +88,7 @@ class FunctionalTestBase(base.ClientTestBase):
         return cli_flags
 
     def _cmd_no_auth(self, cmd, action, flags='', params=''):
-        """Executes given command with noauth attributes.
+        """Execute given command with noauth attributes.
 
         :param cmd: command to be executed
         :type cmd: string
@@ -103,8 +107,8 @@ class FunctionalTestBase(base.ClientTestBase):
         return base.execute(cmd, action, flags, params,
                             cli_dir=self.client.cli_dir)
 
-    def ironic(self, action, flags='', params=''):
-        """Executes ironic command for the given action.
+    def _ironic(self, action, flags='', params=''):
+        """Execute ironic command for the given action.
 
         :param action: the cli command to run using Ironic
         :type action: string
@@ -114,48 +118,124 @@ class FunctionalTestBase(base.ClientTestBase):
         :type params: string
         """
         flags += ' --os-endpoint-type publicURL'
-        if hasattr(self, 'os_auth_token'):
-            return self._cmd_no_auth('ironic', action, flags, params)
-        else:
-            return self.client.cmd_with_auth('ironic', action, flags, params)
+        try:
+            if hasattr(self, 'os_auth_token'):
+                return self._cmd_no_auth('ironic', action, flags, params)
+            else:
+                return self.client.cmd_with_auth('ironic',
+                                                 action, flags, params)
+        except exceptions.CommandFailed as e:
+            self.fail(e)
 
-    def _try_delete_node(self, node_id):
-        if node_id in self.ironic('node-list'):
-            self.ironic('node-delete', params=node_id)
+    def ironic(self, action, flags='', params=''):
+        """Return parsed list of dicts with basic item info.
 
-    def get_dict_from_output(self, output):
-        """Create a dictionary from an output
-
-        :param output: the output of the cmd
+        :param action: the cli command to run using Ironic
+        :type action: string
+        :param flags: any optional cli flags to use
+        :type flags: string
+        :param params: any optional positional args to use
+        :type params: string
         """
-        obj = {}
-        items = self.parser.listing(output)
-        for item in items:
-            obj[item['Property']] = six.text_type(item['Value'])
-        return obj
+        output = self._ironic(action=action, flags=flags, params=params)
+        return self.parser.listing(output)
 
-    def create_node(self, params=''):
-        if not any(dr in params for dr in ('--driver', '-d')):
-            params += '--driver fake'
-        node = self.ironic('node-create', params=params)
-        node = self.get_dict_from_output(node)
-        self.addCleanup(self._try_delete_node, node['uuid'])
-        return node
+    def get_table_headers(self, action, flags='', params=''):
+        output = self._ironic(action=action, flags=flags, params=params)
+        table = self.parser.table(output)
+        return table['headers']
 
-    def assertTableHeaders(self, field_names, output_lines):
-        """Verify that output table has headers item listed in field_names.
+    def assertTableHeaders(self, field_names, table_headers):
+        """Assert that field_names and table_headers are equal.
 
         :param field_names: field names from the output table of the cmd
-        :param output_lines: output table from cmd
+        :param table_heades: table headers output from cmd
         """
-        table = self.parser.table(output_lines)
-        headers = table['headers']
-        for field in field_names:
-            self.assertIn(field, headers)
+        self.assertEqual(sorted(field_names), sorted(table_headers))
 
-    def assertNodeDeleted(self, node_id):
-        """Verify that there isn't node with given id.
+    def assertNodeStates(self, node_show, node_show_states):
+        """Assert that node_show_states output corresponds to node_show output.
 
-        :param node_id: node id to verify
+        :param node_show: output from node-show cmd
+        :param node_show_states: output from node-show-states cmd
         """
-        self.assertNotIn(node_id, self.ironic('node-list'))
+        for key in node_show_states.keys():
+            self.assertEqual(node_show_states[key], node_show[key])
+
+    def assertNodeValidate(self, node_validate):
+        """Assert that node_validate is able to validate all interfaces present.
+
+        :param node_validate: output from node-validate cmd
+        """
+        self.assertNotIn('False', [x['Result'] for x in node_validate])
+
+    def delete_node(self, node_id):
+        """Delete node method works only with fake driver.
+
+        :param node_id: node uuid
+        """
+        node_list = self.list_nodes()
+
+        if utils.get_object(node_list, node_id):
+            node_show = self.show_node(node_id)
+            if node_show['provision_state'] != 'available':
+                self.ironic('node-set-provision-state',
+                            params='{0} deleted'.format(node_id))
+            if node_show['power_state'] not in ('None', 'off'):
+                self.ironic('node-set-power-state',
+                            params='{0} off'.format(node_id))
+            self.ironic('node-delete', params=node_id)
+
+            node_list_uuid = self.get_nodes_uuids_from_node_list()
+            if node_id in node_list_uuid:
+                self.fail('Ironic node {0} has not been deleted!'
+                          .format(node_id))
+
+    def create_node(self, driver='fake', params=''):
+        node = self.ironic('node-create',
+                           params='--driver {0} {1}'.format(driver, params))
+
+        if not node:
+            self.fail('Ironic node has not been created!')
+
+        node = utils.get_dict_from_output(node)
+        self.addCleanup(self.delete_node, node['uuid'])
+        return node
+
+    def show_node(self, node_id, params=''):
+        node_show = self.ironic('node-show',
+                                params='{0} {1}'.format(node_id, params))
+        return utils.get_dict_from_output(node_show)
+
+    def list_nodes(self, params=''):
+        return self.ironic('node-list', params=params)
+
+    def update_node(self, node_id, params):
+        updated_node = self.ironic('node-update',
+                                   params='{0} {1}'.format(node_id, params))
+        return utils.get_dict_from_output(updated_node)
+
+    def get_nodes_uuids_from_node_list(self):
+        node_list = self.list_nodes()
+        return [x['UUID'] for x in node_list]
+
+    def show_node_states(self, node_id):
+        show_node_states = self.ironic('node-show-states', params=node_id)
+        return utils.get_dict_from_output(show_node_states)
+
+    def set_node_maintenance(self, node_id, maintenance_mode, params=''):
+        self.ironic(
+            'node-set-maintenance',
+            params='{0} {1} {2}'.format(node_id, maintenance_mode, params))
+
+    def set_node_power_state(self, node_id, power_state):
+        self.ironic('node-set-power-state',
+                    params='{0} {1}'.format(node_id, power_state))
+
+    def set_node_provision_state(self, node_id, provision_state, params=''):
+        self.ironic('node-set-provision-state',
+                    params='{0} {1} {2}'
+                    .format(node_id, provision_state, params))
+
+    def validate_node(self, node_id):
+        return self.ironic('node-validate', params=node_id)
