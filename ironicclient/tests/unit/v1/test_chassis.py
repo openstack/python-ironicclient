@@ -327,7 +327,7 @@ class ChassisManagerTest(testtools.TestCase):
         self.assertTrue(chassis)
 
     def test_delete(self):
-        chassis = self.mgr.delete(resource_id=CHASSIS['uuid'])
+        chassis = self.mgr.delete(chassis_id=CHASSIS['uuid'])
         expect = [
             ('DELETE', '/v1/chassis/%s' % CHASSIS['uuid'], {}, None),
         ]
@@ -338,7 +338,7 @@ class ChassisManagerTest(testtools.TestCase):
         patch = {'op': 'replace',
                  'value': NEW_DESCR,
                  'path': '/description'}
-        chassis = self.mgr.update(resource_id=CHASSIS['uuid'], patch=patch)
+        chassis = self.mgr.update(chassis_id=CHASSIS['uuid'], patch=patch)
         expect = [
             ('PATCH', '/v1/chassis/%s' % CHASSIS['uuid'], {}, patch),
         ]

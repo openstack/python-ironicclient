@@ -20,15 +20,20 @@ from ironicclient.common import utils
 from ironicclient import exc
 
 
+CREATION_ATTRIBUTES = ['description', 'extra']
+
+
 class Chassis(base.Resource):
     def __repr__(self):
         return "<Chassis %s>" % self._info
 
 
-class ChassisManager(base.CreateManager):
+class ChassisManager(base.Manager):
     resource_class = Chassis
-    _resource_name = 'chassis'
-    _creation_attributes = ['description', 'extra']
+
+    @staticmethod
+    def _path(id=None):
+        return '/v1/chassis/%s' % id if id else '/v1/chassis'
 
     def list(self, marker=None, limit=None, sort_key=None,
              sort_dir=None, detail=False, fields=None):
@@ -159,3 +164,28 @@ class ChassisManager(base.CreateManager):
         else:
             return self._list_pagination(self._path(path), "nodes",
                                          limit=limit)
+
+    def get(self, chassis_id, fields=None):
+        if fields is not None:
+            chassis_id = '%s?fields=' % chassis_id
+            chassis_id += ','.join(fields)
+
+        try:
+            return self._list(self._path(chassis_id))[0]
+        except IndexError:
+            return None
+
+    def create(self, **kwargs):
+        new = {}
+        for (key, value) in kwargs.items():
+            if key in CREATION_ATTRIBUTES:
+                new[key] = value
+            else:
+                raise exc.InvalidAttribute()
+        return self._create(self._path(), new)
+
+    def delete(self, chassis_id):
+        return self._delete(self._path(chassis_id))
+
+    def update(self, chassis_id, patch):
+        return self._update(self._path(chassis_id), patch)

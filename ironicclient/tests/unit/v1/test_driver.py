@@ -106,7 +106,7 @@ class DriverManagerTest(testtools.TestCase):
         # anything to verify.
         vendor_passthru_args = {'arg1': 'val1'}
         kwargs = {
-            'resource_identifier': 'driver_name',
+            'driver_name': 'driver_name',
             'method': 'method',
             'args': vendor_passthru_args
             }
@@ -123,7 +123,7 @@ class DriverManagerTest(testtools.TestCase):
     @mock.patch.object(driver.DriverManager, 'get')
     def test_vendor_passthru_get(self, get_mock):
         kwargs = {
-            'resource_identifier': 'driver_name',
+            'driver_name': 'driver_name',
             'method': 'method',
             'http_method': 'GET',
             }
@@ -135,7 +135,7 @@ class DriverManagerTest(testtools.TestCase):
     @mock.patch.object(driver.DriverManager, 'delete')
     def test_vendor_passthru_delete(self, delete_mock):
         kwargs = {
-            'resource_identifier': 'driver_name',
+            'driver_name': 'driver_name',
             'method': 'method',
             'http_method': 'DELETE',
             }
@@ -147,7 +147,7 @@ class DriverManagerTest(testtools.TestCase):
     @mock.patch.object(driver.DriverManager, 'delete')
     def test_vendor_passthru_unknown_http_method(self, delete_mock):
         kwargs = {
-            'resource_identifier': 'driver_name',
+            'driver_name': 'driver_name',
             'method': 'method',
             'http_method': 'UNKNOWN',
             }
