@@ -239,3 +239,17 @@ class FunctionalTestBase(base.ClientTestBase):
 
     def validate_node(self, node_id):
         return self.ironic('node-validate', params=node_id)
+
+    def list_driver(self, params=''):
+        return self.ironic('driver-list', params=params)
+
+    def show_driver(self, driver_name):
+        driver_show = self.ironic('driver-show', params=driver_name)
+        return utils.get_dict_from_output(driver_show)
+
+    def properties_driver(self, driver_name):
+        return self.ironic('driver-properties', params=driver_name)
+
+    def get_drivers_names(self):
+        driver_list = self.list_driver()
+        return [x['Supported driver(s)'] for x in driver_list]
