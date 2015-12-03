@@ -120,15 +120,18 @@ def do_chassis_list(cc, args):
     action='append',
     help="Record arbitrary key/value metadata. "
          "Can be specified multiple times.")
+@cliutils.arg(
+    '-u', '--uuid',
+    metavar='<uuid>',
+    help="UUID of the chassis.")
 def do_chassis_create(cc, args):
     """Create a new chassis."""
-    field_list = ['description', 'extra']
+    field_list = ['description', 'extra', 'uuid']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'extra')
     chassis = cc.chassis.create(**fields)
 
-    field_list.append('uuid')
     data = dict([(f, getattr(chassis, f, '')) for f in field_list])
     cliutils.print_dict(data, wrap=72)
 
