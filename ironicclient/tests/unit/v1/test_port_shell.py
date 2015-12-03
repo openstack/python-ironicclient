@@ -14,6 +14,8 @@
 
 import mock
 
+from oslo_utils import uuidutils
+
 from ironicclient.common.apiclient import exceptions
 from ironicclient.common import cliutils
 from ironicclient.common import utils as commonutils
@@ -231,6 +233,14 @@ class PortShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         p_shell.do_port_create(client_mock, args)
         client_mock.port.create.assert_called_once_with()
+
+    def test_do_port_create_with_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.uuid = uuidutils.generate_uuid()
+
+        p_shell.do_port_create(client_mock, args)
+        client_mock.port.create.assert_called_once_with(uuid=args.uuid)
 
     def test_do_port_create_valid_fields_values(self):
         client_mock = mock.MagicMock()

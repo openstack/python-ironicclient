@@ -38,6 +38,9 @@ CREATE_PORT = copy.deepcopy(PORT)
 del CREATE_PORT['id']
 del CREATE_PORT['uuid']
 
+CREATE_PORT_WITH_UUID = copy.deepcopy(PORT)
+del CREATE_PORT_WITH_UUID['id']
+
 UPDATED_PORT = copy.deepcopy(PORT)
 NEW_ADDR = 'AA:AA:AA:AA:AA:AA'
 UPDATED_PORT['address'] = NEW_ADDR
@@ -286,6 +289,14 @@ class PortManagerTest(testtools.TestCase):
         port = self.mgr.create(**CREATE_PORT)
         expect = [
             ('POST', '/v1/ports', {}, CREATE_PORT),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertTrue(port)
+
+    def test_create_with_uuid(self):
+        port = self.mgr.create(**CREATE_PORT_WITH_UUID)
+        expect = [
+            ('POST', '/v1/ports', {}, CREATE_PORT_WITH_UUID),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(port)
