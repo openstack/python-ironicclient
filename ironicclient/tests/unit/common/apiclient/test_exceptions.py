@@ -15,6 +15,7 @@
 
 from oslotest import base as test_base
 import six
+from six.moves import http_client
 
 from ironicclient.common.apiclient import exceptions
 
@@ -54,7 +55,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
     def test_from_response_known(self):
         method = "GET"
         url = "/fake"
-        status_code = 400
+        status_code = http_client.BAD_REQUEST
         json_data = {"error": {"message": "fake message",
                                "details": "fake details"}}
         self.assert_exception(
@@ -75,7 +76,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
     def test_from_response_non_openstack(self):
         method = "POST"
         url = "/fake-unknown"
-        status_code = 400
+        status_code = http_client.BAD_REQUEST
         json_data = {"alien": 123}
         self.assert_exception(
             exceptions.BadRequest, method, url, status_code, json_data,
@@ -84,7 +85,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
     def test_from_response_with_different_response_format(self):
         method = "GET"
         url = "/fake-wsme"
-        status_code = 400
+        status_code = http_client.BAD_REQUEST
         json_data1 = {"error_message": {"debuginfo": None,
                                         "faultcode": "Client",
                                         "faultstring": "fake message"}}
@@ -95,7 +96,8 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
             exceptions.BadRequest, method, url, status_code, json_data1,
             message, details)
 
-        json_data2 = {"badRequest": {"message": "fake message", "code": 400}}
+        json_data2 = {"badRequest": {"message": "fake message",
+                                     "code": http_client.BAD_REQUEST}}
         message = six.text_type(json_data2["badRequest"]["message"])
         details = six.text_type(json_data2)
         self.assert_exception(
@@ -105,7 +107,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
     def test_from_response_with_text_response_format(self):
         method = "GET"
         url = "/fake-wsme"
-        status_code = 400
+        status_code = http_client.BAD_REQUEST
         text_data1 = "error_message: fake message"
 
         ex = exceptions.from_response(
@@ -123,7 +125,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
     def test_from_response_with_text_response_format_with_no_body(self):
         method = "GET"
         url = "/fake-wsme"
-        status_code = 401
+        status_code = http_client.UNAUTHORIZED
 
         ex = exceptions.from_response(
             FakeResponse(status_code=status_code,

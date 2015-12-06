@@ -27,6 +27,7 @@ import time
 from keystoneclient import adapter
 from oslo_utils import strutils
 import six
+from six.moves import http_client
 import six.moves.urllib.parse as urlparse
 
 from ironicclient.common import filecache
@@ -323,7 +324,7 @@ class HTTPClient(VersionNegotiationMixin):
             # to servers that did not support microversions. Details here:
             # http://specs.openstack.org/openstack/ironic-specs/specs/kilo/api-microversions.html#use-case-3b-new-client-communicating-with-a-old-ironic-user-specified  # noqa
 
-            if resp.status == 406:
+            if resp.status == http_client.NOT_ACCEPTABLE:
                 negotiated_ver = self.negotiate_version(conn, resp)
                 kwargs['headers']['X-OpenStack-Ironic-API-Version'] = (
                     negotiated_ver)
@@ -350,15 +351,16 @@ class HTTPClient(VersionNegotiationMixin):
         else:
             self.log_http_response(resp)
 
-        if 400 <= resp.status < 600:
+        if resp.status >= http_client.BAD_REQUEST:
             error_json = _extract_error_json(body_str)
             raise exc.from_response(
                 resp, error_json.get('faultstring'),
                 error_json.get('debuginfo'), method, url)
-        elif resp.status in (301, 302, 305):
+        elif resp.status in (http_client.MOVED_PERMANENTLY, http_client.FOUND,
+                             http_client.USE_PROXY):
             # Redirected. Reissue the request to the new location.
             return self._http_request(resp['location'], method, **kwargs)
-        elif resp.status == 300:
+        elif resp.status == http_client.MULTIPLE_CHOICES:
             raise exc.from_response(resp, method=method, url=url)
 
         return resp, body_iter
@@ -374,7 +376,8 @@ class HTTPClient(VersionNegotiationMixin):
         resp, body_iter = self._http_request(url, method, **kwargs)
         content_type = resp.getheader('content-type', None)
 
-        if resp.status == 204 or resp.status == 205 or content_type is None:
+        if (resp.status in (http_client.NO_CONTENT, http_client.RESET_CONTENT)
+                or content_type is None):
             return resp, list()
 
         if 'application/json' in content_type:
@@ -499,20 +502,21 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
 
         resp = self.session.request(url, method,
                                     raise_exc=False, **kwargs)
-        if resp.status_code == 406:
+        if resp.status_code == http_client.NOT_ACCEPTABLE:
             negotiated_ver = self.negotiate_version(self.session, resp)
             kwargs['headers']['X-OpenStack-Ironic-API-Version'] = (
                 negotiated_ver)
             return self._http_request(url, method, **kwargs)
-        if 400 <= resp.status_code < 600:
+        if resp.status_code >= http_client.BAD_REQUEST:
             error_json = _extract_error_json(resp.content)
             raise exc.from_response(resp, error_json.get('faultstring'),
                                     error_json.get('debuginfo'), method, url)
-        elif resp.status_code in (301, 302, 305):
+        elif resp.status_code in (http_client.MOVED_PERMANENTLY,
+                                  http_client.FOUND, http_client.USE_PROXY):
             # Redirected. Reissue the request to the new location.
             location = resp.headers.get('location')
             resp = self._http_request(location, method, **kwargs)
-        elif resp.status_code == 300:
+        elif resp.status_code == http_client.MULTIPLE_CHOICES:
             raise exc.from_response(resp, method=method, url=url)
         return resp
 
@@ -528,7 +532,8 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         body = resp.content
         content_type = resp.headers.get('content-type', None)
         status = resp.status_code
-        if status == 204 or status == 205 or content_type is None:
+        if (status in (http_client.NO_CONTENT, http_client.RESET_CONTENT) or
+                content_type is None):
             return resp, list()
         if 'application/json' in content_type:
             try:
