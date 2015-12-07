@@ -18,9 +18,9 @@ import six
 
 
 def get_dict_from_output(output):
-    """Parce list of dictonaries, return dictonary.
+    """Parse list of dictionaries, return a dictionary.
 
-    :param output: list of dictonaries
+    :param output: list of dictionaries
     """
     obj = {}
     for item in output:
