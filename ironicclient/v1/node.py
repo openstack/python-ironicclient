@@ -119,7 +119,7 @@ class NodeManager(base.Manager):
                    sort_dir=None, detail=False, fields=None):
         """List all the ports for a given node.
 
-        :param node_id: The UUID of the node.
+        :param node_id: Name or UUID of the node.
         :param marker: Optional, the UUID of a port, eg the last
                        port from a previous result set. Return
                        the next result set.
