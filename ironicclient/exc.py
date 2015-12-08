@@ -60,4 +60,4 @@ def from_response(response, message=None, traceback=None, method=None,
         # to handle faultstring.
         response.json = lambda: {'error': error_body}
 
-    return exceptions.from_response(response, message, url)
+    return exceptions.from_response(response, method=method, url=url)
