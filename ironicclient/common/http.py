@@ -186,7 +186,7 @@ def with_retries(func):
                     LOG.error(msg)
                     raise
                 else:
-                    LOG.warn(msg)
+                    LOG.debug(msg)
                     time.sleep(self.conflict_retry_interval)
 
     return wrapper
@@ -345,7 +345,6 @@ class HTTPClient(VersionNegotiationMixin):
             self.log_http_response(resp)
 
         if 400 <= resp.status < 600:
-            LOG.warn("Request returned failure status.")
             error_json = _extract_error_json(body_str)
             raise exc.from_response(
                 resp, error_json.get('faultstring'),
