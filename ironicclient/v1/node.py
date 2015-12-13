@@ -21,9 +21,6 @@ from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 
-CREATION_ATTRIBUTES = ['chassis_uuid', 'driver', 'driver_info', 'extra',
-                       'uuid', 'properties', 'name']
-
 
 _power_states = {
     'on': 'power on',
@@ -37,12 +34,11 @@ class Node(base.Resource):
         return "<Node %s>" % self._info
 
 
-class NodeManager(base.Manager):
+class NodeManager(base.CreateManager):
     resource_class = Node
-
-    @staticmethod
-    def _path(id=None):
-        return '/v1/nodes/%s' % id if id else '/v1/nodes'
+    _creation_attributes = ['chassis_uuid', 'driver', 'driver_info',
+                            'extra', 'uuid', 'properties', 'name']
+    _resource_name = 'nodes'
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
              detail=False, sort_key=None, sort_dir=None, fields=None,
@@ -171,14 +167,7 @@ class NodeManager(base.Manager):
                                          limit=limit)
 
     def get(self, node_id, fields=None):
-        if fields is not None:
-            node_id = '%s?fields=' % node_id
-            node_id += ','.join(fields)
-
-        try:
-            return self._list(self._path(node_id))[0]
-        except IndexError:
-            return None
+        return self._get(resource_id=node_id, fields=fields)
 
     def get_by_instance_uuid(self, instance_uuid, fields=None):
         path = '?instance_uuid=%s' % instance_uuid
@@ -196,22 +185,15 @@ class NodeManager(base.Manager):
         else:
             raise exc.NotFound()
 
-    def create(self, **kwargs):
-        new = {}
-        for (key, value) in kwargs.items():
-            if key in CREATION_ATTRIBUTES:
-                new[key] = value
-            else:
-                raise exc.InvalidAttribute()
-        return self._create(self._path(), new)
-
     def delete(self, node_id):
-        return self._delete(self._path(node_id))
+        return self._delete(resource_id=node_id)
 
     def update(self, node_id, patch, http_method='PATCH'):
-        return self._update(self._path(node_id), patch, method=http_method)
+        return self._update(resource_id=node_id, patch=patch,
+                            method=http_method)
 
-    def vendor_passthru(self, node_id, method, args=None, http_method=None):
+    def vendor_passthru(self, node_id, method, args=None,
+                        http_method=None):
         """Issue requests for vendor-specific actions on a given node.
 
         :param node_id: The UUID of the node.
@@ -219,7 +201,6 @@ class NodeManager(base.Manager):
         :param args: Optional. The arguments to be passed to the method.
         :param http_method: The HTTP method to use on the request.
                             Defaults to POST.
-
         """
         if args is None:
             args = {}
@@ -265,14 +246,14 @@ class NodeManager(base.Manager):
         path = "%s/maintenance" % node_id
         if maintenance_mode:
             reason = {'reason': maint_reason}
-            return self._update(self._path(path), reason, method='PUT')
+            return self.update(path, reason, http_method='PUT')
         else:
-            return self._delete(self._path(path))
+            return self.delete(path)
 
     def set_power_state(self, node_id, state):
         path = "%s/states/power" % node_id
         target = {'target': _power_states.get(state, state)}
-        return self._update(self._path(path), target, method='PUT')
+        return self.update(path, target, http_method='PUT')
 
     def validate(self, node_uuid):
         path = "%s/validate" % node_uuid
@@ -289,7 +270,7 @@ class NodeManager(base.Manager):
                 configdrive = utils.make_configdrive(configdrive)
 
             body['configdrive'] = configdrive
-        return self._update(self._path(path), body, method='PUT')
+        return self.update(path, body, http_method='PUT')
 
     def states(self, node_uuid):
         path = "%s/states" % node_uuid
@@ -312,12 +293,12 @@ class NodeManager(base.Manager):
         """
         path = "%s/states/console" % node_uuid
         target = {'enabled': enabled}
-        return self._update(self._path(path), target, method='PUT')
+        return self.update(path, target, http_method='PUT')
 
     def set_boot_device(self, node_uuid, boot_device, persistent=False):
         path = "%s/management/boot_device" % node_uuid
         target = {'boot_device': boot_device, 'persistent': persistent}
-        return self._update(self._path(path), target, method='PUT')
+        return self.update(path, target, http_method='PUT')
 
     def get_boot_device(self, node_uuid):
         path = "%s/management/boot_device" % node_uuid

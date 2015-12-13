@@ -25,37 +25,29 @@ class Driver(base.Resource):
 
 class DriverManager(base.Manager):
     resource_class = Driver
+    _resource_name = 'drivers'
 
     def list(self):
-        return self._list('/v1/drivers', "drivers")
+        return self._list('/v1/drivers', self._resource_name)
 
     def get(self, driver_name):
-        try:
-            return self._list('/v1/drivers/%s' % driver_name)[0]
-        except IndexError:
-            return None
+        return self._get(resource_id=driver_name)
 
     def update(self, driver_name, patch, http_method='PATCH'):
-        path = '/v1/drivers/%s' % driver_name
-        return self._update(path, patch, method=http_method)
+        return self._update(resource_id=driver_name, patch=patch,
+                            method=http_method)
 
     def delete(self, driver_name):
-        return self._delete('/v1/drivers/%s' % driver_name)
+        return self._delete(resource_id=driver_name)
 
     def properties(self, driver_name):
-        try:
-            info = self._list('/v1/drivers/%s/properties' % driver_name)[0]
-            if info:
-                return info.to_dict()
-            return {}
-        except IndexError:
-            return {}
+        return self._get(resource_id='%s/properties' % driver_name).to_dict()
 
     def vendor_passthru(self, driver_name, method, args=None,
                         http_method=None):
         """Issue requests for vendor-specific actions on a given driver.
 
-        :param driver_name: Name of the driver.
+        :param driver_name: The name of the driver.
         :param method: Name of the vendor method.
         :param args: Optional. The arguments to be passed to the method.
         :param http_method: The HTTP method to use on the request.
