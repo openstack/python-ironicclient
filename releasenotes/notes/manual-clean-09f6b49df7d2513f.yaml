@@ -1,0 +1,10 @@
+---
+features:
+  - Adds support for manual cleaning API; available with ironic-api-version
+    1.15 or higher. The ironic CLI is "ironic node-set-provision-state
+    --clean-steps <clean-steps> <node> <provision-state>"
+    where <provision-state> is 'clean' and <clean-steps> is the clean steps
+    in JSON format. May be the path to a file containing the clean steps;
+    OR '-', with the clean steps being read from standard input; OR a string.
+    The value should be a list of clean-step dictionaries; each dictionary
+    should have keys 'interface' and 'step', and optional key 'args'.

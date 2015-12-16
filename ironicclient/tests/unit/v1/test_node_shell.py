@@ -12,11 +12,17 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
+import json
+import sys
+import tempfile
+
 import mock
+import six.moves.builtins as __builtin__
 
 from ironicclient.common.apiclient import exceptions
 from ironicclient.common import cliutils
 from ironicclient.common import utils as commonutils
+from ironicclient import exc
 from ironicclient.tests.unit import utils
 import ironicclient.v1.node_shell as n_shell
 
@@ -385,10 +391,11 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.provision_state = 'active'
         args.config_drive = 'foo'
+        args.clean_steps = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'active', configdrive='foo')
+            'node_uuid', 'active', configdrive='foo', cleansteps=None)
 
     def test_do_node_set_provision_state_deleted(self):
         client_mock = mock.MagicMock()
@@ -396,10 +403,11 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.provision_state = 'deleted'
         args.config_drive = None
+        args.clean_steps = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'deleted', configdrive=None)
+            'node_uuid', 'deleted', configdrive=None, cleansteps=None)
 
     def test_do_node_set_provision_state_rebuild(self):
         client_mock = mock.MagicMock()
@@ -407,10 +415,11 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.provision_state = 'rebuild'
         args.config_drive = None
+        args.clean_steps = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'rebuild', configdrive=None)
+            'node_uuid', 'rebuild', configdrive=None, cleansteps=None)
 
     def test_do_node_set_provision_state_not_active_fails(self):
         client_mock = mock.MagicMock()
@@ -418,6 +427,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.provision_state = 'deleted'
         args.config_drive = 'foo'
+        args.clean_steps = None
 
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_set_provision_state,
@@ -430,10 +440,11 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.provision_state = 'inspect'
         args.config_drive = None
+        args.clean_steps = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'inspect', configdrive=None)
+            'node_uuid', 'inspect', configdrive=None, cleansteps=None)
 
     def test_do_node_set_provision_state_manage(self):
         client_mock = mock.MagicMock()
@@ -441,10 +452,11 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.provision_state = 'manage'
         args.config_drive = None
+        args.clean_steps = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'manage', configdrive=None)
+            'node_uuid', 'manage', configdrive=None, cleansteps=None)
 
     def test_do_node_set_provision_state_provide(self):
         client_mock = mock.MagicMock()
@@ -452,10 +464,108 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.provision_state = 'provide'
         args.config_drive = None
+        args.clean_steps = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'provide', configdrive=None)
+            'node_uuid', 'provide', configdrive=None, cleansteps=None)
+
+    def test_do_node_set_provision_state_clean(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'clean'
+        args.config_drive = None
+        clean_steps = '[{"step": "upgrade", "interface": "deploy"}]'
+        args.clean_steps = clean_steps
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'clean', configdrive=None,
+            cleansteps=json.loads(clean_steps))
+
+    @mock.patch.object(n_shell, '_get_from_stdin', autospec=True)
+    def test_do_node_set_provision_state_clean_stdin(self, mock_stdin):
+        clean_steps = '[{"step": "upgrade", "interface": "deploy"}]'
+        mock_stdin.return_value = clean_steps
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'clean'
+        args.config_drive = None
+        args.clean_steps = '-'
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        mock_stdin.assert_called_once_with('clean steps')
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'clean', configdrive=None,
+            cleansteps=json.loads(clean_steps))
+
+    @mock.patch.object(n_shell, '_get_from_stdin', autospec=True)
+    def test_do_node_set_provision_state_clean_stdin_fails(self, mock_stdin):
+        mock_stdin.side_effect = exc.InvalidAttribute('bad')
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'clean'
+        args.config_drive = None
+        args.clean_steps = '-'
+
+        self.assertRaises(exc.InvalidAttribute,
+                          n_shell.do_node_set_provision_state,
+                          client_mock, args)
+        mock_stdin.assert_called_once_with('clean steps')
+        self.assertFalse(client_mock.node.set_provision_state.called)
+
+    def test_do_node_set_provision_state_clean_file(self):
+        contents = '[{"step": "upgrade", "interface": "deploy"}]'
+
+        with tempfile.NamedTemporaryFile(mode='w') as f:
+            f.write(contents)
+            f.flush()
+
+            client_mock = mock.MagicMock()
+            args = mock.MagicMock()
+            args.node = 'node_uuid'
+            args.provision_state = 'clean'
+            args.config_drive = None
+            args.clean_steps = f.name
+
+            n_shell.do_node_set_provision_state(client_mock, args)
+            client_mock.node.set_provision_state.assert_called_once_with(
+                'node_uuid', 'clean', configdrive=None,
+                cleansteps=json.loads(contents))
+
+    def test_do_node_set_provision_state_clean_fails(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'clean'
+        args.config_drive = None
+        args.clean_steps = None
+
+        # clean_steps isn't specified
+        self.assertRaisesRegex(exceptions.CommandError,
+                               'clean-steps.*must be specified',
+                               n_shell.do_node_set_provision_state,
+                               client_mock, args)
+        self.assertFalse(client_mock.node.set_provision_state.called)
+
+    def test_do_node_set_provision_state_not_clean_fails(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'deleted'
+        args.config_drive = None
+        clean_steps = '[{"step": "upgrade", "interface": "deploy"}]'
+        args.clean_steps = clean_steps
+
+        # clean_steps specified but not cleaning
+        self.assertRaisesRegex(exceptions.CommandError,
+                               'clean-steps.*only valid',
+                               n_shell.do_node_set_provision_state,
+                               client_mock, args)
+        self.assertFalse(client_mock.node.set_provision_state.called)
 
     def test_do_node_set_provision_state_abort(self):
         client_mock = mock.MagicMock()
@@ -463,10 +573,11 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.provision_state = 'abort'
         args.config_drive = None
+        args.clean_steps = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'abort', configdrive=None)
+            'node_uuid', 'abort', configdrive=None, cleansteps=None)
 
     def test_do_node_set_console_mode(self):
         client_mock = mock.MagicMock()
@@ -808,3 +919,60 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_get_vendor_passthru_methods(client_mock, args)
         client_mock.node.get_vendor_passthru_methods.assert_called_once_with(
             'node_uuid')
+
+
+class NodeShellLocalTest(utils.BaseTestCase):
+
+    @mock.patch.object(sys, 'stdin', autospec=True)
+    def test__get_from_stdin(self, mock_stdin):
+        contents = '[{"step": "upgrade", "interface": "deploy"}]'
+        mock_stdin.read.return_value = contents
+        desc = 'something'
+
+        info = n_shell._get_from_stdin(desc)
+        self.assertEqual(info, contents)
+        mock_stdin.read.assert_called_once_with()
+
+    @mock.patch.object(sys, 'stdin', autospec=True)
+    def test__get_from_stdin_fail(self, mock_stdin):
+        mock_stdin.read.side_effect = IOError
+        desc = 'something'
+
+        self.assertRaises(exc.InvalidAttribute, n_shell._get_from_stdin, desc)
+        mock_stdin.read.assert_called_once_with()
+
+    def test__handle_clean_steps_arg(self):
+        cleansteps = '[{"step": "upgrade", "interface": "deploy"}]'
+        steps = n_shell._handle_clean_steps_arg(cleansteps)
+        self.assertEqual(json.loads(cleansteps), steps)
+
+    def test__handle_clean_steps_arg_bad_json(self):
+        cleansteps = 'foo'
+        self.assertRaisesRegex(exc.InvalidAttribute,
+                               'For clean steps',
+                               n_shell._handle_clean_steps_arg, cleansteps)
+
+    def test__handle_clean_steps_arg_file(self):
+        contents = '[{"step": "upgrade", "interface": "deploy"}]'
+
+        with tempfile.NamedTemporaryFile(mode='w') as f:
+            f.write(contents)
+            f.flush()
+            steps = n_shell._handle_clean_steps_arg(f.name)
+
+        self.assertEqual(json.loads(contents), steps)
+
+    @mock.patch.object(__builtin__, 'open', autospec=True)
+    def test__handle_clean_steps_arg_file_fail(self, mock_open):
+        mock_file_object = mock.MagicMock()
+        mock_file_handle = mock.MagicMock()
+        mock_file_handle.__enter__.return_value = mock_file_object
+        mock_open.return_value = mock_file_handle
+        mock_file_object.read.side_effect = IOError
+
+        with tempfile.NamedTemporaryFile(mode='w') as f:
+            self.assertRaisesRegex(exc.InvalidAttribute,
+                                   "from file",
+                                   n_shell._handle_clean_steps_arg, f.name)
+            mock_open.assert_called_once_with(f.name, 'r')
+            mock_file_object.read.assert_called_once_with()

@@ -14,11 +14,15 @@
 #    under the License.
 
 import argparse
+import json
+import os
+import sys
 
 from ironicclient.common.apiclient import exceptions
 from ironicclient.common import cliutils
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
+from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
 
 
@@ -29,6 +33,48 @@ def _print_node_show(node, fields=None):
     data = dict(
         [(f, getattr(node, f, '')) for f in fields])
     cliutils.print_dict(data, wrap=72)
+
+
+def _get_from_stdin(info_desc):
+    """Read information from stdin.
+
+    :param info_desc: A string description of the desired information
+    :raises: InvalidAttribute if there was a problem reading from stdin
+    :returns: the string that was read from stdin
+    """
+    try:
+        info = sys.stdin.read().strip()
+    except Exception as e:
+        err = _("Cannot get %(desc)s from standard input. Error: %(err)s")
+        raise exc.InvalidAttribute(err % {'desc': info_desc, 'err': e})
+    return info
+
+
+def _handle_clean_steps_arg(clean_steps):
+    """Attempts to read clean steps argument.
+
+    :param clean_steps: May be a file name containing the clean steps, or
+        a JSON string representing the clean steps.
+    :returns: A list of dictionaries representing clean steps.
+    :raises: InvalidAttribute if the argument cannot be parsed.
+    """
+
+    if os.path.isfile(clean_steps):
+        try:
+            with open(clean_steps, 'r') as f:
+                clean_steps = f.read().strip()
+        except Exception as e:
+            err = _("Cannot get clean steps from file '%(file)s'. "
+                    "Error: %(err)s") % {'err': e, 'file': clean_steps}
+            raise exc.InvalidAttribute(err)
+    try:
+        clean_steps = json.loads(clean_steps)
+    except ValueError as e:
+        err = (_("For clean steps: '%(steps)s', error: '%(err)s'") %
+               {'err': e, 'steps': clean_steps})
+        raise exc.InvalidAttribute(err)
+
+    return clean_steps
 
 
 @cliutils.arg(
@@ -381,9 +427,9 @@ def do_node_set_power_state(cc, args):
     'provision_state',
     metavar='<provision-state>',
     choices=['active', 'deleted', 'rebuild', 'inspect', 'provide',
-             'manage', 'abort'],
+             'manage', 'clean', 'abort'],
     help="Supported states: 'active', 'deleted', 'rebuild', "
-         "'inspect', 'provide', 'manage' or 'abort'")
+         "'inspect', 'provide', 'manage', 'clean' or 'abort'.")
 @cliutils.arg(
     '--config-drive',
     metavar='<config-drive>',
@@ -391,15 +437,39 @@ def do_node_set_power_state(cc, args):
     help=("A gzipped, base64-encoded configuration drive string OR the path "
           "to the configuration drive file OR the path to a directory "
           "containing the config drive files. In case it's a directory, a "
-          "config drive will be generated from it. This parameter is only "
-          "valid when setting provision state to 'active'."))
+          "config drive will be generated from it. This argument is only "
+          "valid when setting provision-state to 'active'."))
+@cliutils.arg(
+    '--clean-steps',
+    metavar='<clean-steps>',
+    default=None,
+    help=("The clean steps in JSON format. May be the path to a file "
+          "containing the clean steps; OR '-', with the clean steps being "
+          "read from standard input; OR a string. The value should be "
+          "a list of clean-step dictionaries; each dictionary should have "
+          "keys 'interface' and 'step', and optional key 'args'. "
+          "This argument must be specified (and is only valid) when "
+          "setting provision-state to 'clean'."))
 def do_node_set_provision_state(cc, args):
     """Initiate a provisioning state change for a node."""
     if args.config_drive and args.provision_state != 'active':
         raise exceptions.CommandError(_('--config-drive is only valid when '
                                         'setting provision state to "active"'))
+    elif args.clean_steps and args.provision_state != 'clean':
+        raise exceptions.CommandError(_('--clean-steps is only valid when '
+                                        'setting provision state to "clean"'))
+    elif args.provision_state == 'clean' and not args.clean_steps:
+        raise exceptions.CommandError(_('--clean-steps must be specified when '
+                                        'setting provision state to "clean"'))
+
+    clean_steps = args.clean_steps
+    if args.clean_steps == '-':
+        clean_steps = _get_from_stdin('clean steps')
+    if clean_steps:
+        clean_steps = _handle_clean_steps_arg(clean_steps)
     cc.node.set_provision_state(args.node, args.provision_state,
-                                configdrive=args.config_drive)
+                                configdrive=args.config_drive,
+                                cleansteps=clean_steps)
 
 
 @cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")

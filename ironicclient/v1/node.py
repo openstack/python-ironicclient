@@ -259,7 +259,26 @@ class NodeManager(base.CreateManager):
         path = "%s/validate" % node_uuid
         return self.get(path)
 
-    def set_provision_state(self, node_uuid, state, configdrive=None):
+    def set_provision_state(self, node_uuid, state, configdrive=None,
+                            cleansteps=None):
+        """Set the provision state for the node.
+
+        :param node_uuid: The UUID or name of the node.
+        :param state: The desired provision state. One of 'active', 'deleted',
+             'rebuild', 'inspect', 'provide', 'manage', 'clean', 'abort'.
+        :param configdrive: A gzipped, base64-encoded configuration drive
+            string OR the path to the configuration drive file OR the path to
+            a directory containing the config drive files. In case it's a
+            directory, a config drive will be generated from it. This is only
+            valid when setting state to 'active'.
+        :param cleansteps: The clean steps as a list of clean-step
+            dictionaries; each dictionary should have keys 'interface' and
+            'step', and optional key 'args'. This must be specified (and is
+            only valid) when setting provision-state to 'clean'.
+        :raises: InvalidAttribute if there was an error with the clean steps
+        :returns: The status of the request
+        """
+
         path = "%s/states/provision" % node_uuid
         body = {'target': state}
         if configdrive:
@@ -270,6 +289,9 @@ class NodeManager(base.CreateManager):
                 configdrive = utils.make_configdrive(configdrive)
 
             body['configdrive'] = configdrive
+        elif cleansteps:
+            body['clean_steps'] = cleansteps
+
         return self.update(path, body, http_method='PUT')
 
     def states(self, node_uuid):
