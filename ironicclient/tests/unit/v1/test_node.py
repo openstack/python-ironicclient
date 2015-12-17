@@ -735,7 +735,7 @@ class NodeManagerTest(testtools.TestCase):
             ('PUT', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, body),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual(None, maintenance)
+        self.assertIsNone(maintenance)
 
     def test_node_set_maintenance_false(self):
         maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'false')
@@ -743,7 +743,7 @@ class NodeManagerTest(testtools.TestCase):
             ('DELETE', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual(None, maintenance)
+        self.assertIsNone(maintenance)
 
     def test_node_set_maintenance_on(self):
         maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'on',
@@ -753,7 +753,7 @@ class NodeManagerTest(testtools.TestCase):
             ('PUT', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, body),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual(None, maintenance)
+        self.assertIsNone(maintenance)
 
     def test_node_set_maintenance_off(self):
         maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'off')
@@ -761,7 +761,7 @@ class NodeManagerTest(testtools.TestCase):
             ('DELETE', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual(None, maintenance)
+        self.assertIsNone(maintenance)
 
     def test_node_set_maintenance_bad(self):
         self.assertRaises(exc.InvalidAttribute, self.mgr.set_maintenance,
@@ -775,7 +775,7 @@ class NodeManagerTest(testtools.TestCase):
             ('PUT', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, body),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual(None, maintenance)
+        self.assertIsNone(maintenance)
 
     def test_node_set_power_state(self):
         power_state = self.mgr.set_power_state(NODE1['uuid'], "on")
