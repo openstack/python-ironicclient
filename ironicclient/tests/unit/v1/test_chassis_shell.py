@@ -14,6 +14,8 @@
 
 import mock
 
+from oslo_utils import uuidutils
+
 from ironicclient.common.apiclient import exceptions
 from ironicclient.common import cliutils
 from ironicclient.common import utils as commonutils
@@ -315,6 +317,14 @@ class ChassisShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         c_shell.do_chassis_create(client_mock, args)
         client_mock.chassis.create.assert_called_once_with()
+
+    def test_do_chassis_create_with_uuid(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.uuid = uuidutils.generate_uuid()
+
+        c_shell.do_chassis_create(client_mock, args)
+        client_mock.chassis.create.assert_called_once_with(uuid=args.uuid)
 
     def test_do_chassis_create_valid_field(self):
         client_mock = mock.MagicMock()

@@ -46,6 +46,9 @@ CREATE_CHASSIS = copy.deepcopy(CHASSIS)
 del CREATE_CHASSIS['id']
 del CREATE_CHASSIS['uuid']
 
+CREATE_WITH_UUID = copy.deepcopy(CHASSIS)
+del CREATE_WITH_UUID['id']
+
 UPDATED_CHASSIS = copy.deepcopy(CHASSIS)
 NEW_DESCR = 'new-description'
 UPDATED_CHASSIS['description'] = NEW_DESCR
@@ -322,6 +325,14 @@ class ChassisManagerTest(testtools.TestCase):
         chassis = self.mgr.create(**CREATE_CHASSIS)
         expect = [
             ('POST', '/v1/chassis', {}, CREATE_CHASSIS),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertTrue(chassis)
+
+    def test_create_with_uuid(self):
+        chassis = self.mgr.create(**CREATE_WITH_UUID)
+        expect = [
+            ('POST', '/v1/chassis', {}, CREATE_WITH_UUID),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(chassis)

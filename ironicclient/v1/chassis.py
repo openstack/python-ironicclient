@@ -28,7 +28,7 @@ class Chassis(base.Resource):
 class ChassisManager(base.CreateManager):
     resource_class = Chassis
     _resource_name = 'chassis'
-    _creation_attributes = ['description', 'extra']
+    _creation_attributes = ['description', 'extra', 'uuid']
 
     def list(self, marker=None, limit=None, sort_key=None,
              sort_dir=None, detail=False, fields=None):
