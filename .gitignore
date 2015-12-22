@@ -8,6 +8,9 @@
 _build
 doc/source/api/
 
+# Release notes
+releasenotes/build
+
 # Packages/installer info
 *.egg
 *.egg-info
