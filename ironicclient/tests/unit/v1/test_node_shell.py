@@ -73,6 +73,17 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock.node.delete.assert_has_calls(
             [mock.call('node_uuid1'), mock.call('node_uuid2')])
 
+    def test_do_node_delete_multiple_with_exception(self):
+        client_mock = mock.MagicMock()
+        client_mock.node.delete.side_effect = (
+            [exceptions.ClientException, None])
+        args = mock.MagicMock()
+        args.node = ['node_uuid1', 'node_uuid2']
+
+        n_shell.do_node_delete(client_mock, args)
+        client_mock.node.delete.assert_has_calls(
+            [mock.call('node_uuid1'), mock.call('node_uuid2')])
+
     def test_do_node_update(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
