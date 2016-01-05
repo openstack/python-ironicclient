@@ -449,6 +449,26 @@ class HttpClientTest(utils.BaseTestCase):
         self.assertEqual(200, response.status)
         self.assertEqual(1, mock_negotiate.call_count)
 
+    @mock.patch.object(http.LOG, 'debug', autospec=True)
+    def test_log_curl_request_mask_password(self, mock_log):
+        client = http.HTTPClient('http://localhost/')
+        kwargs = {'headers': {'foo-header': 'bar-header'},
+                  'body': '{"password": "foo"}'}
+        client.log_curl_request('foo', 'http://127.0.0.1', kwargs)
+        expected_log = ("curl -i -X foo -H 'foo-header: bar-header' "
+                        "-d '{\"password\": \"***\"}' http://127.0.0.1")
+        mock_log.assert_called_once_with(expected_log)
+
+    @mock.patch.object(http.LOG, 'debug', autospec=True)
+    def test_log_http_response_mask_password(self, mock_log):
+        client = http.HTTPClient('http://localhost/')
+        fake_response = utils.FakeResponse({}, version=1, reason='foo',
+                                           status=200)
+        body = '{"password": "foo"}'
+        client.log_http_response(fake_response, body=body)
+        expected_log = ("\nHTTP/0.1 200 foo\n\n{\"password\": \"***\"}\n")
+        mock_log.assert_called_once_with(expected_log)
+
 
 class SessionClientTest(utils.BaseTestCase):
 

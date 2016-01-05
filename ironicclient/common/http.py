@@ -25,6 +25,7 @@ import textwrap
 import time
 
 from keystoneclient import adapter
+from oslo_utils import strutils
 import six
 import six.moves.urllib.parse as urlparse
 
@@ -265,7 +266,8 @@ class HTTPClient(VersionNegotiationMixin):
             curl.append('-k')
 
         if 'body' in kwargs:
-            curl.append('-d \'%s\'' % kwargs['body'])
+            body = strutils.mask_password(kwargs['body'])
+            curl.append('-d \'%s\'' % body)
 
         curl.append(urlparse.urljoin(self.endpoint_trimmed, url))
         LOG.debug(' '.join(curl))
@@ -277,6 +279,7 @@ class HTTPClient(VersionNegotiationMixin):
         dump.extend(['%s: %s' % (k, v) for k, v in resp.getheaders()])
         dump.append('')
         if body:
+            body = strutils.mask_password(body)
             dump.extend([body, ''])
         LOG.debug('\n'.join(dump))
 
