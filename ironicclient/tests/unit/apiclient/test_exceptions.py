@@ -41,7 +41,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
                          json_data=json_data),
             method,
             url)
-        self.assertTrue(isinstance(ex, ex_cls))
+        self.assertIsInstance(ex, ex_cls)
         if check_description:
             expected_msg = error_msg or json_data["error"]["message"]
             expected_details = error_details or json_data["error"]["details"]
@@ -114,7 +114,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
                          text=text_data1),
             method,
             url)
-        self.assertTrue(isinstance(ex, exceptions.BadRequest))
+        self.assertIsInstance(ex, exceptions.BadRequest)
         self.assertEqual(ex.details, text_data1)
         self.assertEqual(ex.method, method)
         self.assertEqual(ex.url, url)
@@ -130,7 +130,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
                          headers={"Content-Type": "text/html"}),
             method,
             url)
-        self.assertTrue(isinstance(ex, exceptions.Unauthorized))
+        self.assertIsInstance(ex, exceptions.Unauthorized)
         self.assertEqual(ex.details, '')
         self.assertEqual(ex.method, method)
         self.assertEqual(ex.url, url)
