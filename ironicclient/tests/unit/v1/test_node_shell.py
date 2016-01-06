@@ -552,21 +552,32 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_list(client_mock, args)
         client_mock.node.list.assert_called_once_with(detail=False)
 
-    def test_do_node_list_provison_state(self):
-        client_mock = mock.MagicMock()
-        args = self._get_client_mock_args(provision_state='wait call-back')
-
-        n_shell.do_node_list(client_mock, args)
-        client_mock.node.list.assert_called_once_with(
-            provision_state='wait call-back',
-            detail=False)
-
     def test_do_node_list_detail(self):
         client_mock = mock.MagicMock()
         args = self._get_client_mock_args(detail=True)
 
         n_shell.do_node_list(client_mock, args)
         client_mock.node.list.assert_called_once_with(detail=True)
+
+    def test_do_node_list_provision_state(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(provision_state='wait call-back',
+                                          detail=False)
+
+        n_shell.do_node_list(client_mock, args)
+        client_mock.node.list.assert_called_once_with(
+            provision_state='wait call-back',
+            detail=False)
+
+    def test_do_node_list_detail_provision_state(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(provision_state='wait call-back',
+                                          detail=True)
+
+        n_shell.do_node_list(client_mock, args)
+        client_mock.node.list.assert_called_once_with(
+            provision_state='wait call-back',
+            detail=True)
 
     def test_do_node_list_sort_key(self):
         client_mock = mock.MagicMock()
