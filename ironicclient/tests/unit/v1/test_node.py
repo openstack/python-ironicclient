@@ -160,6 +160,13 @@ fake_responses = {
             {"nodes": [NODE1]},
         )
     },
+    '/v1/nodes/?driver=fake':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1]},
+        )
+    },
     '/v1/nodes/detail?instance_uuid=%s' % NODE2['instance_uuid']:
     {
         'GET': (
@@ -520,6 +527,15 @@ class NodeManagerTest(testtools.TestCase):
     def test_node_list_provision_state_fail(self):
         self.assertRaises(KeyError, self.mgr.list,
                           provision_state="test")
+
+    def test_node_list_driver(self):
+        nodes = self.mgr.list(driver="fake")
+        expect = [
+            ('GET', '/v1/nodes/?driver=fake', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
     def test_node_list_no_maintenance(self):
         nodes = self.mgr.list(maintenance=False)

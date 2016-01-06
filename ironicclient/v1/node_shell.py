@@ -98,6 +98,10 @@ def do_node_show(cc, args):
     metavar='<provision-state>',
     help="List nodes in specified provision state.")
 @cliutils.arg(
+    '--driver',
+    metavar='<driver>',
+    help="List nodes using specified driver.")
+@cliutils.arg(
     '--detail',
     dest='detail',
     action='store_true',
@@ -123,6 +127,9 @@ def do_node_list(cc, args):
                                                           args.maintenance)
     if args.provision_state is not None:
         params['provision_state'] = args.provision_state
+
+    if args.driver is not None:
+        params['driver'] = args.driver
 
     if args.detail:
         fields = res_fields.NODE_DETAILED_RESOURCE.fields
