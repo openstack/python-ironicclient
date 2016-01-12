@@ -671,12 +671,12 @@ class EnvTestCase(test_base.BaseTestCase):
     def test_env(self):
         env = {"alpha": "a", "beta": "b"}
         self.useFixture(fixtures.MonkeyPatch("os.environ", env))
-        self.assertEqual(cliutils.env("beta"), env["beta"])
-        self.assertEqual(cliutils.env("beta", "alpha"), env["beta"])
-        self.assertEqual(cliutils.env("alpha", "beta"), env["alpha"])
-        self.assertEqual(cliutils.env("gamma", "beta"), env["beta"])
-        self.assertEqual(cliutils.env("gamma"), "")
-        self.assertEqual(cliutils.env("gamma", default="c"), "c")
+        self.assertEqual(env["beta"], cliutils.env("beta"))
+        self.assertEqual(env["beta"], cliutils.env("beta", "alpha"))
+        self.assertEqual(env["alpha"], cliutils.env("alpha", "beta"))
+        self.assertEqual(env["beta"], cliutils.env("gamma", "beta"))
+        self.assertEqual("", cliutils.env("gamma"))
+        self.assertEqual("c", cliutils.env("gamma", default="c"))
 
 
 class GetPasswordTestCase(test_base.BaseTestCase):
@@ -693,14 +693,14 @@ class GetPasswordTestCase(test_base.BaseTestCase):
     def test_get_password(self):
         self.useFixture(fixtures.MonkeyPatch("getpass.getpass",
                                              lambda prompt: "mellon"))
-        self.assertEqual(cliutils.get_password(), "mellon")
+        self.assertEqual("mellon", cliutils.get_password())
 
     def test_get_password_verify(self):
         env = {"OS_VERIFY_PASSWORD": "True"}
         self.useFixture(fixtures.MonkeyPatch("os.environ", env))
         self.useFixture(fixtures.MonkeyPatch("getpass.getpass",
                                              lambda prompt: "mellon"))
-        self.assertEqual(cliutils.get_password(), "mellon")
+        self.assertEqual("mellon", cliutils.get_password())
 
     def test_get_password_verify_failure(self):
         env = {"OS_VERIFY_PASSWORD": "True"}

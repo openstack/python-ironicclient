@@ -45,11 +45,11 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
         if check_description:
             expected_msg = error_msg or json_data["error"]["message"]
             expected_details = error_details or json_data["error"]["details"]
-            self.assertEqual(ex.message, expected_msg)
-            self.assertEqual(ex.details, expected_details)
-        self.assertEqual(ex.method, method)
-        self.assertEqual(ex.url, url)
-        self.assertEqual(ex.http_status, status_code)
+            self.assertEqual(expected_msg, ex.message)
+            self.assertEqual(expected_details, ex.details)
+        self.assertEqual(method, ex.method)
+        self.assertEqual(url, ex.url)
+        self.assertEqual(status_code, ex.http_status)
 
     def test_from_response_known(self):
         method = "GET"
@@ -115,10 +115,10 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
             method,
             url)
         self.assertIsInstance(ex, exceptions.BadRequest)
-        self.assertEqual(ex.details, text_data1)
-        self.assertEqual(ex.method, method)
-        self.assertEqual(ex.url, url)
-        self.assertEqual(ex.http_status, status_code)
+        self.assertEqual(text_data1, ex.details)
+        self.assertEqual(method, ex.method)
+        self.assertEqual(url, ex.url)
+        self.assertEqual(status_code, ex.http_status)
 
     def test_from_response_with_text_response_format_with_no_body(self):
         method = "GET"
@@ -131,7 +131,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
             method,
             url)
         self.assertIsInstance(ex, exceptions.Unauthorized)
-        self.assertEqual(ex.details, '')
-        self.assertEqual(ex.method, method)
-        self.assertEqual(ex.url, url)
-        self.assertEqual(ex.http_status, status_code)
+        self.assertEqual('', ex.details)
+        self.assertEqual(method, ex.method)
+        self.assertEqual(url, ex.url)
+        self.assertEqual(status_code, ex.http_status)

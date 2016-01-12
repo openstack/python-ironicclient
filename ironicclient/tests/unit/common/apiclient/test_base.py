@@ -64,18 +64,18 @@ class CrudResourceManager(base.CrudManager):
 class ResourceTest(test_base.BaseTestCase):
     def test_resource_repr(self):
         r = base.Resource(None, dict(foo="bar", baz="spam"))
-        self.assertEqual(repr(r), "<Resource baz=spam, foo=bar>")
+        self.assertEqual("<Resource baz=spam, foo=bar>", repr(r))
 
     def test_getid(self):
         class TmpObject(base.Resource):
             id = "4"
-        self.assertEqual(base.getid(TmpObject(None, {})), "4")
+        self.assertEqual("4", base.getid(TmpObject(None, {})))
 
     def test_human_id(self):
         r = base.Resource(None, {"name": "1"})
         self.assertIsNone(r.human_id)
         r = HumanResource(None, {"name": "1"})
-        self.assertEqual(r.human_id, "1")
+        self.assertEqual("1", r.human_id)
         r = HumanResource(None, {"name": None})
         self.assertIsNone(r.human_id)
 
@@ -146,7 +146,7 @@ class BaseManagerTestCase(test_base.BaseTestCase):
                                     json={'id': 42}, return_raw=True)
         self.manager.client.post.assert_called_with("/human_resources",
                                                     json={'id': 42})
-        self.assertEqual(result, {'id': 42})
+        self.assertEqual({'id': 42}, result)
 
     def test_post_no_response_key(self):
         self.response.json.return_value = {'id': 42}
