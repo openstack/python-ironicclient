@@ -1,0 +1,5 @@
+---
+features:
+  - Add support to the openstackclient plugin for all Ironic API versions of
+    the form 1.x, up to the latest known minor version. The regular Ironic CLI
+    already supports all known versions.

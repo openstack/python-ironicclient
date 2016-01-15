@@ -16,40 +16,30 @@
 
 import logging
 
-from openstackclient.common import exceptions
 from openstackclient.common import utils
-
-from ironicclient.common.i18n import _
-from ironicclient.osc import client as ironic_client
 
 LOG = logging.getLogger(__name__)
 
 DEFAULT_BAREMETAL_API_VERSION = '1.6'
 API_VERSION_OPTION = 'os_baremetal_api_version'
 API_NAME = 'baremetal'
+LAST_KNOWN_API_VERSION = 14
 API_VERSIONS = {
-    '1': 'ironicclient.osc.client',
-    '1.5': 'ironicclient.osc.client',
-    '1.6': 'ironicclient.osc.client',
-    '1.9': 'ironicclient.osc.client',
+    '1.%d' % i: 'ironicclient.v1.client.Client'
+    for i in range(1, LAST_KNOWN_API_VERSION + 1)
 }
+API_VERSIONS['1'] = API_VERSIONS[DEFAULT_BAREMETAL_API_VERSION]
 
 
 def make_client(instance):
     """Returns a baremetal service client."""
-    try:
-        baremetal_client = ironic_client.get_client_class(
-            instance._api_version[API_NAME])
-    except Exception:
-        msg = (_("Invalid %(api_name)s client version '%(ver)s'. Must be one "
-                 "of %(supported_ver)s") %
-               {'api_name': API_NAME,
-                'ver': instance._api_version[API_NAME],
-                'supported_ver': ", ".join(sorted(API_VERSIONS))})
-        raise exceptions.UnsupportedVersion(msg)
-    LOG.debug('Instantiating baremetal client: %s', baremetal_client)
+    baremetal_client_class = utils.get_client_class(
+        API_NAME,
+        instance._api_version[API_NAME],
+        API_VERSIONS)
+    LOG.debug('Instantiating baremetal client: %s', baremetal_client_class)
 
-    client = baremetal_client(
+    client = baremetal_client_class(
         os_ironic_api_version=instance._api_version[API_NAME],
         session=instance.session,
         region_name=instance._region_name,
