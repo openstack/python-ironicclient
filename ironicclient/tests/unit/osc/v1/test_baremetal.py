@@ -15,9 +15,11 @@
 #
 
 import copy
+import mock
 
 from openstackclient.tests import utils as oscutils
 
+from ironicclient import exc
 from ironicclient.osc.v1 import baremetal
 from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
@@ -44,7 +46,7 @@ class TestBaremetalCreate(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.CreateBaremetal(self.app, None)
+        self.cmd = baremetal.CreateBaremetalNode(self.app, None)
         self.arglist = ['--driver', 'fake_driver']
         self.verifylist = [('driver', 'fake_driver')]
         self.collist = (
@@ -173,7 +175,7 @@ class TestBaremetalDelete(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.DeleteBaremetal(self.app, None)
+        self.cmd = baremetal.DeleteBaremetalNode(self.app, None)
 
     def test_baremetal_delete(self):
         arglist = ['xxx-xxxxxx-xxxx']
@@ -184,11 +186,45 @@ class TestBaremetalDelete(TestBaremetal):
         self.cmd.take_action(parsed_args)
 
         # Set expected values
-        args = ['xxx-xxxxxx-xxxx']
+        args = 'xxx-xxxxxx-xxxx'
 
         self.baremetal_mock.node.delete.assert_called_with(
-            *args
+            args
         )
+
+    def test_baremetal_delete_multiple(self):
+        arglist = ['xxx-xxxxxx-xxxx', 'fakename']
+        verifylist = []
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = ['xxx-xxxxxx-xxxx', 'fakename']
+        self.baremetal_mock.node.delete.has_calls(
+            [mock.call(x) for x in args]
+        )
+        self.assertEqual(2, self.baremetal_mock.node.delete.call_count)
+
+    def test_baremetal_delete_multiple_with_failure(self):
+        arglist = ['xxx-xxxxxx-xxxx', 'badname']
+        verifylist = []
+
+        self.baremetal_mock.node.delete.side_effect = ['', exc.ClientException]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.assertRaises(exc.ClientException,
+                          self.cmd.take_action,
+                          parsed_args)
+
+        # Set expected values
+        args = ['xxx-xxxxxx-xxxx', 'badname']
+        self.baremetal_mock.node.delete.has_calls(
+            [mock.call(x) for x in args]
+        )
+        self.assertEqual(2, self.baremetal_mock.node.delete.call_count)
 
 
 class TestBaremetalList(TestBaremetal):
@@ -205,7 +241,7 @@ class TestBaremetalList(TestBaremetal):
         ]
 
         # Get the command object to test
-        self.cmd = baremetal.ListBaremetal(self.app, None)
+        self.cmd = baremetal.ListBaremetalNode(self.app, None)
 
     def test_baremetal_list_no_options(self):
         arglist = []
@@ -218,7 +254,6 @@ class TestBaremetalList(TestBaremetal):
 
         # Set expected values
         kwargs = {
-            'detail': False,
             'marker': None,
             'limit': None,
         }
@@ -313,6 +348,152 @@ class TestBaremetalList(TestBaremetal):
         ), )
         self.assertEqual(datalist, tuple(data))
 
+    def test_baremetal_list_maintenance(self):
+        arglist = [
+            '--maintenance',
+        ]
+        verifylist = [
+            ('maintenance', True),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        columns, data = self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'maintenance': True,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_associated(self):
+        arglist = [
+            '--associated',
+        ]
+        verifylist = [
+            ('associated', True),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        columns, data = self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'associated': True,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_provision_state(self):
+        arglist = [
+            '--provision-state', 'active',
+        ]
+        verifylist = [
+            ('provision_state', 'active'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        columns, data = self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'provision_state': 'active'
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_invalid_provision_state(self):
+        arglist = [
+            '--provision-state', 'invalid',
+        ]
+        verifylist = [
+            ('provision_state', 'invalid'),
+        ]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_list_fields(self):
+        arglist = [
+            '--fields', 'uuid', 'name',
+        ]
+        verifylist = [
+            ('fields', [['uuid', 'name']]),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        columns, data = self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'detail': False,
+            'fields': ('uuid', 'name'),
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_fields_multiple(self):
+        arglist = [
+            '--fields', 'uuid', 'name',
+            '--fields', 'extra',
+        ]
+        verifylist = [
+            ('fields', [['uuid', 'name'], ['extra']])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        columns, data = self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'detail': False,
+            'fields': ('uuid', 'name', 'extra')
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_invalid_fields(self):
+        arglist = [
+            '--fields', 'uuid', 'invalid'
+        ]
+        verifylist = [
+            ('fields', [['uuid', 'invalid']])
+        ]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
 
 class TestBaremetalSet(TestBaremetal):
     def setUp(self):
@@ -326,7 +507,7 @@ class TestBaremetalSet(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.SetBaremetal(self.app, None)
+        self.cmd = baremetal.SetBaremetalNode(self.app, None)
 
     def test_baremetal_set_no_options(self):
         arglist = []
@@ -349,7 +530,9 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/path/to/property', 'value': 'value', 'op': 'add'}])
+            [{'path': '/properties/path/to/property',
+              'value': 'value',
+              'op': 'add'}])
 
     def test_baremetal_set_multiple_properties(self):
         arglist = [
@@ -372,8 +555,126 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/path/to/property', 'value': 'value', 'op': 'add'},
-             {'path': '/other/path', 'value': 'value2', 'op': 'add'}]
+            [{'path': '/properties/path/to/property',
+              'value': 'value',
+              'op': 'add'},
+             {'path': '/properties/other/path',
+              'value': 'value2',
+              'op': 'add'}]
+        )
+
+    def test_baremetal_set_instance_uuid(self):
+        arglist = [
+            'node_uuid',
+            '--instance-uuid', 'xxxxx',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('instance_uuid', 'xxxxx')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/instance_uuid', 'value': 'xxxxx', 'op': 'add'}]
+        )
+
+    def test_baremetal_set_name(self):
+        arglist = [
+            'node_uuid',
+            '--name', 'xxxxx',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('name', 'xxxxx')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/name', 'value': 'xxxxx', 'op': 'add'}]
+        )
+
+    def test_baremetal_set_driver(self):
+        arglist = [
+            'node_uuid',
+            '--driver', 'xxxxx',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('driver', 'xxxxx')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/driver', 'value': 'xxxxx', 'op': 'add'}]
+        )
+
+    def test_baremetal_set_extra(self):
+        arglist = [
+            'node_uuid',
+            '--extra', 'foo=bar',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('extra', ['foo=bar'])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}]
+        )
+
+    def test_baremetal_set_driver_info(self):
+        arglist = [
+            'node_uuid',
+            '--driver-info', 'foo=bar',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('driver_info', ['foo=bar'])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/driver_info/foo', 'value': 'bar', 'op': 'add'}]
+        )
+
+    def test_baremetal_set_instance_info(self):
+        arglist = [
+            'node_uuid',
+            '--instance-info', 'foo=bar',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('instance_info', ['foo=bar'])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/instance_info/foo', 'value': 'bar', 'op': 'add'}]
         )
 
 
@@ -396,7 +697,7 @@ class TestBaremetalShow(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.ShowBaremetal(self.app, None)
+        self.cmd = baremetal.ShowBaremetalNode(self.app, None)
 
     def test_baremetal_show(self):
         arglist = ['xxx-xxxxxx-xxxx']
@@ -411,7 +712,7 @@ class TestBaremetalShow(TestBaremetal):
         args = ['xxx-xxxxxx-xxxx']
 
         self.baremetal_mock.node.get.assert_called_with(
-            *args
+            *args, fields=None
         )
 
         collist = (
@@ -460,8 +761,68 @@ class TestBaremetalShow(TestBaremetal):
         args = ['xxx-xxxxxx-xxxx']
 
         self.baremetal_mock.node.get_by_instance_uuid.assert_called_with(
-            *args
+            *args, fields=None
         )
+
+    def test_baremetal_show_fields(self):
+        arglist = [
+            'xxxxx',
+            '--fields', 'uuid', 'name',
+        ]
+        verifylist = [
+            ('node', 'xxxxx'),
+            ('fields', [['uuid', 'name']]),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        columns, data = self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = ['xxxxx']
+        fields = ['uuid', 'name']
+
+        self.baremetal_mock.node.get.assert_called_with(
+            *args, fields=fields
+        )
+
+    def test_baremetal_show_fields_multiple(self):
+        arglist = [
+            'xxxxx',
+            '--fields', 'uuid', 'name',
+            '--fields', 'extra',
+        ]
+        verifylist = [
+            ('node', 'xxxxx'),
+            ('fields', [['uuid', 'name'], ['extra']])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        columns, data = self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = ['xxxxx']
+        fields = ['uuid', 'name', 'extra']
+
+        self.baremetal_mock.node.get.assert_called_with(
+            *args, fields=fields
+        )
+
+    def test_baremetal_show_invalid_fields(self):
+        arglist = [
+            'xxxxx',
+            '--fields', 'uuid', 'invalid'
+        ]
+        verifylist = [
+            ('node', 'xxxxx'),
+            ('fields', [['uuid', 'invalid']])
+        ]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
 
 
 class TestBaremetalUnset(TestBaremetal):
@@ -476,7 +837,7 @@ class TestBaremetalUnset(TestBaremetal):
             ))
 
         # Get the command object to test
-        self.cmd = baremetal.UnsetBaremetal(self.app, None)
+        self.cmd = baremetal.UnsetBaremetalNode(self.app, None)
 
     def test_baremetal_unset_no_options(self):
         arglist = []
@@ -497,7 +858,7 @@ class TestBaremetalUnset(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/path/to/property', 'op': 'remove'}])
+            [{'path': '/properties/path/to/property', 'op': 'remove'}])
 
     def test_baremetal_unset_multiple_properties(self):
         arglist = ['node_uuid',
@@ -514,6 +875,101 @@ class TestBaremetalUnset(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/path/to/property', 'op': 'remove'},
-             {'path': '/other/path', 'op': 'remove'}]
+            [{'path': '/properties/path/to/property', 'op': 'remove'},
+             {'path': '/properties/other/path', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_instance_uuid(self):
+        arglist = [
+            'node_uuid',
+            '--instance-uuid',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('instance_uuid', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/instance_uuid', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_name(self):
+        arglist = [
+            'node_uuid',
+            '--name',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('name', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/name', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_extra(self):
+        arglist = [
+            'node_uuid',
+            '--extra', 'foo',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('extra', ['foo'])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/extra/foo', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_driver_info(self):
+        arglist = [
+            'node_uuid',
+            '--driver-info', 'foo',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('driver_info', ['foo'])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/driver_info/foo', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_instance_info(self):
+        arglist = [
+            'node_uuid',
+            '--instance-info', 'foo',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('instance_info', ['foo'])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/instance_info/foo', 'op': 'remove'}]
         )
