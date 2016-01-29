@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from keystoneclient.v2_0 import client as ksclient
+import keystoneclient
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
@@ -27,12 +27,18 @@ def _get_ksclient(**kwargs):
             * insecure: allow insecure SSL (no cert verification)
             * tenant_{name|id}: name or ID of tenant
     """
-    return ksclient.Client(username=kwargs.get('username'),
-                           password=kwargs.get('password'),
-                           tenant_id=kwargs.get('tenant_id'),
-                           tenant_name=kwargs.get('tenant_name'),
-                           auth_url=kwargs.get('auth_url'),
-                           insecure=kwargs.get('insecure'))
+
+    client = keystoneclient.client.Client(
+        username=kwargs.get('username'),
+        password=kwargs.get('password'),
+        tenant_id=kwargs.get('tenant_id'),
+        tenant_name=kwargs.get('tenant_name'),
+        auth_url=kwargs.get('auth_url'),
+        insecure=kwargs.get('insecure'))
+    # FIXME(jlvillal): Work around for Bug 1539839 as client.authenticate is
+    # not called.
+    client.authenticate()
+    return client
 
 
 def _get_endpoint(client, **kwargs):
