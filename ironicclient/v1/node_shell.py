@@ -472,9 +472,10 @@ def do_node_set_target_raid_config(cc, args):
     'provision_state',
     metavar='<provision-state>',
     choices=['active', 'deleted', 'rebuild', 'inspect', 'provide',
-             'manage', 'clean', 'abort'],
+             'manage', 'clean', 'abort', 'adopt'],
     help="Supported states: 'active', 'deleted', 'rebuild', "
-         "'inspect', 'provide', 'manage', 'clean' or 'abort'.")
+         "'inspect', 'provide', 'manage', 'clean', 'abort', "
+         "or 'adopt'.")
 @cliutils.arg(
     '--config-drive',
     metavar='<config-drive>',
