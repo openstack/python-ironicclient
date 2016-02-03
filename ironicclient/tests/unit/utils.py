@@ -14,7 +14,6 @@
 #    under the License.
 
 import copy
-import datetime
 import os
 
 import fixtures
@@ -22,11 +21,6 @@ import mock
 from oslo_utils import strutils
 import six
 import testtools
-
-
-DEFAULT_TEST_HOST = 'localhost'
-DEFAULT_TEST_REGION = 'regionhost'
-DEFAULT_TEST_PORT = '6385'
 
 
 class BaseTestCase(testtools.TestCase):
@@ -111,30 +105,6 @@ class FakeResponse(object):
         return ("FakeResponse(%s, body=%s, version=%s, status=%s, reason=%s)" %
                 (self.headers, self.body, self.version, self.status,
                  self.reason))
-
-
-class FakeServiceCatalog(object):
-    def url_for(self, endpoint_type, service_type, attr=None,
-                filter_value=None):
-        if attr == 'region' and filter_value:
-            return 'http://%s:%s/v1/f14b41234' % (DEFAULT_TEST_REGION,
-                                                  DEFAULT_TEST_PORT)
-        else:
-            return 'http://%s:%s/v1/f14b41234' % (DEFAULT_TEST_HOST,
-                                                  DEFAULT_TEST_PORT)
-
-
-class FakeKeystone(object):
-    service_catalog = FakeServiceCatalog()
-    timestamp = datetime.datetime.utcnow() + datetime.timedelta(days=5)
-
-    def __init__(self, auth_token):
-        self.auth_token = auth_token
-        self.auth_ref = {
-            'token': {'expires': FakeKeystone.timestamp.strftime(
-                      '%Y-%m-%dT%H:%M:%S.%f'),
-                      'id': 'd1a541311782870742235'}
-        }
 
 
 class FakeSessionResponse(object):

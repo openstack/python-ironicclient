@@ -1,0 +1,5 @@
+---
+features:
+  - Added a possibility to pass os_auth_token instead of os_username and
+    os_password to authenticate in keystone both in CLI and in get_client
+    function.
