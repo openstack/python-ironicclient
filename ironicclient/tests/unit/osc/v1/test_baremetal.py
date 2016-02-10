@@ -116,7 +116,7 @@ class TestBaremetalCreate(TestBaremetal):
         self.baremetal_mock.node.create.assert_called_once_with(**kwargs)
 
     def test_baremetal_create_with_chassis(self):
-        self.check_with_options(['--chassis', 'chassis_uuid'],
+        self.check_with_options(['--chassis-uuid', 'chassis_uuid'],
                                 [('chassis_uuid', 'chassis_uuid')],
                                 {'chassis_uuid': 'chassis_uuid'})
 
