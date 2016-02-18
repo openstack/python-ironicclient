@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import getpass
 import inspect
+import json
 import os
 import sys
 import textwrap
@@ -139,7 +140,7 @@ def isunauthenticated(func):
 
 
 def print_list(objs, fields, formatters=None, sortby_index=0,
-               mixed_case_fields=None, field_labels=None):
+               mixed_case_fields=None, field_labels=None, json_flag=False):
     """Print a list of objects or dict as a table, one row per object or dict.
 
     :param objs: iterable of :class:`Resource`
@@ -150,7 +151,11 @@ def print_list(objs, fields, formatters=None, sortby_index=0,
         have mixed case names (e.g., 'serverId')
     :param field_labels: Labels to use in the heading of the table, default to
         fields.
+    :param json_flag: print the list as JSON instead of table
     """
+    if json_flag:
+        print(json.dumps([o._info for o in objs]))
+        return
     formatters = formatters or {}
     mixed_case_fields = mixed_case_fields or []
     field_labels = field_labels or fields
@@ -189,14 +194,19 @@ def print_list(objs, fields, formatters=None, sortby_index=0,
         print(encodeutils.safe_encode(pt.get_string(**kwargs)))
 
 
-def print_dict(dct, dict_property="Property", wrap=0, dict_value='Value'):
+def print_dict(dct, dict_property="Property", wrap=0, dict_value='Value',
+               json_flag=False):
     """Print a `dict` as a table of two columns.
 
     :param dct: `dict` to print
     :param dict_property: name of the first column
     :param wrap: wrapping for the second column
     :param dict_value: header label for the value (second) column
+    :param json_flag: print `dict` as JSON instead of table
     """
+    if json_flag:
+        print(json.dumps(dct))
+        return
     pt = prettytable.PrettyTable([dict_property, dict_value])
     pt.align = 'l'
     for k, v in sorted(dct.items()):

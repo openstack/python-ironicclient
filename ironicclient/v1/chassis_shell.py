@@ -18,12 +18,12 @@ from ironicclient.common import utils
 from ironicclient.v1 import resource_fields as res_fields
 
 
-def _print_chassis_show(chassis, fields=None):
+def _print_chassis_show(chassis, fields=None, json=False):
     if fields is None:
         fields = res_fields.CHASSIS_DETAILED_RESOURCE.fields
 
     data = dict([(f, getattr(chassis, f, '')) for f in fields])
-    cliutils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72, json_flag=json)
 
 
 @cliutils.arg('chassis', metavar='<chassis>', help="UUID of the chassis.")
@@ -43,7 +43,7 @@ def do_chassis_show(cc, args):
     utils.check_for_invalid_fields(
         fields, res_fields.CHASSIS_DETAILED_RESOURCE.fields)
     chassis = cc.chassis.get(args.chassis, fields=fields)
-    _print_chassis_show(chassis, fields=fields)
+    _print_chassis_show(chassis, fields=fields, json=args.json)
 
 
 @cliutils.arg(
@@ -107,7 +107,8 @@ def do_chassis_list(cc, args):
     chassis = cc.chassis.list(**params)
     cliutils.print_list(chassis, fields,
                         field_labels=field_labels,
-                        sortby_index=None)
+                        sortby_index=None,
+                        json_flag=args.json)
 
 
 @cliutils.arg(
@@ -133,7 +134,7 @@ def do_chassis_create(cc, args):
     chassis = cc.chassis.create(**fields)
 
     data = dict([(f, getattr(chassis, f, '')) for f in field_list])
-    cliutils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72, json_flag=args.json)
 
 
 @cliutils.arg(
@@ -166,7 +167,7 @@ def do_chassis_update(cc, args):
     """Update information about a chassis."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
     chassis = cc.chassis.update(args.chassis, patch)
-    _print_chassis_show(chassis)
+    _print_chassis_show(chassis, json=args.json)
 
 
 @cliutils.arg(
@@ -253,4 +254,5 @@ def do_chassis_node_list(cc, args):
     nodes = cc.chassis.list_nodes(args.chassis, **params)
     cliutils.print_list(nodes, fields,
                         field_labels=field_labels,
-                        sortby_index=None)
+                        sortby_index=None,
+                        json_flag=args.json)

@@ -119,6 +119,11 @@ class IronicShell(object):
                             action='store_true',
                             help='Defaults to env[IRONICCLIENT_DEBUG]')
 
+        parser.add_argument('--json',
+                            default=False,
+                            action='store_true',
+                            help='Print JSON response without formatting.')
+
         parser.add_argument('-v', '--verbose',
                             default=False, action="store_true",
                             help="Print more verbose output")

@@ -42,6 +42,7 @@ class PortShellTest(utils.BaseTestCase):
         args.port = 'port_uuid'
         args.address = False
         args.fields = None
+        args.json = False
 
         p_shell.do_port_show(client_mock, args)
         client_mock.port.get.assert_called_once_with('port_uuid', fields=None)
@@ -53,6 +54,7 @@ class PortShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.port = '   '
         args.address = False
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           p_shell.do_port_show,
                           client_mock, args)
@@ -62,6 +64,7 @@ class PortShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.port = ''
         args.address = False
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           p_shell.do_port_show,
                           client_mock, args)
@@ -72,6 +75,7 @@ class PortShellTest(utils.BaseTestCase):
         args.port = 'port_address'
         args.address = True
         args.fields = None
+        args.json = False
 
         p_shell.do_port_show(client_mock, args)
         client_mock.port.get_by_address.assert_called_once_with('port_address',
@@ -85,6 +89,7 @@ class PortShellTest(utils.BaseTestCase):
         args.port = 'port_uuid'
         args.address = False
         args.fields = [['uuid', 'address']]
+        args.json = False
         p_shell.do_port_show(client_mock, args)
         client_mock.port.get.assert_called_once_with(
             'port_uuid', fields=['uuid', 'address'])
@@ -95,6 +100,7 @@ class PortShellTest(utils.BaseTestCase):
         args.port = 'port_uuid'
         args.address = False
         args.fields = [['foo', 'bar']]
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           p_shell.do_port_show,
                           client_mock, args)
@@ -105,6 +111,7 @@ class PortShellTest(utils.BaseTestCase):
         args.port = 'port_uuid'
         args.op = 'add'
         args.attributes = [['arg1=val1', 'arg2=val2']]
+        args.json = False
 
         p_shell.do_port_update(client_mock, args)
         patch = commonutils.args_array_to_patch(args.op, args.attributes[0])
@@ -116,6 +123,7 @@ class PortShellTest(utils.BaseTestCase):
         args.port = 'port_uuid'
         args.op = 'foo'
         args.attributes = [['arg1=val1', 'arg2=val2']]
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           p_shell.do_port_update,
                           client_mock, args)
@@ -123,7 +131,7 @@ class PortShellTest(utils.BaseTestCase):
 
     def _get_client_mock_args(self, address=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False,
-                              fields=None):
+                              fields=None, json=False):
         args = mock.MagicMock(spec=True)
         args.address = address
         args.marker = marker
@@ -132,6 +140,7 @@ class PortShellTest(utils.BaseTestCase):
         args.sort_key = sort_key
         args.detail = detail
         args.fields = fields
+        args.json = json
 
         return args
 
@@ -231,6 +240,7 @@ class PortShellTest(utils.BaseTestCase):
     def test_do_port_create(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
+        args.json = False
         p_shell.do_port_create(client_mock, args)
         client_mock.port.create.assert_called_once_with()
 
@@ -238,6 +248,7 @@ class PortShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.uuid = uuidutils.generate_uuid()
+        args.json = False
 
         p_shell.do_port_create(client_mock, args)
         client_mock.port.create.assert_called_once_with(uuid=args.uuid)
@@ -248,6 +259,7 @@ class PortShellTest(utils.BaseTestCase):
         args.address = 'address'
         args.node_uuid = 'uuid'
         args.extra = ["key1=val1", "key2=val2"]
+        args.json = False
         p_shell.do_port_create(client_mock, args)
         client_mock.port.create.assert_called_once_with(
             address='address', node_uuid='uuid', extra={'key1': 'val1',
@@ -259,6 +271,7 @@ class PortShellTest(utils.BaseTestCase):
         args.address = 'address'
         args.node_uuid = 'uuid'
         args.extra = ["foo"]
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           p_shell.do_port_create, client_mock, args)
 

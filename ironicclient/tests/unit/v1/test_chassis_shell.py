@@ -27,7 +27,7 @@ class ChassisShellTest(utils.BaseTestCase):
     def _get_client_mock_args(self, chassis=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False,
                               fields=None, associated=None, maintenance=None,
-                              provision_state=None):
+                              provision_state=None, json=False):
         args = mock.MagicMock(spec=True)
         args.chassis = chassis
         args.marker = marker
@@ -39,6 +39,7 @@ class ChassisShellTest(utils.BaseTestCase):
         args.associated = associated
         args.maintenance = maintenance
         args.provision_state = provision_state
+        args.json = json
 
         return args
 
@@ -73,6 +74,7 @@ class ChassisShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.chassis = 'chassis_uuid'
         args.fields = [['uuid', 'description']]
+        args.json = False
         c_shell.do_chassis_show(client_mock, args)
         client_mock.chassis.get.assert_called_once_with(
             'chassis_uuid', fields=['uuid', 'description'])
@@ -82,6 +84,7 @@ class ChassisShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.chassis = 'chassis_uuid'
         args.fields = [['foo', 'bar']]
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           c_shell.do_chassis_show,
                           client_mock, args)
@@ -315,6 +318,7 @@ class ChassisShellTest(utils.BaseTestCase):
     def test_do_chassis_create(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
+        args.json = False
         c_shell.do_chassis_create(client_mock, args)
         client_mock.chassis.create.assert_called_once_with()
 
@@ -322,6 +326,7 @@ class ChassisShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.uuid = uuidutils.generate_uuid()
+        args.json = False
 
         c_shell.do_chassis_create(client_mock, args)
         client_mock.chassis.create.assert_called_once_with(uuid=args.uuid)
@@ -331,6 +336,7 @@ class ChassisShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.extra = ["key1=val1", "key2=val2"]
         args.description = 'desc'
+        args.json = False
         c_shell.do_chassis_create(client_mock, args)
         client_mock.chassis.create.assert_called_once_with(extra={
                                                            'key1': 'val1',
@@ -342,6 +348,7 @@ class ChassisShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.extra = ["foo"]
         args.description = 'desc'
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           c_shell.do_chassis_create, client_mock, args)
 
@@ -366,6 +373,7 @@ class ChassisShellTest(utils.BaseTestCase):
         args.chassis = 'chassis_uuid'
         args.op = 'add'
         args.attributes = [['arg1=val1', 'arg2=val2']]
+        args.json = False
         c_shell.do_chassis_update(client_mock, args)
         patch = commonutils.args_array_to_patch(args.op, args.attributes[0])
         client_mock.chassis.update.assert_called_once_with('chassis_uuid',
