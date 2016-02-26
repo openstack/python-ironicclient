@@ -261,8 +261,12 @@ def do_node_create(cc, args):
 def do_node_delete(cc, args):
     """Unregister node(s) from the Ironic service."""
     for n in args.node:
-        cc.node.delete(n)
-        print(_('Deleted node %s') % n)
+        try:
+            cc.node.delete(n)
+            print(_('Deleted node %s') % n)
+        except exceptions.ClientException as e:
+            print(_("Failed to delete node %(node)s: %(error)s")
+                  % {'node': n, 'error': e})
 
 
 @cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
