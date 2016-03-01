@@ -16,6 +16,7 @@
 import copy
 from distutils.version import StrictVersion
 import functools
+import hashlib
 import json
 import logging
 import os
@@ -54,6 +55,7 @@ API_VERSION_SELECTED_STATES = ('user', 'negotiated', 'cached', 'default')
 
 DEFAULT_MAX_RETRIES = 5
 DEFAULT_RETRY_INTERVAL = 2
+SENSITIVE_HEADERS = ('X-Auth-Token',)
 
 
 def _trim_endpoint_api_version(url):
@@ -245,11 +247,33 @@ class HTTPClient(VersionNegotiationMixin):
         except six.moves.http_client.InvalidURL:
             raise exc.EndpointException()
 
+    def _process_header(self, name, value):
+        """Redacts any sensitive header
+
+        Redact a header that contains sensitive information, by returning an
+        updated header with the sha1 hash of that value. The redacted value is
+        prefixed by '{SHA1}' because that's the convention used within
+        OpenStack.
+
+        :returns: A tuple of (name, value)
+                  name: the safe encoding format of name
+                  value: the redacted value if name is x-auth-token,
+                         or the safe encoding format of name
+
+        """
+        if name in SENSITIVE_HEADERS:
+            v = value.encode('utf-8')
+            h = hashlib.sha1(v)
+            d = h.hexdigest()
+            return (name, "{SHA1}%s" % d)
+        else:
+            return (name, value)
+
     def log_curl_request(self, method, url, kwargs):
         curl = ['curl -i -X %s' % method]
 
         for (key, value) in kwargs['headers'].items():
-            header = '-H \'%s: %s\'' % (key, value)
+            header = '-H \'%s: %s\'' % self._process_header(key, value)
             curl.append(header)
 
         conn_params_fmt = [

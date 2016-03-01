@@ -1,0 +1,4 @@
+---
+other:
+  - Log the SHA1 hash of X-Auth-Token value prefixed
+    by '{SHA}'.

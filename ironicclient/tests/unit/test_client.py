@@ -16,6 +16,7 @@ import mock
 import ironicclient
 from ironicclient.client import get_client
 from ironicclient.common import filecache
+from ironicclient.common import http
 from ironicclient import exc
 from ironicclient.tests.unit import utils
 from ironicclient.v1 import client as v1
@@ -210,3 +211,18 @@ class ClientTest(utils.BaseTestCase):
                                                    port=mock.ANY)
         self.assertEqual(version, client.http_client.os_ironic_api_version)
         self.assertEqual('cached', client.http_client.api_version_select_state)
+
+    def test_safe_header_with_auth_token(self):
+        (name, value) = ('X-Auth-Token', u'3b640e2e64d946ac8f55615aff221dc1')
+        expected_header = (u'X-Auth-Token',
+                           '{SHA1}6de9fb3b0b89099030a54abfeb468e7b1b1f0f2b')
+        client = http.HTTPClient('http://localhost/')
+        header_redact = client._process_header(name, value)
+        self.assertEqual(expected_header, header_redact)
+
+    def test_safe_header_with_no_auth_token(self):
+        name, value = ('Accept', 'application/json')
+        header = ('Accept', 'application/json')
+        client = http.HTTPClient('http://localhost/')
+        header_redact = client._process_header(name, value)
+        self.assertEqual(header, header_redact)
