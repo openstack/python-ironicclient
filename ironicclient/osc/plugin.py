@@ -43,7 +43,6 @@ def make_client(instance):
         os_ironic_api_version=instance._api_version[API_NAME],
         session=instance.session,
         region_name=instance._region_name,
-        endpoint=instance.auth_ref.auth_url,
     )
 
     return client
