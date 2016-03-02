@@ -18,6 +18,7 @@ import time
 
 import mock
 import six
+from six.moves import http_client
 
 from ironicclient.common import filecache
 from ironicclient.common import http
@@ -68,7 +69,8 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         self.test_object.endpoint = "http://localhost:1234"
         self.mock_mcu = mock.MagicMock()
         self.test_object._make_connection_url = self.mock_mcu
-        self.response = utils.FakeResponse({}, status=406)
+        self.response = utils.FakeResponse(
+            {}, status=http_client.NOT_ACCEPTABLE)
         self.test_object.get_server = mock.MagicMock(
             return_value=('localhost', '1234'))
 
@@ -209,10 +211,10 @@ class HttpClientTest(utils.BaseTestCase):
 
     def test_server_exception_empty_body(self):
         error_body = _get_error_body()
-        fake_resp = utils.FakeResponse({'content-type': 'application/json'},
-                                       six.StringIO(error_body),
-                                       version=1,
-                                       status=500)
+        fake_resp = utils.FakeResponse(
+            {'content-type': 'application/json'},
+            six.StringIO(error_body), version=1,
+            status=http_client.INTERNAL_SERVER_ERROR)
         client = http.HTTPClient('http://localhost/')
         client.get_connection = (
             lambda *a, **kw: utils.FakeConnection(fake_resp))
@@ -225,10 +227,10 @@ class HttpClientTest(utils.BaseTestCase):
     def test_server_exception_msg_only(self):
         error_msg = 'test error msg'
         error_body = _get_error_body(error_msg)
-        fake_resp = utils.FakeResponse({'content-type': 'application/json'},
-                                       six.StringIO(error_body),
-                                       version=1,
-                                       status=500)
+        fake_resp = utils.FakeResponse(
+            {'content-type': 'application/json'},
+            six.StringIO(error_body), version=1,
+            status=http_client.INTERNAL_SERVER_ERROR)
         client = http.HTTPClient('http://localhost/')
         client.get_connection = (
             lambda *a, **kw: utils.FakeConnection(fake_resp))
@@ -243,10 +245,10 @@ class HttpClientTest(utils.BaseTestCase):
         error_trace = ("\"Traceback (most recent call last):\\n\\n  "
                        "File \\\"/usr/local/lib/python2.7/...")
         error_body = _get_error_body(error_msg, error_trace)
-        fake_resp = utils.FakeResponse({'content-type': 'application/json'},
-                                       six.StringIO(error_body),
-                                       version=1,
-                                       status=500)
+        fake_resp = utils.FakeResponse(
+            {'content-type': 'application/json'},
+            six.StringIO(error_body), version=1,
+            status=http_client.INTERNAL_SERVER_ERROR)
         client = http.HTTPClient('http://localhost/')
         client.get_connection = (
             lambda *a, **kw: utils.FakeConnection(fake_resp))
@@ -369,7 +371,7 @@ class HttpClientTest(utils.BaseTestCase):
         fake_resp = utils.FakeResponse({'content-type': 'text/plain'},
                                        six.StringIO(error_body),
                                        version=1,
-                                       status=401)
+                                       status=http_client.UNAUTHORIZED)
         client = http.HTTPClient('http://localhost/')
         client.get_connection = (
             lambda *a, **kw: utils.FakeConnection(fake_resp))
@@ -387,7 +389,7 @@ class HttpClientTest(utils.BaseTestCase):
              },
             six.StringIO(error_body),
             version=1,
-            status=406)
+            status=http_client.NOT_ACCEPTABLE)
         expected_result = ('1.1', '1.6')
         client = http.HTTPClient('http://localhost/')
         result = client._parse_version_headers(fake_resp)
@@ -407,7 +409,7 @@ class HttpClientTest(utils.BaseTestCase):
              },
             six.StringIO(error_body),
             version=1,
-            status=406)
+            status=http_client.NOT_ACCEPTABLE)
         client = http.HTTPClient('http://%s:%s/' % (host, port))
         mock_getcon.return_value = utils.FakeConnection(fake_resp)
         self.assertRaises(
@@ -433,7 +435,7 @@ class HttpClientTest(utils.BaseTestCase):
              },
             six.StringIO(error_body),
             version=1,
-            status=406)
+            status=http_client.NOT_ACCEPTABLE)
         good_resp = utils.FakeResponse(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
@@ -441,12 +443,12 @@ class HttpClientTest(utils.BaseTestCase):
              },
             six.StringIO("We got some text"),
             version=1,
-            status=200)
+            status=http_client.OK)
         client = http.HTTPClient('http://localhost/')
         mock_getcon.side_effect = iter([utils.FakeConnection(bad_resp),
                                         utils.FakeConnection(good_resp)])
         response, body_iter = client._http_request('/v1/resources', 'GET')
-        self.assertEqual(200, response.status)
+        self.assertEqual(http_client.OK, response.status)
         self.assertEqual(1, mock_negotiate.call_count)
 
     @mock.patch.object(http.LOG, 'debug', autospec=True)
@@ -480,7 +482,7 @@ class SessionClientTest(utils.BaseTestCase):
 
         fake_session = utils.FakeSession({'Content-Type': 'application/json'},
                                          error_body,
-                                         500)
+                                         http_client.INTERNAL_SERVER_ERROR)
 
         client = _session_client(session=fake_session)
 
@@ -499,7 +501,7 @@ class SessionClientTest(utils.BaseTestCase):
 
         fake_session = utils.FakeSession({'Content-Type': 'application/json'},
                                          error_body,
-                                         500)
+                                         http_client.INTERNAL_SERVER_ERROR)
 
         client = _session_client(session=fake_session)
 
@@ -517,7 +519,7 @@ class SessionClientTest(utils.BaseTestCase):
              'content-type': 'text/plain',
              },
             None,
-            506)
+            http_client.HTTP_VERSION_NOT_SUPPORTED)
         expected_result = ('1.1', '1.6')
         client = _session_client(session=fake_session)
         result = client._parse_version_headers(fake_session)
@@ -534,7 +536,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'content-type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=409)
+            status=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/', max_retries=0)
         mock_getcon.return_value = utils.FakeConnection(bad_resp)
         self.assertRaises(exc.Conflict, client._http_request,
@@ -548,17 +550,17 @@ class RetriesTestCase(utils.BaseTestCase):
             {'content-type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=409)
+            status=http_client.CONFLICT)
         good_resp = utils.FakeResponse(
             {'content-type': 'text/plain'},
             six.StringIO("meow"),
             version=1,
-            status=200)
+            status=http_client.OK)
         client = http.HTTPClient('http://localhost/')
         mock_getcon.side_effect = iter((utils.FakeConnection(bad_resp),
                                         utils.FakeConnection(good_resp)))
         response, body_iter = client._http_request('/v1/resources', 'GET')
-        self.assertEqual(200, response.status)
+        self.assertEqual(http_client.OK, response.status)
         self.assertEqual(2, mock_getcon.call_count)
 
     @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
@@ -568,17 +570,17 @@ class RetriesTestCase(utils.BaseTestCase):
             {'content-type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=503)
+            status=http_client.SERVICE_UNAVAILABLE)
         good_resp = utils.FakeResponse(
             {'content-type': 'text/plain'},
             six.StringIO("meow"),
             version=1,
-            status=200)
+            status=http_client.OK)
         client = http.HTTPClient('http://localhost/')
         mock_getcon.side_effect = iter((utils.FakeConnection(bad_resp),
                                         utils.FakeConnection(good_resp)))
         response, body_iter = client._http_request('/v1/resources', 'GET')
-        self.assertEqual(200, response.status)
+        self.assertEqual(http_client.OK, response.status)
         self.assertEqual(2, mock_getcon.call_count)
 
     @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
@@ -587,12 +589,12 @@ class RetriesTestCase(utils.BaseTestCase):
             {'content-type': 'text/plain'},
             six.StringIO("meow"),
             version=1,
-            status=200)
+            status=http_client.OK)
         client = http.HTTPClient('http://localhost/')
         mock_getcon.side_effect = iter((exc.ConnectionRefused(),
                                         utils.FakeConnection(good_resp)))
         response, body_iter = client._http_request('/v1/resources', 'GET')
-        self.assertEqual(200, response.status)
+        self.assertEqual(http_client.OK, response.status)
         self.assertEqual(2, mock_getcon.call_count)
 
     @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
@@ -602,7 +604,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'content-type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=409)
+            status=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/')
         mock_getcon.return_value = utils.FakeConnection(bad_resp)
         self.assertRaises(exc.Conflict, client._http_request,
@@ -616,7 +618,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'content-type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=409)
+            status=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/', max_retries=None)
         mock_getcon.return_value = utils.FakeConnection(bad_resp)
         self.assertRaises(exc.Conflict, client._http_request,
@@ -630,7 +632,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'content-type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=409)
+            status=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/',
                                  max_retries=http.DEFAULT_MAX_RETRIES + 1)
         mock_getcon.return_value = utils.FakeConnection(bad_resp)
@@ -644,11 +646,11 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_resp = utils.FakeSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
-            409)
+            http_client.CONFLICT)
         ok_resp = utils.FakeSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
-            200)
+            http_client.OK)
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.side_effect = iter((fake_resp, ok_resp))
 
@@ -662,11 +664,11 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_resp = utils.FakeSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
-            503)
+            http_client.SERVICE_UNAVAILABLE)
         ok_resp = utils.FakeSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
-            200)
+            http_client.OK)
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.side_effect = iter((fake_resp, ok_resp))
 
@@ -678,7 +680,7 @@ class RetriesTestCase(utils.BaseTestCase):
         ok_resp = utils.FakeSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
-            200)
+            http_client.OK)
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.side_effect = iter((exc.ConnectionRefused(),
                                                  ok_resp))
@@ -693,7 +695,7 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_resp = utils.FakeSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
-            409)
+            http_client.CONFLICT)
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.return_value = fake_resp
 
@@ -710,7 +712,7 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_resp = utils.FakeSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
-            409)
+            http_client.CONFLICT)
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.return_value = fake_resp
 
@@ -728,7 +730,7 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_resp = utils.FakeSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
-            409)
+            http_client.CONFLICT)
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.return_value = fake_resp
 
