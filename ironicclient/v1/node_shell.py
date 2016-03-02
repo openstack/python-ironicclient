@@ -259,14 +259,21 @@ def do_node_create(cc, args):
               nargs='+',
               help="Name or UUID of the node.")
 def do_node_delete(cc, args):
-    """Unregister node(s) from the Ironic service."""
+    """Unregister node(s) from the Ironic service.
+
+    :raises: ClientException, if error happens during the delete
+    """
+
+    failures = []
     for n in args.node:
         try:
             cc.node.delete(n)
             print(_('Deleted node %s') % n)
         except exceptions.ClientException as e:
-            print(_("Failed to delete node %(node)s: %(error)s")
-                  % {'node': n, 'error': e})
+            failures.append(_("Failed to delete node %(node)s: %(error)s")
+                            % {'node': n, 'error': e})
+    if failures:
+        raise exceptions.ClientException("\n".join(failures))
 
 
 @cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")

@@ -86,7 +86,8 @@ class NodeShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.node = ['node_uuid1', 'node_uuid2']
 
-        n_shell.do_node_delete(client_mock, args)
+        self.assertRaises(exceptions.ClientException, n_shell.do_node_delete,
+                          client_mock, args)
         client_mock.node.delete.assert_has_calls(
             [mock.call('node_uuid1'), mock.call('node_uuid2')])
 

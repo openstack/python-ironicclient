@@ -1,0 +1,5 @@
+---
+fixes:
+  - Fixes an issue where deleting nodes ignore failures and just prints the results
+    which nodes are deleted and which are failed, always returning exit code of 0.
+    This now will return a non-zero exit code if at least one node-delete fails.
