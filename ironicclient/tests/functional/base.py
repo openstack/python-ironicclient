@@ -42,6 +42,10 @@ class FunctionalTestBase(base.ClientTestBase):
                                     password=config['os_password'],
                                     tenant_name=config['os_tenant_name'],
                                     uri=config['os_auth_url'])
+            for keystone_object in 'user', 'project':
+                domain_attr = 'os_%s_domain_id' % keystone_object
+                if config.get(domain_attr):
+                    setattr(self, domain_attr, config[domain_attr])
         else:
             self.ironic_url = config['ironic_url']
             self.os_auth_token = config['os_auth_token']
@@ -66,19 +70,26 @@ class FunctionalTestBase(base.ClientTestBase):
                 'one of: [keystone, noauth]' % auth_strategy)
 
         conf_settings = []
+        keystone_v3_conf_settings = []
         if auth_strategy == 'keystone':
             conf_settings += ['os_auth_url', 'os_username',
                               'os_password', 'os_tenant_name']
+            keystone_v3_conf_settings += ['os_user_domain_id',
+                                          'os_project_domain_id']
         else:
             conf_settings += ['os_auth_token', 'ironic_url']
 
         cli_flags = {}
         missing = []
-        for c in conf_settings:
+        for c in conf_settings + keystone_v3_conf_settings:
             try:
                 cli_flags[c] = config.get('functional', c)
             except config_parser.NoOptionError:
-                missing.append(c)
+                # NOTE(vdrok): Here we ignore the absence of KS v3 options as
+                # v2 may be used. Keystone client will do the actual check of
+                # the parameters' correctness.
+                if c not in keystone_v3_conf_settings:
+                    missing.append(c)
         if missing:
             self.fail('Missing required setting in test.conf (%(conf)s) for '
                       'auth_strategy=%(auth)s: %(missing)s' %
@@ -122,6 +133,13 @@ class FunctionalTestBase(base.ClientTestBase):
             if hasattr(self, 'os_auth_token'):
                 return self._cmd_no_auth('ironic', action, flags, params)
             else:
+                for keystone_object in 'user', 'project':
+                    domain_attr = 'os_%s_domain_id' % keystone_object
+                    if hasattr(self, domain_attr):
+                        flags += ' --os-%(ks_obj)s-domain-id %(value)s' % {
+                            'ks_obj': keystone_object,
+                            'value': getattr(self, domain_attr)
+                        }
                 return self.client.cmd_with_auth('ironic',
                                                  action, flags, params)
         except exceptions.CommandFailed as e:
