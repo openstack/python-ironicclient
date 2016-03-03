@@ -79,6 +79,30 @@ class ResourceTest(test_base.BaseTestCase):
         r = HumanResource(None, {"name": None})
         self.assertIsNone(r.human_id)
 
+    def test_two_resources_with_same_id_are_not_equal(self):
+        # Two resources with same ID: never equal if their info is not equal
+        r1 = base.Resource(None, {'id': 1, 'name': 'hi'})
+        r2 = base.Resource(None, {'id': 1, 'name': 'hello'})
+        self.assertNotEqual(r1, r2)
+
+    def test_two_resources_with_same_id_and_info_are_equal(self):
+        # Two resources with same ID: equal if their info is equal
+        r1 = base.Resource(None, {'id': 1, 'name': 'hello'})
+        r2 = base.Resource(None, {'id': 1, 'name': 'hello'})
+        self.assertEqual(r1, r2)
+
+    def test_two_resources_with_diff_type_are_not_equal(self):
+        # Two resoruces of different types: never equal
+        r1 = base.Resource(None, {'id': 1})
+        r2 = HumanResource(None, {'id': 1})
+        self.assertNotEqual(r1, r2)
+
+    def test_two_resources_with_no_id_are_equal(self):
+        # Two resources with no ID: equal if their info is equal
+        r1 = base.Resource(None, {'name': 'joe', 'age': 12})
+        r2 = base.Resource(None, {'name': 'joe', 'age': 12})
+        self.assertEqual(r1, r2)
+
 
 class BaseManagerTestCase(test_base.BaseTestCase):
 
