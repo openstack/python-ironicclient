@@ -26,8 +26,6 @@ from ironicclient import exc
 from ironicclient.tests.unit import utils
 
 
-HTTP_CLASS = six.moves.http_client.HTTPConnection
-HTTPS_CLASS = http.VerifiedHTTPSConnection
 DEFAULT_TIMEOUT = 600
 
 DEFAULT_HOST = 'localhost'
@@ -192,32 +190,26 @@ class HttpClientTest(utils.BaseTestCase):
     def test_url_generation_trailing_slash_in_base(self):
         client = http.HTTPClient('http://localhost/')
         url = client._make_connection_url('/v1/resources')
-        self.assertEqual('/v1/resources', url)
+        self.assertEqual('http://localhost/v1/resources', url)
 
     def test_url_generation_without_trailing_slash_in_base(self):
         client = http.HTTPClient('http://localhost')
         url = client._make_connection_url('/v1/resources')
-        self.assertEqual('/v1/resources', url)
-
-    def test_url_generation_prefix_slash_in_path(self):
-        client = http.HTTPClient('http://localhost/')
-        url = client._make_connection_url('/v1/resources')
-        self.assertEqual('/v1/resources', url)
+        self.assertEqual('http://localhost/v1/resources', url)
 
     def test_url_generation_without_prefix_slash_in_path(self):
         client = http.HTTPClient('http://localhost')
         url = client._make_connection_url('v1/resources')
-        self.assertEqual('/v1/resources', url)
+        self.assertEqual('http://localhost/v1/resources', url)
 
     def test_server_exception_empty_body(self):
         error_body = _get_error_body()
-        fake_resp = utils.FakeResponse(
-            {'content-type': 'application/json'},
-            six.StringIO(error_body), version=1,
-            status=http_client.INTERNAL_SERVER_ERROR)
         client = http.HTTPClient('http://localhost/')
-        client.get_connection = (
-            lambda *a, **kw: utils.FakeConnection(fake_resp))
+        client.session = utils.FakeSession(
+            {'Content-Type': 'application/json'},
+            six.StringIO(error_body),
+            version=1,
+            status_code=http_client.INTERNAL_SERVER_ERROR)
 
         error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
@@ -227,13 +219,12 @@ class HttpClientTest(utils.BaseTestCase):
     def test_server_exception_msg_only(self):
         error_msg = 'test error msg'
         error_body = _get_error_body(error_msg)
-        fake_resp = utils.FakeResponse(
-            {'content-type': 'application/json'},
-            six.StringIO(error_body), version=1,
-            status=http_client.INTERNAL_SERVER_ERROR)
         client = http.HTTPClient('http://localhost/')
-        client.get_connection = (
-            lambda *a, **kw: utils.FakeConnection(fake_resp))
+        client.session = utils.FakeSession(
+            {'Content-Type': 'application/json'},
+            six.StringIO(error_body),
+            version=1,
+            status_code=http_client.INTERNAL_SERVER_ERROR)
 
         error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
@@ -245,13 +236,12 @@ class HttpClientTest(utils.BaseTestCase):
         error_trace = ("\"Traceback (most recent call last):\\n\\n  "
                        "File \\\"/usr/local/lib/python2.7/...")
         error_body = _get_error_body(error_msg, error_trace)
-        fake_resp = utils.FakeResponse(
-            {'content-type': 'application/json'},
-            six.StringIO(error_body), version=1,
-            status=http_client.INTERNAL_SERVER_ERROR)
         client = http.HTTPClient('http://localhost/')
-        client.get_connection = (
-            lambda *a, **kw: utils.FakeConnection(fake_resp))
+        client.session = utils.FakeSession(
+            {'Content-Type': 'application/json'},
+            six.StringIO(error_body),
+            version=1,
+            status_code=http_client.INTERNAL_SERVER_ERROR)
 
         error = self.assertRaises(exc.InternalServerError,
                                   client.json_request,
@@ -263,155 +253,83 @@ class HttpClientTest(utils.BaseTestCase):
             "%(error)s\n%(details)s" % {'error': str(error),
                                         'details': str(error.details)})
 
-    def test_get_connection_params(self):
-        endpoint = 'http://ironic-host:6385'
-        expected = (HTTP_CLASS,
-                    ('ironic-host', 6385, ''),
-                    {'timeout': DEFAULT_TIMEOUT})
-        params = http.HTTPClient.get_connection_params(endpoint)
-        self.assertEqual(expected, params)
+    def test_server_https_request_ok(self):
+        client = http.HTTPClient('https://localhost/')
+        client.session = utils.FakeSession(
+            {'Content-Type': 'application/json'},
+            six.StringIO("Body"),
+            version=1,
+            status_code=http_client.OK)
 
-    def test_get_connection_params_with_trailing_slash(self):
-        endpoint = 'http://ironic-host:6385/'
-        expected = (HTTP_CLASS,
-                    ('ironic-host', 6385, ''),
-                    {'timeout': DEFAULT_TIMEOUT})
-        params = http.HTTPClient.get_connection_params(endpoint)
-        self.assertEqual(expected, params)
+        client.json_request('GET', '/v1/resources')
 
-    def test_get_connection_params_with_ssl(self):
-        endpoint = 'https://ironic-host:6385'
-        expected = (HTTPS_CLASS,
-                    ('ironic-host', 6385, ''),
-                    {
-                        'timeout': DEFAULT_TIMEOUT,
-                        'ca_file': None,
-                        'cert_file': None,
-                        'key_file': None,
-                        'insecure': False,
-                    })
-        params = http.HTTPClient.get_connection_params(endpoint)
-        self.assertEqual(expected, params)
+    def test_server_https_empty_body(self):
+        error_body = _get_error_body()
 
-    def test_get_connection_params_with_ssl_params(self):
-        endpoint = 'https://ironic-host:6385'
-        ssl_args = {
-            'ca_file': '/path/to/ca_file',
-            'cert_file': '/path/to/cert_file',
-            'key_file': '/path/to/key_file',
-            'insecure': True,
-        }
+        client = http.HTTPClient('https://localhost/')
+        client.session = utils.FakeSession(
+            {'Content-Type': 'application/json'},
+            six.StringIO(error_body),
+            version=1,
+            status_code=http_client.INTERNAL_SERVER_ERROR)
 
-        expected_kwargs = {'timeout': DEFAULT_TIMEOUT}
-        expected_kwargs.update(ssl_args)
-        expected = (HTTPS_CLASS,
-                    ('ironic-host', 6385, ''),
-                    expected_kwargs)
-        params = http.HTTPClient.get_connection_params(endpoint, **ssl_args)
-        self.assertEqual(expected, params)
-
-    def test_get_connection_params_with_timeout(self):
-        endpoint = 'http://ironic-host:6385'
-        expected = (HTTP_CLASS,
-                    ('ironic-host', 6385, ''),
-                    {'timeout': 300.0})
-        params = http.HTTPClient.get_connection_params(endpoint, timeout=300)
-        self.assertEqual(expected, params)
-
-    def test_get_connection_params_with_version(self):
-        endpoint = 'http://ironic-host:6385/v1'
-        expected = (HTTP_CLASS,
-                    ('ironic-host', 6385, ''),
-                    {'timeout': DEFAULT_TIMEOUT})
-        params = http.HTTPClient.get_connection_params(endpoint)
-        self.assertEqual(expected, params)
-
-    def test_get_connection_params_with_version_trailing_slash(self):
-        endpoint = 'http://ironic-host:6385/v1/'
-        expected = (HTTP_CLASS,
-                    ('ironic-host', 6385, ''),
-                    {'timeout': DEFAULT_TIMEOUT})
-        params = http.HTTPClient.get_connection_params(endpoint)
-        self.assertEqual(expected, params)
-
-    def test_get_connection_params_with_subpath(self):
-        endpoint = 'http://ironic-host:6385/ironic'
-        expected = (HTTP_CLASS,
-                    ('ironic-host', 6385, '/ironic'),
-                    {'timeout': DEFAULT_TIMEOUT})
-        params = http.HTTPClient.get_connection_params(endpoint)
-        self.assertEqual(expected, params)
-
-    def test_get_connection_params_with_subpath_trailing_slash(self):
-        endpoint = 'http://ironic-host:6385/ironic/'
-        expected = (HTTP_CLASS,
-                    ('ironic-host', 6385, '/ironic'),
-                    {'timeout': DEFAULT_TIMEOUT})
-        params = http.HTTPClient.get_connection_params(endpoint)
-        self.assertEqual(expected, params)
-
-    def test_get_connection_params_with_subpath_version(self):
-        endpoint = 'http://ironic-host:6385/ironic/v1'
-        expected = (HTTP_CLASS,
-                    ('ironic-host', 6385, '/ironic'),
-                    {'timeout': DEFAULT_TIMEOUT})
-        params = http.HTTPClient.get_connection_params(endpoint)
-        self.assertEqual(expected, params)
-
-    def test_get_connection_params_with_subpath_version_trailing_slash(self):
-        endpoint = 'http://ironic-host:6385/ironic/v1/'
-        expected = (HTTP_CLASS,
-                    ('ironic-host', 6385, '/ironic'),
-                    {'timeout': DEFAULT_TIMEOUT})
-        params = http.HTTPClient.get_connection_params(endpoint)
-        self.assertEqual(expected, params)
+        error = self.assertRaises(exc.InternalServerError,
+                                  client.json_request,
+                                  'GET', '/v1/resources')
+        self.assertEqual('Internal Server Error (HTTP 500)', str(error))
 
     def test_401_unauthorized_exception(self):
         error_body = _get_error_body()
-        fake_resp = utils.FakeResponse({'content-type': 'text/plain'},
-                                       six.StringIO(error_body),
-                                       version=1,
-                                       status=http_client.UNAUTHORIZED)
         client = http.HTTPClient('http://localhost/')
-        client.get_connection = (
-            lambda *a, **kw: utils.FakeConnection(fake_resp))
+        client.session = utils.FakeSession(
+            {'Content-Type': 'text/plain'},
+            six.StringIO(error_body),
+            version=1,
+            status_code=http_client.UNAUTHORIZED)
 
         self.assertRaises(exc.Unauthorized, client.json_request,
                           'GET', '/v1/resources')
 
+    def test_http_request_not_valid_request(self):
+        client = http.HTTPClient('http://localhost/')
+        client.session.request = mock.Mock(
+            side_effect=http.requests.exceptions.InvalidSchema)
+
+        self.assertRaises(exc.ValidationError, client._http_request,
+                          'http://localhost/', 'GET')
+
     def test__parse_version_headers(self):
         # Test parsing of version headers from HTTPClient
         error_body = _get_error_body()
-        fake_resp = utils.FakeResponse(
+        expected_result = ('1.1', '1.6')
+
+        client = http.HTTPClient('http://localhost/')
+        fake_resp = utils.FakeSessionResponse(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
-             'content-type': 'text/plain',
+             'Content-Type': 'text/plain',
              },
             six.StringIO(error_body),
             version=1,
-            status=http_client.NOT_ACCEPTABLE)
-        expected_result = ('1.1', '1.6')
-        client = http.HTTPClient('http://localhost/')
+            status_code=http_client.NOT_ACCEPTABLE)
         result = client._parse_version_headers(fake_resp)
         self.assertEqual(expected_result, result)
 
     @mock.patch.object(filecache, 'save_data', autospec=True)
-    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test__http_request_client_fallback_fail(self, mock_getcon,
-                                                mock_save_data):
+    def test__http_request_client_fallback_fail(self, mock_save_data):
         # Test when fallback to a supported version fails
         host, port, latest_ver = 'localhost', '1234', '1.6'
         error_body = _get_error_body()
-        fake_resp = utils.FakeResponse(
+
+        client = http.HTTPClient('http://%s:%s/' % (host, port))
+        client.session = utils.FakeSession(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': latest_ver,
              'content-type': 'text/plain',
              },
             six.StringIO(error_body),
             version=1,
-            status=http_client.NOT_ACCEPTABLE)
-        client = http.HTTPClient('http://%s:%s/' % (host, port))
-        mock_getcon.return_value = utils.FakeConnection(fake_resp)
+            status_code=http_client.NOT_ACCEPTABLE)
         self.assertRaises(
             exc.UnsupportedVersion,
             client._http_request,
@@ -422,33 +340,35 @@ class HttpClientTest(utils.BaseTestCase):
 
     @mock.patch.object(http.VersionNegotiationMixin, 'negotiate_version',
                        autospec=False)
-    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test__http_request_client_fallback_success(
-            self, mock_getcon, mock_negotiate):
+    def test__http_request_client_fallback_success(self, mock_negotiate):
         # Test when fallback to a supported version succeeds
         mock_negotiate.return_value = '1.6'
         error_body = _get_error_body()
-        bad_resp = utils.FakeResponse(
+        bad_resp = utils.FakeSessionResponse(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
              'content-type': 'text/plain',
              },
             six.StringIO(error_body),
             version=1,
-            status=http_client.NOT_ACCEPTABLE)
-        good_resp = utils.FakeResponse(
+            status_code=http_client.NOT_ACCEPTABLE)
+        good_resp = utils.FakeSessionResponse(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
              'content-type': 'text/plain',
              },
             six.StringIO("We got some text"),
             version=1,
-            status=http_client.OK)
+            status_code=http_client.OK)
         client = http.HTTPClient('http://localhost/')
-        mock_getcon.side_effect = iter([utils.FakeConnection(bad_resp),
-                                        utils.FakeConnection(good_resp)])
-        response, body_iter = client._http_request('/v1/resources', 'GET')
-        self.assertEqual(http_client.OK, response.status)
+
+        with mock.patch.object(client, 'session',
+                               autospec=True) as mock_session:
+
+            mock_session.request.side_effect = iter([bad_resp, good_resp])
+            response, body_iter = client._http_request('/v1/resources', 'GET')
+
+        self.assertEqual(http_client.OK, response.status_code)
         self.assertEqual(1, mock_negotiate.call_count)
 
     @mock.patch.object(http.LOG, 'debug', autospec=True)
@@ -470,6 +390,64 @@ class HttpClientTest(utils.BaseTestCase):
         client.log_http_response(fake_response, body=body)
         expected_log = ("\nHTTP/0.1 200 foo\n\n{\"password\": \"***\"}\n")
         mock_log.assert_called_once_with(expected_log)
+
+    def test__https_init_ssl_args_insecure(self):
+        client = http.HTTPClient('https://localhost/', insecure=True)
+
+        self.assertEqual(False, client.session.verify)
+
+    def test__https_init_ssl_args_secure(self):
+        client = http.HTTPClient('https://localhost/', ca_file='test_ca',
+                                 key_file='test_key', cert_file='test_cert')
+
+        self.assertEqual('test_ca', client.session.verify)
+        self.assertEqual(('test_cert', 'test_key'), client.session.cert)
+
+    @mock.patch. object(http.LOG, 'debug', autospec=True)
+    def test_log_curl_request_with_body_and_header(self, mock_log):
+        client = http.HTTPClient('http://test')
+        headers = {'header1': 'value1'}
+        body = 'example body'
+
+        client.log_curl_request('GET', '/v1/nodes',
+                                {'headers': headers, 'body': body})
+
+        self.assertTrue(mock_log.called)
+        self.assertTrue(mock_log.call_args[0])
+        self.assertEqual("curl -i -X GET -H 'header1: value1'"
+                         " -d 'example body' http://test/v1/nodes",
+                         mock_log.call_args[0][0])
+
+    @mock.patch. object(http.LOG, 'debug', autospec=True)
+    def test_log_curl_request_with_certs(self, mock_log):
+        headers = {'header1': 'value1'}
+        client = http.HTTPClient('https://test', key_file='key',
+                                 cert_file='cert', cacert='cacert',
+                                 token='fake-token')
+
+        client.log_curl_request('GET', '/v1/test', {'headers': headers})
+
+        self.assertTrue(mock_log.called)
+        self.assertTrue(mock_log.call_args[0])
+
+        self.assertEqual("curl -i -X GET -H 'header1: value1' "
+                         "--cert cert --key key https://test/v1/test",
+                         mock_log.call_args[0][0])
+
+    @mock.patch. object(http.LOG, 'debug', autospec=True)
+    def test_log_curl_request_with_insecure_param(self, mock_log):
+        headers = {'header1': 'value1'}
+        http_client_object = http.HTTPClient('https://test', insecure=True,
+                                             token='fake-token')
+
+        http_client_object.log_curl_request('GET', '/v1/test',
+                                            {'headers': headers})
+
+        self.assertTrue(mock_log.called)
+        self.assertTrue(mock_log.call_args[0])
+        self.assertEqual("curl -i -X GET -H 'header1: value1' -k "
+                         "--cert None --key None https://test/v1/test",
+                         mock_log.call_args[0][0])
 
 
 class SessionClientTest(utils.BaseTestCase):
@@ -529,116 +507,135 @@ class SessionClientTest(utils.BaseTestCase):
 @mock.patch.object(time, 'sleep', lambda *_: None)
 class RetriesTestCase(utils.BaseTestCase):
 
-    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test_http_no_retry(self, mock_getcon):
+    def test_http_no_retry(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeResponse(
-            {'content-type': 'text/plain'},
+        bad_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=http_client.CONFLICT)
+            status_code=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/', max_retries=0)
-        mock_getcon.return_value = utils.FakeConnection(bad_resp)
-        self.assertRaises(exc.Conflict, client._http_request,
-                          '/v1/resources', 'GET')
-        self.assertEqual(1, mock_getcon.call_count)
 
-    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test_http_retry(self, mock_getcon):
+        with mock.patch.object(client.session, 'request', autospec=True,
+                               return_value=bad_resp) as mock_request:
+
+            self.assertRaises(exc.Conflict, client._http_request,
+                              '/v1/resources', 'GET')
+            self.assertEqual(1, mock_request.call_count)
+
+    def test_http_retry(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeResponse(
-            {'content-type': 'text/plain'},
+        bad_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=http_client.CONFLICT)
-        good_resp = utils.FakeResponse(
+            status_code=http_client.CONFLICT)
+        good_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'text/plain'},
+            six.StringIO("meow"),
+            version=1,
+            status_code=http_client.OK)
+        client = http.HTTPClient('http://localhost/')
+
+        with mock.patch.object(client, 'session',
+                               autospec=True) as mock_session:
+
+            mock_session.request.side_effect = iter([bad_resp, good_resp])
+            response, body_iter = client._http_request('/v1/resources', 'GET')
+
+        self.assertEqual(http_client.OK, response.status_code)
+        self.assertEqual(2, mock_session.request.call_count)
+
+    def test_http_retry_503(self):
+        error_body = _get_error_body()
+        bad_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'text/plain'},
+            six.StringIO(error_body),
+            version=1,
+            status_code=http_client.SERVICE_UNAVAILABLE)
+        good_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'text/plain'},
+            six.StringIO("meow"),
+            version=1,
+            status_code=http_client.OK)
+        client = http.HTTPClient('http://localhost/')
+
+        with mock.patch.object(client, 'session',
+                               autospec=True) as mock_session:
+            mock_session.request.side_effect = iter([bad_resp, good_resp])
+            response, body_iter = client._http_request('/v1/resources', 'GET')
+
+        self.assertEqual(http_client.OK, response.status_code)
+        self.assertEqual(2, mock_session.request.call_count)
+
+    def test_http_retry_connection_refused(self):
+        good_resp = utils.FakeSessionResponse(
             {'content-type': 'text/plain'},
             six.StringIO("meow"),
             version=1,
-            status=http_client.OK)
+            status_code=http_client.OK)
         client = http.HTTPClient('http://localhost/')
-        mock_getcon.side_effect = iter((utils.FakeConnection(bad_resp),
-                                        utils.FakeConnection(good_resp)))
-        response, body_iter = client._http_request('/v1/resources', 'GET')
-        self.assertEqual(http_client.OK, response.status)
-        self.assertEqual(2, mock_getcon.call_count)
 
-    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test_http_retry_503(self, mock_getcon):
+        with mock.patch.object(client, 'session',
+                               autospec=True) as mock_session:
+            mock_session.request.side_effect = iter([exc.ConnectionRefused(),
+                                                     good_resp])
+            response, body_iter = client._http_request('/v1/resources', 'GET')
+
+        self.assertEqual(http_client.OK, response.status_code)
+        self.assertEqual(2, mock_session.request.call_count)
+
+    def test_http_failed_retry(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeResponse(
+        bad_resp = utils.FakeSessionResponse(
             {'content-type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=http_client.SERVICE_UNAVAILABLE)
-        good_resp = utils.FakeResponse(
-            {'content-type': 'text/plain'},
-            six.StringIO("meow"),
-            version=1,
-            status=http_client.OK)
+            status_code=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/')
-        mock_getcon.side_effect = iter((utils.FakeConnection(bad_resp),
-                                        utils.FakeConnection(good_resp)))
-        response, body_iter = client._http_request('/v1/resources', 'GET')
-        self.assertEqual(http_client.OK, response.status)
-        self.assertEqual(2, mock_getcon.call_count)
 
-    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test_http_retry_connection_refused(self, mock_getcon):
-        good_resp = utils.FakeResponse(
-            {'content-type': 'text/plain'},
-            six.StringIO("meow"),
-            version=1,
-            status=http_client.OK)
-        client = http.HTTPClient('http://localhost/')
-        mock_getcon.side_effect = iter((exc.ConnectionRefused(),
-                                        utils.FakeConnection(good_resp)))
-        response, body_iter = client._http_request('/v1/resources', 'GET')
-        self.assertEqual(http_client.OK, response.status)
-        self.assertEqual(2, mock_getcon.call_count)
+        with mock.patch.object(client, 'session',
+                               autospec=True) as mock_session:
+            mock_session.request.return_value = bad_resp
+            self.assertRaises(exc.Conflict, client._http_request,
+                              '/v1/resources', 'GET')
+            self.assertEqual(http.DEFAULT_MAX_RETRIES + 1,
+                             mock_session.request.call_count)
 
-    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test_http_failed_retry(self, mock_getcon):
+    def test_http_max_retries_none(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeResponse(
+        bad_resp = utils.FakeSessionResponse(
             {'content-type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=http_client.CONFLICT)
-        client = http.HTTPClient('http://localhost/')
-        mock_getcon.return_value = utils.FakeConnection(bad_resp)
-        self.assertRaises(exc.Conflict, client._http_request,
-                          '/v1/resources', 'GET')
-        self.assertEqual(http.DEFAULT_MAX_RETRIES + 1, mock_getcon.call_count)
-
-    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test_http_max_retries_none(self, mock_getcon):
-        error_body = _get_error_body()
-        bad_resp = utils.FakeResponse(
-            {'content-type': 'text/plain'},
-            six.StringIO(error_body),
-            version=1,
-            status=http_client.CONFLICT)
+            status_code=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/', max_retries=None)
-        mock_getcon.return_value = utils.FakeConnection(bad_resp)
-        self.assertRaises(exc.Conflict, client._http_request,
-                          '/v1/resources', 'GET')
-        self.assertEqual(http.DEFAULT_MAX_RETRIES + 1, mock_getcon.call_count)
 
-    @mock.patch.object(http.HTTPClient, 'get_connection', autospec=True)
-    def test_http_change_max_retries(self, mock_getcon):
+        with mock.patch.object(client, 'session',
+                               autospec=True) as mock_session:
+            mock_session.request.return_value = bad_resp
+            self.assertRaises(exc.Conflict, client._http_request,
+                              '/v1/resources', 'GET')
+            self.assertEqual(http.DEFAULT_MAX_RETRIES + 1,
+                             mock_session.request.call_count)
+
+    def test_http_change_max_retries(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeResponse(
+        bad_resp = utils.FakeSessionResponse(
             {'content-type': 'text/plain'},
             six.StringIO(error_body),
             version=1,
-            status=http_client.CONFLICT)
+            status_code=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/',
                                  max_retries=http.DEFAULT_MAX_RETRIES + 1)
-        mock_getcon.return_value = utils.FakeConnection(bad_resp)
-        self.assertRaises(exc.Conflict, client._http_request,
-                          '/v1/resources', 'GET')
-        self.assertEqual(http.DEFAULT_MAX_RETRIES + 2, mock_getcon.call_count)
+
+        with mock.patch.object(client, 'session',
+                               autospec=True) as mock_session:
+            mock_session.request.return_value = bad_resp
+            self.assertRaises(exc.Conflict, client._http_request,
+                              '/v1/resources', 'GET')
+            self.assertEqual(http.DEFAULT_MAX_RETRIES + 2,
+                             mock_session.request.call_count)
 
     def test_session_retry(self):
         error_body = _get_error_body()
