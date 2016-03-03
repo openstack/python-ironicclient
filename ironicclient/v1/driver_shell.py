@@ -20,10 +20,10 @@ from ironicclient.common import utils
 from ironicclient.v1 import resource_fields as res_fields
 
 
-def _print_driver_show(driver):
+def _print_driver_show(driver, json=False):
     fields = ['name', 'hosts']
     data = dict([(f, getattr(driver, f, '')) for f in fields])
-    cliutils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72, json_flag=json)
 
 
 def do_driver_list(cc, args):
@@ -35,7 +35,8 @@ def do_driver_list(cc, args):
         d.hosts = ', '.join(d.hosts)
     field_labels = ['Supported driver(s)', 'Active host(s)']
     fields = ['name', 'hosts']
-    cliutils.print_list(drivers, fields, field_labels=field_labels)
+    cliutils.print_list(drivers, fields, field_labels=field_labels,
+                        json_flag=args.json)
 
 
 @cliutils.arg('driver_name', metavar='<driver>',
@@ -43,7 +44,7 @@ def do_driver_list(cc, args):
 def do_driver_show(cc, args):
     """Show information about a driver."""
     driver = cc.driver.get(args.driver_name)
-    _print_driver_show(driver)
+    _print_driver_show(driver, json=args.json)
 
 
 @cliutils.arg('driver_name', metavar='<driver>',
@@ -59,7 +60,8 @@ def do_driver_properties(cc, args):
     cliutils.print_dict(
         properties,
         wrap=args.wrap,
-        dict_value='Description')
+        dict_value='Description',
+        json_flag=args.json)
 
 
 @cliutils.arg('driver_name',
@@ -117,4 +119,5 @@ def do_driver_get_vendor_passthru_methods(cc, args):
     field_labels = res_fields.VENDOR_PASSTHRU_METHOD_RESOURCE.labels
     cliutils.print_list(data, fields,
                         field_labels=field_labels,
-                        sortby_index=None)
+                        sortby_index=None,
+                        json_flag=args.json)

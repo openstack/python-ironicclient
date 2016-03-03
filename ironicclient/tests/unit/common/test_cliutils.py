@@ -434,6 +434,7 @@ class _FakeResult(object):
     def __init__(self, name, value):
         self.name = name
         self.value = value
+        self._info = {"name": name, "value": value}
 
 
 class PrintResultTestCase(test_base.BaseTestCase):
@@ -585,6 +586,24 @@ class PrintResultStringTestCase(test_base.BaseTestCase):
 '''
         self.assertEqual(expected, out)
 
+    def test_print_list_string_json(self):
+        objs = [_FakeResult("k1", 1)]
+        field_labels = ["Another Name", "Another Value"]
+
+        orig = sys.stdout
+        sys.stdout = six.StringIO()
+        cliutils.print_list(objs, ["Name", "Value"], sortby_index=0,
+                            field_labels=field_labels, json_flag=True)
+        out = sys.stdout.getvalue()
+        sys.stdout.close()
+        sys.stdout = orig
+        expected = ['''\
+[{"name": "k1", "value": 1}]
+''', '''\
+[{"value": 1, "name": "k1"}]
+''']
+        self.assertIn(out, expected)
+
     def test_print_dict_string(self):
         orig = sys.stdout
         sys.stdout = six.StringIO()
@@ -601,6 +620,20 @@ class PrintResultStringTestCase(test_base.BaseTestCase):
 +----------+-------+
 '''
         self.assertEqual(expected, out)
+
+    def test_print_dict_string_json(self):
+        orig = sys.stdout
+        sys.stdout = six.StringIO()
+        cliutils.print_dict({"K": "k", "Key": "Value"}, json_flag=True)
+        out = sys.stdout.getvalue()
+        sys.stdout.close()
+        sys.stdout = orig
+        expected = ['''\
+{"K": "k", "Key": "Value"}
+''', '''\
+{"Key": "Value", "K": "k"}
+''']
+        self.assertIn(out, expected)
 
     def test_print_dict_string_custom_headers(self):
         orig = sys.stdout

@@ -18,12 +18,12 @@ from ironicclient.common import utils
 from ironicclient.v1 import resource_fields as res_fields
 
 
-def _print_port_show(port, fields=None):
+def _print_port_show(port, fields=None, json=False):
     if fields is None:
         fields = res_fields.PORT_DETAILED_RESOURCE.fields
 
     data = dict([(f, getattr(port, f, '')) for f in fields])
-    cliutils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72, json_flag=json)
 
 
 @cliutils.arg(
@@ -55,7 +55,7 @@ def do_port_show(cc, args):
     else:
         utils.check_empty_arg(args.port, '<id>')
         port = cc.port.get(args.port, fields=fields)
-    _print_port_show(port, fields=fields)
+    _print_port_show(port, fields=fields, json=args.json)
 
 
 @cliutils.arg(
@@ -128,7 +128,8 @@ def do_port_list(cc, args):
     port = cc.port.list(**params)
     cliutils.print_list(port, fields,
                         field_labels=field_labels,
-                        sortby_index=None)
+                        sortby_index=None,
+                        json_flag=args.json)
 
 
 @cliutils.arg(
@@ -161,7 +162,7 @@ def do_port_create(cc, args):
     port = cc.port.create(**fields)
 
     data = dict([(f, getattr(port, f, '')) for f in field_list])
-    cliutils.print_dict(data, wrap=72)
+    cliutils.print_dict(data, wrap=72, json_flag=args.json)
 
 
 @cliutils.arg('port', metavar='<port>', nargs='+', help="UUID of the port.")
@@ -190,4 +191,4 @@ def do_port_update(cc, args):
     """Update information about a port."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
     port = cc.port.update(args.port, patch)
-    _print_port_show(port)
+    _print_port_show(port, json=args.json)

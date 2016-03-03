@@ -97,6 +97,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.op = 'add'
         args.attributes = [['arg1=val1', 'arg2=val2']]
+        args.json = False
 
         n_shell.do_node_update(client_mock, args)
         patch = commonutils.args_array_to_patch(args.op, args.attributes[0])
@@ -108,6 +109,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.op = 'foo'
         args.attributes = [['arg1=val1', 'arg2=val2']]
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_update,
                           client_mock, args)
@@ -116,6 +118,7 @@ class NodeShellTest(utils.BaseTestCase):
     def test_do_node_create(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
+        args.json = False
 
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with()
@@ -124,6 +127,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.driver = 'driver'
+        args.json = False
 
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with(
@@ -133,6 +137,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.chassis_uuid = 'chassis_uuid'
+        args.json = False
 
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with(
@@ -142,6 +147,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.driver_info = ['arg1=val1', 'arg2=val2']
+        args.json = False
 
         n_shell.do_node_create(client_mock, args)
         kwargs = {'driver_info': {'arg1': 'val1', 'arg2': 'val2'}}
@@ -151,6 +157,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.properties = ['arg1=val1', 'arg2=val2']
+        args.json = False
 
         n_shell.do_node_create(client_mock, args)
         kwargs = {'properties': {'arg1': 'val1', 'arg2': 'val2'}}
@@ -161,6 +168,7 @@ class NodeShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.driver = 'driver_name'
         args.extra = ['arg1=val1', 'arg2=val2']
+        args.json = False
 
         n_shell.do_node_create(client_mock, args)
         kwargs = {
@@ -173,6 +181,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.uuid = 'fef99cb8-a0d1-43df-b084-17b3b42b3cbd'
+        args.json = False
 
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with(uuid=args.uuid)
@@ -181,6 +190,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.name = 'node_name'
+        args.json = False
 
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with(name=args.name)
@@ -191,6 +201,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.instance_uuid = False
         args.fields = None
+        args.json = False
 
         n_shell.do_node_show(client_mock, args)
         client_mock.node.get.assert_called_once_with('node_uuid', fields=None)
@@ -203,6 +214,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'instance_uuid'
         args.instance_uuid = True
         args.fields = None
+        args.json = False
 
         n_shell.do_node_show(client_mock, args)
         client_mock.node.get_by_instance_uuid.assert_called_once_with(
@@ -215,6 +227,7 @@ class NodeShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.node = '   '
         args.instance_uuid = False
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_show,
                           client_mock, args)
@@ -224,6 +237,7 @@ class NodeShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.node = '   '
         args.instance_uuid = True
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_show,
                           client_mock, args)
@@ -233,6 +247,7 @@ class NodeShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.node = ''
         args.instance_uuid = False
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_show,
                           client_mock, args)
@@ -242,6 +257,7 @@ class NodeShellTest(utils.BaseTestCase):
         args = mock.MagicMock()
         args.node = ''
         args.instance_uuid = True
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_show,
                           client_mock, args)
@@ -252,6 +268,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.instance_uuid = False
         args.fields = [['uuid', 'power_state']]
+        args.json = False
         n_shell.do_node_show(client_mock, args)
         client_mock.node.get.assert_called_once_with(
             'node_uuid', fields=['uuid', 'power_state'])
@@ -262,6 +279,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.node = 'node_uuid'
         args.instance_uuid = False
         args.fields = [['foo', 'bar']]
+        args.json = False
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_show, client_mock, args)
 
@@ -637,6 +655,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.node = 'node_uuid'
+        args.json = False
 
         n_shell.do_node_get_boot_device(client_mock, args)
         client_mock.node.get_boot_device.assert_called_once_with('node_uuid')
@@ -645,6 +664,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.node = 'node_uuid'
+        args.json = False
 
         n_shell.do_node_get_supported_boot_devices(client_mock, args)
         client_mock.node.get_supported_boot_devices.assert_called_once_with(
@@ -653,7 +673,8 @@ class NodeShellTest(utils.BaseTestCase):
     def _get_client_mock_args(self, node=None, associated=None,
                               maintenance=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False,
-                              fields=None, provision_state=None, driver=None):
+                              fields=None, provision_state=None, driver=None,
+                              json=False):
         args = mock.MagicMock()
         args.node = node
         args.associated = associated
@@ -666,6 +687,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.detail = detail
         args.fields = fields
         args.driver = driver
+        args.json = json
 
         return args
 
@@ -839,6 +861,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.node = 'node_uuid'
+        args.json = False
 
         n_shell.do_node_show_states(client_mock, args)
         client_mock.node.states.assert_called_once_with('node_uuid')
