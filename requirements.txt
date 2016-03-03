@@ -4,7 +4,7 @@
 pbr>=1.6 # Apache-2.0
 appdirs>=1.3.0 # MIT License
 dogpile.cache>=0.5.4 # BSD
-cliff!=1.16.0,>=1.15.0 # Apache-2.0
+cliff!=1.16.0,!=1.17.0,>=1.15.0 # Apache-2.0
 httplib2>=0.7.5 # MIT
 oslo.i18n>=2.1.0 # Apache-2.0
 oslo.utils>=3.5.0 # Apache-2.0
