@@ -42,7 +42,7 @@ class NodeManager(base.CreateManager):
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
              detail=False, sort_key=None, sort_dir=None, fields=None,
-             provision_state=None):
+             provision_state=None, driver=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -80,6 +80,9 @@ class NodeManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param driver: Optional. String value to get only nodes using that
+                       driver.
+
         :returns: A list of nodes.
 
         """
@@ -98,6 +101,8 @@ class NodeManager(base.CreateManager):
             filters.append('maintenance=%s' % maintenance)
         if provision_state is not None:
             filters.append('provision_state=%s' % provision_state)
+        if driver is not None:
+            filters.append('driver=%s' % driver)
 
         path = ''
         if detail:

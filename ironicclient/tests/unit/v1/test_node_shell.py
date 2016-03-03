@@ -653,7 +653,7 @@ class NodeShellTest(utils.BaseTestCase):
     def _get_client_mock_args(self, node=None, associated=None,
                               maintenance=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False,
-                              fields=None, provision_state=None):
+                              fields=None, provision_state=None, driver=None):
         args = mock.MagicMock()
         args.node = node
         args.associated = associated
@@ -665,6 +665,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.sort_key = sort_key
         args.detail = detail
         args.fields = fields
+        args.driver = driver
 
         return args
 
@@ -701,6 +702,24 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock.node.list.assert_called_once_with(
             provision_state='wait call-back',
             detail=True)
+
+    def test_do_node_list_driver(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(driver='fake',
+                                          detail=False)
+
+        n_shell.do_node_list(client_mock, args)
+        client_mock.node.list.assert_called_once_with(driver='fake',
+                                                      detail=False)
+
+    def test_do_node_list_detail_driver(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(driver='fake',
+                                          detail=True)
+
+        n_shell.do_node_list(client_mock, args)
+        client_mock.node.list.assert_called_once_with(driver='fake',
+                                                      detail=True)
 
     def test_do_node_list_sort_key(self):
         client_mock = mock.MagicMock()
