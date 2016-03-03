@@ -25,7 +25,7 @@ import ssl
 import textwrap
 import time
 
-from keystoneclient import adapter
+from keystoneauth1 import adapter
 from oslo_utils import strutils
 import requests
 import six
