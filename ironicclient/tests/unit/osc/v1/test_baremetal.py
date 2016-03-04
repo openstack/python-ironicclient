@@ -275,8 +275,10 @@ class TestBaremetalList(TestBaremetal):
                    'Driver Internal Info', 'Extra', 'Instance Info',
                    'Instance UUID', 'Last Error', 'Maintenance',
                    'Maintenance Reason', 'Power State', 'Properties',
-                   'Provisioning State', 'Provision Updated At', 'Reservation',
+                   'Provisioning State', 'Provision Updated At',
+                   'Current RAID configuration', 'Reservation',
                    'Target Power State', 'Target Provision State',
+                   'Target RAID configuration',
                    'Updated At', 'Inspection Finished At',
                    'Inspection Started At', 'UUID', 'Name')
         self.assertEqual(collist, columns)
@@ -297,6 +299,8 @@ class TestBaremetalList(TestBaremetal):
             baremetal_fakes.baremetal_power_state,
             '',
             baremetal_fakes.baremetal_provision_state,
+            '',
+            '',
             '',
             '',
             '',

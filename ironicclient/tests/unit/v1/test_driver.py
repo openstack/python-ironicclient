@@ -35,6 +35,10 @@ DRIVER_VENDOR_PASSTHRU_METHOD = {"lookup": {"attach": "false",
                                             "http_methods": ["POST"],
                                             "description": "",
                                             "async": "false"}}
+DRIVER2_RAID_LOGICAL_DISK_PROPERTIES = {
+    "property1": "description1",
+    "property2": "description2",
+}
 
 fake_responses = {
     '/v1/drivers':
@@ -64,7 +68,14 @@ fake_responses = {
             {},
             DRIVER_VENDOR_PASSTHRU_METHOD,
         ),
-    }
+    },
+    '/v1/drivers/%s/raid/logical_disk_properties' % DRIVER2['name']:
+    {
+        'GET': (
+            {},
+            DRIVER2_RAID_LOGICAL_DISK_PROPERTIES,
+        ),
+    },
 }
 
 
@@ -99,6 +110,26 @@ class DriverManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(DRIVER2_PROPERTIES, properties)
+
+    def test_driver_raid_logical_disk_properties(self):
+        properties = self.mgr.raid_logical_disk_properties(DRIVER2['name'])
+        expect = [
+            ('GET',
+             '/v1/drivers/%s/raid/logical_disk_properties' % DRIVER2['name'],
+             {}, None)]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(DRIVER2_RAID_LOGICAL_DISK_PROPERTIES, properties)
+
+    @mock.patch.object(driver.DriverManager, '_list', autospec=True)
+    def test_driver_raid_logical_disk_properties_indexerror(self, _list_mock):
+        _list_mock.side_effect = IndexError
+
+        properties = self.mgr.raid_logical_disk_properties(DRIVER2['name'])
+
+        _list_mock.assert_called_once_with(
+            self.mgr,
+            '/v1/drivers/%s/raid/logical_disk_properties' % DRIVER2['name'])
+        self.assertEqual({}, properties)
 
     @mock.patch.object(driver.DriverManager, 'update')
     def test_vendor_passthru_update(self, update_mock):

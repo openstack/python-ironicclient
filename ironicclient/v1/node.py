@@ -260,6 +260,17 @@ class NodeManager(base.CreateManager):
         target = {'target': _power_states.get(state, state)}
         return self.update(path, target, http_method='PUT')
 
+    def set_target_raid_config(self, node_ident, target_raid_config):
+        """Sets target_raid_config for a node.
+
+        :param node_ident: Node identifier
+        :param target_raid_config: A dictionary with the target RAID
+            configuration; may be empty.
+        :returns: status of the request
+        """
+        path = "%s/states/raid" % node_ident
+        return self.update(path, target_raid_config, http_method='PUT')
+
     def validate(self, node_uuid):
         path = "%s/validate" % node_uuid
         return self.get(path)

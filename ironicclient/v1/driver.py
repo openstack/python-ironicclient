@@ -43,6 +43,25 @@ class DriverManager(base.Manager):
     def properties(self, driver_name):
         return self._get(resource_id='%s/properties' % driver_name).to_dict()
 
+    def raid_logical_disk_properties(self, driver_name):
+        """Returns the RAID logical disk properties for the driver.
+
+        :param driver_name: Name of the driver.
+        :returns: A dictionary containing the properties that can be mentioned
+            for RAID logical disks and a textual description for them. It
+            returns an empty dictionary on error.
+        """
+        info = None
+        try:
+            info = self._list(
+                '/v1/drivers/%s/raid/logical_disk_properties' % driver_name)[0]
+        except IndexError:
+            pass
+
+        if info:
+            return info.to_dict()
+        return {}
+
     def vendor_passthru(self, driver_name, method, args=None,
                         http_method=None):
         """Issue requests for vendor-specific actions on a given driver.

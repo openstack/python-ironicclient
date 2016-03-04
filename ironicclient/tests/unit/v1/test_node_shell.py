@@ -58,7 +58,9 @@ class NodeShellTest(utils.BaseTestCase):
                'updated_at',
                'inspection_finished_at',
                'inspection_started_at',
-               'uuid']
+               'uuid',
+               'raid_config',
+               'target_raid_config']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
 
@@ -381,6 +383,68 @@ class NodeShellTest(utils.BaseTestCase):
 
     def test_do_node_set_power_state_reboot(self):
         self._do_node_set_power_state_helper('reboot')
+
+    def test_do_node_set_target_raid_config_file(self):
+        contents = '{"raid": "config"}'
+
+        with tempfile.NamedTemporaryFile(mode='w') as f:
+            f.write(contents)
+            f.flush()
+
+            node_manager_mock = mock.MagicMock(spec=['set_target_raid_config'])
+            client_mock = mock.MagicMock(spec=['node'], node=node_manager_mock)
+            args = mock.MagicMock()
+            args.node = 'node_uuid'
+            args.target_raid_config = f.name
+
+            n_shell.do_node_set_target_raid_config(client_mock, args)
+            node_manager_mock.set_target_raid_config.assert_called_once_with(
+                'node_uuid', json.loads(contents))
+
+    def test_do_node_set_target_raid_config_string(self):
+        node_manager_mock = mock.MagicMock(spec=['set_target_raid_config'])
+        client_mock = mock.MagicMock(spec=['node'], node=node_manager_mock)
+        target_raid_config_string = (
+            '{"logical_disks": [{"size_gb": 100, "raid_level": "1"}]}')
+        expected_target_raid_config_string = json.loads(
+            target_raid_config_string)
+
+        args = mock.MagicMock(node='node',
+                              target_raid_config=target_raid_config_string)
+        n_shell.do_node_set_target_raid_config(client_mock, args)
+
+        node_manager_mock.set_target_raid_config.assert_called_once_with(
+            'node', expected_target_raid_config_string)
+
+    @mock.patch.object(n_shell, '_get_from_stdin', autospec=True)
+    def test_set_target_raid_config_stdin(self, stdin_read_mock):
+        node_manager_mock = mock.MagicMock(spec=['set_target_raid_config'])
+        client_mock = mock.MagicMock(spec=['node'], node=node_manager_mock)
+        target_raid_config_string = (
+            '{"logical_disks": [{"size_gb": 100, "raid_level": "1"}]}')
+        stdin_read_mock.return_value = target_raid_config_string
+        args_mock = mock.MagicMock(node='node',
+                                   target_raid_config='-')
+        expected_target_raid_config_string = json.loads(
+            target_raid_config_string)
+        n_shell.do_node_set_target_raid_config(client_mock, args_mock)
+        stdin_read_mock.assert_called_once_with('target_raid_config')
+        client_mock.node.set_target_raid_config.assert_called_once_with(
+            'node', expected_target_raid_config_string)
+
+    @mock.patch.object(n_shell, '_get_from_stdin', autospec=True)
+    def test_set_target_raid_config_stdin_exception(self, stdin_read_mock):
+        client_mock = mock.MagicMock()
+        stdin_read_mock.side_effect = exc.InvalidAttribute('bad')
+        args_mock = mock.MagicMock(node='node',
+                                   target_raid_config='-')
+
+        self.assertRaises(exc.InvalidAttribute,
+                          n_shell.do_node_set_target_raid_config,
+                          client_mock, args_mock)
+
+        stdin_read_mock.assert_called_once_with('target_raid_config')
+        self.assertFalse(client_mock.set_target_raid_config.called)
 
     def test_do_node_validate(self):
         client_mock = mock.MagicMock()
@@ -995,29 +1059,29 @@ class NodeShellLocalTest(utils.BaseTestCase):
         self.assertRaises(exc.InvalidAttribute, n_shell._get_from_stdin, desc)
         mock_stdin.read.assert_called_once_with()
 
-    def test__handle_clean_steps_arg(self):
+    def test__handle_json_or_file_arg(self):
         cleansteps = '[{"step": "upgrade", "interface": "deploy"}]'
-        steps = n_shell._handle_clean_steps_arg(cleansteps)
+        steps = n_shell._handle_json_or_file_arg(cleansteps)
         self.assertEqual(json.loads(cleansteps), steps)
 
-    def test__handle_clean_steps_arg_bad_json(self):
+    def test__handle_json_or_file_arg_bad_json(self):
         cleansteps = 'foo'
         self.assertRaisesRegex(exc.InvalidAttribute,
-                               'For clean steps',
-                               n_shell._handle_clean_steps_arg, cleansteps)
+                               'For JSON',
+                               n_shell._handle_json_or_file_arg, cleansteps)
 
-    def test__handle_clean_steps_arg_file(self):
+    def test__handle_json_or_file_arg_file(self):
         contents = '[{"step": "upgrade", "interface": "deploy"}]'
 
         with tempfile.NamedTemporaryFile(mode='w') as f:
             f.write(contents)
             f.flush()
-            steps = n_shell._handle_clean_steps_arg(f.name)
+            steps = n_shell._handle_json_or_file_arg(f.name)
 
         self.assertEqual(json.loads(contents), steps)
 
     @mock.patch.object(__builtin__, 'open', autospec=True)
-    def test__handle_clean_steps_arg_file_fail(self, mock_open):
+    def test__handle_json_or_file_arg_file_fail(self, mock_open):
         mock_file_object = mock.MagicMock()
         mock_file_handle = mock.MagicMock()
         mock_file_handle.__enter__.return_value = mock_file_object
@@ -1027,6 +1091,6 @@ class NodeShellLocalTest(utils.BaseTestCase):
         with tempfile.NamedTemporaryFile(mode='w') as f:
             self.assertRaisesRegex(exc.InvalidAttribute,
                                    "from file",
-                                   n_shell._handle_clean_steps_arg, f.name)
+                                   n_shell._handle_json_or_file_arg, f.name)
             mock_open.assert_called_once_with(f.name, 'r')
             mock_file_object.read.assert_called_once_with()

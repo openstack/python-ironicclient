@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Adds support for RAID configuration:
+
+    * Ability to set target_raid_config for a node using
+      node-set-target-raid-config.
+
+    * Displays target_raid_config and raid_config in
+      node-show.
+
+    * Displays logical disk properties for a driver using
+      driver-raid-logical-disk-properties.
+
+    API version 1.15 should be used with these features, as
+    RAID configuration was added in 1.12 and manual cleaning
+    (used to trigger RAID configuration) was added in 1.15.

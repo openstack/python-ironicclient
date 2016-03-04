@@ -50,31 +50,31 @@ def _get_from_stdin(info_desc):
     return info
 
 
-def _handle_clean_steps_arg(clean_steps):
-    """Attempts to read clean steps argument.
+def _handle_json_or_file_arg(json_arg):
+    """Attempts to read JSON argument from file or string.
 
-    :param clean_steps: May be a file name containing the clean steps, or
-        a JSON string representing the clean steps.
-    :returns: A list of dictionaries representing clean steps.
+    :param json_arg: May be a file name containing the JSON, or
+        a JSON string.
+    :returns: A list or dictionary parsed from JSON.
     :raises: InvalidAttribute if the argument cannot be parsed.
     """
 
-    if os.path.isfile(clean_steps):
+    if os.path.isfile(json_arg):
         try:
-            with open(clean_steps, 'r') as f:
-                clean_steps = f.read().strip()
+            with open(json_arg, 'r') as f:
+                json_arg = f.read().strip()
         except Exception as e:
-            err = _("Cannot get clean steps from file '%(file)s'. "
-                    "Error: %(err)s") % {'err': e, 'file': clean_steps}
+            err = _("Cannot get JSON from file '%(file)s'. "
+                    "Error: %(err)s") % {'err': e, 'file': json_arg}
             raise exc.InvalidAttribute(err)
     try:
-        clean_steps = json.loads(clean_steps)
+        json_arg = json.loads(json_arg)
     except ValueError as e:
-        err = (_("For clean steps: '%(steps)s', error: '%(err)s'") %
-               {'err': e, 'steps': clean_steps})
+        err = (_("For JSON: '%(string)s', error: '%(err)s'") %
+               {'err': e, 'string': json_arg})
         raise exc.InvalidAttribute(err)
 
-    return clean_steps
+    return json_arg
 
 
 @cliutils.arg(
@@ -445,6 +445,30 @@ def do_node_set_power_state(cc, args):
 
 @cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 @cliutils.arg(
+    'target_raid_config',
+    metavar='<target-raid-config>',
+    help=("A file containing JSON data of the desired RAID configuration. "
+          "Use '-' to read the contents from standard input. "
+          "It also accepts the valid json string as input if "
+          "file/standard input are not used for providing input. "
+          "The input can be an empty dictionary too which "
+          "unsets the node.target_raid_config on the node."))
+def do_node_set_target_raid_config(cc, args):
+    """Set target RAID config on a node."""
+    target_raid_config = args.target_raid_config
+    if not target_raid_config:
+        raise exc.InvalidAttribute(
+            _("target RAID configuration not provided"))
+
+    if target_raid_config == '-':
+        target_raid_config = _get_from_stdin('target_raid_config')
+    target_raid_config = _handle_json_or_file_arg(target_raid_config)
+
+    cc.node.set_target_raid_config(args.node, target_raid_config)
+
+
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
+@cliutils.arg(
     'provision_state',
     metavar='<provision-state>',
     choices=['active', 'deleted', 'rebuild', 'inspect', 'provide',
@@ -487,7 +511,7 @@ def do_node_set_provision_state(cc, args):
     if args.clean_steps == '-':
         clean_steps = _get_from_stdin('clean steps')
     if clean_steps:
-        clean_steps = _handle_clean_steps_arg(clean_steps)
+        clean_steps = _handle_json_or_file_arg(clean_steps)
     cc.node.set_provision_state(args.node, args.provision_state,
                                 configdrive=args.config_drive,
                                 cleansteps=clean_steps)
