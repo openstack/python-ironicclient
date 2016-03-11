@@ -27,7 +27,7 @@ class TestBaremetal(baremetal_fakes.TestBaremetal):
     def setUp(self):
         super(TestBaremetal, self).setUp()
 
-        # Get a shortcut to the FlavorManager Mock
+        # Get a shortcut to the baremetal manager mock
         self.baremetal_mock = self.app.client_manager.baremetal
         self.baremetal_mock.reset_mock()
 
