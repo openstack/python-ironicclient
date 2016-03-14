@@ -21,7 +21,6 @@ import getpass
 import logging
 import sys
 
-import httplib2
 from keystoneauth1.loading import session as kasession
 from oslo_utils import encodeutils
 import six
@@ -254,8 +253,6 @@ class IronicShell(object):
             logging.basicConfig(
                 format="%(levelname)s (%(module)s:%(lineno)d) %(message)s",
                 level=logging.DEBUG)
-
-            httplib2.debuglevel = 1
         else:
             logging.basicConfig(
                 format="%(levelname)s %(message)s",

@@ -15,7 +15,6 @@ import sys
 import uuid
 
 import fixtures
-import httplib2
 from keystoneauth1 import exceptions as keystone_exc
 from keystoneauth1 import fixture as ks_fixture
 import mock
@@ -90,11 +89,6 @@ class ShellTest(utils.BaseTestCase):
 
     def test_help_unknown_command(self):
         self.assertRaises(exc.CommandError, self.shell, 'help foofoo')
-
-    def test_debug(self):
-        httplib2.debuglevel = 0
-        self.shell('--debug help')
-        self.assertEqual(1, httplib2.debuglevel)
 
     def test_help(self):
         required = [
