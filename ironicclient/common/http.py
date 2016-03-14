@@ -506,6 +506,12 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
     def _http_request(self, url, method, **kwargs):
         kwargs.setdefault('user_agent', USER_AGENT)
         kwargs.setdefault('auth', self.auth)
+        if isinstance(self.endpoint_override, six.string_types):
+            kwargs.setdefault(
+                'endpoint_override',
+                _trim_endpoint_api_version(self.endpoint_override)
+            )
+
         if getattr(self, 'os_ironic_api_version', None):
             kwargs['headers'].setdefault('X-OpenStack-Ironic-API-Version',
                                          self.os_ironic_api_version)
