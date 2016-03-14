@@ -49,8 +49,8 @@ def _session_client(**kwargs):
                               max_retries=5,
                               retry_interval=2,
                               auth=None,
-                              interface=None,
-                              service_type='publicURL',
+                              interface='publicURL',
+                              service_type='baremetal',
                               region_name='',
                               endpoint='http://%s:%s' % (DEFAULT_HOST,
                                                          DEFAULT_PORT),
@@ -502,6 +502,47 @@ class SessionClientTest(utils.BaseTestCase):
         client = _session_client(session=fake_session)
         result = client._parse_version_headers(fake_session)
         self.assertEqual(expected_result, result)
+
+    def _test_endpoint_override(self, endpoint):
+        fake_session = utils.FakeSession({'content-type': 'application/json'},
+                                         status_code=http_client.NO_CONTENT)
+        request_mock = mock.Mock()
+        fake_session.request = request_mock
+        request_mock.return_value = utils.FakeSessionResponse(
+            headers={'content-type': 'application/json'},
+            status_code=http_client.NO_CONTENT)
+        client = _session_client(session=fake_session,
+                                 endpoint_override=endpoint)
+        client.json_request('DELETE', '/v1/nodes/aa/maintenance')
+        expected_args_dict = {
+            'headers': {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-OpenStack-Ironic-API-Version': '1.6'
+            },
+            'auth': None, 'user_agent': 'python-ironicclient',
+            'endpoint_filter': {
+                'interface': 'publicURL',
+                'service_type': 'baremetal',
+                'region_name': ''
+            }
+        }
+        if isinstance(endpoint, six.string_types):
+            trimmed = http._trim_endpoint_api_version(endpoint)
+            expected_args_dict['endpoint_override'] = trimmed
+        request_mock.assert_called_once_with(
+            '/v1/nodes/aa/maintenance', 'DELETE', raise_exc=False,
+            **expected_args_dict
+        )
+
+    def test_endpoint_override(self):
+        self._test_endpoint_override('http://1.0.0.1:6385')
+
+    def test_endpoint_override_with_version(self):
+        self._test_endpoint_override('http://1.0.0.1:6385/v1')
+
+    def test_endpoint_override_not_valid(self):
+        self._test_endpoint_override(True)
 
 
 @mock.patch.object(time, 'sleep', lambda *_: None)
