@@ -1,0 +1,4 @@
+---
+features:
+  - Add a --json option to the client to display the JSON
+    response body from the Ironic API without formatting it.

@@ -154,7 +154,8 @@ def print_list(objs, fields, formatters=None, sortby_index=0,
     :param json_flag: print the list as JSON instead of table
     """
     if json_flag:
-        print(json.dumps([o._info for o in objs]))
+        print(json.dumps([o._info for o in objs], indent=4,
+                         separators=(',', ': ')))
         return
     formatters = formatters or {}
     mixed_case_fields = mixed_case_fields or []
@@ -205,7 +206,7 @@ def print_dict(dct, dict_property="Property", wrap=0, dict_value='Value',
     :param json_flag: print `dict` as JSON instead of table
     """
     if json_flag:
-        print(json.dumps(dct))
+        print(json.dumps(dct, indent=4, separators=(',', ': ')))
         return
     pt = prettytable.PrettyTable([dict_property, dict_value])
     pt.align = 'l'
