@@ -82,3 +82,33 @@ class ChassisSanityTestIronicClient(base.FunctionalTestBase):
         self.assertEqual('test-chassis', updated_chassis['description'])
         self.assertNotEqual(self.chassis['description'],
                             updated_chassis['description'])
+
+    def test_chassis_node_list(self):
+        """Test steps:
+
+        1) create chassis in setUp()
+        2) create 3 nodes
+        3) update 2 nodes to be included in chassis
+        4) check if 2 nodes are added to chassis
+        5) check if 1 nodes isn't added to chassis
+        """
+        node1 = self.create_node()
+        node2 = self.create_node()
+
+        # This node is created to show that it won't be present
+        # in the chassis-node-list output
+
+        node3 = self.create_node()
+        updated_node1 = self.update_node(node1['uuid'],
+                                         'add chassis_uuid={0}'
+                                         .format(self.chassis['uuid']))
+        updated_node2 = self.update_node(node2['uuid'],
+                                         'add chassis_uuid={0}'
+                                         .format(self.chassis['uuid']))
+        nodes = [updated_node1['uuid'], updated_node2['uuid']]
+        nodes.sort()
+        nodes_uuids = self.get_nodes_uuids_from_chassis_node_list(
+            self.chassis['uuid'])
+        nodes_uuids.sort()
+        self.assertEqual(nodes, nodes_uuids)
+        self.assertNotIn(node3['uuid'], nodes_uuids)
