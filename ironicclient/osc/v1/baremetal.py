@@ -28,7 +28,7 @@ from ironicclient.v1 import resource_fields as res_fields
 
 
 class CreateBaremetal(show.ShowOne):
-    """Register a new node with the baremetal service"""
+    """Register a new node with the baremetal service."""
 
     log = logging.getLogger(__name__ + ".CreateBaremetal")
 
@@ -96,7 +96,7 @@ class CreateBaremetal(show.ShowOne):
 
 
 class DeleteBaremetal(command.Command):
-    """Unregister a baremetal node"""
+    """Unregister a baremetal node."""
 
     log = logging.getLogger(__name__ + ".DeleteBaremetal")
 
@@ -120,7 +120,7 @@ class DeleteBaremetal(command.Command):
 
 
 class ListBaremetal(lister.Lister):
-    """List baremetal nodes"""
+    """List baremetal nodes."""
 
     log = logging.getLogger(__name__ + ".ListBaremetal")
 
@@ -203,7 +203,7 @@ class ListBaremetal(lister.Lister):
 
 
 class SetBaremetal(command.Command):
-    """Set baremetal properties"""
+    """Set baremetal properties."""
 
     log = logging.getLogger(__name__ + ".SetBaremetal")
 
@@ -237,7 +237,7 @@ class SetBaremetal(command.Command):
 
 
 class ShowBaremetal(show.ShowOne):
-    """Show baremetal node details"""
+    """Show baremetal node details."""
 
     log = logging.getLogger(__name__ + ".ShowBaremetal")
     LONG_FIELDS = [
@@ -286,7 +286,7 @@ class ShowBaremetal(show.ShowOne):
 
 
 class UnsetBaremetal(command.Command):
-    """Unset baremetal properties"""
+    """Unset baremetal properties."""
     log = logging.getLogger(__name__ + ".UnsetBaremetal")
 
     def get_parser(self, prog_name):
