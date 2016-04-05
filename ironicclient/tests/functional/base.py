@@ -278,11 +278,12 @@ class FunctionalTestBase(base.ClientTestBase):
         driver_list = self.list_driver()
         return [x['Supported driver(s)'] for x in driver_list]
 
-    def delete_chassis(self, chassis_id):
-        chassis_list = self.list_chassis()
-
-        if utils.get_object(chassis_list, chassis_id):
+    def delete_chassis(self, chassis_id, ignore_exceptions=False):
+        try:
             self.ironic('chassis-delete', params=chassis_id)
+        except exceptions.CommandFailed:
+            if not ignore_exceptions:
+                raise
 
     def get_chassis_uuids_from_chassis_list(self):
         chassis_list = self.list_chassis()
@@ -295,7 +296,9 @@ class FunctionalTestBase(base.ClientTestBase):
             self.fail('Ironic chassis has not been created!')
 
         chassis = utils.get_dict_from_output(chassis)
-        self.addCleanup(self.delete_chassis, chassis['uuid'])
+        self.addCleanup(self.delete_chassis,
+                        chassis['uuid'],
+                        ignore_exceptions=True)
         return chassis
 
     def list_chassis(self, params=''):
@@ -306,7 +309,7 @@ class FunctionalTestBase(base.ClientTestBase):
                                    params='{0} {1}'.format(chassis_id, params))
         return utils.get_dict_from_output(chassis_show)
 
-    def update_chassis(self, chassis_id, operation, params):
+    def update_chassis(self, chassis_id, operation, params=''):
         updated_chassis = self.ironic(
             'chassis-update',
             params='{0} {1} {2}'.format(chassis_id, operation, params))
