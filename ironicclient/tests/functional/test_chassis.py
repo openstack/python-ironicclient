@@ -57,6 +57,19 @@ class ChassisSanityTestIronicClient(base.FunctionalTestBase):
         chassis_show = self.show_chassis(self.chassis['uuid'])
         self.assertEqual(self.chassis['uuid'], chassis_show['uuid'])
 
+    def test_chassis_show_field(self):
+        """Test steps:
+
+        1) create chassis
+        2) show chassis with fields uuid
+        3) check that fields is exist
+        """
+        fields = ['uuid']
+        chassis_show = self.show_chassis(self.chassis['uuid'],
+                                         params='--fields {0}'
+                                         .format(*fields))
+        self.assertTableHeaders(fields, chassis_show.keys())
+
     def test_chassis_update(self):
         """Test steps:
 
