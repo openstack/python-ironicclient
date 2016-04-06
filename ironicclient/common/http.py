@@ -414,7 +414,7 @@ class HTTPClient(VersionNegotiationMixin):
 
 
 class VerifiedHTTPSConnection(six.moves.http_client.HTTPSConnection):
-    """httplib-compatibile connection using client-side SSL authentication
+    """httplib-compatible connection using client-side SSL authentication
 
     :see http://code.activestate.com/recipes/
             577548-https-httplib-client-connection-with-certificate-v/

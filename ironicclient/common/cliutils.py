@@ -55,7 +55,7 @@ def validate_args(fn, *args, **kwargs):
     MissingArgs: Missing argument(s): b, d
 
     :param fn: the function to check
-    :param arg: the positional arguments supplied
+    :param args: the positional arguments supplied
     :param kwargs: the keyword arguments supplied
     """
     argspec = inspect.getargspec(fn)

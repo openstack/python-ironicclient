@@ -40,12 +40,12 @@ class HelpFormatter(argparse.HelpFormatter):
 
 
 def define_command(subparsers, command, callback, cmd_mapper):
-    '''Define a command in the subparsers collection.
+    """Define a command in the subparsers collection.
 
     :param subparsers: subparsers collection where the command will go
     :param command: command name
     :param callback: function that will be used to process the command
-    '''
+    """
     desc = callback.__doc__ or ''
     help = desc.strip().split('\n')[0]
     arguments = getattr(callback, 'arguments', [])
@@ -293,7 +293,7 @@ def check_for_invalid_fields(fields, valid_fields):
 
     :param fields: A list of fields specified by the user.
     :param valid_fields: A list of valid fields.
-    raises: CommandError: If invalid fields were specified by the user.
+    :raises CommandError: If invalid fields were specified by the user.
     """
     if not fields:
         return
