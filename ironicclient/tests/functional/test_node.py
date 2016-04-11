@@ -47,6 +47,19 @@ class NodeSanityTestIronicClient(base.FunctionalTestBase):
         node_show = self.show_node(self.node['uuid'])
         self.assertEqual(self.node['uuid'], node_show['uuid'])
 
+    def test_node_show_field(self):
+        """Test steps:
+
+        1) create node
+        2) show node with fields instance_uuid, driver, name, uuid
+        3) check that only fields instance_uuid, driver, name,
+        uuid are the output fields
+        """
+        fields = ['instance_uuid', 'driver', 'name', 'uuid']
+        node_show = self.show_node(self.node['uuid'],
+                                   params='--fields %s' % ' '.join(fields))
+        self.assertTableHeaders(fields, node_show.keys())
+
     def test_node_delete(self):
         """Test steps:
 
