@@ -64,6 +64,21 @@ class PortSanityTestIronicClient(base.FunctionalTestBase):
         port_show = self.show_port(self.port['uuid'])
         self.assertEqual(self.port['uuid'], port_show['uuid'])
 
+    def test_port_show_field(self):
+        """Test steps:
+
+        1) create node in setUp()
+        2) create port in setUp()
+        3) show port with fields uuid, address, node_uuid
+        4) check that only fields uuid, address,
+        node_uuid are the output fields
+        """
+        fields = ['uuid', 'address', 'node_uuid']
+        port_show = self.show_port(self.port['uuid'],
+                                   params='--fields {0} {1} {2}'
+                                   .format(*fields))
+        self.assertTableHeaders(fields, port_show.keys())
+
     def test_port_update(self):
         """Test steps:
 
