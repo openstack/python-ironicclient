@@ -435,7 +435,6 @@ class _FakeResult(object):
     def __init__(self, name, value):
         self.name = name
         self.value = value
-        self._info = {"name": name, "value": value}
 
 
 class PrintResultTestCase(test_base.BaseTestCase):
@@ -598,7 +597,9 @@ class PrintResultStringTestCase(test_base.BaseTestCase):
         out = sys.stdout.getvalue()
         sys.stdout.close()
         sys.stdout = orig
-        self.assertEqual([objs[0]._info], json.loads(out))
+
+        expected = [{"name": "k1", "value": 1}]
+        self.assertEqual(expected, json.loads(out))
 
     def test_print_dict_string(self):
         orig = sys.stdout
