@@ -1,0 +1,5 @@
+---
+fixes:
+  - Fixes an issue when SessionClient ignores endpoint_override while doing
+    session requests, which leads to undeterministic results in multi-region
+    deployments.
