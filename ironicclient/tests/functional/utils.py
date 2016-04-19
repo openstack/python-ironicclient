@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import uuid
-
 import six
 
 
@@ -37,12 +35,3 @@ def get_object(object_list, object_value):
     for obj in object_list:
         if object_value in obj.values():
             return obj
-
-
-def generate_name(prefix='test'):
-    """Generate name for objects.
-
-    :param prefix: prefix of the generated name
-    """
-    suffix = uuid.uuid4().hex
-    return "{0}-{1}".format(prefix, suffix)

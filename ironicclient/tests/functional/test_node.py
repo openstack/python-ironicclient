@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest.lib.common.utils import data_utils
+
 from ironicclient.tests.functional import base
 import ironicclient.tests.functional.utils as utils
 
@@ -65,7 +67,7 @@ class NodeSanityTestIronicClient(base.FunctionalTestBase):
         2) update node name
         3) check that node name has been successfully updated
         """
-        node_name = utils.generate_name('test')
+        node_name = data_utils.rand_name(prefix='test')
         updated_node = self.update_node(self.node['uuid'],
                                         'add name={0}'.format(node_name))
         self.assertEqual(node_name, updated_node['name'])
