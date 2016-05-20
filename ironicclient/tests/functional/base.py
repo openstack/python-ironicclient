@@ -15,8 +15,8 @@
 import os
 
 import six.moves.configparser as config_parser
-from tempest_lib.cli import base
-from tempest_lib import exceptions
+from tempest.lib.cli import base
+from tempest.lib import exceptions
 
 import ironicclient.tests.functional.utils as utils
 
