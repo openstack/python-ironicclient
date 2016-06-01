@@ -20,6 +20,8 @@ import mock
 import six
 from six.moves import http_client
 
+from keystoneauth1 import exceptions as kexc
+
 from ironicclient.common import filecache
 from ironicclient.common import http
 from ironicclient import exc
@@ -722,6 +724,19 @@ class RetriesTestCase(utils.BaseTestCase):
         fake_session = mock.Mock(spec=utils.FakeSession)
         fake_session.request.side_effect = iter((exc.ConnectionRefused(),
                                                  ok_resp))
+
+        client = _session_client(session=fake_session)
+        client.json_request('GET', '/v1/resources')
+        self.assertEqual(2, fake_session.request.call_count)
+
+    def test_session_retry_retriable_connection_failure(self):
+        ok_resp = utils.FakeSessionResponse(
+            {'Content-Type': 'application/json'},
+            b"OK",
+            http_client.OK)
+        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session.request.side_effect = iter(
+            (kexc.RetriableConnectionFailure(), ok_resp))
 
         client = _session_client(session=fake_session)
         client.json_request('GET', '/v1/resources')

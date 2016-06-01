@@ -1,0 +1,6 @@
+---
+fixes:
+  - The client will now retry on keystoneauth retriable connection failures if
+    retries are enabled for a particular request. This ensures that on a
+    temporary network outage to the keystone auth services a request we be
+    retried the requested number of times before raising an exception.
