@@ -14,6 +14,7 @@
 #   under the License.
 #
 
+import itertools
 import logging
 
 from cliff import command
@@ -27,13 +28,13 @@ from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
 
 
-class CreateBaremetal(show.ShowOne):
-    """Register a new node with the baremetal service."""
+class CreateBaremetalNode(show.ShowOne):
+    """Register a new node with the baremetal service"""
 
-    log = logging.getLogger(__name__ + ".CreateBaremetal")
+    log = logging.getLogger(__name__ + ".CreateBaremetalNode")
 
     def get_parser(self, prog_name):
-        parser = super(CreateBaremetal, self).get_parser(prog_name)
+        parser = super(CreateBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
             '--chassis-uuid',
@@ -95,17 +96,30 @@ class CreateBaremetal(show.ShowOne):
         return self.dict2columns(node)
 
 
-class DeleteBaremetal(command.Command):
-    """Unregister a baremetal node."""
+class CreateBaremetal(CreateBaremetalNode):
+    """Register a new node with the baremetal service. DEPRECATED"""
 
-    log = logging.getLogger(__name__ + ".DeleteBaremetal")
+    # TODO(thrash): Remove in the 'P' cycle.
+    log = logging.getLogger(__name__ + ".CreateBaremetal")
+
+    def take_action(self, parsed_args):
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node create'.")
+        return super(CreateBaremetal, self).take_action(parsed_args)
+
+
+class DeleteBaremetalNode(command.Command):
+    """Unregister a baremetal node"""
+
+    log = logging.getLogger(__name__ + ".DeleteBaremetalNode")
 
     def get_parser(self, prog_name):
-        parser = super(DeleteBaremetal, self).get_parser(prog_name)
+        parser = super(DeleteBaremetalNode, self).get_parser(prog_name)
         parser.add_argument(
-            "node",
+            "nodes",
             metavar="<node>",
-            help="Node to delete (name or ID)")
+            nargs="+",
+            help="Node(s) to delete (name or UUID)")
 
         return parser
 
@@ -114,18 +128,41 @@ class DeleteBaremetal(command.Command):
 
         baremetal_client = self.app.client_manager.baremetal
 
-        node = oscutils.find_resource(baremetal_client.node,
-                                      parsed_args.node)
-        baremetal_client.node.delete(node.uuid)
+        failures = []
+        for node in parsed_args.nodes:
+            try:
+                baremetal_client.node.delete(node)
+                print(_('Deleted node %s') % node)
+            except exc.ClientException as e:
+                failures.append(_("Failed to delete node %(node)s: %(error)s")
+                                % {'node': node, 'error': e})
+
+        if failures:
+            raise exc.ClientException("\n".join(failures))
 
 
-class ListBaremetal(lister.Lister):
-    """List baremetal nodes."""
+class DeleteBaremetal(DeleteBaremetalNode):
+    """Unregister a baremetal node. DEPRECATED"""
 
-    log = logging.getLogger(__name__ + ".ListBaremetal")
+    # TODO(thrash): Remove in the 'P' cycle.
+    log = logging.getLogger(__name__ + ".DeleteBaremetal")
+
+    def take_action(self, parsed_args):
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node delete'.")
+        super(DeleteBaremetal, self).take_action(parsed_args)
+
+
+class ListBaremetalNode(lister.Lister):
+    """List baremetal nodes"""
+
+    log = logging.getLogger(__name__ + ".ListBaremetalNode")
+
+    PROVISION_STATES = ['active', 'deleted', 'rebuild', 'inspect', 'provide',
+                        'manage', 'clean', 'abort']
 
     def get_parser(self, prog_name):
-        parser = super(ListBaremetal, self).get_parser(prog_name)
+        parser = super(ListBaremetalNode, self).get_parser(prog_name)
         parser.add_argument(
             '--limit',
             metavar='<limit>',
@@ -144,9 +181,9 @@ class ListBaremetal(lister.Lister):
         parser.add_argument(
             '--sort',
             metavar="<key>[:<direction>]",
-            help='Sort output by selected keys and directions(asc or desc) '
-                 '(default: asc), multiple keys and directions can be '
-                 'specified separated by comma',
+            help='Sort output by specified node fields and directions '
+                 '(asc or desc) (default: asc). Multiple fields and '
+                 'directions can be specified, separated by comma.',
         )
         parser.add_argument(
             '--maintenance',
@@ -163,18 +200,37 @@ class ListBaremetal(lister.Lister):
             help="List only nodes associated with an instance."
         )
         parser.add_argument(
+            '--provision-state',
+            dest='provision_state',
+            metavar='<provision state>',
+            choices=self.PROVISION_STATES,
+            help="Limit list to nodes in <provision state>. One of %s." % (
+                 ", ".join(self.PROVISION_STATES)))
+        display_group = parser.add_mutually_exclusive_group(required=False)
+        display_group.add_argument(
             '--long',
-            action='store_true',
             default=False,
-            help="Show detailed information about the nodes."
-        )
+            help="Show detailed information about the nodes.",
+            action='store_true')
+        display_group.add_argument(
+            '--fields',
+            nargs='+',
+            dest='fields',
+            metavar='<field>',
+            action='append',
+            default=[],
+            choices=res_fields.NODE_DETAILED_RESOURCE.fields,
+            help="One or more node fields. Only these fields will be fetched "
+                 "from the server. Can not be used when '--long' is "
+                 "specified.")
         return parser
 
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)" % parsed_args)
         client = self.app.client_manager.baremetal
 
-        columns = res_fields.NODE_RESOURCE
+        columns = res_fields.NODE_RESOURCE.fields
+        labels = res_fields.NODE_RESOURCE.labels
 
         params = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
@@ -187,41 +243,99 @@ class ListBaremetal(lister.Lister):
             params['associated'] = parsed_args.associated
         if parsed_args.maintenance:
             params['maintenance'] = parsed_args.maintenance
-
+        if parsed_args.provision_state:
+            params['provision_state'] = parsed_args.provision_state
         if parsed_args.long:
-            columns = res_fields.NODE_DETAILED_RESOURCE
-        params['detail'] = parsed_args.long
+            params['detail'] = parsed_args.long
+            columns = res_fields.NODE_DETAILED_RESOURCE.fields
+            labels = res_fields.NODE_DETAILED_RESOURCE.labels
+        elif parsed_args.fields:
+            params['detail'] = False
+            fields = itertools.chain.from_iterable(parsed_args.fields)
+            resource = res_fields.Resource(list(fields))
+            columns = resource.fields
+            labels = resource.labels
+            params['fields'] = columns
 
         self.log.debug("params(%s)" % params)
         data = client.node.list(**params)
 
         data = oscutils.sort_items(data, parsed_args.sort)
 
-        return (columns.labels,
-                (oscutils.get_item_properties(s, columns.fields, formatters={
+        return (labels,
+                (oscutils.get_item_properties(s, columns, formatters={
                     'Properties': oscutils.format_dict},) for s in data))
 
 
-class SetBaremetal(command.Command):
-    """Set baremetal properties."""
+class ListBaremetal(ListBaremetalNode):
+    """List baremetal nodes. DEPRECATED"""
 
-    log = logging.getLogger(__name__ + ".SetBaremetal")
+    # TODO(thrash): Remove in the 'P' cycle.
+    log = logging.getLogger(__name__ + ".ListBaremetal")
+
+    def take_action(self, parsed_args):
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node list'.")
+        return super(ListBaremetal, self).take_action(parsed_args)
+
+
+class SetBaremetalNode(command.Command):
+    """Set baremetal properties"""
+
+    log = logging.getLogger(__name__ + ".SetBaremetalNode")
 
     def get_parser(self, prog_name):
-        parser = super(SetBaremetal, self).get_parser(prog_name)
+        parser = super(SetBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node."
+            help="Name or UUID of the node.",
+        )
+        parser.add_argument(
+            "--instance-uuid",
+            metavar="<uuid>",
+            help="Set instance UUID of node to <uuid>",
+        )
+        parser.add_argument(
+            "--name",
+            metavar="<name>",
+            help="Set the name of the node",
+        )
+        parser.add_argument(
+            "--driver",
+            metavar="<driver>",
+            help="Set the driver for the node",
         )
         parser.add_argument(
             "--property",
-            metavar="<path=value>",
+            metavar="<key=value>",
             action='append',
-            help='Property to add to this baremetal host '
+            help='Property to set on this baremetal node '
                  '(repeat option to set multiple properties)',
         )
+        parser.add_argument(
+            "--extra",
+            metavar="<key=value>",
+            action='append',
+            help='Extra to set on this baremetal node '
+                 '(repeat option to set multiple extras)',
+        )
+        parser.add_argument(
+            "--driver-info",
+            metavar="<key=value>",
+            action='append',
+            help='Driver information to set on this baremetal node '
+                 '(repeat option to set multiple driver infos)',
+        )
+        parser.add_argument(
+            "--instance-info",
+            metavar="<key=value>",
+            action='append',
+            help='Instance information to set on this baremetal node '
+                 '(repeat option to set multiple instance infos)',
+        )
+
         return parser
 
     def take_action(self, parsed_args):
@@ -230,16 +344,50 @@ class SetBaremetal(command.Command):
         baremetal_client = self.app.client_manager.baremetal
 
         properties = []
+        if parsed_args.instance_uuid:
+            instance_uuid = ["instance_uuid=%s" % parsed_args.instance_uuid]
+            properties.extend(utils.args_array_to_patch(
+                'add', instance_uuid))
+        if parsed_args.name:
+            name = ["name=%s" % parsed_args.name]
+            properties.extend(utils.args_array_to_patch(
+                'add', name))
+        if parsed_args.driver:
+            driver = ["driver=%s" % parsed_args.driver]
+            properties.extend(utils.args_array_to_patch(
+                'add', driver))
         if parsed_args.property:
-            properties = utils.args_array_to_patch(
-                'add', parsed_args.property)
+            properties.extend(utils.args_array_to_patch(
+                'add', ['properties/' + x for x in parsed_args.property]))
+        if parsed_args.extra:
+            properties.extend(utils.args_array_to_patch(
+                'add', ['extra/' + x for x in parsed_args.extra]))
+        if parsed_args.driver_info:
+            properties.extend(utils.args_array_to_patch(
+                'add', ['driver_info/' + x for x in parsed_args.driver_info]))
+        if parsed_args.instance_info:
+            properties.extend(utils.args_array_to_patch(
+                'add', ['instance_info/' + x for x
+                        in parsed_args.instance_info]))
         baremetal_client.node.update(parsed_args.node, properties)
 
 
-class ShowBaremetal(show.ShowOne):
-    """Show baremetal node details."""
+class SetBaremetal(SetBaremetalNode):
+    """Set baremetal properties. DEPRECATED"""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetal")
+    # TODO(thrash): Remove in the 'P' cycle.
+    log = logging.getLogger(__name__ + ".SetBaremetal")
+
+    def take_action(self, parsed_args):
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node set'.")
+        return super(SetBaremetal, self).take_action(parsed_args)
+
+
+class ShowBaremetalNode(show.ShowOne):
+    """Show baremetal node details"""
+
+    log = logging.getLogger(__name__ + ".ShowBaremetalNode")
     LONG_FIELDS = [
         'extra',
         'properties',
@@ -250,7 +398,7 @@ class ShowBaremetal(show.ShowOne):
     ]
 
     def get_parser(self, prog_name):
-        parser = super(ShowBaremetal, self).get_parser(prog_name)
+        parser = super(ShowBaremetalNode, self).get_parser(prog_name)
         parser.add_argument(
             "node",
             metavar="<node>",
@@ -263,34 +411,52 @@ class ShowBaremetal(show.ShowOne):
             default=False,
             help='<node> is an instance UUID.')
         parser.add_argument(
-            '--long',
-            action='store_true')
+            '--fields',
+            nargs='+',
+            dest='fields',
+            metavar='<field>',
+            action='append',
+            choices=res_fields.NODE_DETAILED_RESOURCE.fields,
+            default=[],
+            help="One or more node fields. Only these fields will be fetched "
+                 "from the server.")
         return parser
 
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
+        fields = list(itertools.chain.from_iterable(parsed_args.fields))
+        fields = fields if fields else None
         if parsed_args.instance_uuid:
             node = baremetal_client.node.get_by_instance_uuid(
-                parsed_args.node)._info
+                parsed_args.node, fields=fields)._info
         else:
-            node = oscutils.find_resource(baremetal_client.node,
-                                          parsed_args.node)._info
+            node = baremetal_client.node.get(
+                parsed_args.node, fields=fields)._info
         node.pop("links", None)
-        if not parsed_args.long:
-            for field in self.LONG_FIELDS:
-                node.pop(field, None)
 
         return zip(*sorted(node.items()))
 
 
-class UnsetBaremetal(command.Command):
-    """Unset baremetal properties."""
-    log = logging.getLogger(__name__ + ".UnsetBaremetal")
+class ShowBaremetal(ShowBaremetalNode):
+    """Show baremetal node details. DEPRECATED"""
+
+    # TODO(thrash): Remove in the 'P' cycle.
+    log = logging.getLogger(__name__ + ".ShowBaremetal")
+
+    def take_action(self, parsed_args):
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node show'.")
+        return super(ShowBaremetal, self).take_action(parsed_args)
+
+
+class UnsetBaremetalNode(command.Command):
+    """Unset baremetal properties"""
+    log = logging.getLogger(__name__ + ".UnsetBaremetalNode")
 
     def get_parser(self, prog_name):
-        parser = super(UnsetBaremetal, self).get_parser(prog_name)
+        parser = super(UnsetBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -298,11 +464,43 @@ class UnsetBaremetal(command.Command):
             help="Name or UUID of the node."
         )
         parser.add_argument(
+            '--instance-uuid',
+            action='store_true',
+            default=False,
+            help='Unset instance UUID on this baremetal node'
+        )
+        parser.add_argument(
+            "--name",
+            action='store_true',
+            help="Unset the name of the node",
+        )
+        parser.add_argument(
             '--property',
-            metavar='<path>',
+            metavar='<key>',
             action='append',
-            help='Property to unset on this baremetal host '
+            help='Property to unset on this baremetal node '
                  '(repeat option to unset multiple properties)',
+        )
+        parser.add_argument(
+            "--extra",
+            metavar="<key>",
+            action='append',
+            help='Extra to unset on this baremetal node '
+                 '(repeat option to unset multiple extras)',
+        )
+        parser.add_argument(
+            "--driver-info",
+            metavar="<key>",
+            action='append',
+            help='Driver information to unset on this baremetal node '
+                 '(repeat option to unset multiple driver informations)',
+        )
+        parser.add_argument(
+            "--instance-info",
+            metavar="<key>",
+            action='append',
+            help='Instance information to unset on this baremetal node '
+                 '(repeat option to unset multiple instance informations)',
         )
 
         return parser
@@ -312,8 +510,39 @@ class UnsetBaremetal(command.Command):
 
         baremetal_client = self.app.client_manager.baremetal
 
-        if not parsed_args.node and not parsed_args.property:
-            return
+        properties = []
+        if parsed_args.instance_uuid:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['instance_uuid']))
+        if parsed_args.name:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['name']))
+        if parsed_args.property:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['properties/' + x
+                               for x in parsed_args.property]))
+        if parsed_args.extra:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['extra/' + x for x in parsed_args.extra]))
+        if parsed_args.driver_info:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['driver_info/' + x for x
+                               in parsed_args.driver_info]))
+        if parsed_args.instance_info:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['instance_info/' + x for x
+                               in parsed_args.instance_info]))
 
-        patch = utils.args_array_to_patch('remove', parsed_args.property)
-        baremetal_client.node.update(parsed_args.node, patch)
+        baremetal_client.node.update(parsed_args.node, properties)
+
+
+class UnsetBaremetal(UnsetBaremetalNode):
+    """Unset baremetal properties. DEPRECATED"""
+
+    # TODO(thrash): Remove in the 'P' cycle.
+    log = logging.getLogger(__name__ + ".UnsetBaremetal")
+
+    def take_action(self, parsed_args):
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node unset'.")
+        super(UnsetBaremetal, self).take_action(parsed_args)

@@ -1,0 +1,21 @@
+---
+features:
+  - |
+    Extend the OpenStackClient plugin with new commands:
+    * openstack baremetal node create
+    * openstack baremetal node delete - Supports deleting multiple nodes
+    * openstack baremetal node list
+    * openstack baremetal node set
+    * openstack baremetal node show
+    * openstack baremetal node unset
+deprecations:
+  - |
+    Deprecating the following commands in favor of the new commands:
+    * openstack baremetal create
+    * openstack baremetal delete
+    * openstack baremetal list
+    * openstack baremetal set
+    * openstack baremetal show
+    * openstack baremetal unset
+
+    These will be removed in the 'P' release.
