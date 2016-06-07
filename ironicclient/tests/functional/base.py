@@ -16,6 +16,7 @@ import os
 
 import six.moves.configparser as config_parser
 from tempest.lib.cli import base
+from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 
 import ironicclient.tests.functional.utils as utils
@@ -129,21 +130,18 @@ class FunctionalTestBase(base.ClientTestBase):
         :type params: string
         """
         flags += ' --os-endpoint-type publicURL'
-        try:
-            if hasattr(self, 'os_auth_token'):
-                return self._cmd_no_auth('ironic', action, flags, params)
-            else:
-                for keystone_object in 'user', 'project':
-                    domain_attr = 'os_%s_domain_id' % keystone_object
-                    if hasattr(self, domain_attr):
-                        flags += ' --os-%(ks_obj)s-domain-id %(value)s' % {
-                            'ks_obj': keystone_object,
-                            'value': getattr(self, domain_attr)
-                        }
-                return self.client.cmd_with_auth('ironic',
-                                                 action, flags, params)
-        except exceptions.CommandFailed as e:
-            self.fail(e)
+        if hasattr(self, 'os_auth_token'):
+            return self._cmd_no_auth('ironic', action, flags, params)
+        else:
+            for keystone_object in 'user', 'project':
+                domain_attr = 'os_%s_domain_id' % keystone_object
+                if hasattr(self, domain_attr):
+                    flags += ' --os-%(ks_obj)s-domain-id %(value)s' % {
+                        'ks_obj': keystone_object,
+                        'value': getattr(self, domain_attr)
+                    }
+            return self.client.cmd_with_auth('ironic',
+                                             action, flags, params)
 
     def ironic(self, action, flags='', params=''):
         """Return parsed list of dicts with basic item info.
@@ -305,3 +303,44 @@ class FunctionalTestBase(base.ClientTestBase):
             'chassis-update',
             params='{0} {1} {2}'.format(chassis_id, operation, params))
         return utils.get_dict_from_output(updated_chassis)
+
+    def delete_port(self, port_id, ignore_exceptions=False):
+        try:
+            self.ironic('port-delete', params=port_id)
+        except exceptions.CommandFailed:
+            if not ignore_exceptions:
+                raise
+
+    def create_port(self,
+                    node_id,
+                    mac_address=None,
+                    params=''):
+
+        if mac_address is None:
+            mac_address = data_utils.rand_mac_address()
+
+        port = self.ironic('port-create',
+                           params='--address {0} --node {1} {2}'
+                           .format(mac_address, node_id, params))
+        if not port:
+            self.fail('Ironic port has not been created!')
+
+        return utils.get_dict_from_output(port)
+
+    def list_ports(self, params=''):
+        return self.ironic('port-list', params=params)
+
+    def show_port(self, port_id, params=''):
+        port_show = self.ironic('port-show', params='{0} {1}'
+                                .format(port_id, params))
+        return utils.get_dict_from_output(port_show)
+
+    def get_uuids_from_port_list(self):
+        port_list = self.list_ports()
+        return [x['UUID'] for x in port_list]
+
+    def update_port(self, port_id, operation, params=''):
+        updated_port = self.ironic('port-update',
+                                   params='{0} {1} {2}'
+                                   .format(port_id, operation, params))
+        return utils.get_dict_from_output(updated_port)
