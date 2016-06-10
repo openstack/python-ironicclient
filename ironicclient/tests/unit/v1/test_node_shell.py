@@ -486,10 +486,28 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'active'
         args.config_drive = 'foo'
         args.clean_steps = None
+        args.wait_timeout = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'active', configdrive='foo', cleansteps=None)
+        self.assertFalse(client_mock.node.wait_for_provision_state.called)
+
+    def test_do_node_set_provision_state_active_wait(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'active'
+        args.config_drive = 'foo'
+        args.clean_steps = None
+        args.wait_timeout = 0
+
+        n_shell.do_node_set_provision_state(client_mock, args)
+        client_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'active', configdrive='foo', cleansteps=None)
+        client_mock.node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='active', timeout=0,
+            poll_interval=n_shell._LONG_ACTION_POLL_INTERVAL)
 
     def test_do_node_set_provision_state_deleted(self):
         client_mock = mock.MagicMock()
@@ -498,6 +516,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'deleted'
         args.config_drive = None
         args.clean_steps = None
+        args.wait_timeout = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
@@ -510,6 +529,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'rebuild'
         args.config_drive = None
         args.clean_steps = None
+        args.wait_timeout = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
@@ -522,6 +542,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'deleted'
         args.config_drive = 'foo'
         args.clean_steps = None
+        args.wait_timeout = None
 
         self.assertRaises(exceptions.CommandError,
                           n_shell.do_node_set_provision_state,
@@ -535,6 +556,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'inspect'
         args.config_drive = None
         args.clean_steps = None
+        args.wait_timeout = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
@@ -547,6 +569,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'manage'
         args.config_drive = None
         args.clean_steps = None
+        args.wait_timeout = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
@@ -559,6 +582,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'provide'
         args.config_drive = None
         args.clean_steps = None
+        args.wait_timeout = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
@@ -572,6 +596,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.config_drive = None
         clean_steps = '[{"step": "upgrade", "interface": "deploy"}]'
         args.clean_steps = clean_steps
+        args.wait_timeout = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
@@ -588,6 +613,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'clean'
         args.config_drive = None
         args.clean_steps = '-'
+        args.wait_timeout = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         mock_stdin.assert_called_once_with('clean steps')
@@ -604,6 +630,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'clean'
         args.config_drive = None
         args.clean_steps = '-'
+        args.wait_timeout = None
 
         self.assertRaises(exc.InvalidAttribute,
                           n_shell.do_node_set_provision_state,
@@ -624,6 +651,7 @@ class NodeShellTest(utils.BaseTestCase):
             args.provision_state = 'clean'
             args.config_drive = None
             args.clean_steps = f.name
+            args.wait_timeout = None
 
             n_shell.do_node_set_provision_state(client_mock, args)
             client_mock.node.set_provision_state.assert_called_once_with(
@@ -637,6 +665,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'clean'
         args.config_drive = None
         args.clean_steps = None
+        args.wait_timeout = None
 
         # clean_steps isn't specified
         self.assertRaisesRegex(exceptions.CommandError,
@@ -653,6 +682,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.config_drive = None
         clean_steps = '[{"step": "upgrade", "interface": "deploy"}]'
         args.clean_steps = clean_steps
+        args.wait_timeout = None
 
         # clean_steps specified but not cleaning
         self.assertRaisesRegex(exceptions.CommandError,
@@ -668,6 +698,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'abort'
         args.config_drive = None
         args.clean_steps = None
+        args.wait_timeout = None
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
@@ -680,10 +711,27 @@ class NodeShellTest(utils.BaseTestCase):
         args.provision_state = 'adopt'
         args.config_drive = None
         args.clean_steps = None
+        args.wait_timeout = 0
 
         n_shell.do_node_set_provision_state(client_mock, args)
         client_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'adopt', cleansteps=None, configdrive=None)
+
+    def test_do_node_set_provision_state_abort_no_wait(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.provision_state = 'abort'
+        args.config_drive = None
+        args.clean_steps = None
+        args.wait_timeout = 0
+
+        self.assertRaisesRegex(exceptions.CommandError,
+                               "not supported for provision state 'abort'",
+                               n_shell.do_node_set_provision_state,
+                               client_mock, args)
+        self.assertFalse(client_mock.node.set_provision_state.called)
+        self.assertFalse(client_mock.node.wait_for_provision_state.called)
 
     def test_do_node_set_console_mode(self):
         client_mock = mock.MagicMock()
