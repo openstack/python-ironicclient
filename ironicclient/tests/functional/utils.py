@@ -27,7 +27,7 @@ def get_dict_from_output(output):
 
 
 def get_object(object_list, object_value):
-    """"Get Ironic object by value from list of Ironic objects.
+    """Get Ironic object by value from list of Ironic objects.
 
     :param object_list: the output of the cmd
     :param object_value: value to get
