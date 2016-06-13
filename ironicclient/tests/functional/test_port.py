@@ -96,3 +96,22 @@ class PortSanityTestIronicClient(base.FunctionalTestBase):
 
         self.assertEqual(node_to_replace['uuid'], updated_port['node_uuid'])
         self.assertNotEqual(self.port['node_uuid'], updated_port['node_uuid'])
+
+    def test_port_list(self):
+        """Test steps:
+
+            1) create node and port in setUp()
+            2) create one more node and port explicitly
+            3) check that port-list contains UUIDs of created ports
+            4) check that port-list contains Addresses of created ports
+        """
+        other_node = self.create_node()
+        other_port = self.create_port(other_node['uuid'])
+
+        port_list = self.list_ports()
+        uuids = {x['UUID'] for x in port_list}
+        self.assertTrue({self.port['uuid'],
+                         other_port['uuid']}.issubset(uuids))
+        addresses = {x['Address'] for x in port_list}
+        self.assertTrue({self.port['address'],
+                         other_port['address']}.issubset(addresses))
