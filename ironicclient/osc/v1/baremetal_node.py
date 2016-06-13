@@ -183,18 +183,6 @@ class CreateBaremetalNode(show.ShowOne):
         return self.dict2columns(node)
 
 
-class CreateBaremetal(CreateBaremetalNode):
-    """Register a new node with the baremetal service. DEPRECATED"""
-
-    # TODO(thrash): Remove in the 'P' cycle.
-    log = logging.getLogger(__name__ + ".CreateBaremetal")
-
-    def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node create'.")
-        return super(CreateBaremetal, self).take_action(parsed_args)
-
-
 class DeleteBaremetalNode(command.Command):
     """Unregister a baremetal node"""
 
