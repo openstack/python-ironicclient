@@ -8,6 +8,7 @@ features:
     * openstack baremetal node set
     * openstack baremetal node show
     * openstack baremetal node unset
+    * openstack baremetal port create
 deprecations:
   - |
     Deprecating the following commands in favor of the new commands:
