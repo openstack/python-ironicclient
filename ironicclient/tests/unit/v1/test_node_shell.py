@@ -13,11 +13,9 @@
 #   under the License.
 
 import json
-import sys
 import tempfile
 
 import mock
-import six.moves.builtins as __builtin__
 
 from ironicclient.common.apiclient import exceptions
 from ironicclient.common import cliutils
@@ -416,7 +414,7 @@ class NodeShellTest(utils.BaseTestCase):
         node_manager_mock.set_target_raid_config.assert_called_once_with(
             'node', expected_target_raid_config_string)
 
-    @mock.patch.object(n_shell, '_get_from_stdin', autospec=True)
+    @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     def test_set_target_raid_config_stdin(self, stdin_read_mock):
         node_manager_mock = mock.MagicMock(spec=['set_target_raid_config'])
         client_mock = mock.MagicMock(spec=['node'], node=node_manager_mock)
@@ -432,7 +430,7 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock.node.set_target_raid_config.assert_called_once_with(
             'node', expected_target_raid_config_string)
 
-    @mock.patch.object(n_shell, '_get_from_stdin', autospec=True)
+    @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     def test_set_target_raid_config_stdin_exception(self, stdin_read_mock):
         client_mock = mock.MagicMock()
         stdin_read_mock.side_effect = exc.InvalidAttribute('bad')
@@ -578,7 +576,7 @@ class NodeShellTest(utils.BaseTestCase):
             'node_uuid', 'clean', configdrive=None,
             cleansteps=json.loads(clean_steps))
 
-    @mock.patch.object(n_shell, '_get_from_stdin', autospec=True)
+    @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     def test_do_node_set_provision_state_clean_stdin(self, mock_stdin):
         clean_steps = '[{"step": "upgrade", "interface": "deploy"}]'
         mock_stdin.return_value = clean_steps
@@ -595,7 +593,7 @@ class NodeShellTest(utils.BaseTestCase):
             'node_uuid', 'clean', configdrive=None,
             cleansteps=json.loads(clean_steps))
 
-    @mock.patch.object(n_shell, '_get_from_stdin', autospec=True)
+    @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     def test_do_node_set_provision_state_clean_stdin_fails(self, mock_stdin):
         mock_stdin.side_effect = exc.InvalidAttribute('bad')
         client_mock = mock.MagicMock()
@@ -1049,60 +1047,3 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_get_vendor_passthru_methods(client_mock, args)
         client_mock.node.get_vendor_passthru_methods.assert_called_once_with(
             'node_uuid')
-
-
-class NodeShellLocalTest(utils.BaseTestCase):
-
-    @mock.patch.object(sys, 'stdin', autospec=True)
-    def test__get_from_stdin(self, mock_stdin):
-        contents = '[{"step": "upgrade", "interface": "deploy"}]'
-        mock_stdin.read.return_value = contents
-        desc = 'something'
-
-        info = n_shell._get_from_stdin(desc)
-        self.assertEqual(info, contents)
-        mock_stdin.read.assert_called_once_with()
-
-    @mock.patch.object(sys, 'stdin', autospec=True)
-    def test__get_from_stdin_fail(self, mock_stdin):
-        mock_stdin.read.side_effect = IOError
-        desc = 'something'
-
-        self.assertRaises(exc.InvalidAttribute, n_shell._get_from_stdin, desc)
-        mock_stdin.read.assert_called_once_with()
-
-    def test__handle_json_or_file_arg(self):
-        cleansteps = '[{"step": "upgrade", "interface": "deploy"}]'
-        steps = n_shell._handle_json_or_file_arg(cleansteps)
-        self.assertEqual(json.loads(cleansteps), steps)
-
-    def test__handle_json_or_file_arg_bad_json(self):
-        cleansteps = 'foo'
-        self.assertRaisesRegex(exc.InvalidAttribute,
-                               'For JSON',
-                               n_shell._handle_json_or_file_arg, cleansteps)
-
-    def test__handle_json_or_file_arg_file(self):
-        contents = '[{"step": "upgrade", "interface": "deploy"}]'
-
-        with tempfile.NamedTemporaryFile(mode='w') as f:
-            f.write(contents)
-            f.flush()
-            steps = n_shell._handle_json_or_file_arg(f.name)
-
-        self.assertEqual(json.loads(contents), steps)
-
-    @mock.patch.object(__builtin__, 'open', autospec=True)
-    def test__handle_json_or_file_arg_file_fail(self, mock_open):
-        mock_file_object = mock.MagicMock()
-        mock_file_handle = mock.MagicMock()
-        mock_file_handle.__enter__.return_value = mock_file_object
-        mock_open.return_value = mock_file_handle
-        mock_file_object.read.side_effect = IOError
-
-        with tempfile.NamedTemporaryFile(mode='w') as f:
-            self.assertRaisesRegex(exc.InvalidAttribute,
-                                   "from file",
-                                   n_shell._handle_json_or_file_arg, f.name)
-            mock_open.assert_called_once_with(f.name, 'r')
-            mock_file_object.read.assert_called_once_with()

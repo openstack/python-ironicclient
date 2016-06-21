@@ -13,10 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import os
 import subprocess
+import sys
+import tempfile
 
 import mock
+import six.moves.builtins as __builtin__
 
 from ironicclient.common import utils
 from ironicclient import exc
@@ -269,3 +273,63 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
                                            stderr=subprocess.PIPE,
                                            stdout=subprocess.PIPE)
         fake_process.communicate.assert_called_once_with()
+
+
+class GetFromStdinTest(test_utils.BaseTestCase):
+
+    @mock.patch.object(sys, 'stdin', autospec=True)
+    def test_get_from_stdin(self, mock_stdin):
+        contents = '[{"step": "upgrade", "interface": "deploy"}]'
+        mock_stdin.read.return_value = contents
+        desc = 'something'
+
+        info = utils.get_from_stdin(desc)
+        self.assertEqual(info, contents)
+        mock_stdin.read.assert_called_once_with()
+
+    @mock.patch.object(sys, 'stdin', autospec=True)
+    def test_get_from_stdin_fail(self, mock_stdin):
+        mock_stdin.read.side_effect = IOError
+        desc = 'something'
+
+        self.assertRaises(exc.InvalidAttribute, utils.get_from_stdin, desc)
+        mock_stdin.read.assert_called_once_with()
+
+
+class HandleJsonFileTest(test_utils.BaseTestCase):
+
+    def test_handle_json_or_file_arg(self):
+        cleansteps = '[{"step": "upgrade", "interface": "deploy"}]'
+        steps = utils.handle_json_or_file_arg(cleansteps)
+        self.assertEqual(json.loads(cleansteps), steps)
+
+    def test_handle_json_or_file_arg_bad_json(self):
+        cleansteps = 'foo'
+        self.assertRaisesRegex(exc.InvalidAttribute,
+                               'For JSON',
+                               utils.handle_json_or_file_arg, cleansteps)
+
+    def test_handle_json_or_file_arg_file(self):
+        contents = '[{"step": "upgrade", "interface": "deploy"}]'
+
+        with tempfile.NamedTemporaryFile(mode='w') as f:
+            f.write(contents)
+            f.flush()
+            steps = utils.handle_json_or_file_arg(f.name)
+
+        self.assertEqual(json.loads(contents), steps)
+
+    @mock.patch.object(__builtin__, 'open', autospec=True)
+    def test_handle_json_or_file_arg_file_fail(self, mock_open):
+        mock_file_object = mock.MagicMock()
+        mock_file_handle = mock.MagicMock()
+        mock_file_handle.__enter__.return_value = mock_file_object
+        mock_open.return_value = mock_file_handle
+        mock_file_object.read.side_effect = IOError
+
+        with tempfile.NamedTemporaryFile(mode='w') as f:
+            self.assertRaisesRegex(exc.InvalidAttribute,
+                                   "from file",
+                                   utils.handle_json_or_file_arg, f.name)
+            mock_open.assert_called_once_with(f.name, 'r')
+            mock_file_object.read.assert_called_once_with()

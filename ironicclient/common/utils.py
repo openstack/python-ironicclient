@@ -23,6 +23,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 
 from oslo_utils import importutils
@@ -304,3 +305,45 @@ def check_for_invalid_fields(fields, valid_fields):
             _('Invalid field(s) requested: %(invalid)s. Valid fields '
               'are: %(valid)s.') % {'invalid': ', '.join(invalid_fields),
                                     'valid': ', '.join(valid_fields)})
+
+
+def get_from_stdin(info_desc):
+    """Read information from stdin.
+
+    :param info_desc: A string description of the desired information
+    :raises: InvalidAttribute if there was a problem reading from stdin
+    :returns: the string that was read from stdin
+    """
+    try:
+        info = sys.stdin.read().strip()
+    except Exception as e:
+        err = _("Cannot get %(desc)s from standard input. Error: %(err)s")
+        raise exc.InvalidAttribute(err % {'desc': info_desc, 'err': e})
+    return info
+
+
+def handle_json_or_file_arg(json_arg):
+    """Attempts to read JSON argument from file or string.
+
+    :param json_arg: May be a file name containing the JSON, or
+        a JSON string.
+    :returns: A list or dictionary parsed from JSON.
+    :raises: InvalidAttribute if the argument cannot be parsed.
+    """
+
+    if os.path.isfile(json_arg):
+        try:
+            with open(json_arg, 'r') as f:
+                json_arg = f.read().strip()
+        except Exception as e:
+            err = _("Cannot get JSON from file '%(file)s'. "
+                    "Error: %(err)s") % {'err': e, 'file': json_arg}
+            raise exc.InvalidAttribute(err)
+    try:
+        json_arg = json.loads(json_arg)
+    except ValueError as e:
+        err = (_("For JSON: '%(string)s', error: '%(err)s'") %
+               {'err': e, 'string': json_arg})
+        raise exc.InvalidAttribute(err)
+
+    return json_arg
