@@ -179,7 +179,7 @@ class FunctionalTestBase(base.ClientTestBase):
             self.assertEqual(node_show_states[key], node_show[key])
 
     def assertNodeValidate(self, node_validate):
-        """Assert that node_validate is able to validate all interfaces present.
+        """Assert that all interfaces present are valid.
 
         :param node_validate: output from node-validate cmd
         """
@@ -255,6 +255,14 @@ class FunctionalTestBase(base.ClientTestBase):
 
     def validate_node(self, node_id):
         return self.ironic('node-validate', params=node_id)
+
+    def list_node_chassis(self, chassis_uuid, params=''):
+        return self.ironic('chassis-node-list',
+                           params='{0} {1}'.format(chassis_uuid, params))
+
+    def get_nodes_uuids_from_chassis_node_list(self, chassis_uuid):
+        chassis_node_list = self.list_node_chassis(chassis_uuid)
+        return [x['UUID'] for x in chassis_node_list]
 
     def list_driver(self, params=''):
         return self.ironic('driver-list', params=params)
