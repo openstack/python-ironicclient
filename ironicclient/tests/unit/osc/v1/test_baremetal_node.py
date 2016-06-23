@@ -17,7 +17,7 @@
 import copy
 import mock
 
-from openstackclient.tests import utils as oscutils
+from osc_lib.tests import utils as oscutils
 
 from ironicclient import exc
 from ironicclient.osc.v1 import baremetal_node

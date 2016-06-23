@@ -1,4 +1,4 @@
 ---
 upgrade:
   - osc-lib is a package of common support modules for writing OSC plugins.
-    So use osc-lib instead of cliff.
+    So use osc-lib instead of cliff and OpenStackClient.

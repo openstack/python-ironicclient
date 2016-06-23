@@ -15,7 +15,7 @@
 #
 
 import mock
-from openstackclient.tests import utils
+from osc_lib.tests import utils
 
 from ironicclient.tests.unit.osc import fakes
 
