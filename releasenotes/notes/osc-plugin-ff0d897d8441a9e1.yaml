@@ -2,18 +2,28 @@
 features:
   - |
     Extend the OpenStackClient plugin with new commands:
+
+    * openstack baremetal node abort
+    * openstack baremetal node clean
     * openstack baremetal node create
     * openstack baremetal node delete - Supports deleting multiple nodes
+    * openstack baremetal node deploy
+    * openstack baremetal node inspect
     * openstack baremetal node list
+    * openstack baremetal node manage
     * openstack baremetal node power
+    * openstack baremetal node provide
     * openstack baremetal node reboot
+    * openstack baremetal node rebuild
     * openstack baremetal node set
     * openstack baremetal node show
+    * openstack baremetal node undeploy
     * openstack baremetal node unset
     * openstack baremetal port create
 deprecations:
   - |
     Deprecating the following commands in favor of the new commands:
+
     * openstack baremetal create
     * openstack baremetal delete
     * openstack baremetal list

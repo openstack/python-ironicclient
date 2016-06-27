@@ -14,6 +14,7 @@
 #   under the License.
 #
 
+import argparse
 import itertools
 import logging
 
@@ -26,6 +27,82 @@ from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
+
+
+class ProvisionStateBaremetalNode(command.Command):
+    """Base provision state class"""
+
+    log = logging.getLogger(__name__ + ".ProvisionStateBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(ProvisionStateBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node."
+        )
+        parser.add_argument(
+            '--provision-state',
+            default=self.PROVISION_STATE,
+            required=False,
+            choices=[self.PROVISION_STATE],
+            help=argparse.SUPPRESS)
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        baremetal_client.node.set_provision_state(
+            parsed_args.node,
+            parsed_args.provision_state)
+
+
+class AbortBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'abort'"""
+
+    log = logging.getLogger(__name__ + ".AbortBaremetalNode")
+    PROVISION_STATE = 'abort'
+
+
+class CleanBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'clean'"""
+
+    log = logging.getLogger(__name__ + ".CleanBaremetalNode")
+    PROVISION_STATE = 'clean'
+
+    def get_parser(self, prog_name):
+        parser = super(CleanBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '--clean-steps',
+            metavar='<clean-steps>',
+            required=True,
+            default=None,
+            help=("The clean steps in JSON format. May be the path to a file "
+                  "containing the clean steps; OR '-', with the clean steps "
+                  "being read from standard input; OR a string. The value "
+                  "should be a list of clean-step dictionaries; each "
+                  "dictionary should have keys 'interface' and 'step', and "
+                  "optional key 'args'."))
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        clean_steps = parsed_args.clean_steps
+        if parsed_args.clean_steps == '-':
+            clean_steps = utils.get_from_stdin('clean steps')
+        if clean_steps:
+            clean_steps = utils.handle_json_or_file_arg(clean_steps)
+        baremetal_client.node.set_provision_state(
+            parsed_args.node,
+            parsed_args.provision_state,
+            cleansteps=clean_steps)
 
 
 class CreateBaremetalNode(show.ShowOne):
@@ -151,6 +228,45 @@ class DeleteBaremetal(DeleteBaremetalNode):
         self.log.warning("This command is deprecated. Instead, use "
                          "'openstack baremetal node delete'.")
         super(DeleteBaremetal, self).take_action(parsed_args)
+
+
+class DeployBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'deploy'"""
+
+    log = logging.getLogger(__name__ + ".DeployBaremetalNode")
+    PROVISION_STATE = 'active'
+
+    def get_parser(self, prog_name):
+        parser = super(DeployBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '--config-drive',
+            metavar='<config-drive>',
+            default=None,
+            help=("A gzipped, base64-encoded configuration drive string OR "
+                  "the path to the configuration drive file OR the path to a "
+                  "directory containing the config drive files. In case it's "
+                  "a directory, a config drive will be generated from it. "))
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        configdrive = (parsed_args.config_drive if parsed_args.config_drive
+                       else None)
+        baremetal_client.node.set_provision_state(
+            parsed_args.node,
+            parsed_args.provision_state,
+            configdrive=configdrive)
+
+
+class InspectBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'inspect'"""
+
+    log = logging.getLogger(__name__ + ".InspectBaremetalNode")
+    PROVISION_STATE = 'inspect'
 
 
 class ListBaremetalNode(lister.Lister):
@@ -279,6 +395,13 @@ class ListBaremetal(ListBaremetalNode):
         return super(ListBaremetal, self).take_action(parsed_args)
 
 
+class ManageBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'manage'"""
+
+    log = logging.getLogger(__name__ + ".ManageBaremetalNode")
+    PROVISION_STATE = 'manage'
+
+
 class PowerBaremetalNode(command.Command):
     """Set power state of baremetal node"""
 
@@ -309,6 +432,13 @@ class PowerBaremetalNode(command.Command):
             parsed_args.node, parsed_args.power_state)
 
 
+class ProvideBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'provide'"""
+
+    log = logging.getLogger(__name__ + ".ProvideBaremetalNode")
+    PROVISION_STATE = 'provide'
+
+
 class RebootBaremetalNode(command.Command):
     """Reboot baremetal node"""
 
@@ -331,6 +461,13 @@ class RebootBaremetalNode(command.Command):
 
         baremetal_client.node.set_power_state(
             parsed_args.node, 'reboot')
+
+
+class RebuildBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'rebuild'"""
+
+    log = logging.getLogger(__name__ + ".RebuildBaremetalNode")
+    PROVISION_STATE = 'rebuild'
 
 
 class SetBaremetalNode(command.Command):
@@ -503,6 +640,13 @@ class ShowBaremetal(ShowBaremetalNode):
         self.log.warning("This command is deprecated. Instead, use "
                          "'openstack baremetal node show'.")
         return super(ShowBaremetal, self).take_action(parsed_args)
+
+
+class UndeployBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'deleted'"""
+
+    log = logging.getLogger(__name__ + ".UndeployBaremetalNode")
+    PROVISION_STATE = 'deleted'
 
 
 class UnsetBaremetalNode(command.Command):

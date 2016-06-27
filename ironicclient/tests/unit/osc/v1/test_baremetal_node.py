@@ -551,6 +551,42 @@ class TestBaremetalPower(TestBaremetal):
             'node_uuid', 'off')
 
 
+class TestDeployBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestDeployBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.DeployBaremetalNode(self.app, None)
+
+    def test_deploy_baremetal_provision_state_active_and_configdrive(self):
+        arglist = ['node_uuid',
+                   '--config-drive', 'path/to/drive']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'active'),
+            ('config_drive', 'path/to/drive'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'active', configdrive='path/to/drive')
+
+    def test_deploy_baremetal_provision_state_mismatch(self):
+        arglist = ['node_uuid',
+                   '--provision-state', 'abort']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'active'),
+        ]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+
 class TestBaremetalReboot(TestBaremetal):
     def setUp(self):
         super(TestBaremetalReboot, self).setUp()
