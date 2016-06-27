@@ -14,18 +14,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
 import os
 
 import appdirs
 import dogpile.cache
 
+from ironicclient.common.i18n import _LW
+
+LOG = logging.getLogger(__name__)
 
 AUTHOR = 'openstack'
 PROGNAME = 'python-ironicclient'
 
-CACHE_DIR = appdirs.user_cache_dir(PROGNAME, AUTHOR)
-CACHE_FILENAME = os.path.join(CACHE_DIR, 'ironic-api-version.dbm')
 CACHE = None
+CACHE_DIR = appdirs.user_cache_dir(PROGNAME, AUTHOR)
+CACHE_EXPIRY_ENV_VAR = 'IRONICCLIENT_CACHE_EXPIRY'  # environment variable
+CACHE_FILENAME = os.path.join(CACHE_DIR, 'ironic-api-version.dbm')
 DEFAULT_EXPIRY = 300  # seconds
 
 
@@ -38,9 +43,22 @@ def _get_cache():
         if not os.path.exists(CACHE_DIR):
             os.makedirs(CACHE_DIR)
 
+        # Use the cache expiry if specified in an env var
+        expiry_time = os.environ.get(CACHE_EXPIRY_ENV_VAR, DEFAULT_EXPIRY)
+        try:
+            expiry_time = int(expiry_time)
+        except ValueError:
+            LOG.warning(_LW("Environment variable %(env_var)s should be an "
+                            "integer (not '%(curr_val)s') using default "
+                            "timeout of %(default)s instead"),
+                        {'env_var': CACHE_EXPIRY_ENV_VAR,
+                         'curr_val': expiry_time,
+                         'default': DEFAULT_EXPIRY})
+            expiry_time = DEFAULT_EXPIRY
+
         CACHE = dogpile.cache.make_region(key_mangler=str).configure(
             'dogpile.cache.dbm',
-            expiration_time=DEFAULT_EXPIRY,
+            expiration_time=expiry_time,
             arguments={
                 "filename": CACHE_FILENAME,
             }

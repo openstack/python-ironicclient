@@ -1,0 +1,4 @@
+---
+features:
+  - Add support for specifying the version cache timeout via an environment
+    variable (IRONICCLIENT_CACHE_EXPIRY).

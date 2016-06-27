@@ -29,12 +29,15 @@ class FileCacheTest(utils.BaseTestCase):
         result = filecache._build_key(None, None)
         self.assertEqual('None:None', result)
 
+    @mock.patch.object(os.environ, 'get', autospec=True)
     @mock.patch.object(os.path, 'exists', autospec=True)
     @mock.patch.object(os, 'makedirs', autospec=True)
     @mock.patch.object(dogpile.cache, 'make_region', autospec=True)
     def test__get_cache_mkdir(self, mock_makeregion, mock_makedirs,
-                              mock_exists):
+                              mock_exists, mock_get):
         cache_val = 6
+        # If not present in the env, get will return the defaulted value
+        mock_get.return_value = filecache.DEFAULT_EXPIRY
         filecache.CACHE = None
         mock_exists.return_value = False
         cache_region = mock.Mock(spec=dogpile.cache.region.CacheRegion)
@@ -43,6 +46,62 @@ class FileCacheTest(utils.BaseTestCase):
         self.assertEqual(cache_val, filecache._get_cache())
         mock_exists.assert_called_once_with(filecache.CACHE_DIR)
         mock_makedirs.assert_called_once_with(filecache.CACHE_DIR)
+        mock_get.assert_called_once_with(filecache.CACHE_EXPIRY_ENV_VAR,
+                                         mock.ANY)
+        cache_region.configure.assert_called_once_with(
+            mock.ANY,
+            arguments=mock.ANY,
+            expiration_time=filecache.DEFAULT_EXPIRY)
+
+    @mock.patch.object(os.environ, 'get', autospec=True)
+    @mock.patch.object(os.path, 'exists', autospec=True)
+    @mock.patch.object(os, 'makedirs', autospec=True)
+    @mock.patch.object(dogpile.cache, 'make_region', autospec=True)
+    def test__get_cache_expiry_set(self, mock_makeregion, mock_makedirs,
+                                   mock_exists, mock_get):
+        cache_val = 5643
+        cache_expiry = '78'
+        mock_get.return_value = cache_expiry
+        filecache.CACHE = None
+        mock_exists.return_value = False
+        cache_region = mock.Mock(spec=dogpile.cache.region.CacheRegion)
+        cache_region.configure.return_value = cache_val
+        mock_makeregion.return_value = cache_region
+        self.assertEqual(cache_val, filecache._get_cache())
+        mock_get.assert_called_once_with(filecache.CACHE_EXPIRY_ENV_VAR,
+                                         mock.ANY)
+        cache_region.configure.assert_called_once_with(
+            mock.ANY,
+            arguments=mock.ANY,
+            expiration_time=int(cache_expiry))
+
+    @mock.patch.object(filecache.LOG, 'warning', autospec=True)
+    @mock.patch.object(os.environ, 'get', autospec=True)
+    @mock.patch.object(os.path, 'exists', autospec=True)
+    @mock.patch.object(os, 'makedirs', autospec=True)
+    @mock.patch.object(dogpile.cache, 'make_region', autospec=True)
+    def test__get_cache_expiry_set_invalid(self, mock_makeregion,
+                                           mock_makedirs, mock_exists,
+                                           mock_get, mock_log):
+        cache_val = 5643
+        cache_expiry = 'Rollenhagen'
+        mock_get.return_value = cache_expiry
+        filecache.CACHE = None
+        mock_exists.return_value = False
+        cache_region = mock.Mock(spec=dogpile.cache.region.CacheRegion)
+        cache_region.configure.return_value = cache_val
+        mock_makeregion.return_value = cache_region
+        self.assertEqual(cache_val, filecache._get_cache())
+        mock_get.assert_called_once_with(filecache.CACHE_EXPIRY_ENV_VAR,
+                                         mock.ANY)
+        cache_region.configure.assert_called_once_with(
+            mock.ANY,
+            arguments=mock.ANY,
+            expiration_time=filecache.DEFAULT_EXPIRY)
+        log_dict = {'curr_val': cache_expiry,
+                    'default': filecache.DEFAULT_EXPIRY,
+                    'env_var': filecache.CACHE_EXPIRY_ENV_VAR}
+        mock_log.assert_called_once_with(mock.ANY, log_dict)
 
     @mock.patch.object(os.path, 'exists', autospec=True)
     @mock.patch.object(os, 'makedirs', autospec=True)
