@@ -495,6 +495,68 @@ class TestBaremetalList(TestBaremetal):
                           self.cmd, arglist, verifylist)
 
 
+class TestBaremetalMaintenanceSet(TestBaremetal):
+    def setUp(self):
+        super(TestBaremetalMaintenanceSet, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.MaintenanceSetBaremetalNode(self.app, None)
+
+    def test_baremetal_maintenance_on(self):
+        arglist = ['node_uuid',
+                   '--reason', 'maintenance reason']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('reason', 'maintenance reason'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_maintenance.assert_called_once_with(
+            'node_uuid',
+            True,
+            maint_reason='maintenance reason'
+        )
+
+    def test_baremetal_maintenance_on_no_reason(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_maintenance.assert_called_once_with(
+            'node_uuid',
+            True,
+            maint_reason=None
+        )
+
+
+class TestBaremetalMaintenanceUnset(TestBaremetal):
+    def setUp(self):
+        super(TestBaremetalMaintenanceUnset, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.MaintenanceUnsetBaremetalNode(self.app, None)
+
+    def test_baremetal_maintenance_off(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_maintenance.assert_called_once_with(
+            'node_uuid',
+            False)
+
+
 class TestBaremetalPower(TestBaremetal):
     def setUp(self):
         super(TestBaremetalPower, self).setUp()

@@ -395,6 +395,64 @@ class ListBaremetal(ListBaremetalNode):
         return super(ListBaremetal, self).take_action(parsed_args)
 
 
+class MaintenanceSetBaremetalNode(command.Command):
+    """Set baremetal node to maintenance mode"""
+
+    log = logging.getLogger(__name__ + ".MaintenanceSetBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(MaintenanceSetBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node."
+        )
+        parser.add_argument(
+            '--reason',
+            metavar='<reason>',
+            default=None,
+            help=("Reason for setting maintenance mode."))
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        baremetal_client.node.set_maintenance(
+            parsed_args.node,
+            True,
+            maint_reason=parsed_args.reason)
+
+
+class MaintenanceUnsetBaremetalNode(command.Command):
+    """Unset baremetal node from maintenance mode"""
+
+    log = logging.getLogger(__name__ + ".MaintenanceUnsetBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(MaintenanceUnsetBaremetalNode,
+                       self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node."
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        baremetal_client.node.set_maintenance(
+            parsed_args.node,
+            False)
+
+
 class ManageBaremetalNode(ProvisionStateBaremetalNode):
     """Set provision state of baremetal node to 'manage'"""
 
