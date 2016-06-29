@@ -201,11 +201,18 @@ class CreateManager(Manager):
         """
 
         new = {}
+        invalid = []
         for (key, value) in kwargs.items():
             if key in self._creation_attributes:
                 new[key] = value
             else:
-                raise exc.InvalidAttribute()
+                invalid.append(key)
+        if invalid:
+            raise exc.InvalidAttribute(
+                'The attribute(s) "%(attrs)s" are invalid; they are not '
+                'needed to create %(resource)s.' %
+                {'resource': self._resource_name,
+                 'attrs': '","'.join(invalid)})
         url = self._path()
         resp, body = self.api.json_request('POST', url, body=new)
         if body:
