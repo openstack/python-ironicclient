@@ -43,3 +43,14 @@ class DriverSanityTestIronicClient(base.FunctionalTestBase):
         for driver in drivers_names:
             driver_properties = self.properties_driver(driver)
             self.assertNotEqual([x['Property'] for x in driver_properties], [])
+
+    def test_driver_list(self):
+        """Test steps:
+
+        1) get list of drivers
+        2) check that list of drivers is not empty
+        """
+        driver = 'fake'
+        available_drivers = self.get_drivers_names()
+        self.assertTrue(len(available_drivers) > 0)
+        self.assertIn(driver, available_drivers)
