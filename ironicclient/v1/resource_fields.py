@@ -64,6 +64,9 @@ class Resource(object):
         'target_raid_config': 'Target RAID configuration',
         'updated_at': 'Updated At',
         'uuid': 'UUID',
+        'local_link_connection': 'Local Link Connection',
+        'pxe_enabled': 'PXE boot enabled',
+        'network_interface': 'Network Interface',
     }
 
     def __init__(self, field_ids, sort_excluded=None):
@@ -151,6 +154,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'inspection_started_at',
      'uuid',
      'name',
+     'network_interface',
      ],
     sort_excluded=[
         # The server cannot sort on "chassis_uuid" because it isn't a column in
@@ -189,6 +193,8 @@ PORT_DETAILED_RESOURCE = Resource(
      'created_at',
      'extra',
      'node_uuid',
+     'local_link_connection',
+     'pxe_enabled',
      'updated_at',
      ],
     sort_excluded=[

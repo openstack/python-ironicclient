@@ -46,6 +46,18 @@ class CreateBaremetalPort(show.ShowOne):
             action='append',
             help="Record arbitrary key/value metadata. "
                  "Can be specified multiple times.")
+        parser.add_argument(
+            '-l', '--local-link-connection',
+            metavar="<key=value>",
+            action='append',
+            help="Key/value metadata describing Local link connection "
+                 "information. Valid keys are switch_info, switch_id, "
+                 "port_id. Can be specified multiple times.")
+        parser.add_argument(
+            '--pxe-enabled',
+            metavar='<boolean>',
+            help='Indicates whether this Port should be used when '
+                 'PXE booting this Node.')
 
         return parser
 
@@ -53,10 +65,12 @@ class CreateBaremetalPort(show.ShowOne):
         self.log.debug("take_action(%s)" % parsed_args)
         baremetal_client = self.app.client_manager.baremetal
 
-        field_list = ['address', 'extra', 'node_uuid']
+        field_list = ['address', 'extra', 'node_uuid', 'pxe_enabled',
+                      'local_link_connection']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'extra')
+        fields = utils.args_array_to_dict(fields, 'local_link_connection')
         port = baremetal_client.port.create(**fields)
 
         data = dict([(f, getattr(port, f, '')) for f in

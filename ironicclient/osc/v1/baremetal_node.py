@@ -151,6 +151,11 @@ class CreateBaremetalNode(show.ShowOne):
             '--name',
             metavar='<name>',
             help="Unique name for the node.")
+        parser.add_argument(
+            '--network-interface',
+            metavar='<network_interface>',
+            help='Network interface used for switching node to '
+                 'cleaning/provisioning networks.')
 
         return parser
 
@@ -160,7 +165,8 @@ class CreateBaremetalNode(show.ShowOne):
         baremetal_client = self.app.client_manager.baremetal
 
         field_list = ['chassis_uuid', 'driver', 'driver_info',
-                      'properties', 'extra', 'uuid', 'name']
+                      'properties', 'extra', 'uuid', 'name',
+                      'network_interface']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'driver_info')
@@ -555,6 +561,11 @@ class SetBaremetalNode(command.Command):
             help="Set the driver for the node",
         )
         parser.add_argument(
+            '--network-interface',
+            metavar='<network_interface>',
+            help='Set the network interface for the node',
+        )
+        parser.add_argument(
             "--property",
             metavar="<key=value>",
             action='append',
@@ -603,6 +614,11 @@ class SetBaremetalNode(command.Command):
             driver = ["driver=%s" % parsed_args.driver]
             properties.extend(utils.args_array_to_patch(
                 'add', driver))
+        if parsed_args.network_interface:
+            network_interface = [
+                "network_interface=%s" % parsed_args.network_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', network_interface))
         if parsed_args.property:
             properties.extend(utils.args_array_to_patch(
                 'add', ['properties/' + x for x in parsed_args.property]))

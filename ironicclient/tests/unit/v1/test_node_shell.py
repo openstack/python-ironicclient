@@ -46,6 +46,7 @@ class NodeShellTest(utils.BaseTestCase):
                'maintenance',
                'maintenance_reason',
                'name',
+               'network_interface',
                'power_state',
                'properties',
                'provision_state',

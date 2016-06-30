@@ -26,12 +26,16 @@ PORT = {'id': 987,
         'uuid': '11111111-2222-3333-4444-555555555555',
         'node_uuid': '55555555-4444-3333-2222-111111111111',
         'address': 'AA:BB:CC:DD:EE:FF',
+        'pxe_enabled': True,
+        'local_link_connection': {},
         'extra': {}}
 
 PORT2 = {'id': 988,
          'uuid': '55555555-4444-3333-2222-111111111111',
          'node_uuid': '55555555-4444-3333-2222-111111111111',
          'address': 'AA:AA:AA:BB:BB:BB',
+         'pxe_enabled': True,
+         'local_link_connection': {},
          'extra': {}}
 
 CREATE_PORT = copy.deepcopy(PORT)
@@ -263,6 +267,9 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(PORT['uuid'], port.uuid)
         self.assertEqual(PORT['address'], port.address)
         self.assertEqual(PORT['node_uuid'], port.node_uuid)
+        self.assertEqual(PORT['pxe_enabled'], port.pxe_enabled)
+        self.assertEqual(PORT['local_link_connection'],
+                         port.local_link_connection)
 
     def test_ports_show_by_address(self):
         port = self.mgr.get_by_address(PORT['address'])
@@ -274,6 +281,9 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(PORT['uuid'], port.uuid)
         self.assertEqual(PORT['address'], port.address)
         self.assertEqual(PORT['node_uuid'], port.node_uuid)
+        self.assertEqual(PORT['pxe_enabled'], port.pxe_enabled)
+        self.assertEqual(PORT['local_link_connection'],
+                         port.local_link_connection)
 
     def test_port_show_fields(self):
         port = self.mgr.get(PORT['uuid'], fields=['uuid', 'address'])

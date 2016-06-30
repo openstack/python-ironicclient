@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Add support of new fields:
+
+    * ``node.network_interface`` is introduced in API 1.20,
+      specifies the network interface to use for a node.
+    * ``port.local_link_connection`` contains the port binding
+      profile.
+    * ``port.pxe_enabled`` indicates whether PXE is enabled
+      for the port.
+
+    The ``port.local_link_connection`` and ``port.pxe_enabled`` fields
+    were introduced in API 1.19.

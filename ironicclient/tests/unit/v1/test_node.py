@@ -53,7 +53,6 @@ PORT = {'id': 456,
         'node_id': 123,
         'address': 'AA:AA:AA:AA:AA:AA',
         'extra': {}}
-
 POWER_STATE = {'power_state': 'power off',
                'target_power_state': 'power on'}
 
