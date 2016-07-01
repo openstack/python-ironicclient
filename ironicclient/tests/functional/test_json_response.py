@@ -161,3 +161,50 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
                                .format(self.node['uuid'], node_name),
                                parse=False)
         self.assertTrue(_is_valid_json(response, self.node_schema))
+
+
+class TestDriverJsonResponse(base.FunctionalTestBase):
+    """Test JSON responses for driver commands."""
+
+    def test_driver_list_json(self):
+        """Test JSON response for drivers list."""
+        schema = {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "hosts": {"type": "string"},
+                    }}
+        }
+        response = self.ironic('driver-list', flags='--json', parse=False)
+        self.assertTrue(_is_valid_json(response, schema))
+
+    def test_driver_show_json(self):
+        """Test JSON response for driver show."""
+        schema = {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "hosts": {
+                    "type": "array",
+                    "items": {"type": "string"}}
+            }
+        }
+        drivers_names = self.get_drivers_names()
+        for driver in drivers_names:
+            response = self.ironic('driver-show', flags='--json',
+                                   params='{0}'.format(driver), parse=False)
+            self.assertTrue(_is_valid_json(response, schema))
+
+    def test_driver_properties_json(self):
+        """Test JSON response for driver properties."""
+        schema = {
+            "type": "object",
+            "additionalProperties": {"type": "string"}
+        }
+        drivers_names = self.get_drivers_names()
+        for driver in drivers_names:
+            response = self.ironic('driver-properties', flags='--json',
+                                   params='{0}'.format(driver), parse=False)
+            self.assertTrue(_is_valid_json(response, schema))
