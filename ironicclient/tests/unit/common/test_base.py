@@ -117,8 +117,9 @@ class ManagerTestCase(testtools.TestCase):
         self.assertIsInstance(resource, TestableResource)
 
     def test_create_with_invalid_attribute(self):
-        self.assertRaises(exc.InvalidAttribute, self.manager.create,
-                          **INVALID_ATTRIBUTE_TESTABLE_RESOURCE)
+        self.assertRaisesRegex(exc.InvalidAttribute, "non-existent-attribute",
+                               self.manager.create,
+                               **INVALID_ATTRIBUTE_TESTABLE_RESOURCE)
 
     def test_get(self):
         resource = self.manager.get(TESTABLE_RESOURCE['uuid'])
