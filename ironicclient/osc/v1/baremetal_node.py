@@ -254,12 +254,10 @@ class DeployBaremetalNode(ProvisionStateBaremetalNode):
 
         baremetal_client = self.app.client_manager.baremetal
 
-        configdrive = (parsed_args.config_drive if parsed_args.config_drive
-                       else None)
         baremetal_client.node.set_provision_state(
             parsed_args.node,
             parsed_args.provision_state,
-            configdrive=configdrive)
+            configdrive=parsed_args.config_drive)
 
 
 class InspectBaremetalNode(ProvisionStateBaremetalNode):
