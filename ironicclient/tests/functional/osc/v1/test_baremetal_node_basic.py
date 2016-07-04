@@ -117,3 +117,63 @@ class BaremetalNodeTests(base.TestCase):
         self.assertEqual(self.node['name'], node['name'])
         self.assertEqual(self.node['uuid'], node['uuid'])
         self.assertEqual(self.node['driver'], node['driver'])
+
+    def test_baremetal_node_maintenance_set_unset(self):
+        """Check baremetal node maintenance set command.
+
+        Test steps:
+        1) Create baremetal node in setUp.
+        2) Check maintenance status of fresh node is False.
+        3) Set maintenance status for node.
+        4) Check maintenance status of node is True.
+        5) Unset maintenance status for node.
+        6) Check maintenance status of node is False back.
+        """
+        show_prop = self.node_show(self.node['name'], ['maintenance'])
+        self.assertFalse(show_prop['maintenance'])
+
+        self.openstack('baremetal node maintenance set {0}'.
+                       format(self.node['name']))
+
+        show_prop = self.node_show(self.node['name'], ['maintenance'])
+        self.assertTrue(show_prop['maintenance'])
+
+        self.openstack('baremetal node maintenance unset {0}'.
+                       format(self.node['name']))
+
+        show_prop = self.node_show(self.node['name'], ['maintenance'])
+        self.assertFalse(show_prop['maintenance'])
+
+    def test_baremetal_node_maintenance_set_unset_reason(self):
+        """Check baremetal node maintenance set command.
+
+        Test steps:
+        1) Create baremetal node in setUp.
+        2) Check initial maintenance reason is None.
+        3) Set maintenance status for node with reason.
+        4) Check maintenance reason of node equals to expected value.
+           Also check maintenance status.
+        5) Unset maintenance status for node. Recheck maintenance status.
+        6) Check maintenance reason is None. Recheck maintenance status.
+        """
+        reason = "Hardware maintenance."
+        show_prop = self.node_show(self.node['name'],
+                                   ['maintenance_reason', 'maintenance'])
+        self.assertIsNone(show_prop['maintenance_reason'])
+        self.assertFalse(show_prop['maintenance'])
+
+        self.openstack("baremetal node maintenance set --reason '{0}' {1}".
+                       format(reason, self.node['name']))
+
+        show_prop = self.node_show(self.node['name'],
+                                   ['maintenance_reason', 'maintenance'])
+        self.assertEqual(reason, show_prop['maintenance_reason'])
+        self.assertTrue(show_prop['maintenance'])
+
+        self.openstack('baremetal node maintenance unset {0}'.
+                       format(self.node['name']))
+
+        show_prop = self.node_show(self.node['name'],
+                                   ['maintenance_reason', 'maintenance'])
+        self.assertIsNone(show_prop['maintenance_reason'])
+        self.assertFalse(show_prop['maintenance'])
