@@ -12,6 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import six
+from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions
+
 from ironicclient.tests.functional import base
 
 
@@ -112,3 +116,98 @@ class ChassisSanityTestIronicClient(base.FunctionalTestBase):
         nodes_uuids.sort()
         self.assertEqual(nodes, nodes_uuids)
         self.assertNotIn(node3['uuid'], nodes_uuids)
+
+
+class ChassisNegativeTestsIronicClient(base.FunctionalTestBase):
+    """Negative tests for testing actions with Chassis.
+
+    Negative tests for the Ironic CLI commands which checks actions with
+    chassis command like show, update, delete either using with arguments
+    or without arguments.
+    """
+
+    def test_chassis_delete_without_arguments(self):
+        """Test step:
+
+        1) check that chassis-delete command without arguments
+        triggers an exception
+        """
+        ex_text = r'chassis-delete: error: too few arguments'
+
+        six.assertRaisesRegex(self, exceptions.CommandFailed,
+                              ex_text,
+                              self.delete_chassis, '')
+
+    def test_chassis_delete_with_incorrect_chassis_uuid(self):
+        """Test step:
+
+        1) check that deleting non-exist chassis triggers an exception
+        triggers an exception
+        """
+        uuid = data_utils.rand_uuid()
+        ex_text = (r"Chassis {0} "
+                   r"could not be found. \(HTTP 404\)".format(uuid))
+
+        six.assertRaisesRegex(self, exceptions.CommandFailed,
+                              ex_text,
+                              self.delete_chassis,
+                              '{0}'.format(uuid))
+
+    def test_chassis_show_without_arguments(self):
+        """Test step:
+
+        1) check that chassis-show command without arguments
+        triggers an exception
+        """
+        ex_text = r'chassis-show: error: too few arguments'
+
+        six.assertRaisesRegex(self, exceptions.CommandFailed,
+                              ex_text,
+                              self.show_chassis, '')
+
+    def test_chassis_show_with_incorrect_chassis_uuid(self):
+        """Test step:
+
+        1) check that chassis-show command with incorrect chassis
+        uuid triggers an exception
+        """
+        uuid = data_utils.rand_uuid()
+        ex_text = (r"Chassis {0} "
+                   r"could not be found. \(HTTP 404\)".format(uuid))
+
+        six.assertRaisesRegex(self, exceptions.CommandFailed,
+                              ex_text,
+                              self.show_chassis,
+                              '{0}'.format(uuid))
+
+    def test_chassis_update_without_arguments(self):
+        """Test steps:
+
+        1) create chassis
+        2) check that chassis-update command without arguments
+        triggers an exception
+        """
+        ex_text = r'chassis-update: error: too few arguments'
+
+        six.assertRaisesRegex(self, exceptions.CommandFailed,
+                              ex_text,
+                              self.update_chassis,
+                              chassis_id='',
+                              operation='')
+
+    def test_chassis_update_with_incorrect_chassis_uuid(self):
+        """Test steps:
+
+        1) create chassis
+        2) check that chassis-update command with incorrect arguments
+        triggers an exception
+        """
+        uuid = data_utils.rand_uuid()
+        ex_text = r'chassis-update: error: too few arguments'
+
+        six.assertRaisesRegex(self,
+                              exceptions.CommandFailed,
+                              ex_text,
+                              self.update_chassis,
+                              chassis_id='{0}'.format(uuid),
+                              operation='')
