@@ -49,8 +49,8 @@ def _get_cache():
             expiry_time = int(expiry_time)
         except ValueError:
             LOG.warning(_LW("Environment variable %(env_var)s should be an "
-                            "integer (not '%(curr_val)s') using default "
-                            "timeout of %(default)s instead"),
+                            "integer (not '%(curr_val)s'). Using default "
+                            "expiry of %(default)s seconds instead."),
                         {'env_var': CACHE_EXPIRY_ENV_VAR,
                          'curr_val': expiry_time,
                          'default': DEFAULT_EXPIRY})
