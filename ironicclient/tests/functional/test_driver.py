@@ -42,7 +42,7 @@ class DriverSanityTestIronicClient(base.FunctionalTestBase):
         drivers_names = self.get_drivers_names()
         for driver in drivers_names:
             driver_properties = self.properties_driver(driver)
-            self.assertNotEqual([x['Property'] for x in driver_properties], [])
+            self.assertNotEqual([], [x['Property'] for x in driver_properties])
 
     def test_driver_list(self):
         """Test steps:
