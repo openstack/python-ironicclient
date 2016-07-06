@@ -1,4 +1,5 @@
 ---
 features:
-  - Add support for specifying the version cache timeout via an environment
-    variable (IRONICCLIENT_CACHE_EXPIRY).
+  - Add support for specifying the expiry (in seconds) of the caching
+    of the ironic API version, via the environment variable
+    "IRONICCLIENT_CACHE_EXPIRY".
