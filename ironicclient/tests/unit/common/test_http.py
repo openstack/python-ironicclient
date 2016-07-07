@@ -213,10 +213,9 @@ class HttpClientTest(utils.BaseTestCase):
             version=1,
             status_code=http_client.INTERNAL_SERVER_ERROR)
 
-        error = self.assertRaises(exc.InternalServerError,
-                                  client.json_request,
-                                  'GET', '/v1/resources')
-        self.assertEqual('Internal Server Error (HTTP 500)', str(error))
+        self.assertRaises(exc.InternalServerError,
+                          client.json_request,
+                          'GET', '/v1/resources')
 
     def test_server_exception_msg_only(self):
         error_msg = 'test error msg'
@@ -228,32 +227,9 @@ class HttpClientTest(utils.BaseTestCase):
             version=1,
             status_code=http_client.INTERNAL_SERVER_ERROR)
 
-        error = self.assertRaises(exc.InternalServerError,
-                                  client.json_request,
-                                  'GET', '/v1/resources')
-        self.assertEqual(error_msg + ' (HTTP 500)', str(error))
-
-    def test_server_exception_msg_and_traceback(self):
-        error_msg = 'another test error'
-        error_trace = ("\"Traceback (most recent call last):\\n\\n  "
-                       "File \\\"/usr/local/lib/python2.7/...")
-        error_body = _get_error_body(error_msg, error_trace)
-        client = http.HTTPClient('http://localhost/')
-        client.session = utils.FakeSession(
-            {'Content-Type': 'application/json'},
-            six.StringIO(error_body),
-            version=1,
-            status_code=http_client.INTERNAL_SERVER_ERROR)
-
-        error = self.assertRaises(exc.InternalServerError,
-                                  client.json_request,
-                                  'GET', '/v1/resources')
-
-        self.assertEqual(
-            '%(error)s (HTTP 500)\n%(trace)s' % {'error': error_msg,
-                                                 'trace': error_trace},
-            "%(error)s\n%(details)s" % {'error': str(error),
-                                        'details': str(error.details)})
+        self.assertRaises(exc.InternalServerError,
+                          client.json_request,
+                          'GET', '/v1/resources')
 
     def test_server_https_request_ok(self):
         client = http.HTTPClient('https://localhost/')
@@ -275,10 +251,9 @@ class HttpClientTest(utils.BaseTestCase):
             version=1,
             status_code=http_client.INTERNAL_SERVER_ERROR)
 
-        error = self.assertRaises(exc.InternalServerError,
-                                  client.json_request,
-                                  'GET', '/v1/resources')
-        self.assertEqual('Internal Server Error (HTTP 500)', str(error))
+        self.assertRaises(exc.InternalServerError,
+                          client.json_request,
+                          'GET', '/v1/resources')
 
     def test_401_unauthorized_exception(self):
         error_body = _get_error_body()
@@ -454,28 +429,6 @@ class HttpClientTest(utils.BaseTestCase):
 
 class SessionClientTest(utils.BaseTestCase):
 
-    def test_server_exception_msg_and_traceback(self):
-        error_msg = 'another test error'
-        error_trace = ("\"Traceback (most recent call last):\\n\\n  "
-                       "File \\\"/usr/local/lib/python2.7/...")
-        error_body = _get_error_body(error_msg, error_trace)
-
-        fake_session = utils.FakeSession({'Content-Type': 'application/json'},
-                                         error_body,
-                                         http_client.INTERNAL_SERVER_ERROR)
-
-        client = _session_client(session=fake_session)
-
-        error = self.assertRaises(exc.InternalServerError,
-                                  client.json_request,
-                                  'GET', '/v1/resources')
-
-        self.assertEqual(
-            '%(error)s (HTTP 500)\n%(trace)s' % {'error': error_msg,
-                                                 'trace': error_trace},
-            "%(error)s\n%(details)s" % {'error': str(error),
-                                        'details': str(error.details)})
-
     def test_server_exception_empty_body(self):
         error_body = _get_error_body()
 
@@ -485,11 +438,9 @@ class SessionClientTest(utils.BaseTestCase):
 
         client = _session_client(session=fake_session)
 
-        error = self.assertRaises(exc.InternalServerError,
-                                  client.json_request,
-                                  'GET', '/v1/resources')
-
-        self.assertEqual('Internal Server Error (HTTP 500)', str(error))
+        self.assertRaises(exc.InternalServerError,
+                          client.json_request,
+                          'GET', '/v1/resources')
 
     def test__parse_version_headers(self):
         # Test parsing of version headers from SessionClient
