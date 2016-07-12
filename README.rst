@@ -23,7 +23,7 @@ Python API
 Quick-start Example::
     >>> from ironicclient import client
     >>>
-    >>> kwargs = {'os_auth_token': '3bcc3d3a03f44e3d8377f9247b0ad155'
+    >>> kwargs = {'os_auth_token': '3bcc3d3a03f44e3d8377f9247b0ad155',
     >>>           'ironic_url': 'http://ironic.example.org:6385/'}
     >>> ironic = client.get_client(1, **kwargs)
 
