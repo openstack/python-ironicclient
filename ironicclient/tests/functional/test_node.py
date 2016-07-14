@@ -193,3 +193,18 @@ class NodeSanityTestIronicClient(base.FunctionalTestBase):
         node_show = self.show_node(self.node['uuid'])
         show_node_states = self.show_node_states(self.node['uuid'])
         self.assertNodeStates(node_show, show_node_states)
+
+    def test_node_list(self):
+        """Test steps:
+
+            1) create node in setup and one more node explicitly
+            2) check that both nodes are in list
+        """
+        other_node = self.create_node()
+        node_list = self.list_nodes()
+        uuids = [x['UUID'] for x in node_list]
+        names = [x['Name'] for x in node_list]
+        self.assertIn(self.node['uuid'], uuids)
+        self.assertIn(other_node['uuid'], uuids)
+        self.assertIn(self.node['name'], names)
+        self.assertIn(other_node['name'], names)
