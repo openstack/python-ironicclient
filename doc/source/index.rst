@@ -16,6 +16,7 @@ Contents
    cli
    contributing
    testing
+   Release Notes <http://docs.openstack.org/releasenotes/python-ironicclient/>
 
 Indices and tables
 ==================
