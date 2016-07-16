@@ -162,6 +162,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('name', 'name')],
                                 {'name': 'name'})
 
+    def test_baremetal_create_with_network_interface(self):
+        self.check_with_options(['--network-interface', 'neutron'],
+                                [('network_interface', 'neutron')],
+                                {'network_interface': 'neutron'})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -315,7 +320,8 @@ class TestBaremetalList(TestBaremetal):
                    'Target Power State', 'Target Provision State',
                    'Target RAID configuration',
                    'Updated At', 'Inspection Finished At',
-                   'Inspection Started At', 'UUID', 'Name')
+                   'Inspection Started At', 'UUID', 'Name',
+                   'Network Interface')
         self.assertEqual(collist, columns)
         datalist = ((
             '',
@@ -345,6 +351,7 @@ class TestBaremetalList(TestBaremetal):
             '',
             baremetal_fakes.baremetal_uuid,
             baremetal_fakes.baremetal_name,
+            '',
         ), )
         self.assertEqual(datalist, tuple(data))
 
@@ -799,6 +806,25 @@ class TestBaremetalSet(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/driver', 'value': 'xxxxx', 'op': 'add'}]
+        )
+
+    def test_baremetal_set_network_interface(self):
+        arglist = [
+            'node_uuid',
+            '--network-interface', 'xxxxx',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('network_interface', 'xxxxx')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/network_interface', 'value': 'xxxxx', 'op': 'add'}]
         )
 
     def test_baremetal_set_extra(self):

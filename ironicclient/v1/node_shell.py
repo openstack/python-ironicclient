@@ -202,10 +202,16 @@ def do_node_list(cc, args):
     '-n', '--name',
     metavar='<name>',
     help="Unique name for the node.")
+@cliutils.arg(
+    '--network-interface',
+    metavar='<network_interface>',
+    help='Network interface used for switching node to cleaning/provisioning '
+         'networks.')
 def do_node_create(cc, args):
     """Register a new node with the Ironic service."""
     field_list = ['chassis_uuid', 'driver', 'driver_info',
-                  'properties', 'extra', 'uuid', 'name']
+                  'properties', 'extra', 'uuid', 'name',
+                  'network_interface']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'driver_info')

@@ -144,6 +144,18 @@ def do_port_list(cc, args):
     required=True,
     help='UUID of the node that this port belongs to.')
 @cliutils.arg(
+    '-l', '--local-link-connection',
+    metavar="<key=value>",
+    action='append',
+    help="Key/value metadata describing Local link connection information. "
+    "Valid keys are switch_info, switch_id, port_id."
+    "Can be specified multiple times.")
+@cliutils.arg(
+    '--pxe-enabled',
+    metavar='<boolean>',
+    help='Indicates whether this Port should be used when '
+         'PXE booting this Node.')
+@cliutils.arg(
     '-e', '--extra',
     metavar="<key=value>",
     action='append',
@@ -155,10 +167,12 @@ def do_port_list(cc, args):
     help="UUID of the port.")
 def do_port_create(cc, args):
     """Create a new port."""
-    field_list = ['address', 'extra', 'node_uuid', 'uuid']
+    field_list = ['address', 'extra', 'node_uuid', 'uuid',
+                  'local_link_connection', 'pxe_enabled']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'extra')
+    fields = utils.args_array_to_dict(fields, 'local_link_connection')
     port = cc.port.create(**fields)
 
     data = dict([(f, getattr(port, f, '')) for f in field_list])

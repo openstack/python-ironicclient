@@ -27,7 +27,8 @@ class Port(base.Resource):
 
 class PortManager(base.CreateManager):
     resource_class = Port
-    _creation_attributes = ['address', 'extra', 'node_uuid', 'uuid']
+    _creation_attributes = ['address', 'extra', 'local_link_connection',
+                            'node_uuid', 'pxe_enabled', 'uuid']
     _resource_name = 'ports'
 
     def list(self, address=None, limit=None, marker=None, sort_key=None,
