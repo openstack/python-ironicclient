@@ -145,7 +145,7 @@ class NodeSanityTestIronicClient(base.FunctionalTestBase):
 
         1) create node
         2) check that power state is None
-        3) set power state to On
+        3) set power state to 'off'
         4) check that power state has been changed successfully
         """
         node_show = self.show_node(self.node['uuid'])
