@@ -16,6 +16,8 @@
 from ironicclient.common import filecache
 from ironicclient.common import http
 from ironicclient.common.http import DEFAULT_VER
+from ironicclient.common.i18n import _
+from ironicclient import exc
 from ironicclient.v1 import chassis
 from ironicclient.v1 import driver
 from ironicclient.v1 import node
@@ -32,14 +34,19 @@ class Client(object):
                             http requests. (optional)
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, endpoint=None, *args, **kwargs):
         """Initialize a new client for the Ironic v1 API."""
         if kwargs.get('os_ironic_api_version'):
             kwargs['api_version_select_state'] = "user"
         else:
+            if not endpoint:
+                raise exc.EndpointException(
+                    _("Must provide 'endpoint' if os_ironic_api_version "
+                      "isn't specified"))
+
             # If the user didn't specify a version, use a cached version if
             # one has been stored
-            host, netport = http.get_server(args[0])
+            host, netport = http.get_server(endpoint)
             saved_version = filecache.retrieve_data(host=host, port=netport)
             if saved_version:
                 kwargs['api_version_select_state'] = "cached"
@@ -48,7 +55,8 @@ class Client(object):
                 kwargs['api_version_select_state'] = "default"
                 kwargs['os_ironic_api_version'] = DEFAULT_VER
 
-        self.http_client = http._construct_http_client(*args, **kwargs)
+        self.http_client = http._construct_http_client(
+            endpoint, *args, **kwargs)
 
         self.chassis = chassis.ChassisManager(self.http_client)
         self.node = node.NodeManager(self.http_client)

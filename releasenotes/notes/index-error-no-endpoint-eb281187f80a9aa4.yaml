@@ -1,0 +1,5 @@
+---
+fixes:
+  - Fail with EndpointException instead of IndexError while creating
+    v1 client without ``endpoint`` argument if os_ironic_api_version
+    isn't specified.
