@@ -38,6 +38,7 @@ NODE1 = {'id': 123,
          'driver_info': {'user': 'foo', 'password': 'bar'},
          'properties': {'num_cpu': 4},
          'name': 'fake-node-1',
+         'resource_class': 'foo',
          'extra': {}}
 NODE2 = {'id': 456,
          'uuid': '66666666-7777-8888-9999-111111111111',
@@ -47,6 +48,7 @@ NODE2 = {'id': 456,
          'driver': 'fake too',
          'driver_info': {'user': 'foo', 'password': 'bar'},
          'properties': {'num_cpu': 4},
+         'resource_class': 'bar',
          'extra': {}}
 PORT = {'id': 456,
         'uuid': '11111111-2222-3333-4444-555555555555',
@@ -165,6 +167,13 @@ fake_responses = {
         )
     },
     '/v1/nodes/?driver=fake':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1]},
+        )
+    },
+    '/v1/nodes/?resource_class=foo':
     {
         'GET': (
             {},
@@ -543,6 +552,15 @@ class NodeManagerTest(testtools.TestCase):
         nodes = self.mgr.list(driver="fake")
         expect = [
             ('GET', '/v1/nodes/?driver=fake', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_resource_class(self):
+        nodes = self.mgr.list(resource_class="foo")
+        expect = [
+            ('GET', '/v1/nodes/?resource_class=foo', {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))

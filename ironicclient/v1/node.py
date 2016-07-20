@@ -38,12 +38,12 @@ class NodeManager(base.CreateManager):
     resource_class = Node
     _creation_attributes = ['chassis_uuid', 'driver', 'driver_info',
                             'extra', 'uuid', 'properties', 'name',
-                            'network_interface']
+                            'network_interface', 'resource_class']
     _resource_name = 'nodes'
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
              detail=False, sort_key=None, sort_dir=None, fields=None,
-             provision_state=None, driver=None):
+             provision_state=None, driver=None, resource_class=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -84,6 +84,9 @@ class NodeManager(base.CreateManager):
         :param driver: Optional. String value to get only nodes using that
                        driver.
 
+        :param resource_class: Optional. String value to get only nodes
+                               with the given resource class set.
+
         :returns: A list of nodes.
 
         """
@@ -104,6 +107,8 @@ class NodeManager(base.CreateManager):
             filters.append('provision_state=%s' % provision_state)
         if driver is not None:
             filters.append('driver=%s' % driver)
+        if resource_class is not None:
+            filters.append('resource_class=%s' % resource_class)
 
         path = ''
         if detail:

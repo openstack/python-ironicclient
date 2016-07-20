@@ -117,6 +117,11 @@ def do_node_show(cc, args):
     default=[],
     help="One or more node fields. Only these fields will be fetched from "
          "the server. Can not be used when '--detail' is specified.")
+@cliutils.arg(
+    '--resource-class',
+    dest='resource_class',
+    metavar='<resource class>',
+    help="List nodes using specified resource class.")
 def do_node_list(cc, args):
     """List the nodes which are registered with the Ironic service."""
     params = {}
@@ -131,6 +136,9 @@ def do_node_list(cc, args):
 
     if args.driver is not None:
         params['driver'] = args.driver
+
+    if args.resource_class is not None:
+        params['resource_class'] = args.resource_class
 
     if args.detail:
         fields = res_fields.NODE_DETAILED_RESOURCE.fields
@@ -207,11 +215,16 @@ def do_node_list(cc, args):
     metavar='<network_interface>',
     help='Network interface used for switching node to cleaning/provisioning '
          'networks.')
+@cliutils.arg(
+    '--resource-class',
+    metavar='<resource_class>',
+    help='Resource class for classifying or grouping nodes. Used, for '
+         'example, to classify nodes in Nova\'s placement engine.')
 def do_node_create(cc, args):
     """Register a new node with the Ironic service."""
     field_list = ['chassis_uuid', 'driver', 'driver_info',
                   'properties', 'extra', 'uuid', 'name',
-                  'network_interface']
+                  'network_interface', 'resource_class']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'driver_info')
