@@ -23,6 +23,7 @@ from ironicclient import exc
 from ironicclient.v1 import chassis
 from ironicclient.v1 import conductor
 from ironicclient.v1 import driver
+from ironicclient.v1 import events
 from ironicclient.v1 import node
 from ironicclient.v1 import port
 from ironicclient.v1 import portgroup
@@ -99,6 +100,7 @@ class Client(object):
         self.driver = driver.DriverManager(self.http_client)
         self.portgroup = portgroup.PortgroupManager(self.http_client)
         self.conductor = conductor.ConductorManager(self.http_client)
+        self.events = events.EventManager(self.http_client)
 
     @property
     def current_api_version(self):
