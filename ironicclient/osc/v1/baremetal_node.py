@@ -651,14 +651,6 @@ class ShowBaremetalNode(show.ShowOne):
     """Show baremetal node details"""
 
     log = logging.getLogger(__name__ + ".ShowBaremetalNode")
-    LONG_FIELDS = [
-        'extra',
-        'properties',
-        'ports',
-        'driver_info',
-        'driver_internal_info',
-        'instance_info',
-    ]
 
     def get_parser(self, prog_name):
         parser = super(ShowBaremetalNode, self).get_parser(prog_name)
