@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Extend the OpenStackClient plugin with new chassis commands:
+
+    * openstack baremetal chassis create
+    * openstack baremetal chassis delete
+    * openstack baremetal chassis list
+    * openstack baremetal chassis set
+    * openstack baremetal chassis show
+    * openstack baremetal chassis unset
