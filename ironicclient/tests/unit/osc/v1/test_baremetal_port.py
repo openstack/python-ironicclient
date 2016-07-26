@@ -132,3 +132,50 @@ class TestShowBaremetalPort(TestBaremetalPort):
         self.assertRaises(oscutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
+
+
+class TestBaremetalPortUnset(TestBaremetalPort):
+    def setUp(self):
+        super(TestBaremetalPortUnset, self).setUp()
+
+        self.baremetal_mock.port.update.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None,
+                copy.deepcopy(baremetal_fakes.BAREMETAL_PORT),
+                loaded=True))
+
+        self.cmd = baremetal_port.UnsetBaremetalPort(self.app, None)
+
+    def test_baremetal_port_unset_no_options(self):
+        arglist = []
+        verifylist = []
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_port_unset_extra(self):
+        arglist = ['port', '--extra', 'foo']
+        verifylist = [('port', 'port'),
+                      ('extra', ['foo'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port',
+            [{'path': '/extra/foo', 'op': 'remove'}])
+
+    def test_baremetal_port_unset_multiple_extras(self):
+        arglist = ['port',
+                   '--extra', 'foo',
+                   '--extra', 'bar']
+        verifylist = [('port', 'port'),
+                      ('extra', ['foo', 'bar'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port',
+            [{'path': '/extra/foo', 'op': 'remove'},
+             {'path': '/extra/bar', 'op': 'remove'}])
