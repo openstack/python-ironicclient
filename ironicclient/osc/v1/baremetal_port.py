@@ -186,3 +186,59 @@ class UnsetBaremetalPort(command.Command):
             self.log.warning("Please specify what to unset.")
 
         baremetal_client.port.update(parsed_args.port, properties)
+
+
+class SetBaremetalPort(command.Command):
+    """Set baremetal port properties."""
+
+    log = logging.getLogger(__name__ + ".SetBaremetalPort")
+
+    def get_parser(self, prog_name):
+        parser = super(SetBaremetalPort, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'port',
+            metavar='<port>',
+            help="UUID of the port")
+
+        parser.add_argument(
+            '--node',
+            dest='node_uuid',
+            metavar='<uuid>',
+            help='Set UUID of the node that this port belongs to')
+
+        parser.add_argument(
+            "--address",
+            metavar="<address>",
+            dest='address',
+            help="Set MAC address for this port")
+
+        parser.add_argument(
+            "--extra",
+            metavar="<key=value>",
+            action='append',
+            help='Extra to set on this baremetal port '
+                 '(repeat option to set multiple extras)')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        properties = []
+        if parsed_args.node_uuid:
+            node_uuid = ["node_uuid=%s" % parsed_args.node_uuid]
+            properties.extend(utils.args_array_to_patch(
+                'add', node_uuid))
+        if parsed_args.address:
+            address = ["address=%s" % parsed_args.address]
+            properties.extend(utils.args_array_to_patch('add', address))
+        if parsed_args.extra:
+            properties.extend(utils.args_array_to_patch(
+                'add', ['extra/' + x for x in parsed_args.extra]))
+        if not properties:
+            self.log.warning("Please specify what to set.")
+
+        baremetal_client.port.update(parsed_args.port, properties)
