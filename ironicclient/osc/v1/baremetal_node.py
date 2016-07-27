@@ -21,7 +21,7 @@ import logging
 from osc_lib.command import command
 from osc_lib import utils as oscutils
 
-from ironicclient.common.i18n import _
+from ironicclient.common.i18n import _, _LW
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
@@ -902,6 +902,8 @@ class SetBaremetalNode(command.Command):
                         in parsed_args.instance_info]))
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
+        else:
+            self.log.warning(_LW("Please specify what to set."))
 
 
 class SetBaremetal(SetBaremetalNode):
@@ -1097,6 +1099,8 @@ class UnsetBaremetalNode(command.Command):
                               ['chassis_uuid']))
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
+        else:
+            self.log.warning(_LW("Please specify what to unset."))
 
 
 class UnsetBaremetal(UnsetBaremetalNode):
