@@ -156,6 +156,10 @@ class CreateBaremetalNode(show.ShowOne):
             metavar='<network_interface>',
             help='Network interface used for switching node to '
                  'cleaning/provisioning networks.')
+        parser.add_argument(
+            '--resource-class',
+            metavar='<resource_class>',
+            help='Resource class for mapping nodes to Nova flavors')
 
         return parser
 
@@ -166,7 +170,7 @@ class CreateBaremetalNode(show.ShowOne):
 
         field_list = ['chassis_uuid', 'driver', 'driver_info',
                       'properties', 'extra', 'uuid', 'name',
-                      'network_interface']
+                      'network_interface', 'resource_class']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'driver_info')
@@ -326,6 +330,11 @@ class ListBaremetalNode(lister.Lister):
             choices=self.PROVISION_STATES,
             help="Limit list to nodes in <provision state>. One of %s." % (
                  ", ".join(self.PROVISION_STATES)))
+        parser.add_argument(
+            '--resource-class',
+            dest='resource_class',
+            metavar='<resource class>',
+            help="Limit list to nodes with resource class <resource class>")
         display_group = parser.add_mutually_exclusive_group(required=False)
         display_group.add_argument(
             '--long',
@@ -365,6 +374,8 @@ class ListBaremetalNode(lister.Lister):
             params['maintenance'] = parsed_args.maintenance
         if parsed_args.provision_state:
             params['provision_state'] = parsed_args.provision_state
+        if parsed_args.resource_class:
+            params['resource_class'] = parsed_args.resource_class
         if parsed_args.long:
             params['detail'] = parsed_args.long
             columns = res_fields.NODE_DETAILED_RESOURCE.fields
@@ -566,6 +577,11 @@ class SetBaremetalNode(command.Command):
             help='Set the network interface for the node',
         )
         parser.add_argument(
+            '--resource-class',
+            metavar='<resource_class>',
+            help='Set the resource class for the node',
+        )
+        parser.add_argument(
             "--property",
             metavar="<key=value>",
             action='append',
@@ -619,6 +635,11 @@ class SetBaremetalNode(command.Command):
                 "network_interface=%s" % parsed_args.network_interface]
             properties.extend(utils.args_array_to_patch(
                 'add', network_interface))
+        if parsed_args.resource_class:
+            resource_class = [
+                "resource_class=%s" % parsed_args.resource_class]
+            properties.extend(utils.args_array_to_patch(
+                'add', resource_class))
         if parsed_args.property:
             properties.extend(utils.args_array_to_patch(
                 'add', ['properties/' + x for x in parsed_args.property]))
@@ -745,6 +766,12 @@ class UnsetBaremetalNode(command.Command):
             help="Unset the name of the node",
         )
         parser.add_argument(
+            "--resource-class",
+            dest='resource_class',
+            action='store_true',
+            help="Unset the resource class of the node",
+        )
+        parser.add_argument(
             '--property',
             metavar='<key>',
             action='append',
@@ -787,6 +814,9 @@ class UnsetBaremetalNode(command.Command):
         if parsed_args.name:
             properties.extend(utils.args_array_to_patch('remove',
                               ['name']))
+        if parsed_args.resource_class:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['resource_class']))
         if parsed_args.property:
             properties.extend(utils.args_array_to_patch('remove',
                               ['properties/' + x

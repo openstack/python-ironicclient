@@ -167,6 +167,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('network_interface', 'neutron')],
                                 {'network_interface': 'neutron'})
 
+    def test_baremetal_create_with_resource_class(self):
+        self.check_with_options(['--resource-class', 'foo'],
+                                [('resource_class', 'foo')],
+                                {'resource_class': 'foo'})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -317,6 +322,7 @@ class TestBaremetalList(TestBaremetal):
                    'Maintenance Reason', 'Power State', 'Properties',
                    'Provisioning State', 'Provision Updated At',
                    'Current RAID configuration', 'Reservation',
+                   'Resource Class',
                    'Target Power State', 'Target Provision State',
                    'Target RAID configuration',
                    'Updated At', 'Inspection Finished At',
@@ -340,6 +346,7 @@ class TestBaremetalList(TestBaremetal):
             baremetal_fakes.baremetal_power_state,
             '',
             baremetal_fakes.baremetal_provision_state,
+            '',
             '',
             '',
             '',
@@ -438,6 +445,30 @@ class TestBaremetalList(TestBaremetal):
         self.assertRaises(oscutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
+
+    def test_baremetal_list_resource_class(self):
+        arglist = [
+            '--resource-class', 'foo',
+        ]
+        verifylist = [
+            ('resource_class', 'foo'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        columns, data = self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'resource_class': 'foo'
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
 
     def test_baremetal_list_fields(self):
         arglist = [
@@ -827,6 +858,25 @@ class TestBaremetalSet(TestBaremetal):
             [{'path': '/network_interface', 'value': 'xxxxx', 'op': 'add'}]
         )
 
+    def test_baremetal_set_resource_class(self):
+        arglist = [
+            'node_uuid',
+            '--resource-class', 'foo',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('resource_class', 'foo')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/resource_class', 'value': 'foo', 'op': 'add'}]
+        )
+
     def test_baremetal_set_extra(self):
         arglist = [
             'node_uuid',
@@ -1122,6 +1172,25 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/name', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_resource_class(self):
+        arglist = [
+            'node_uuid',
+            '--resource-class',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('resource_class', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/resource_class', 'op': 'remove'}]
         )
 
     def test_baremetal_unset_extra(self):

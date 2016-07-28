@@ -52,6 +52,7 @@ class NodeShellTest(utils.BaseTestCase):
                'provision_state',
                'provision_updated_at',
                'reservation',
+               'resource_class',
                'target_power_state',
                'target_provision_state',
                'updated_at',
@@ -749,7 +750,7 @@ class NodeShellTest(utils.BaseTestCase):
                               maintenance=None, marker=None, limit=None,
                               sort_dir=None, sort_key=None, detail=False,
                               fields=None, provision_state=None, driver=None,
-                              json=False):
+                              json=False, resource_class=None):
         args = mock.MagicMock()
         args.node = node
         args.associated = associated
@@ -763,6 +764,7 @@ class NodeShellTest(utils.BaseTestCase):
         args.fields = fields
         args.driver = driver
         args.json = json
+        args.resource_class = resource_class
 
         return args
 
@@ -816,6 +818,24 @@ class NodeShellTest(utils.BaseTestCase):
 
         n_shell.do_node_list(client_mock, args)
         client_mock.node.list.assert_called_once_with(driver='fake',
+                                                      detail=True)
+
+    def test_do_node_list_resource_class(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(resource_class='foo',
+                                          detail=False)
+
+        n_shell.do_node_list(client_mock, args)
+        client_mock.node.list.assert_called_once_with(resource_class='foo',
+                                                      detail=False)
+
+    def test_do_node_list_detail_resource_class(self):
+        client_mock = mock.MagicMock()
+        args = self._get_client_mock_args(resource_class='foo',
+                                          detail=True)
+
+        n_shell.do_node_list(client_mock, args)
+        client_mock.node.list.assert_called_once_with(resource_class='foo',
                                                       detail=True)
 
     def test_do_node_list_sort_key(self):
