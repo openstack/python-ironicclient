@@ -143,7 +143,7 @@ class FunctionalTestBase(base.ClientTestBase):
             return self.client.cmd_with_auth('ironic',
                                              action, flags, params)
 
-    def ironic(self, action, flags='', params=''):
+    def ironic(self, action, flags='', params='', parse=True):
         """Return parsed list of dicts with basic item info.
 
         :param action: the cli command to run using Ironic
@@ -152,9 +152,11 @@ class FunctionalTestBase(base.ClientTestBase):
         :type flags: string
         :param params: any optional positional args to use
         :type params: string
+        :param parse: return parsed list or raw output
+        :type parse: bool
         """
         output = self._ironic(action=action, flags=flags, params=params)
-        return self.parser.listing(output)
+        return self.parser.listing(output) if parse else output
 
     def get_table_headers(self, action, flags='', params=''):
         output = self._ironic(action=action, flags=flags, params=params)
