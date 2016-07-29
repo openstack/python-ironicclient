@@ -48,6 +48,7 @@ class Resource(object):
         'inspection_started_at': 'Inspection Started At',
         'instance_info': 'Instance Info',
         'instance_uuid': 'Instance UUID',
+        'internal_info': 'Internal Info',
         'last_error': 'Last Error',
         'maintenance': 'Maintenance',
         'maintenance_reason': 'Maintenance Reason',
@@ -198,6 +199,7 @@ PORT_DETAILED_RESOURCE = Resource(
      'local_link_connection',
      'pxe_enabled',
      'updated_at',
+     'internal_info',
      ],
     sort_excluded=[
         'extra',
@@ -205,6 +207,7 @@ PORT_DETAILED_RESOURCE = Resource(
         # the "ports" database table. "node_id" is stored, but it is internal
         # to ironic. See bug #1443003 for more details.
         'node_uuid',
+        'internal_info',
     ])
 PORT_RESOURCE = Resource(
     ['uuid',

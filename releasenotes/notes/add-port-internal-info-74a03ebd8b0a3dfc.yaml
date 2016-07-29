@@ -1,0 +1,5 @@
+---
+features:
+  - Added ``internal_info`` field to port resource, so that it is now shown
+    when issuing ``ironic port-show`` and ``ironic port-list --detail``
+    commands.
