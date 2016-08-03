@@ -120,7 +120,7 @@ class NegativeChassisCreateTestsIronicClient(base.FunctionalTestBase):
         4) check that command using --uuid argument triggers an exception
         """
         invalid_uuid = data_utils.rand_uuid()[:-1]
-        ex_text = r'Expected a uuid but received {0}'.format(invalid_uuid)
+        ex_text = r'Expected a UUID but received {0}'.format(invalid_uuid)
         six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
                               self.create_chassis,
                               params='-u {0}'.format(invalid_uuid))
