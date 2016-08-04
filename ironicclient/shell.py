@@ -419,10 +419,10 @@ def main():
         IronicShell().main(sys.argv[1:])
     except KeyboardInterrupt:
         print("... terminating ironic client", file=sys.stderr)
-        sys.exit(130)
+        return 130
     except Exception as e:
         print(encodeutils.safe_encode(six.text_type(e)), file=sys.stderr)
-        sys.exit(1)
+        return 1
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
