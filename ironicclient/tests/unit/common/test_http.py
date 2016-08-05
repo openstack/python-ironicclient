@@ -380,7 +380,7 @@ class HttpClientTest(utils.BaseTestCase):
         self.assertEqual('test_ca', client.session.verify)
         self.assertEqual(('test_cert', 'test_key'), client.session.cert)
 
-    @mock.patch. object(http.LOG, 'debug', autospec=True)
+    @mock.patch.object(http.LOG, 'debug', autospec=True)
     def test_log_curl_request_with_body_and_header(self, mock_log):
         client = http.HTTPClient('http://test')
         headers = {'header1': 'value1'}
@@ -395,7 +395,7 @@ class HttpClientTest(utils.BaseTestCase):
                          " -d 'example body' http://test/v1/nodes",
                          mock_log.call_args[0][0])
 
-    @mock.patch. object(http.LOG, 'debug', autospec=True)
+    @mock.patch.object(http.LOG, 'debug', autospec=True)
     def test_log_curl_request_with_certs(self, mock_log):
         headers = {'header1': 'value1'}
         client = http.HTTPClient('https://test', key_file='key',
@@ -411,7 +411,7 @@ class HttpClientTest(utils.BaseTestCase):
                          "--cert cert --key key https://test/v1/test",
                          mock_log.call_args[0][0])
 
-    @mock.patch. object(http.LOG, 'debug', autospec=True)
+    @mock.patch.object(http.LOG, 'debug', autospec=True)
     def test_log_curl_request_with_insecure_param(self, mock_log):
         headers = {'header1': 'value1'}
         http_client_object = http.HTTPClient('https://test', insecure=True,
