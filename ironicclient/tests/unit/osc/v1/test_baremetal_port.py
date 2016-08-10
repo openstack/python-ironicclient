@@ -59,7 +59,7 @@ class TestCreateBaremetalPort(TestBaremetalPort):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         args = {
@@ -119,7 +119,7 @@ class TestShowBaremetalPort(TestBaremetalPort):
         verifylist = [('address', True)]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         args = {'AA:BB:CC:DD:EE:FF'}
         self.baremetal_mock.port.get_by_address.assert_called_with(

@@ -373,7 +373,7 @@ class TestBaremetalList(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         kwargs = {
@@ -397,7 +397,7 @@ class TestBaremetalList(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         kwargs = {
@@ -421,7 +421,7 @@ class TestBaremetalList(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         kwargs = {
@@ -457,7 +457,7 @@ class TestBaremetalList(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         kwargs = {
@@ -481,7 +481,7 @@ class TestBaremetalList(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         kwargs = {
@@ -506,7 +506,7 @@ class TestBaremetalList(TestBaremetal):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         kwargs = {
@@ -1012,7 +1012,7 @@ class TestBaremetalShow(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         args = ['xxx-xxxxxx-xxxx']
@@ -1034,7 +1034,7 @@ class TestBaremetalShow(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         args = ['xxxxx']
@@ -1057,7 +1057,7 @@ class TestBaremetalShow(TestBaremetal):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         args = ['xxxxx']
