@@ -48,12 +48,23 @@ class CreateBaremetalPort(show.ShowOne):
             help="Record arbitrary key/value metadata. "
                  "Can be specified multiple times.")
         parser.add_argument(
-            '-l', '--local-link-connection',
+            '--local-link-connection',
             metavar="<key=value>",
             action='append',
             help="Key/value metadata describing Local link connection "
                  "information. Valid keys are switch_info, switch_id, "
-                 "port_id. Can be specified multiple times.")
+                 "port_id; switch_id and port_id are obligatory. Can be "
+                 "specified multiple times.")
+        parser.add_argument(
+            '-l',
+            dest='local_link_connection_deprecated',
+            metavar="<key=value>",
+            action='append',
+            help="DEPRECATED. Please use --local-link-connection instead. "
+                 "Key/value metadata describing Local link connection "
+                 "information. Valid keys are switch_info, switch_id, "
+                 "port_id; switch_id and port_id are obligatory. Can be "
+                 "specified multiple times.")
         parser.add_argument(
             '--pxe-enabled',
             metavar='<boolean>',
@@ -65,6 +76,18 @@ class CreateBaremetalPort(show.ShowOne):
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)" % parsed_args)
         baremetal_client = self.app.client_manager.baremetal
+
+        if parsed_args.local_link_connection_deprecated:
+            self.log.warning("Please use --local-link-connection instead of "
+                             "-l, as it is deprecated and will be removed in "
+                             "future releases.")
+            # It is parsed to either None, or to an array
+            if parsed_args.local_link_connection:
+                parsed_args.local_link_connection.extend(
+                    parsed_args.local_link_connection_deprecated)
+            else:
+                parsed_args.local_link_connection = (
+                    parsed_args.local_link_connection_deprecated)
 
         field_list = ['address', 'extra', 'node_uuid', 'pxe_enabled',
                       'local_link_connection']

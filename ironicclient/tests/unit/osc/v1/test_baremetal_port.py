@@ -16,6 +16,7 @@
 
 import copy
 
+import mock
 from openstackclient.tests import utils as oscutils
 
 from ironicclient.osc.v1 import baremetal_port
@@ -68,6 +69,56 @@ class TestCreateBaremetalPort(TestBaremetalPort):
         }
 
         self.baremetal_mock.port.create.assert_called_once_with(**args)
+
+    def _test_baremetal_port_create_llc_warning(self, additional_args,
+                                                additional_verify_items):
+        arglist = [
+            baremetal_fakes.baremetal_port_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+        ]
+        arglist.extend(additional_args)
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_port_address),
+        ]
+        verifylist.extend(additional_verify_items)
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.log = mock.Mock()
+
+        # DisplayCommandBase.take_action() returns two tuples
+        columns, data = self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = {
+            'address': baremetal_fakes.baremetal_port_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'local_link_connection': {'switch_id': 'aa:bb:cc:dd:ee:ff',
+                                      'port_id': 'eth0'}
+        }
+
+        self.baremetal_mock.port.create.assert_called_once_with(**args)
+        self.cmd.log.warning.assert_called()
+
+    def test_baremetal_port_create_llc_warning_some_deprecated(self):
+        self._test_baremetal_port_create_llc_warning(
+            additional_args=['-l', 'port_id=eth0', '--local-link-connection',
+                             'switch_id=aa:bb:cc:dd:ee:ff'],
+            additional_verify_items=[
+                ('local_link_connection_deprecated', ['port_id=eth0']),
+                ('local_link_connection', ['switch_id=aa:bb:cc:dd:ee:ff'])]
+        )
+
+    def test_baremetal_port_create_llc_warning_all_deprecated(self):
+        self._test_baremetal_port_create_llc_warning(
+            additional_args=['-l', 'port_id=eth0', '-l',
+                             'switch_id=aa:bb:cc:dd:ee:ff'],
+            additional_verify_items=[('local_link_connection_deprecated',
+                                      ['port_id=eth0',
+                                       'switch_id=aa:bb:cc:dd:ee:ff'])]
+        )
 
 
 class TestShowBaremetalPort(TestBaremetalPort):
