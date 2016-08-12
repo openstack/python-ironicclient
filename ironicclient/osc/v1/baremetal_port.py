@@ -17,6 +17,7 @@
 import itertools
 import logging
 
+from cliff import command
 from cliff import show
 
 from ironicclient.common import utils
@@ -149,3 +150,39 @@ class ShowBaremetalPort(show.ShowOne):
 
         port.pop("links", None)
         return zip(*sorted(port.items()))
+
+
+class UnsetBaremetalPort(command.Command):
+    """Unset baremetal port properties."""
+    log = logging.getLogger(__name__ + ".UnsetBaremetalPort")
+
+    def get_parser(self, prog_name):
+        parser = super(UnsetBaremetalPort, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'port',
+            metavar='<port>',
+            help="UUID of the port.")
+
+        parser.add_argument(
+            "--extra",
+            metavar="<key>",
+            action='append',
+            help='Extra to unset on this baremetal port '
+                 '(repeat option to unset multiple extras)')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        properties = []
+        if parsed_args.extra:
+            properties.extend(utils.args_array_to_patch(
+                'remove',
+                ['extra/' + x for x in parsed_args.extra]))
+        if not properties:
+            self.log.warning("Please specify what to unset.")
+
+        baremetal_client.port.update(parsed_args.port, properties)
