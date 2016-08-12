@@ -427,7 +427,7 @@ class MaintenanceSetBaremetalNode(command.Command):
             '--reason',
             metavar='<reason>',
             default=None,
-            help=("Reason for setting maintenance mode."))
+            help="Reason for setting maintenance mode.")
 
         return parser
 
