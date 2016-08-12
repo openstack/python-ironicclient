@@ -271,7 +271,9 @@ def do_node_delete(cc, args):
     action='append',
     default=[],
     help="Attribute to add, replace, or remove. Can be specified "
-         "multiple times. For 'remove', only <path> is necessary.")
+         "multiple times. For 'remove', only <path> is necessary. "
+         "For nested attributes, separate the components with slashes, eg "
+         "'driver_info/deploy_kernel=uuid'.")
 def do_node_update(cc, args):
     """Update information about a registered node."""
     patch = utils.args_array_to_patch(args.op, args.attributes[0])
