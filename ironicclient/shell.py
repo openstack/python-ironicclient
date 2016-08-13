@@ -43,8 +43,8 @@ class IronicShell(object):
         parser = argparse.ArgumentParser(
             prog='ironic',
             description=__doc__.strip(),
-            epilog='See "ironic help COMMAND" '
-                   'for help on a specific command.',
+            epilog=_('See "ironic help COMMAND" '
+                     'for help on a specific command.'),
             add_help=False,
             formatter_class=HelpFormatter,
         )
@@ -66,84 +66,84 @@ class IronicShell(object):
         parser.add_argument('--debug',
                             default=bool(cliutils.env('IRONICCLIENT_DEBUG')),
                             action='store_true',
-                            help='Defaults to env[IRONICCLIENT_DEBUG]')
+                            help=_('Defaults to env[IRONICCLIENT_DEBUG]'))
 
         parser.add_argument('--json',
                             default=False,
                             action='store_true',
-                            help='Print JSON response without formatting.')
+                            help=_('Print JSON response without formatting.'))
 
         parser.add_argument('-v', '--verbose',
                             default=False, action="store_true",
-                            help="Print more verbose output")
+                            help=_('Print more verbose output'))
 
         # for backward compatibility only
         parser.add_argument('--cert-file',
                             dest='os_cert',
-                            help='DEPRECATED! Use --os-cert.')
+                            help=_('DEPRECATED! Use --os-cert.'))
 
         # for backward compatibility only
         parser.add_argument('--key-file',
                             dest='os_key',
-                            help='DEPRECATED! Use --os-key.')
+                            help=_('DEPRECATED! Use --os-key.'))
 
         # for backward compatibility only
         parser.add_argument('--ca-file',
                             dest='os_cacert',
-                            help='DEPRECATED! Use --os-cacert.')
+                            help=_('DEPRECATED! Use --os-cacert.'))
 
         parser.add_argument('--os-username',
                             default=cliutils.env('OS_USERNAME'),
-                            help='Defaults to env[OS_USERNAME]')
+                            help=_('Defaults to env[OS_USERNAME]'))
 
         parser.add_argument('--os_username',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-password',
                             default=cliutils.env('OS_PASSWORD'),
-                            help='Defaults to env[OS_PASSWORD]')
+                            help=_('Defaults to env[OS_PASSWORD]'))
 
         parser.add_argument('--os_password',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-tenant-id',
                             default=cliutils.env('OS_TENANT_ID'),
-                            help='Defaults to env[OS_TENANT_ID]')
+                            help=_('Defaults to env[OS_TENANT_ID]'))
 
         parser.add_argument('--os_tenant_id',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-tenant-name',
                             default=cliutils.env('OS_TENANT_NAME'),
-                            help='Defaults to env[OS_TENANT_NAME]')
+                            help=_('Defaults to env[OS_TENANT_NAME]'))
 
         parser.add_argument('--os_tenant_name',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-auth-url',
                             default=cliutils.env('OS_AUTH_URL'),
-                            help='Defaults to env[OS_AUTH_URL]')
+                            help=_('Defaults to env[OS_AUTH_URL]'))
 
         parser.add_argument('--os_auth_url',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-region-name',
                             default=cliutils.env('OS_REGION_NAME'),
-                            help='Defaults to env[OS_REGION_NAME]')
+                            help=_('Defaults to env[OS_REGION_NAME]'))
 
         parser.add_argument('--os_region_name',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-auth-token',
                             default=cliutils.env('OS_AUTH_TOKEN'),
-                            help='Defaults to env[OS_AUTH_TOKEN]')
+                            help=_('Defaults to env[OS_AUTH_TOKEN]'))
 
         parser.add_argument('--os_auth_token',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--ironic-url',
                             default=cliutils.env('IRONIC_URL'),
-                            help='Defaults to env[IRONIC_URL]')
+                            help=_('Defaults to env[IRONIC_URL]'))
 
         parser.add_argument('--ironic_url',
                             help=argparse.SUPPRESS)
@@ -151,17 +151,17 @@ class IronicShell(object):
         parser.add_argument('--ironic-api-version',
                             default=cliutils.env(
                                 'IRONIC_API_VERSION', default='1'),
-                            help='Accepts 1.x (where "x" is microversion) '
-                                 'or "latest", Defaults to '
-                                 'env[IRONIC_API_VERSION] or 1')
+                            help=_('Accepts 1.x (where "x" is microversion) '
+                                   'or "latest", Defaults to '
+                                   'env[IRONIC_API_VERSION] or 1'))
 
         parser.add_argument('--ironic_api_version',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-service-type',
                             default=cliutils.env('OS_SERVICE_TYPE'),
-                            help='Defaults to env[OS_SERVICE_TYPE] or '
-                                 '"baremetal"')
+                            help=_('Defaults to env[OS_SERVICE_TYPE] or '
+                                   '"baremetal"'))
 
         parser.add_argument('--os_service_type',
                             help=argparse.SUPPRESS)
@@ -169,10 +169,10 @@ class IronicShell(object):
         parser.add_argument('--os-endpoint',
                             dest='ironic_url',
                             default=cliutils.env('OS_SERVICE_ENDPOINT'),
-                            help='Specify an endpoint to use instead of '
-                                 'retrieving one from the service catalog '
-                                 '(via authentication). '
-                                 'Defaults to env[OS_SERVICE_ENDPOINT].')
+                            help=_('Specify an endpoint to use instead of '
+                                   'retrieving one from the service catalog '
+                                   '(via authentication). '
+                                   'Defaults to env[OS_SERVICE_ENDPOINT].'))
 
         parser.add_argument('--os_endpoint',
                             dest='ironic_url',
@@ -180,57 +180,55 @@ class IronicShell(object):
 
         parser.add_argument('--os-endpoint-type',
                             default=cliutils.env('OS_ENDPOINT_TYPE'),
-                            help='Defaults to env[OS_ENDPOINT_TYPE] or '
-                                 '"publicURL"')
+                            help=_('Defaults to env[OS_ENDPOINT_TYPE] or '
+                                   '"publicURL"'))
 
         parser.add_argument('--os_endpoint_type',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-user-domain-id',
                             default=cliutils.env('OS_USER_DOMAIN_ID'),
-                            help='Defaults to env[OS_USER_DOMAIN_ID].')
+                            help=_('Defaults to env[OS_USER_DOMAIN_ID].'))
 
         parser.add_argument('--os-user-domain-name',
                             default=cliutils.env('OS_USER_DOMAIN_NAME'),
-                            help='Defaults to env[OS_USER_DOMAIN_NAME].')
+                            help=_('Defaults to env[OS_USER_DOMAIN_NAME].'))
 
         parser.add_argument('--os-project-id',
                             default=cliutils.env('OS_PROJECT_ID'),
-                            help='Another way to specify tenant ID. '
-                                 'This option is mutually exclusive with '
-                                 ' --os-tenant-id. '
-                                 'Defaults to env[OS_PROJECT_ID].')
+                            help=_('Another way to specify tenant ID. '
+                                   'This option is mutually exclusive with '
+                                   ' --os-tenant-id. '
+                                   'Defaults to env[OS_PROJECT_ID].'))
 
         parser.add_argument('--os-project-name',
                             default=cliutils.env('OS_PROJECT_NAME'),
-                            help='Another way to specify tenant name. '
-                                 'This option is mutually exclusive with '
-                                 ' --os-tenant-name. '
-                                 'Defaults to env[OS_PROJECT_NAME].')
+                            help=_('Another way to specify tenant name. '
+                                   'This option is mutually exclusive with '
+                                   ' --os-tenant-name. '
+                                   'Defaults to env[OS_PROJECT_NAME].'))
 
         parser.add_argument('--os-project-domain-id',
                             default=cliutils.env('OS_PROJECT_DOMAIN_ID'),
-                            help='Defaults to env[OS_PROJECT_DOMAIN_ID].')
+                            help=_('Defaults to env[OS_PROJECT_DOMAIN_ID].'))
 
         parser.add_argument('--os-project-domain-name',
                             default=cliutils.env('OS_PROJECT_DOMAIN_NAME'),
-                            help='Defaults to env[OS_PROJECT_DOMAIN_NAME].')
+                            help=_('Defaults to env[OS_PROJECT_DOMAIN_NAME].'))
 
-        parser.add_argument('--max-retries', type=int,
-                            help='Maximum number of retries in case of '
-                            'conflict error (HTTP 409). '
-                            'Defaults to env[IRONIC_MAX_RETRIES] or %d. '
-                            'Use 0 to disable retrying.'
-                            % http.DEFAULT_MAX_RETRIES,
+        msg = _('Maximum number of retries in case of conflict error '
+                '(HTTP 409). Defaults to env[IRONIC_MAX_RETRIES] or %d. '
+                'Use 0 to disable retrying.') % http.DEFAULT_MAX_RETRIES
+        parser.add_argument('--max-retries', type=int, help=msg,
                             default=cliutils.env(
                                 'IRONIC_MAX_RETRIES',
                                 default=str(http.DEFAULT_MAX_RETRIES)))
 
-        parser.add_argument('--retry-interval', type=int,
-                            help='Amount of time (in seconds) between retries '
-                            'in case of conflict error (HTTP 409). '
-                            'Defaults to env[IRONIC_RETRY_INTERVAL] or %d.'
-                            % http.DEFAULT_RETRY_INTERVAL,
+        msg = _('Amount of time (in seconds) between retries '
+                'in case of conflict error (HTTP 409). '
+                'Defaults to env[IRONIC_RETRY_INTERVAL] '
+                'or %d.') % http.DEFAULT_RETRY_INTERVAL
+        parser.add_argument('--retry-interval', type=int, help=msg,
                             default=cliutils.env(
                                 'IRONIC_RETRY_INTERVAL',
                                 default=str(http.DEFAULT_RETRY_INTERVAL)))
@@ -394,7 +392,7 @@ class IronicShell(object):
             subcommand_parser.error(e)
 
     @cliutils.arg('command', metavar='<subcommand>', nargs='?',
-                  help='Display help for <subcommand>')
+                  help=_('Display help for <subcommand>'))
     def do_help(self, args):
         """Display help about this program or one of its subcommands."""
         if getattr(args, 'command', None):
@@ -418,7 +416,7 @@ def main():
     try:
         IronicShell().main(sys.argv[1:])
     except KeyboardInterrupt:
-        print("... terminating ironic client", file=sys.stderr)
+        print(_("... terminating ironic client"), file=sys.stderr)
         return 130
     except Exception as e:
         print(encodeutils.safe_encode(six.text_type(e)), file=sys.stderr)
