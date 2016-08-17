@@ -67,6 +67,13 @@ class AbortBaremetalNode(ProvisionStateBaremetalNode):
     PROVISION_STATE = 'abort'
 
 
+class AdoptBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'adopt'"""
+
+    log = logging.getLogger(__name__ + ".AdoptBaremetalNode")
+    PROVISION_STATE = 'adopt'
+
+
 class CleanBaremetalNode(ProvisionStateBaremetalNode):
     """Set provision state of baremetal node to 'clean'"""
 
@@ -271,7 +278,7 @@ class ListBaremetalNode(lister.Lister):
     log = logging.getLogger(__name__ + ".ListBaremetalNode")
 
     PROVISION_STATES = ['active', 'deleted', 'rebuild', 'inspect', 'provide',
-                        'manage', 'clean', 'abort']
+                        'manage', 'clean', 'adopt', 'abort']
 
     def get_parser(self, prog_name):
         parser = super(ListBaremetalNode, self).get_parser(prog_name)
