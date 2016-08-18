@@ -72,6 +72,82 @@ class AdoptBaremetalNode(ProvisionStateBaremetalNode):
     PROVISION_STATE = 'adopt'
 
 
+class BootdeviceSetBaremetalNode(command.Command):
+    """Set the boot device for a node"""
+
+    log = logging.getLogger(__name__ + ".BootdeviceSetBaremetalNode")
+
+    BOOT_DEVICES = ['pxe', 'disk', 'cdrom', 'bios', 'safe']
+
+    def get_parser(self, prog_name):
+        parser = super(BootdeviceSetBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node"
+        )
+        parser.add_argument(
+            'device',
+            metavar='<device>',
+            choices=self.BOOT_DEVICES,
+            help="One of %s" % (oscutils.format_list(self.BOOT_DEVICES))
+        )
+        parser.add_argument(
+            '--persistent',
+            dest='persistent',
+            action='store_true',
+            default=False,
+            help="Make changes persistent for all future boots"
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        baremetal_client.node.set_boot_device(
+            parsed_args.node,
+            parsed_args.device,
+            parsed_args.persistent)
+
+
+class BootdeviceShowBaremetalNode(command.ShowOne):
+    """Show the boot device information for a node"""
+
+    log = logging.getLogger(__name__ + ".BootdeviceShowBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(BootdeviceShowBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node"
+        )
+        parser.add_argument(
+            '--supported',
+            dest='supported',
+            action='store_true',
+            default=False,
+            help="Show the supported boot devices"
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        if parsed_args.supported:
+            info = baremetal_client.node.get_supported_boot_devices(
+                parsed_args.node)
+            boot_device_list = info.get('supported_boot_devices', [])
+            info['supported_boot_devices'] = ', '.join(boot_device_list)
+        else:
+            info = baremetal_client.node.get_boot_device(parsed_args.node)
+        return zip(*sorted(info.items()))
+
+
 class CleanBaremetalNode(ProvisionStateBaremetalNode):
     """Set provision state of baremetal node to 'clean'"""
 
@@ -533,6 +609,104 @@ class ManageBaremetalNode(ProvisionStateBaremetalNode):
 
     log = logging.getLogger(__name__ + ".ManageBaremetalNode")
     PROVISION_STATE = 'manage'
+
+
+class PassthruCallBaremetalNode(command.Command):
+    """Call a vendor passthu method for a node"""
+
+    log = logging.getLogger(__name__ + ".PassthuCallBaremetalNode")
+
+    HTTP_METHODS = ['POST', 'PUT', 'GET', 'DELETE', 'PATCH']
+
+    def get_parser(self, prog_name):
+        parser = super(PassthruCallBaremetalNode, self).get_parser(
+            prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node"
+        )
+        parser.add_argument(
+            'method',
+            metavar='<method>',
+            help="Vendor passthru method to be executed"
+        )
+        parser.add_argument(
+            '--arg',
+            metavar='<key=value>',
+            action='append',
+            help="Argument to pass to the passthru method (repeat option "
+                 "to specify multiple arguments)"
+        )
+        parser.add_argument(
+            '--http-method',
+            metavar='<http-method>',
+            choices=self.HTTP_METHODS,
+            default='POST',
+            help="The HTTP method to use in the passthru request. One of "
+                 "%s. Defaults to POST." %
+                 oscutils.format_list(self.HTTP_METHODS)
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        arguments = utils.args_array_to_dict(
+            {'args': parsed_args.arg}, 'args')['args']
+
+        # If there were no arguments for the method, arguments will still
+        # be an empty list. So make it an empty dict.
+        if not arguments:
+            arguments = {}
+
+        resp = baremetal_client.node.vendor_passthru(
+            parsed_args.node,
+            parsed_args.method,
+            http_method=parsed_args.http_method,
+            args=arguments)
+        if resp:
+            # Print the raw response; we don't know how it should be formatted
+            print(str(resp.to_dict()))
+
+
+class PassthruListBaremetalNode(command.Lister):
+    """List vendor passthru methods for a node"""
+
+    log = logging.getLogger(__name__ + ".PassthruListBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(PassthruListBaremetalNode, self).get_parser(
+            prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node"
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        methods = baremetal_client.node.get_vendor_passthru_methods(
+            parsed_args.node)
+        data = []
+        for method, response in methods.items():
+            response['name'] = method
+            response['http_methods'] = oscutils.format_list(
+                response['http_methods'])
+            data.append(response)
+
+        return (
+            res_fields.VENDOR_PASSTHRU_METHOD_RESOURCE.labels,
+            (oscutils.get_dict_properties(
+                s, res_fields.VENDOR_PASSTHRU_METHOD_RESOURCE.fields)
+             for s in data))
 
 
 class PowerBaremetalNode(command.Command):

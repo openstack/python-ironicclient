@@ -56,6 +56,92 @@ class TestAdopt(TestBaremetal):
             'node_uuid', 'adopt')
 
 
+class TestBootdeviceSet(TestBaremetal):
+    def setUp(self):
+        super(TestBootdeviceSet, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.BootdeviceSetBaremetalNode(self.app, None)
+
+    def test_bootdevice_set(self):
+        arglist = ['node_uuid', 'bios']
+        verifylist = [('node', 'node_uuid'),
+                      ('device', 'bios')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_boot_device.assert_called_once_with(
+            'node_uuid', 'bios', False)
+
+    def test_bootdevice_set_persistent(self):
+        arglist = ['node_uuid', 'bios', '--persistent']
+        verifylist = [('node', 'node_uuid'),
+                      ('device', 'bios'),
+                      ('persistent', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_boot_device.assert_called_once_with(
+            'node_uuid', 'bios', True)
+
+    def test_bootdevice_set_invalid_device(self):
+        arglist = ['node_uuid', 'foo']
+        verifylist = [('node', 'node_uuid'),
+                      ('device', 'foo')]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_bootdevice_set_device_only(self):
+        arglist = ['bios']
+        verifylist = [('device', 'bios')]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+
+class TestBootdeviceShow(TestBaremetal):
+    def setUp(self):
+        super(TestBootdeviceShow, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.BootdeviceShowBaremetalNode(self.app, None)
+
+        self.baremetal_mock.node.get_boot_device.return_value = {
+            "boot_device": "pxe", "persistent": False}
+
+        self.baremetal_mock.node.get_supported_boot_devices.return_value = {
+            "supported_boot_devices": ["cdrom", "bios", "safe", "disk", "pxe"]}
+
+    def test_bootdevice_show(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.get_boot_device.assert_called_once_with(
+            'node_uuid')
+
+    def test_bootdevice_supported_show(self):
+        arglist = ['node_uuid', '--supported']
+        verifylist = [('node', 'node_uuid'), ('supported', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        mock = self.baremetal_mock.node.get_supported_boot_devices
+        mock.assert_called_once_with('node_uuid')
+
+
 class TestConsoleDisable(TestBaremetal):
     def setUp(self):
         super(TestConsoleDisable, self).setUp()
@@ -675,6 +761,73 @@ class TestBaremetalMaintenanceUnset(TestBaremetal):
         self.baremetal_mock.node.set_maintenance.assert_called_once_with(
             'node_uuid',
             False)
+
+
+class TestPassthruCall(TestBaremetal):
+    def setUp(self):
+        super(TestPassthruCall, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.PassthruCallBaremetalNode(self.app, None)
+
+    def test_passthru_call(self):
+        arglist = ['node_uuid', 'heartbeat']
+        verifylist = [('node', 'node_uuid'),
+                      ('method', 'heartbeat')]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.node.vendor_passthru.assert_called_once_with(
+            'node_uuid', 'heartbeat', http_method='POST', args={})
+
+    def test_passthru_call_http_method(self):
+        arglist = ['node_uuid', 'heartbeat', '--http-method', 'PUT']
+        verifylist = [('node', 'node_uuid'),
+                      ('method', 'heartbeat'),
+                      ('http_method', 'PUT')]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.node.vendor_passthru.assert_called_once_with(
+            'node_uuid', 'heartbeat', http_method='PUT', args={})
+
+    def test_passthru_call_args(self):
+        arglist = ['node_uuid', 'heartbeat',
+                   '--arg', 'key1=value1', '--arg', 'key2=value2']
+        verifylist = [('node', 'node_uuid'),
+                      ('method', 'heartbeat'),
+                      ('arg', ['key1=value1', 'key2=value2'])]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        expected_dict = {'key1': 'value1', 'key2': 'value2'}
+        self.baremetal_mock.node.vendor_passthru.assert_called_once_with(
+            'node_uuid', 'heartbeat', http_method='POST', args=expected_dict)
+
+
+class TestPassthruList(TestBaremetal):
+    def setUp(self):
+        super(TestPassthruList, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.PassthruListBaremetalNode(self.app, None)
+
+        self.baremetal_mock.node.get_vendor_passthru_methods.return_value = {
+            "send_raw": {"require_exclusive_lock": True, "attach": False,
+                         "http_methods": ["POST"], "description": "",
+                         "async": True},
+            "bmc_reset": {"require_exclusive_lock": True, "attach": False,
+                          "http_methods": ["POST"], "description": "",
+                          "async": True}}
+
+    def test_passthru_list(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        mock = self.baremetal_mock.node.get_vendor_passthru_methods
+        mock.assert_called_once_with('node_uuid')
 
 
 class TestBaremetalPower(TestBaremetal):
