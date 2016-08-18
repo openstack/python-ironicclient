@@ -29,6 +29,20 @@ from ironicclient.tests.unit import utils as test_utils
 
 class UtilsTest(test_utils.BaseTestCase):
 
+    def test_key_value_pairs_to_dict(self):
+        kv_list = ['str=foo', 'int=1', 'bool=true',
+                   'list=[1, 2, 3]', 'dict={"foo": "bar"}']
+
+        d = utils.key_value_pairs_to_dict(kv_list)
+        self.assertEqual(
+            {'str': 'foo', 'int': 1, 'bool': True,
+             'list': [1, 2, 3], 'dict': {'foo': 'bar'}},
+            d)
+
+    def test_key_value_pairs_to_dict_nothing(self):
+        self.assertEqual({}, utils.key_value_pairs_to_dict(None))
+        self.assertEqual({}, utils.key_value_pairs_to_dict([]))
+
     def test_args_array_to_dict(self):
         my_args = {
             'matching_metadata': ['str=foo', 'int=1', 'bool=true',

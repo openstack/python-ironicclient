@@ -103,13 +103,7 @@ def do_driver_raid_logical_disk_properties(cc, args):
               help=argparse.SUPPRESS)
 def do_driver_vendor_passthru(cc, args):
     """Call a vendor-passthru extension for a driver."""
-    arguments = utils.args_array_to_dict({'args': args.arguments[0]},
-                                         'args')['args']
-
-    # If there were no arguments for the method, arguments will still
-    # be an empty list. So make it an empty dict.
-    if not arguments:
-        arguments = {}
+    arguments = utils.key_value_pairs_to_dict(args.arguments[0])
 
     resp = cc.driver.vendor_passthru(args.driver_name, args.method,
                                      http_method=args.http_method,

@@ -101,11 +101,33 @@ def split_and_deserialize(string):
     return (key, value)
 
 
+def key_value_pairs_to_dict(key_value_pairs):
+    """Convert a list of key-value pairs to a dictionary.
+
+    :param key_value_pairs: a list of strings, each string is in the form
+                            <key>=<value>
+    :returns: a dictionary, possibly empty
+    """
+    if key_value_pairs:
+        return dict(split_and_deserialize(v) for v in key_value_pairs)
+    return {}
+
+
 def args_array_to_dict(kwargs, key_to_convert):
+    """Convert the value in a dictionary entry to a dictionary.
+
+    From the kwargs dictionary, converts the value of the key_to_convert
+    entry from a list of key-value pairs to a dictionary.
+
+    :param kwargs: a dictionary
+    :param key_to_convert: the key (in kwargs), whose value is expected to
+        be a list of key=value strings. This value will be converted to a
+        dictionary.
+    :returns: kwargs, the (modified) dictionary
+    """
     values_to_convert = kwargs.get(key_to_convert)
     if values_to_convert:
-        kwargs[key_to_convert] = dict(split_and_deserialize(v)
-                                      for v in values_to_convert)
+        kwargs[key_to_convert] = key_value_pairs_to_dict(values_to_convert)
     return kwargs
 
 
