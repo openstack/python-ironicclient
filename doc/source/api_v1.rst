@@ -22,13 +22,18 @@ credentials to `ironicclient.client.get_client()`_. By default, the
 Bare Metal Provisioning system is configured so that only administrators
 (users with 'admin' role) have access.
 
+.. note::
+    Explicit instantiation of `ironicclient.v1.client.Client`_ may cause
+    errors since it doesn't verify provided arguments, using
+    `ironicclient.client.get_client()` is prefered way to get client object.
+
 There are two different sets of credentials that can be used::
 
    * ironic endpoint and auth token
    * Identity Service (keystone) credentials
 
 Using ironic endpoint and auth token
-.....................................
+....................................
 
 An auth token and the ironic endpoint can be used to authenticate::
 
