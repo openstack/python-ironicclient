@@ -39,7 +39,7 @@ class ProvisionStateBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node."
+            help=_("Name or UUID of the node.")
         )
         parser.add_argument(
             '--provision-state',
@@ -87,9 +87,9 @@ class ProvisionStateWithWait(ProvisionStateBaremetalNode):
             metavar='<time-out>',
             const=0,
             nargs='?',
-            help=("Wait for a node to reach the desired state, %(state)s. "
-                  "Optionally takes a timeout value (in seconds). The "
-                  "default value is 0, meaning it will wait indefinitely.") %
+            help=_("Wait for a node to reach the desired state, %(state)s. "
+                   "Optionally takes a timeout value (in seconds). The "
+                   "default value is 0, meaning it will wait indefinitely.") %
             {'state': desired_state})
         return parser
 
@@ -143,20 +143,20 @@ class BootdeviceSetBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         parser.add_argument(
             'device',
             metavar='<device>',
             choices=v1_utils.BOOT_DEVICES,
-            help="One of %s" % (oscutils.format_list(v1_utils.BOOT_DEVICES))
+            help=_("One of %s") % (oscutils.format_list(v1_utils.BOOT_DEVICES))
         )
         parser.add_argument(
             '--persistent',
             dest='persistent',
             action='store_true',
             default=False,
-            help="Make changes persistent for all future boots"
+            help=_("Make changes persistent for all future boots")
         )
         return parser
 
@@ -181,14 +181,14 @@ class BootdeviceShowBaremetalNode(command.ShowOne):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         parser.add_argument(
             '--supported',
             dest='supported',
             action='store_true',
             default=False,
-            help="Show the supported boot devices"
+            help=_("Show the supported boot devices")
         )
         return parser
 
@@ -220,12 +220,12 @@ class CleanBaremetalNode(ProvisionStateWithWait):
             metavar='<clean-steps>',
             required=True,
             default=None,
-            help=("The clean steps in JSON format. May be the path to a file "
-                  "containing the clean steps; OR '-', with the clean steps "
-                  "being read from standard input; OR a string. The value "
-                  "should be a list of clean-step dictionaries; each "
-                  "dictionary should have keys 'interface' and 'step', and "
-                  "optional key 'args'."))
+            help=_("The clean steps in JSON format. May be the path to a file "
+                   "containing the clean steps; OR '-', with the clean steps "
+                   "being read from standard input; OR a string. The value "
+                   "should be a list of clean-step dictionaries; each "
+                   "dictionary should have keys 'interface' and 'step', and "
+                   "optional key 'args'."))
         return parser
 
 
@@ -240,7 +240,7 @@ class ConsoleDisableBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         return parser
 
@@ -262,7 +262,7 @@ class ConsoleEnableBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         return parser
 
@@ -284,7 +284,7 @@ class ConsoleShowBaremetalNode(command.ShowOne):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         return parser
 
@@ -308,97 +308,97 @@ class CreateBaremetalNode(command.ShowOne):
             '--chassis-uuid',
             dest='chassis_uuid',
             metavar='<chassis>',
-            help='UUID of the chassis that this node belongs to.')
+            help=_('UUID of the chassis that this node belongs to.'))
         parser.add_argument(
             '--driver',
             metavar='<driver>',
             required=True,
-            help='Driver used to control the node [REQUIRED].')
+            help=_('Driver used to control the node [REQUIRED].'))
         parser.add_argument(
             '--driver-info',
             metavar='<key=value>',
             action='append',
-            help='Key/value pair used by the driver, such as out-of-band '
-                 'management credentials. Can be specified multiple times.')
+            help=_('Key/value pair used by the driver, such as out-of-band '
+                   'management credentials. Can be specified multiple times.'))
         parser.add_argument(
             '--property',
             dest='properties',
             metavar='<key=value>',
             action='append',
-            help='Key/value pair describing the physical characteristics of '
-                 'the node. This is exported to Nova and used by the '
-                 'scheduler. Can be specified multiple times.')
+            help=_('Key/value pair describing the physical characteristics of '
+                   'the node. This is exported to Nova and used by the '
+                   'scheduler. Can be specified multiple times.'))
         parser.add_argument(
             '--extra',
             metavar='<key=value>',
             action='append',
-            help="Record arbitrary key/value metadata. "
-                 "Can be specified multiple times.")
+            help=_("Record arbitrary key/value metadata. "
+                   "Can be specified multiple times."))
         parser.add_argument(
             '--uuid',
             metavar='<uuid>',
-            help="Unique UUID for the node.")
+            help=_("Unique UUID for the node."))
         parser.add_argument(
             '--name',
             metavar='<name>',
-            help="Unique name for the node.")
+            help=_("Unique name for the node."))
         parser.add_argument(
             '--boot-interface',
             metavar='<boot_interface>',
-            help='Boot interface used by the node\'s driver. This is '
-                 'only applicable when the specified --driver is a '
-                 'hardware type.')
+            help=_('Boot interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
         parser.add_argument(
             '--console-interface',
             metavar='<console_interface>',
-            help='Console interface used by the node\'s driver. This is '
-                 'only applicable when the specified --driver is a '
-                 'hardware type.')
+            help=_('Console interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
         parser.add_argument(
             '--deploy-interface',
             metavar='<deploy_interface>',
-            help='Deploy interface used by the node\'s driver. This is '
-                 'only applicable when the specified --driver is a '
-                 'hardware type.')
+            help=_('Deploy interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
         parser.add_argument(
             '--inspect-interface',
             metavar='<inspect_interface>',
-            help='Inspect interface used by the node\'s driver. This is '
-                 'only applicable when the specified --driver is a '
-                 'hardware type.')
+            help=_('Inspect interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
         parser.add_argument(
             '--management-interface',
             metavar='<management_interface>',
-            help='Management interface used by the node\'s driver. This is '
-                 'only applicable when the specified --driver is a '
-                 'hardware type.')
+            help=_('Management interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
         parser.add_argument(
             '--network-interface',
             metavar='<network_interface>',
-            help='Network interface used for switching node to '
-                 'cleaning/provisioning networks.')
+            help=_('Network interface used for switching node to '
+                   'cleaning/provisioning networks.'))
         parser.add_argument(
             '--power-interface',
             metavar='<power_interface>',
-            help='Power interface used by the node\'s driver. This is '
-                 'only applicable when the specified --driver is a '
-                 'hardware type.')
+            help=_('Power interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
         parser.add_argument(
             '--raid-interface',
             metavar='<raid_interface>',
-            help='RAID interface used by the node\'s driver. This is '
-                 'only applicable when the specified --driver is a '
-                 'hardware type.')
+            help=_('RAID interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
         parser.add_argument(
             '--vendor-interface',
             metavar='<vendor_interface>',
-            help='Vendor interface used by the node\'s driver. This is '
-                 'only applicable when the specified --driver is a '
-                 'hardware type.')
+            help=_('Vendor interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
         parser.add_argument(
             '--resource-class',
             metavar='<resource_class>',
-            help='Resource class for mapping nodes to Nova flavors')
+            help=_('Resource class for mapping nodes to Nova flavors'))
 
         return parser
 
@@ -441,7 +441,7 @@ class DeleteBaremetalNode(command.Command):
             "nodes",
             metavar="<node>",
             nargs="+",
-            help="Node(s) to delete (name or UUID)")
+            help=_("Node(s) to delete (name or UUID)"))
 
         return parser
 
@@ -470,8 +470,8 @@ class DeleteBaremetal(DeleteBaremetalNode):
     log = logging.getLogger(__name__ + ".DeleteBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node delete'.")
+        self.log.warning(_LW("This command is deprecated. Instead, use "
+                             "'openstack baremetal node delete'."))
         super(DeleteBaremetal, self).take_action(parsed_args)
 
 
@@ -488,10 +488,10 @@ class DeployBaremetalNode(ProvisionStateWithWait):
             '--config-drive',
             metavar='<config-drive>',
             default=None,
-            help=("A gzipped, base64-encoded configuration drive string OR "
-                  "the path to the configuration drive file OR the path to a "
-                  "directory containing the config drive files. In case it's "
-                  "a directory, a config drive will be generated from it. "))
+            help=_("A gzipped, base64-encoded configuration drive string OR "
+                   "the path to the configuration drive file OR the path to a "
+                   "directory containing the config drive files. In case it's "
+                   "a directory, a config drive will be generated from it. "))
         return parser
 
 
@@ -516,23 +516,23 @@ class ListBaremetalNode(command.Lister):
             '--limit',
             metavar='<limit>',
             type=int,
-            help='Maximum number of nodes to return per request, '
-                 '0 for no limit. Default is the maximum number used '
-                 'by the Baremetal API Service.'
+            help=_('Maximum number of nodes to return per request, '
+                   '0 for no limit. Default is the maximum number used '
+                   'by the Baremetal API Service.')
         )
         parser.add_argument(
             '--marker',
             metavar='<node>',
-            help='Node UUID (for example, of the last node in the list from '
-                 'a previous request). Returns the list of nodes after this '
-                 'UUID.'
+            help=_('Node UUID (for example, of the last node in the list from '
+                   'a previous request). Returns the list of nodes after this '
+                   'UUID.')
         )
         parser.add_argument(
             '--sort',
             metavar="<key>[:<direction>]",
-            help='Sort output by specified node fields and directions '
-                 '(asc or desc) (default: asc). Multiple fields and '
-                 'directions can be specified, separated by comma.',
+            help=_('Sort output by specified node fields and directions '
+                   '(asc or desc) (default: asc). Multiple fields and '
+                   'directions can be specified, separated by comma.'),
         )
         maint_group = parser.add_mutually_exclusive_group(required=False)
         maint_group.add_argument(
@@ -540,20 +540,20 @@ class ListBaremetalNode(command.Lister):
             dest='maintenance',
             action='store_true',
             default=None,
-            help="Limit list to nodes in maintenance mode",
+            help=_("Limit list to nodes in maintenance mode"),
         )
         maint_group.add_argument(
             '--no-maintenance',
             dest='maintenance',
             action='store_false',
             default=None,
-            help="Limit list to nodes not in maintenance mode",
+            help=_("Limit list to nodes not in maintenance mode"),
         )
         associated_group = parser.add_mutually_exclusive_group()
         associated_group.add_argument(
             '--associated',
             action='store_true',
-            help=_('List only nodes associated with an instance.'),
+            help=_("List only nodes associated with an instance."),
         )
         associated_group.add_argument(
             '--unassociated',
@@ -565,23 +565,23 @@ class ListBaremetalNode(command.Lister):
             dest='provision_state',
             metavar='<provision state>',
             choices=self.PROVISION_STATES,
-            help="Limit list to nodes in <provision state>. One of %s." % (
-                 ", ".join(self.PROVISION_STATES)))
+            help=_("Limit list to nodes in <provision state>. One of %s.") %
+                 (", ".join(self.PROVISION_STATES)))
         parser.add_argument(
             '--resource-class',
             dest='resource_class',
             metavar='<resource class>',
-            help="Limit list to nodes with resource class <resource class>")
+            help=_("Limit list to nodes with resource class <resource class>"))
         parser.add_argument(
             '--chassis',
             dest='chassis',
             metavar='<chassis UUID>',
-            help="Limit list to nodes of this chassis")
+            help=_("Limit list to nodes of this chassis"))
         display_group = parser.add_mutually_exclusive_group(required=False)
         display_group.add_argument(
             '--long',
             default=False,
-            help="Show detailed information about the nodes.",
+            help=_("Show detailed information about the nodes."),
             action='store_true')
         display_group.add_argument(
             '--fields',
@@ -591,9 +591,9 @@ class ListBaremetalNode(command.Lister):
             action='append',
             default=[],
             choices=res_fields.NODE_DETAILED_RESOURCE.fields,
-            help="One or more node fields. Only these fields will be fetched "
-                 "from the server. Can not be used when '--long' is "
-                 "specified.")
+            help=_("One or more node fields. Only these fields will be "
+                   "fetched from the server. Can not be used when '--long' "
+                   "is specified."))
         return parser
 
     def take_action(self, parsed_args):
@@ -651,8 +651,8 @@ class ListBaremetal(ListBaremetalNode):
     log = logging.getLogger(__name__ + ".ListBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node list'.")
+        self.log.warning(_LW("This command is deprecated. Instead, use "
+                             "'openstack baremetal node list'."))
         return super(ListBaremetal, self).take_action(parsed_args)
 
 
@@ -667,13 +667,13 @@ class MaintenanceSetBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node."
+            help=_("Name or UUID of the node.")
         )
         parser.add_argument(
             '--reason',
             metavar='<reason>',
             default=None,
-            help="Reason for setting maintenance mode.")
+            help=_("Reason for setting maintenance mode."))
 
         return parser
 
@@ -700,7 +700,7 @@ class MaintenanceUnsetBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node."
+            help=_("Name or UUID of the node.")
         )
         return parser
 
@@ -733,28 +733,28 @@ class PassthruCallBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         parser.add_argument(
             'method',
             metavar='<method>',
-            help="Vendor passthru method to be executed"
+            help=_("Vendor passthru method to be executed")
         )
         parser.add_argument(
             '--arg',
             metavar='<key=value>',
             action='append',
-            help="Argument to pass to the passthru method (repeat option "
-                 "to specify multiple arguments)"
+            help=_("Argument to pass to the passthru method (repeat option "
+                   "to specify multiple arguments)")
         )
         parser.add_argument(
             '--http-method',
             metavar='<http-method>',
             choices=v1_utils.HTTP_METHODS,
             default='POST',
-            help="The HTTP method to use in the passthru request. One of "
-                 "%s. Defaults to POST." %
-                 oscutils.format_list(v1_utils.HTTP_METHODS)
+            help=(_("The HTTP method to use in the passthru request. One of "
+                    "%s. Defaults to POST.") %
+                  oscutils.format_list(v1_utils.HTTP_METHODS))
         )
         return parser
 
@@ -786,7 +786,7 @@ class PassthruListBaremetalNode(command.Lister):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         return parser
 
@@ -822,12 +822,12 @@ class PowerBaremetalNode(command.Command):
             'power_state',
             metavar='<on|off>',
             choices=['on', 'off'],
-            help="Power node on or off"
+            help=_("Power node on or off")
         )
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node."
+            help=_("Name or UUID of the node.")
         )
         parser.add_argument(
             '--soft',
@@ -874,7 +874,7 @@ class RebootBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node."
+            help=_("Name or UUID of the node.")
         )
         parser.add_argument(
             '--soft',
@@ -922,73 +922,73 @@ class SetBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node.",
+            help=_("Name or UUID of the node."),
         )
         parser.add_argument(
             "--instance-uuid",
             metavar="<uuid>",
-            help="Set instance UUID of node to <uuid>",
+            help=_("Set instance UUID of node to <uuid>"),
         )
         parser.add_argument(
             "--name",
             metavar="<name>",
-            help="Set the name of the node",
+            help=_("Set the name of the node"),
         )
         parser.add_argument(
             "--chassis-uuid",
             metavar="<chassis UUID>",
-            help="Set the chassis for the node",
+            help=_("Set the chassis for the node"),
         )
         parser.add_argument(
             "--driver",
             metavar="<driver>",
-            help="Set the driver for the node",
+            help=_("Set the driver for the node"),
         )
         parser.add_argument(
             '--network-interface',
             metavar='<network_interface>',
-            help='Set the network interface for the node',
+            help=_('Set the network interface for the node'),
         )
         parser.add_argument(
             '--resource-class',
             metavar='<resource_class>',
-            help='Set the resource class for the node',
+            help=_('Set the resource class for the node'),
         )
         parser.add_argument(
             '--target-raid-config',
             metavar='<target_raid_config>',
-            help='Set the target RAID configuration (JSON) for the node. This '
-                 'can be one of: 1. a file containing JSON data of the RAID '
-                 'configuration; 2. "-" to read the contents from standard '
-                 'input; or 3. a valid JSON string.',
+            help=_('Set the target RAID configuration (JSON) for the node. '
+                   'This can be one of: 1. a file containing JSON data of the '
+                   'RAID configuration; 2. "-" to read the contents from '
+                   'standard input; or 3. a valid JSON string.'),
         )
         parser.add_argument(
             "--property",
             metavar="<key=value>",
             action='append',
-            help='Property to set on this baremetal node '
-                 '(repeat option to set multiple properties)',
+            help=_('Property to set on this baremetal node '
+                   '(repeat option to set multiple properties)'),
         )
         parser.add_argument(
             "--extra",
             metavar="<key=value>",
             action='append',
-            help='Extra to set on this baremetal node '
-                 '(repeat option to set multiple extras)',
+            help=_('Extra to set on this baremetal node '
+                   '(repeat option to set multiple extras)'),
         )
         parser.add_argument(
             "--driver-info",
             metavar="<key=value>",
             action='append',
-            help='Driver information to set on this baremetal node '
-                 '(repeat option to set multiple driver infos)',
+            help=_('Driver information to set on this baremetal node '
+                   '(repeat option to set multiple driver infos)'),
         )
         parser.add_argument(
             "--instance-info",
             metavar="<key=value>",
             action='append',
-            help='Instance information to set on this baremetal node '
-                 '(repeat option to set multiple instance infos)',
+            help=_('Instance information to set on this baremetal node '
+                   '(repeat option to set multiple instance infos)'),
         )
 
         return parser
@@ -1062,8 +1062,8 @@ class SetBaremetal(SetBaremetalNode):
     log = logging.getLogger(__name__ + ".SetBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node set'.")
+        self.log.warning(_LW("This command is deprecated. Instead, use "
+                             "'openstack baremetal node set'."))
         return super(SetBaremetal, self).take_action(parsed_args)
 
 
@@ -1077,14 +1077,14 @@ class ShowBaremetalNode(command.ShowOne):
         parser.add_argument(
             "node",
             metavar="<node>",
-            help="Name or UUID of the node (or instance UUID if --instance "
-                 "is specified)")
+            help=_("Name or UUID of the node (or instance UUID if --instance "
+                   "is specified)"))
         parser.add_argument(
             '--instance',
             dest='instance_uuid',
             action='store_true',
             default=False,
-            help='<node> is an instance UUID.')
+            help=_('<node> is an instance UUID.'))
         parser.add_argument(
             '--fields',
             nargs='+',
@@ -1093,8 +1093,8 @@ class ShowBaremetalNode(command.ShowOne):
             action='append',
             choices=res_fields.NODE_DETAILED_RESOURCE.fields,
             default=[],
-            help="One or more node fields. Only these fields will be fetched "
-                 "from the server.")
+            help=_("One or more node fields. Only these fields will be "
+                   "fetched from the server."))
         return parser
 
     def take_action(self, parsed_args):
@@ -1125,8 +1125,8 @@ class ShowBaremetal(ShowBaremetalNode):
     log = logging.getLogger(__name__ + ".ShowBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node show'.")
+        self.log.warning(_LW("This command is deprecated. Instead, use "
+                             "'openstack baremetal node show'."))
         return super(ShowBaremetal, self).take_action(parsed_args)
 
 
@@ -1147,57 +1147,57 @@ class UnsetBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node."
+            help=_("Name or UUID of the node.")
         )
         parser.add_argument(
             '--instance-uuid',
             action='store_true',
             default=False,
-            help='Unset instance UUID on this baremetal node'
+            help=_('Unset instance UUID on this baremetal node')
         )
         parser.add_argument(
             "--name",
             action='store_true',
-            help="Unset the name of the node",
+            help=_("Unset the name of the node"),
         )
         parser.add_argument(
             "--resource-class",
             dest='resource_class',
             action='store_true',
-            help="Unset the resource class of the node",
+            help=_("Unset the resource class of the node"),
         )
         parser.add_argument(
             "--target-raid-config",
             action='store_true',
-            help="Unset the target RAID configuration of the node",
+            help=_("Unset the target RAID configuration of the node"),
         )
         parser.add_argument(
             '--property',
             metavar='<key>',
             action='append',
-            help='Property to unset on this baremetal node '
-                 '(repeat option to unset multiple properties)',
+            help=_('Property to unset on this baremetal node '
+                   '(repeat option to unset multiple properties)'),
         )
         parser.add_argument(
             "--extra",
             metavar="<key>",
             action='append',
-            help='Extra to unset on this baremetal node '
-                 '(repeat option to unset multiple extras)',
+            help=_('Extra to unset on this baremetal node '
+                   '(repeat option to unset multiple extras)'),
         )
         parser.add_argument(
             "--driver-info",
             metavar="<key>",
             action='append',
-            help='Driver information to unset on this baremetal node '
-                 '(repeat option to unset multiple driver informations)',
+            help=_('Driver information to unset on this baremetal node '
+                   '(repeat option to unset multiple driver informations)'),
         )
         parser.add_argument(
             "--instance-info",
             metavar="<key>",
             action='append',
-            help='Instance information to unset on this baremetal node '
-                 '(repeat option to unset multiple instance informations)',
+            help=_('Instance information to unset on this baremetal node '
+                   '(repeat option to unset multiple instance informations)'),
         )
         parser.add_argument(
             "--chassis-uuid",
@@ -1260,8 +1260,8 @@ class UnsetBaremetal(UnsetBaremetalNode):
     log = logging.getLogger(__name__ + ".UnsetBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node unset'.")
+        self.log.warning(_LW("This command is deprecated. Instead, use "
+                             "'openstack baremetal node unset'."))
         super(UnsetBaremetal, self).take_action(parsed_args)
 
 
@@ -1276,7 +1276,7 @@ class ValidateBaremetalNode(command.Lister):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node")
+            help=_("Name or UUID of the node"))
 
         return parser
 
@@ -1309,7 +1309,7 @@ class VifListBaremetalNode(command.Lister):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         return parser
 
@@ -1337,20 +1337,20 @@ class VifAttachBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         parser.add_argument(
             'vif_id',
             metavar='<vif-id>',
-            help="Name or UUID of the VIF to attach to a node."
+            help=_("Name or UUID of the VIF to attach to a node.")
         )
         parser.add_argument(
             '--vif-info',
             metavar='<key=value>',
             action='append',
-            help="Record arbitrary key/value metadata. "
-                 "Can be specified multiple times. The mandatory 'id' "
-                 "parameter cannot be specified as a key.")
+            help=_("Record arbitrary key/value metadata. "
+                   "Can be specified multiple times. The mandatory 'id' "
+                   "parameter cannot be specified as a key."))
         return parser
 
     def take_action(self, parsed_args):
@@ -1374,12 +1374,12 @@ class VifDetachBaremetalNode(command.Command):
         parser.add_argument(
             'node',
             metavar='<node>',
-            help="Name or UUID of the node"
+            help=_("Name or UUID of the node")
         )
         parser.add_argument(
             'vif_id',
             metavar='<vif-id>',
-            help="Name or UUID of the VIF to detach from a node."
+            help=_("Name or UUID of the VIF to detach from a node.")
         )
         return parser
 
