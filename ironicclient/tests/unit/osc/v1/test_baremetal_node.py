@@ -1814,3 +1814,30 @@ class TestVifDetach(TestBaremetal):
 
         self.baremetal_mock.node.vif_detach.assert_called_once_with(
             'node_uuid', 'aaa-aaa')
+
+
+class TestBaremetalInject(TestBaremetal):
+    def setUp(self):
+        super(TestBaremetalInject, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.InjectNmiBaremetalNode(self.app, None)
+
+    def test_baremetal_inject_no_options(self):
+        arglist = []
+        verifylist = []
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_inject_nmi_uuid(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.inject_nmi.assert_called_once_with(
+            'node_uuid')

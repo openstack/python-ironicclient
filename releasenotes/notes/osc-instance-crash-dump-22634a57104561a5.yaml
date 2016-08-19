@@ -1,0 +1,4 @@
+---
+features:
+  - Add a new OSC command for the injection of Non-Masking Interrupts
+    (NMI), "openstack baremetal node inject nmi".
