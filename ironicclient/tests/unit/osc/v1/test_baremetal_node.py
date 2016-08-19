@@ -893,26 +893,86 @@ class TestBaremetalPower(TestBaremetal):
     def test_baremetal_power_on(self):
         arglist = ['on', 'node_uuid']
         verifylist = [('power_state', 'on'),
-                      ('node', 'node_uuid')]
+                      ('node', 'node_uuid'),
+                      ('soft', False),
+                      ('power_timeout', None)]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
-            'node_uuid', 'on')
+            'node_uuid', 'on', False, timeout=None)
+
+    def test_baremetal_power_on_timeout(self):
+        arglist = ['on', 'node_uuid', '--power-timeout', '2']
+        verifylist = [('power_state', 'on'),
+                      ('node', 'node_uuid'),
+                      ('soft', False),
+                      ('power_timeout', 2)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'on', False, timeout=2)
 
     def test_baremetal_power_off(self):
         arglist = ['off', 'node_uuid']
         verifylist = [('power_state', 'off'),
-                      ('node', 'node_uuid')]
+                      ('node', 'node_uuid'),
+                      ('soft', False),
+                      ('power_timeout', None)]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
-            'node_uuid', 'off')
+            'node_uuid', 'off', False, timeout=None)
+
+    def test_baremetal_power_off_timeout(self):
+        arglist = ['off', 'node_uuid', '--power-timeout', '2']
+        verifylist = [('power_state', 'off'),
+                      ('node', 'node_uuid'),
+                      ('soft', False),
+                      ('power_timeout', 2)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'off', False, timeout=2)
+
+    def test_baremetal_soft_power_off(self):
+        arglist = ['off', 'node_uuid', '--soft']
+        verifylist = [('power_state', 'off'),
+                      ('node', 'node_uuid'),
+                      ('soft', True),
+                      ('power_timeout', None)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'off', True, timeout=None)
+
+    def test_baremetal_soft_power_off_timeout(self):
+        arglist = ['off', 'node_uuid', '--soft', '--power-timeout', '2']
+        verifylist = [('power_state', 'off'),
+                      ('node', 'node_uuid'),
+                      ('soft', True),
+                      ('power_timeout', 2)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'off', True, timeout=2)
 
 
 class TestDeployBaremetalProvisionState(TestBaremetal):
@@ -969,14 +1029,55 @@ class TestBaremetalReboot(TestBaremetal):
 
     def test_baremetal_reboot_uuid_only(self):
         arglist = ['node_uuid']
-        verifylist = [('node', 'node_uuid')]
+        verifylist = [('node', 'node_uuid'),
+                      ('soft', False),
+                      ('power_timeout', None)]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
-            'node_uuid', 'reboot')
+            'node_uuid', 'reboot', False, timeout=None)
+
+    def test_baremetal_reboot_timeout(self):
+        arglist = ['node_uuid', '--power-timeout', '2']
+        verifylist = [('node', 'node_uuid'),
+                      ('soft', False),
+                      ('power_timeout', 2)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'reboot', False, timeout=2)
+
+    def test_baremetal_soft_reboot(self):
+        arglist = ['node_uuid', '--soft']
+        verifylist = [('node', 'node_uuid'),
+                      ('soft', True),
+                      ('power_timeout', None)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'reboot', True, timeout=None)
+
+    def test_baremetal_soft_reboot_timeout(self):
+        arglist = ['node_uuid', '--soft', '--power-timeout', '2']
+        verifylist = [('node', 'node_uuid'),
+                      ('soft', True),
+                      ('power_timeout', 2)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'reboot', True, timeout=2)
 
 
 class TestBaremetalSet(TestBaremetal):

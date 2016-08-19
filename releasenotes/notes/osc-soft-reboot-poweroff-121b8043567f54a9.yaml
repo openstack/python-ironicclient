@@ -1,0 +1,4 @@
+---
+features:
+  - Enhances OSC to support soft reboot and soft power off with
+    power control timeout option.
