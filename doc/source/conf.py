@@ -37,6 +37,11 @@ add_module_names = True
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# A list of glob-style patterns that should be excluded when looking for
+# source files. They are matched against the source file names relative to the
+# source directory, using slashes as directory separators on all platforms.
+exclude_patterns = ['api/ironicclient.tests.functional.*']
+
 # -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages. Major themes that come with
