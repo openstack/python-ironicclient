@@ -184,7 +184,7 @@ class CreateBaremetalNode(show.ShowOne):
 
 
 class DeleteBaremetalNode(command.Command):
-    """Unregister a baremetal node"""
+    """Unregister baremetal node(s)"""
 
     log = logging.getLogger(__name__ + ".DeleteBaremetalNode")
 
