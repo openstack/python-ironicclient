@@ -1,0 +1,5 @@
+---
+features:
+  - Add --wait flag to "node-set-provision-state" command and the associated
+    "node.wait_for_provision_state" method to the Python API.
+    The flag works with all provision actions except for "abort".

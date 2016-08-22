@@ -12,7 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
 import os
+import time
 
 from oslo_utils import strutils
 
@@ -27,6 +29,10 @@ _power_states = {
     'off': 'power off',
     'reboot': 'rebooting',
 }
+
+
+LOG = logging.getLogger(__name__)
+_DEFAULT_POLL_INTERVAL = 2
 
 
 class Node(base.Resource):
@@ -355,3 +361,77 @@ class NodeManager(base.CreateManager):
     def get_vendor_passthru_methods(self, node_ident):
         path = "%s/vendor_passthru/methods" % node_ident
         return self.get(path).to_dict()
+
+    def wait_for_provision_state(self, node_ident, expected_state,
+                                 timeout=0,
+                                 poll_interval=_DEFAULT_POLL_INTERVAL,
+                                 poll_delay_function=None,
+                                 fail_on_unexpected_state=True):
+        """Helper function to wait for a node to reach a given state.
+
+        Polls Ironic API in a loop until node gets to a requested state.
+
+        Fails in the following cases:
+        * Timeout (if provided) is reached
+        * Node's last_error gets set to a non-empty value
+        * Unexpected stable state is reached and fail_on_unexpected_state is on
+        * Error state is reached (if it's not equal to expected_state)
+
+        :param node_ident: node UUID or name
+        :param expected_state: expected final provision state
+        :param timeout: timeout in seconds, no timeout if 0
+        :param poll_interval: interval in seconds between 2 poll
+        :param poll_delay_function: function to use to wait between polls
+            (defaults to time.sleep). Should take one argument - delay time
+            in seconds. Any exceptions raised inside it will abort the wait.
+        :param fail_on_unexpected_state: whether to fail if the nodes
+            reaches a different stable state.
+        :raises: StateTransitionFailed if node reached an error state
+        :raises: StateTransitionTimeout on timeout
+        """
+        if not isinstance(timeout, (int, float)) or timeout < 0:
+            raise ValueError(_('Timeout must be a non-negative number'))
+
+        threshold = time.time() + timeout
+        expected_state = expected_state.lower()
+        poll_delay_function = (time.sleep if poll_delay_function is None
+                               else poll_delay_function)
+        if not callable(poll_delay_function):
+            raise TypeError(_('poll_delay_function must be callable'))
+
+        # TODO(dtantsur): use version negotiation to request API 1.8 and use
+        # the "fields" argument to reduce amount of data sent.
+        while not timeout or time.time() < threshold:
+            node = self.get(node_ident)
+            if node.provision_state == expected_state:
+                LOG.debug('Node %(node)s reached provision state %(state)s',
+                          {'node': node_ident, 'state': expected_state})
+                return
+
+            # Note that if expected_state == 'error' we still succeed
+            if (node.last_error or node.provision_state == 'error' or
+                    node.provision_state.endswith(' failed')):
+                raise exc.StateTransitionFailed(
+                    _('Node %(node)s failed to reach state %(state)s. '
+                      'It\'s in state %(actual)s, and has error: %(error)s') %
+                    {'node': node_ident, 'state': expected_state,
+                     'actual': node.provision_state, 'error': node.last_error})
+
+            if fail_on_unexpected_state and not node.target_provision_state:
+                raise exc.StateTransitionFailed(
+                    _('Node %(node)s failed to reach state %(state)s. '
+                      'It\'s in unexpected stable state %(actual)s') %
+                    {'node': node_ident, 'state': expected_state,
+                     'actual': node.provision_state})
+
+            LOG.debug('Still waiting for node %(node)s to reach state '
+                      '%(state)s, the current state is %(actual)s',
+                      {'node': node_ident, 'state': expected_state,
+                       'actual': node.provision_state})
+            poll_delay_function(poll_interval)
+
+        raise exc.StateTransitionTimeout(
+            _('Node %(node)s failed to reach state %(state)s in '
+              '%(timeout)s seconds') % {'node': node_ident,
+                                        'state': expected_state,
+                                        'timeout': timeout})

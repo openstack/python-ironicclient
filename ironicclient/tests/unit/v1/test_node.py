@@ -14,6 +14,7 @@
 
 import copy
 import tempfile
+import time
 
 import mock
 import six
@@ -1049,3 +1050,117 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NODE_VENDOR_PASSTHRU_METHOD, vendor_methods)
+
+    def _fake_node_for_wait(self, state, error=None, target=None):
+        spec = ['provision_state', 'last_error', 'target_provision_state']
+        return mock.Mock(provision_state=state,
+                         last_error=error,
+                         target_provision_state=target,
+                         spec=spec)
+
+    @mock.patch.object(time, 'sleep', autospec=True)
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
+    def test_wait_for_provision_state(self, mock_get, mock_sleep):
+        mock_get.side_effect = [
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('active')
+        ]
+
+        self.mgr.wait_for_provision_state('node', 'active')
+
+        mock_get.assert_called_with(self.mgr, 'node')
+        self.assertEqual(3, mock_get.call_count)
+        mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
+        self.assertEqual(2, mock_sleep.call_count)
+
+    @mock.patch.object(time, 'sleep', autospec=True)
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
+    def test_wait_for_provision_state_timeout(self, mock_get, mock_sleep):
+        mock_get.return_value = self._fake_node_for_wait(
+            'deploying', target='active')
+
+        self.assertRaises(exc.StateTransitionTimeout,
+                          self.mgr.wait_for_provision_state, 'node', 'active',
+                          timeout=0.001)
+
+    @mock.patch.object(time, 'sleep', autospec=True)
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
+    def test_wait_for_provision_state_error(self, mock_get, mock_sleep):
+        mock_get.side_effect = [
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('deploy failed', error='boom'),
+        ]
+
+        self.assertRaisesRegexp(exc.StateTransitionFailed,
+                                'boom',
+                                self.mgr.wait_for_provision_state,
+                                'node', 'active')
+
+        mock_get.assert_called_with(self.mgr, 'node')
+        self.assertEqual(2, mock_get.call_count)
+        mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
+        self.assertEqual(1, mock_sleep.call_count)
+
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
+    def test_wait_for_provision_state_custom_delay(self, mock_get):
+        mock_get.side_effect = [
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('active')
+        ]
+
+        delay_mock = mock.Mock()
+        self.mgr.wait_for_provision_state('node', 'active',
+                                          poll_delay_function=delay_mock)
+
+        mock_get.assert_called_with(self.mgr, 'node')
+        self.assertEqual(2, mock_get.call_count)
+        delay_mock.assert_called_with(node._DEFAULT_POLL_INTERVAL)
+        self.assertEqual(1, delay_mock.call_count)
+
+    def test_wait_for_provision_state_wrong_input(self):
+        self.assertRaises(ValueError, self.mgr.wait_for_provision_state,
+                          'node', 'active', timeout='42')
+        self.assertRaises(ValueError, self.mgr.wait_for_provision_state,
+                          'node', 'active', timeout=-1)
+        self.assertRaises(TypeError, self.mgr.wait_for_provision_state,
+                          'node', 'active', poll_delay_function={})
+
+    @mock.patch.object(time, 'sleep', autospec=True)
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
+    def test_wait_for_provision_state_unexpected_stable_state(
+            self, mock_get, mock_sleep):
+        # This simulates aborted deployment
+        mock_get.side_effect = [
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('available'),
+        ]
+
+        self.assertRaisesRegexp(exc.StateTransitionFailed,
+                                'available',
+                                self.mgr.wait_for_provision_state,
+                                'node', 'active')
+
+        mock_get.assert_called_with(self.mgr, 'node')
+        self.assertEqual(2, mock_get.call_count)
+        mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
+        self.assertEqual(1, mock_sleep.call_count)
+
+    @mock.patch.object(time, 'sleep', autospec=True)
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
+    def test_wait_for_provision_state_unexpected_stable_state_allowed(
+            self, mock_get, mock_sleep):
+        mock_get.side_effect = [
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('available'),
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('active'),
+        ]
+
+        self.mgr.wait_for_provision_state('node', 'active',
+                                          fail_on_unexpected_state=False)
+
+        mock_get.assert_called_with(self.mgr, 'node')
+        self.assertEqual(4, mock_get.call_count)
+        mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
+        self.assertEqual(3, mock_sleep.call_count)

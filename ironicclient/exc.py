@@ -36,6 +36,14 @@ class InvalidAttribute(ClientException):
     pass
 
 
+class StateTransitionFailed(ClientException):
+    """Failed to reach a requested provision state."""
+
+
+class StateTransitionTimeout(ClientException):
+    """Timed out while waiting for a requested provision state."""
+
+
 def from_response(response, message=None, traceback=None, method=None,
                   url=None):
     """Return an HttpError instance based on response from httplib/requests."""

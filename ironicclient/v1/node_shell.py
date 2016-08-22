@@ -23,6 +23,35 @@ from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
 
 
+# Polling intervals in seconds.
+_LONG_ACTION_POLL_INTERVAL = 10
+_SHORT_ACTION_POLL_INTERVAL = 2
+# This dict acts as both list of possible provision actions and arguments for
+# wait_for_provision_state invocation.
+PROVISION_ACTIONS = {
+    'active': {'expected_state': 'active',
+               'poll_interval': _LONG_ACTION_POLL_INTERVAL},
+    'deleted': {'expected_state': 'available',
+                'poll_interval': _LONG_ACTION_POLL_INTERVAL},
+    'rebuild': {'expected_state': 'active',
+                'poll_interval': _LONG_ACTION_POLL_INTERVAL},
+    'inspect': {'expected_state': 'manageable',
+                # This is suboptimal for in-band inspection, but it's probably
+                # not worth making people wait 10 seconds for OOB inspection
+                'poll_interval': _SHORT_ACTION_POLL_INTERVAL},
+    'provide': {'expected_state': 'available',
+                # This assumes cleaning is in place
+                'poll_interval': _LONG_ACTION_POLL_INTERVAL},
+    'manage': {'expected_state': 'manageable',
+               'poll_interval': _SHORT_ACTION_POLL_INTERVAL},
+    'clean': {'expected_state': 'manageable',
+              'poll_interval': _LONG_ACTION_POLL_INTERVAL},
+    'adopt': {'expected_state': 'active',
+              'poll_interval': _SHORT_ACTION_POLL_INTERVAL},
+    'abort': None,  # no support for --wait in abort
+}
+
+
 def _print_node_show(node, fields=None, json=False):
     if fields is None:
         fields = res_fields.NODE_DETAILED_RESOURCE.fields
@@ -445,11 +474,9 @@ def do_node_set_target_raid_config(cc, args):
 @cliutils.arg(
     'provision_state',
     metavar='<provision-state>',
-    choices=['active', 'deleted', 'rebuild', 'inspect', 'provide',
-             'manage', 'clean', 'abort', 'adopt'],
-    help="Supported states: 'active', 'deleted', 'rebuild', "
-         "'inspect', 'provide', 'manage', 'clean', 'abort', "
-         "or 'adopt'.")
+    choices=list(PROVISION_ACTIONS),
+    help="Supported states: %s." % ', '.join("'%s'" % state
+                                             for state in PROVISION_ACTIONS))
 @cliutils.arg(
     '--config-drive',
     metavar='<config-drive>',
@@ -470,6 +497,18 @@ def do_node_set_target_raid_config(cc, args):
           "keys 'interface' and 'step', and optional key 'args'. "
           "This argument must be specified (and is only valid) when "
           "setting provision-state to 'clean'."))
+@cliutils.arg(
+    '--wait',
+    type=int,
+    dest='wait_timeout',
+    default=None,
+    const=0,
+    nargs='?',
+    help=("Wait for a node to reach the expected state. Not supported "
+          "for 'abort'. Optionally takes a timeout in seconds. "
+          "The default value is 0, meaning no timeout. "
+          "Fails if the node reaches an unexpected stable state, a failure "
+          "state or a state with last_error set."))
 def do_node_set_provision_state(cc, args):
     """Initiate a provisioning state change for a node."""
     if args.config_drive and args.provision_state != 'active':
@@ -482,6 +521,13 @@ def do_node_set_provision_state(cc, args):
         raise exceptions.CommandError(_('--clean-steps must be specified when '
                                         'setting provision state to "clean"'))
 
+    if args.wait_timeout is not None:
+        wait_args = PROVISION_ACTIONS.get(args.provision_state)
+        if wait_args is None:
+            raise exceptions.CommandError(
+                _("--wait is not supported for provision state '%s'")
+                % args.provision_state)
+
     clean_steps = args.clean_steps
     if args.clean_steps == '-':
         clean_steps = utils.get_from_stdin('clean steps')
@@ -490,6 +536,11 @@ def do_node_set_provision_state(cc, args):
     cc.node.set_provision_state(args.node, args.provision_state,
                                 configdrive=args.config_drive,
                                 cleansteps=clean_steps)
+    if args.wait_timeout is not None:
+        print(_('Waiting for provision state %(state)s on node %(node)s') %
+              {'state': wait_args['expected_state'], 'node': args.node})
+        cc.node.wait_for_provision_state(args.node, timeout=args.wait_timeout,
+                                         **wait_args)
 
 
 @cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
