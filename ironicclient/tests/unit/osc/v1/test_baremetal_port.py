@@ -230,3 +230,68 @@ class TestBaremetalPortUnset(TestBaremetalPort):
             'port',
             [{'path': '/extra/foo', 'op': 'remove'},
              {'path': '/extra/bar', 'op': 'remove'}])
+
+
+class TestBaremetalPortSet(TestBaremetalPort):
+    def setUp(self):
+        super(TestBaremetalPortSet, self).setUp()
+
+        self.baremetal_mock.port.update.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None,
+                copy.deepcopy(baremetal_fakes.BAREMETAL_PORT),
+                loaded=True))
+
+        self.cmd = baremetal_port.SetBaremetalPort(self.app, None)
+
+    def test_baremetal_port_set_node_uuid(self):
+        new_node_uuid = '1111-111111-1111'
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--node', new_node_uuid]
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('node_uuid', new_node_uuid)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/node_uuid', 'value': new_node_uuid, 'op': 'add'}])
+
+    def test_baremetal_port_set_address(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--address', baremetal_fakes.baremetal_port_address]
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('address', baremetal_fakes.baremetal_port_address)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/address',
+              'value': baremetal_fakes.baremetal_port_address,
+              'op': 'add'}])
+
+    def test_baremetal_set_extra(self):
+        arglist = ['port', '--extra', 'foo=bar']
+        verifylist = [('port', 'port'),
+                      ('extra', ['foo=bar'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port',
+            [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}])
+
+    def test_baremetal_port_set_no_options(self):
+        arglist = []
+        verifylist = []
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
