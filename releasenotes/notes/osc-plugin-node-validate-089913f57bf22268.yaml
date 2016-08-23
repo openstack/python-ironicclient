@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Extends the OpenStackClient plug-in with the new command:
+
+    * openstack baremetal node validate
