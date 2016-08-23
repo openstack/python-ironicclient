@@ -39,6 +39,13 @@ FAKE_ENV = {'OS_USERNAME': 'username',
             'OS_PROJECT_NAME': 'project_name',
             'OS_AUTH_URL': V2_URL}
 
+FAKE_ENV_WITH_SSL = FAKE_ENV.copy()
+FAKE_ENV_WITH_SSL.update({
+    'OS_CACERT': 'cacert',
+    'OS_CERT': 'cert',
+    'OS_KEY': 'key',
+})
+
 FAKE_ENV_KEYSTONE_V2 = {
     'OS_USERNAME': 'username',
     'OS_PASSWORD': 'password',
@@ -162,16 +169,10 @@ class ShellTest(utils.BaseTestCase):
         self.assertRaises(keystone_exc.ConnectFailure,
                           self.shell, 'node-list')
         expected_kwargs = {
-            'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
-            'os_tenant_id': '', 'os_tenant_name': '',
-            'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
-            'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
-            'os_auth_token': '', 'os_project_id': '',
-            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
-            'os_project_domain_id': '',
-            'os_project_domain_name': '', 'os_region_name': '',
-            'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
-            'os_cert': None, 'os_key': None,
+            'auth_url': FAKE_ENV['OS_AUTH_URL'],
+            'username': FAKE_ENV['OS_USERNAME'],
+            'password': FAKE_ENV['OS_PASSWORD'],
+            'project_name': FAKE_ENV['OS_PROJECT_NAME'],
             'max_retries': http.DEFAULT_MAX_RETRIES,
             'retry_interval': http.DEFAULT_RETRY_INTERVAL,
             'os_ironic_api_version': ironic_shell.LATEST_VERSION,
@@ -183,6 +184,32 @@ class ShellTest(utils.BaseTestCase):
 
     @mock.patch.object(client, 'get_client', autospec=True,
                        side_effect=keystone_exc.ConnectFailure)
+    @mock.patch('sys.stdin', side_effect=mock.MagicMock, autospec=True)
+    @mock.patch('getpass.getpass', return_value='password', autospec=True)
+    def test_password(self, mock_getpass, mock_stdin, mock_client):
+        self.make_env(environ_dict=FAKE_ENV_WITH_SSL)
+        # We will get a ConnectFailure because there is no keystone.
+        self.assertRaises(keystone_exc.ConnectFailure,
+                          self.shell, 'node-list')
+        expected_kwargs = {
+            'auth_url': FAKE_ENV_WITH_SSL['OS_AUTH_URL'],
+            'username': FAKE_ENV_WITH_SSL['OS_USERNAME'],
+            'password': FAKE_ENV_WITH_SSL['OS_PASSWORD'],
+            'project_name': FAKE_ENV_WITH_SSL['OS_PROJECT_NAME'],
+            'cafile': FAKE_ENV_WITH_SSL['OS_CACERT'],
+            'certfile': FAKE_ENV_WITH_SSL['OS_CERT'],
+            'keyfile': FAKE_ENV_WITH_SSL['OS_KEY'],
+            'max_retries': http.DEFAULT_MAX_RETRIES,
+            'retry_interval': http.DEFAULT_RETRY_INTERVAL,
+            'timeout': 600,
+            'os_ironic_api_version': ironic_shell.LATEST_VERSION,
+            'insecure': False
+        }
+        mock_client.assert_called_once_with(1, **expected_kwargs)
+        self.assertFalse(mock_getpass.called)
+
+    @mock.patch.object(client, 'get_client', autospec=True,
+                       side_effect=keystone_exc.ConnectFailure)
     @mock.patch('getpass.getpass', return_value='password', autospec=True)
     def test_token_auth(self, mock_getpass, mock_client):
         self.make_env(environ_dict=FAKE_ENV_KEYSTONE_V2_TOKEN)
@@ -190,23 +217,49 @@ class ShellTest(utils.BaseTestCase):
         self.assertRaises(keystone_exc.ConnectFailure,
                           self.shell, 'node-list')
         expected_kwargs = {
-            'ironic_url': '',
-            'os_auth_url': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_AUTH_URL'],
-            'os_tenant_id': '',
-            'os_tenant_name': '',
-            'os_username': '', 'os_user_domain_id': '',
-            'os_user_domain_name': '', 'os_password': '',
-            'os_auth_token': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_AUTH_TOKEN'],
-            'os_project_id': '',
-            'os_project_name': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_PROJECT_NAME'],
-            'os_project_domain_id': '', 'os_project_domain_name': '',
-            'os_region_name': '', 'os_service_type': '',
-            'os_endpoint_type': '', 'os_cacert': None, 'os_cert': None,
-            'os_key': None, 'max_retries': http.DEFAULT_MAX_RETRIES,
+            'auth_url': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_AUTH_URL'],
+            'token': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_AUTH_TOKEN'],
+            'project_name': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_PROJECT_NAME'],
+            'max_retries': http.DEFAULT_MAX_RETRIES,
+            'retry_interval': http.DEFAULT_RETRY_INTERVAL,
+            'timeout': 600,
+            'os_ironic_api_version': ironic_shell.LATEST_VERSION,
+            'insecure': False
+        }
+        mock_client.assert_called_once_with(1, **expected_kwargs)
+        self.assertFalse(mock_getpass.called)
+
+    @mock.patch.object(client, 'get_client', autospec=True)
+    @mock.patch('getpass.getpass', return_value='password', autospec=True)
+    def test_admin_token_auth(self, mock_getpass, mock_client):
+        self.make_env(environ_dict={
+            'IRONIC_URL': 'http://192.168.1.1/v1',
+            'OS_AUTH_TOKEN': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_AUTH_TOKEN']})
+        expected_kwargs = {
+            'endpoint': 'http://192.168.1.1/v1',
+            'token': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_AUTH_TOKEN'],
+            'max_retries': http.DEFAULT_MAX_RETRIES,
+            'retry_interval': http.DEFAULT_RETRY_INTERVAL,
+            'timeout': 600,
+            'os_ironic_api_version': ironic_shell.LATEST_VERSION,
+            'insecure': False
+        }
+        self.shell('node-list')
+        mock_client.assert_called_once_with(1, **expected_kwargs)
+        self.assertFalse(mock_getpass.called)
+
+    @mock.patch.object(client, 'get_client', autospec=True)
+    @mock.patch('getpass.getpass', return_value='password', autospec=True)
+    def test_none_auth(self, mock_getpass, mock_client):
+        self.make_env(environ_dict={'IRONIC_URL': 'http://192.168.1.1/v1'})
+        expected_kwargs = {
+            'endpoint': 'http://192.168.1.1/v1',
+            'max_retries': http.DEFAULT_MAX_RETRIES,
             'retry_interval': http.DEFAULT_RETRY_INTERVAL,
             'os_ironic_api_version': ironic_shell.LATEST_VERSION,
             'timeout': 600, 'insecure': False
         }
+        self.shell('node-list')
         mock_client.assert_called_once_with(1, **expected_kwargs)
         self.assertFalse(mock_getpass.called)
 
@@ -274,16 +327,10 @@ class ShellTest(utils.BaseTestCase):
         self.assertRaises(keystone_exc.ConnectFailure,
                           self.shell, 'node-list')
         expected_kwargs = {
-            'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
-            'os_tenant_id': '', 'os_tenant_name': '',
-            'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
-            'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
-            'os_auth_token': '', 'os_project_id': '',
-            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
-            'os_project_domain_id': '',
-            'os_project_domain_name': '', 'os_region_name': '',
-            'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
-            'os_cert': None, 'os_key': None,
+            'auth_url': FAKE_ENV['OS_AUTH_URL'],
+            'username': FAKE_ENV['OS_USERNAME'],
+            'password': FAKE_ENV['OS_PASSWORD'],
+            'project_name': FAKE_ENV['OS_PROJECT_NAME'],
             'max_retries': http.DEFAULT_MAX_RETRIES,
             'retry_interval': http.DEFAULT_RETRY_INTERVAL,
             'os_ironic_api_version': '1.10',
@@ -300,16 +347,10 @@ class ShellTest(utils.BaseTestCase):
         self.assertRaises(keystone_exc.ConnectFailure,
                           self.shell, 'node-list')
         expected_kwargs = {
-            'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
-            'os_tenant_id': '', 'os_tenant_name': '',
-            'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
-            'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
-            'os_auth_token': '', 'os_project_id': '',
-            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
-            'os_project_domain_id': '',
-            'os_project_domain_name': '', 'os_region_name': '',
-            'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
-            'os_cert': None, 'os_key': None,
+            'auth_url': FAKE_ENV['OS_AUTH_URL'],
+            'username': FAKE_ENV['OS_USERNAME'],
+            'password': FAKE_ENV['OS_PASSWORD'],
+            'project_name': FAKE_ENV['OS_PROJECT_NAME'],
             'max_retries': http.DEFAULT_MAX_RETRIES,
             'retry_interval': http.DEFAULT_RETRY_INTERVAL,
             'os_ironic_api_version': ironic_shell.LATEST_VERSION,
@@ -326,16 +367,10 @@ class ShellTest(utils.BaseTestCase):
         self.assertRaises(keystone_exc.ConnectFailure,
                           self.shell, '--ironic-api-version 1.11 node-list')
         expected_kwargs = {
-            'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
-            'os_tenant_id': '', 'os_tenant_name': '',
-            'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
-            'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
-            'os_auth_token': '', 'os_project_id': '',
-            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
-            'os_project_domain_id': '',
-            'os_project_domain_name': '', 'os_region_name': '',
-            'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
-            'os_cert': None, 'os_key': None,
+            'auth_url': FAKE_ENV['OS_AUTH_URL'],
+            'username': FAKE_ENV['OS_USERNAME'],
+            'password': FAKE_ENV['OS_PASSWORD'],
+            'project_name': FAKE_ENV['OS_PROJECT_NAME'],
             'max_retries': http.DEFAULT_MAX_RETRIES,
             'retry_interval': http.DEFAULT_RETRY_INTERVAL,
             'os_ironic_api_version': '1.11',
@@ -352,16 +387,10 @@ class ShellTest(utils.BaseTestCase):
         self.assertRaises(keystone_exc.ConnectFailure,
                           self.shell, '--ironic-api-version 1 node-list')
         expected_kwargs = {
-            'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
-            'os_tenant_id': '', 'os_tenant_name': '',
-            'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
-            'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
-            'os_auth_token': '', 'os_project_id': '',
-            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
-            'os_project_domain_id': '',
-            'os_project_domain_name': '', 'os_region_name': '',
-            'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
-            'os_cert': None, 'os_key': None,
+            'auth_url': FAKE_ENV['OS_AUTH_URL'],
+            'username': FAKE_ENV['OS_USERNAME'],
+            'password': FAKE_ENV['OS_PASSWORD'],
+            'project_name': FAKE_ENV['OS_PROJECT_NAME'],
             'max_retries': http.DEFAULT_MAX_RETRIES,
             'retry_interval': http.DEFAULT_RETRY_INTERVAL,
             'os_ironic_api_version': ironic_shell.LATEST_VERSION,

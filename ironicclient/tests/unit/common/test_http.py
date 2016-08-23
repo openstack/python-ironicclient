@@ -327,6 +327,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
 
 class HttpClientTest(utils.BaseTestCase):
 
+    @mock.patch.object(http.LOG, 'warning', autospec=True)
+    def test_http_client_deprecation(self, log_mock):
+        http.HTTPClient('http://localhost')
+        self.assertIn('deprecated', log_mock.call_args[0][0])
+
     def test_url_generation_trailing_slash_in_base(self):
         client = http.HTTPClient('http://localhost/')
         url = client._make_connection_url('/v1/resources')
@@ -593,6 +598,13 @@ class HttpClientTest(utils.BaseTestCase):
 
 
 class SessionClientTest(utils.BaseTestCase):
+
+    @mock.patch.object(http.LOG, 'warning', autospec=True)
+    def test_session_client_endpoint_deprecation(self, log_mock):
+        http.SessionClient(os_ironic_api_version=1, session=mock.Mock(),
+                           api_version_select_state='user', max_retries=5,
+                           retry_interval=5, endpoint='abc')
+        self.assertIn('deprecated', log_mock.call_args[0][0])
 
     def test_server_exception_empty_body(self):
         error_body = _get_error_body()

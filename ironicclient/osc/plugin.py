@@ -75,7 +75,7 @@ def make_client(instance):
         region_name=instance._region_name,
         # NOTE(vdrok): This will be set as endpoint_override, and the Client
         # class will be able to do the version stripping if needed
-        endpoint=instance.get_endpoint_for_service_type(
+        endpoint_override=instance.get_endpoint_for_service_type(
             API_NAME, interface=instance.interface,
             region_name=instance._region_name
         )

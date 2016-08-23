@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
+
 from ironicclient.common import filecache
 from ironicclient.common import http
 from ironicclient.common.http import DEFAULT_VER
@@ -26,20 +28,29 @@ from ironicclient.v1 import portgroup
 from ironicclient.v1 import volume_connector
 from ironicclient.v1 import volume_target
 
+LOG = logging.getLogger(__name__)
+
 
 class Client(object):
     """Client for the Ironic v1 API.
 
     :param string endpoint: A user-supplied endpoint URL for the ironic
-                            service.
+                            service. DEPRECATED, use endpoint_override instead.
+    :param string endpoint_override: A user-supplied endpoint URL for the
+                                     ironic service.
     :param function token: Provides token for authentication.
     :param integer timeout: Allows customization of the timeout for client
                             http requests. (optional)
     """
 
-    def __init__(self, endpoint=None, *args, **kwargs):
+    def __init__(self, endpoint=None, endpoint_override=None, *args, **kwargs):
         """Initialize a new client for the Ironic v1 API."""
         allow_downgrade = kwargs.pop('allow_api_version_downgrade', False)
+        if endpoint_override is None and endpoint is not None:
+            LOG.warning('Passing "endpoint" parameter to Client constructor '
+                        'is deprecated, and it will be removed in Stein '
+                        'release. Please use "endpoint_override" instead.')
+            endpoint_override = endpoint
         if kwargs.get('os_ironic_api_version'):
             # TODO(TheJulia): We should sanity check os_ironic_api_version
             # against our maximum suported version, so the client fails
@@ -58,14 +69,14 @@ class Client(object):
             else:
                 kwargs['api_version_select_state'] = "user"
         else:
-            if not endpoint:
+            if not endpoint_override:
                 raise exc.EndpointException(
-                    _("Must provide 'endpoint' if os_ironic_api_version "
-                      "isn't specified"))
+                    _("Must provide 'endpoint_override' if "
+                      "'os_ironic_api_version' isn't specified"))
 
             # If the user didn't specify a version, use a cached version if
             # one has been stored
-            host, netport = http.get_server(endpoint)
+            host, netport = http.get_server(endpoint_override)
             saved_version = filecache.retrieve_data(host=host, port=netport)
             if saved_version:
                 kwargs['api_version_select_state'] = "cached"
@@ -74,8 +85,8 @@ class Client(object):
                 kwargs['api_version_select_state'] = "default"
                 kwargs['os_ironic_api_version'] = DEFAULT_VER
 
-        self.http_client = http._construct_http_client(
-            endpoint, *args, **kwargs)
+        kwargs['endpoint_override'] = endpoint_override
+        self.http_client = http._construct_http_client(*args, **kwargs)
 
         self.chassis = chassis.ChassisManager(self.http_client)
         self.node = node.NodeManager(self.http_client)

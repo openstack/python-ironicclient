@@ -1,0 +1,73 @@
+---
+features:
+  - |
+    The client now supports ``none`` authorization method, which should be
+    used if the Identity service is not present in the deployment that the
+    client talks to. To use it:
+
+    - openstack baremetal CLI -- supported starting with ``osc-lib`` version
+      ``1.10.0``, by providing ``--os-auth-type none`` and ``--os-endpoint``
+      argument to ``openstack`` command
+
+    - ironic CLI -- just specify the ``--ironic-url`` or ``--os-endpoint``
+      argument in the ``ironic`` command (or set the corresponding environment
+      variable)
+
+    - python API -- specify the ``endpoint_override`` argument to the
+      ``client.get_client()`` method (in addition to the required
+      ``api_version``)
+deprecations:
+  - |
+    ``common.http.HTTPClient`` class is deprecated and will be removed in
+    the Stein release. If you initialize the ironic client via
+    ``v1.client.Client`` class directly, please pass the `keystoneauth
+    <https://docs.openstack.org/keystoneauth/latest/>`_ session to the Client
+    constructor, so that ``common.http.SessionClient`` is used instead.
+  - |
+    As part of standardizing argument naming to the one used by `keystoneauth
+    <https://docs.openstack.org/keystoneauth/latest/>`_, the following
+    arguments to ``client.get_client`` method are deprecated and will be
+    removed in Stein release:
+
+    * ``os_auth_token``: use ``token`` instead
+
+    * ``os_username``: use ``username`` instead
+
+    * ``os_password``: use ``password`` instead
+
+    * ``os_auth_url``: use ``auth_url`` instead
+
+    * ``os_project_id``: use ``project_id`` instead
+
+    * ``os_project_name``: use ``project_name`` instead
+
+    * ``os_tenant_id``: use ``tenant_id`` instead
+
+    * ``os_tenant_name``: use ``tenant_name`` instead
+
+    * ``os_region_name``: use ``region_name`` instead
+
+    * ``os_user_domain_id``: use ``user_domain_id`` instead
+
+    * ``os_user_domain_name``: use ``user_domain_name`` instead
+
+    * ``os_project_domain_id``: use ``project_domain_id`` instead
+
+    * ``os_project_domain_name``: use ``project_domain_name`` instead
+
+    * ``os_service_type``: use ``service_type`` instead
+
+    * ``os_endpoint_type``: use ``interface`` instead
+
+    * ``ironic_url``: use ``endpoint`` instead
+
+    * ``os_cacert``, ``ca_file``: use ``cafile`` instead
+
+    * ``os_cert``, ``cert_file``: use ``certfile`` instead
+
+    * ``os_key``, ``key_file``: use ``keyfile`` instead
+  - |
+    The ``endpoint`` argument to the ``v1.client.Client`` constructor is
+    deprecated and will be removed in Stein release. Instead, please use the
+    standard `keystoneauth <https://docs.openstack.org/keystoneauth/latest/>`_
+    argument name ``endpoint_override``.

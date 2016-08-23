@@ -98,59 +98,75 @@ class IronicShell(object):
                             help=_('DEPRECATED! Use --os-cacert.'))
 
         parser.add_argument('--os-username',
+                            dest='username',
                             default=cliutils.env('OS_USERNAME'),
                             help=_('Defaults to env[OS_USERNAME]'))
 
         parser.add_argument('--os_username',
+                            dest='username',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-password',
+                            dest='password',
                             default=cliutils.env('OS_PASSWORD'),
                             help=_('Defaults to env[OS_PASSWORD]'))
 
         parser.add_argument('--os_password',
+                            dest='password',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-tenant-id',
+                            dest='tenant_id',
                             default=cliutils.env('OS_TENANT_ID'),
                             help=_('Defaults to env[OS_TENANT_ID]'))
 
         parser.add_argument('--os_tenant_id',
+                            dest='tenant_id',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-tenant-name',
+                            dest='tenant_name',
                             default=cliutils.env('OS_TENANT_NAME'),
                             help=_('Defaults to env[OS_TENANT_NAME]'))
 
         parser.add_argument('--os_tenant_name',
+                            dest='tenant_name',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-auth-url',
+                            dest='auth_url',
                             default=cliutils.env('OS_AUTH_URL'),
                             help=_('Defaults to env[OS_AUTH_URL]'))
 
         parser.add_argument('--os_auth_url',
+                            dest='auth_url',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-region-name',
+                            dest='region_name',
                             default=cliutils.env('OS_REGION_NAME'),
                             help=_('Defaults to env[OS_REGION_NAME]'))
 
         parser.add_argument('--os_region_name',
+                            dest='region_name',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-auth-token',
+                            dest='token',
                             default=cliutils.env('OS_AUTH_TOKEN'),
                             help=_('Defaults to env[OS_AUTH_TOKEN]'))
 
         parser.add_argument('--os_auth_token',
+                            dest='token',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--ironic-url',
+                            dest='endpoint',
                             default=cliutils.env('IRONIC_URL'),
                             help=_('Defaults to env[IRONIC_URL]'))
 
         parser.add_argument('--ironic_url',
+                            dest='endpoint',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--ironic-api-version',
@@ -164,15 +180,17 @@ class IronicShell(object):
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-service-type',
+                            dest='service_type',
                             default=cliutils.env('OS_SERVICE_TYPE'),
                             help=_('Defaults to env[OS_SERVICE_TYPE] or '
                                    '"baremetal"'))
 
         parser.add_argument('--os_service_type',
+                            dest='service_type',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-endpoint',
-                            dest='ironic_url',
+                            dest='endpoint',
                             default=cliutils.env('OS_SERVICE_ENDPOINT'),
                             help=_('Specify an endpoint to use instead of '
                                    'retrieving one from the service catalog '
@@ -180,26 +198,31 @@ class IronicShell(object):
                                    'Defaults to env[OS_SERVICE_ENDPOINT].'))
 
         parser.add_argument('--os_endpoint',
-                            dest='ironic_url',
+                            dest='endpoint',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-endpoint-type',
+                            dest='interface',
                             default=cliutils.env('OS_ENDPOINT_TYPE'),
                             help=_('Defaults to env[OS_ENDPOINT_TYPE] or '
                                    '"publicURL"'))
 
         parser.add_argument('--os_endpoint_type',
+                            dest='interface',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-user-domain-id',
+                            dest='user_domain_id',
                             default=cliutils.env('OS_USER_DOMAIN_ID'),
                             help=_('Defaults to env[OS_USER_DOMAIN_ID].'))
 
         parser.add_argument('--os-user-domain-name',
+                            dest='user_domain_name',
                             default=cliutils.env('OS_USER_DOMAIN_NAME'),
                             help=_('Defaults to env[OS_USER_DOMAIN_NAME].'))
 
         parser.add_argument('--os-project-id',
+                            dest='project_id',
                             default=cliutils.env('OS_PROJECT_ID'),
                             help=_('Another way to specify tenant ID. '
                                    'This option is mutually exclusive with '
@@ -207,6 +230,7 @@ class IronicShell(object):
                                    'Defaults to env[OS_PROJECT_ID].'))
 
         parser.add_argument('--os-project-name',
+                            dest='project_name',
                             default=cliutils.env('OS_PROJECT_NAME'),
                             help=_('Another way to specify tenant name. '
                                    'This option is mutually exclusive with '
@@ -214,10 +238,12 @@ class IronicShell(object):
                                    'Defaults to env[OS_PROJECT_NAME].'))
 
         parser.add_argument('--os-project-domain-id',
+                            dest='project_domain_id',
                             default=cliutils.env('OS_PROJECT_DOMAIN_ID'),
                             help=_('Defaults to env[OS_PROJECT_DOMAIN_ID].'))
 
         parser.add_argument('--os-project-domain-name',
+                            dest='project_domain_name',
                             default=cliutils.env('OS_PROJECT_DOMAIN_NAME'),
                             help=_('Defaults to env[OS_PROJECT_DOMAIN_NAME].'))
 
@@ -354,38 +380,39 @@ class IronicShell(object):
             self.do_bash_completion()
             return 0
 
-        if not (args.os_auth_token and (args.ironic_url or args.os_auth_url)):
-            if not args.os_username:
+        # Assume password auth if it does not seem like none, admin_token or
+        # token auth
+        if not args.endpoint and not (args.token and args.auth_url):
+            if not args.username:
                 raise exc.CommandError(_("You must provide a username via "
                                          "either --os-username or via "
                                          "env[OS_USERNAME]"))
 
-            if not args.os_password:
+            if not args.password:
                 # No password, If we've got a tty, try prompting for it
                 if hasattr(sys.stdin, 'isatty') and sys.stdin.isatty():
                     # Check for Ctl-D
                     try:
-                        args.os_password = getpass.getpass(
+                        args.password = getpass.getpass(
                             'OpenStack Password: ')
                     except EOFError:
                         pass
             # No password because we didn't have a tty or the
             # user Ctl-D when prompted.
-            if not args.os_password:
+            if not args.password:
                 raise exc.CommandError(_("You must provide a password via "
                                          "either --os-password, "
                                          "env[OS_PASSWORD], "
                                          "or prompted response"))
 
-            if not (args.os_tenant_id or args.os_tenant_name or
-                    args.os_project_id or args.os_project_name):
+            if not (args.tenant_id or args.tenant_name or
+                    args.project_id or args.project_name):
                 raise exc.CommandError(
                     _("You must provide a project name or"
                       " project id via --os-project-name, --os-project-id,"
-                      " env[OS_PROJECT_ID] or env[OS_PROJECT_NAME].  You may"
-                      " use os-project and os-tenant interchangeably."))
+                      " env[OS_PROJECT_ID] or env[OS_PROJECT_NAME]."))
 
-            if not args.os_auth_url:
+            if not args.auth_url:
                 raise exc.CommandError(_("You must provide an auth url via "
                                          "either --os-auth-url or via "
                                          "env[OS_AUTH_URL]"))
@@ -397,17 +424,29 @@ class IronicShell(object):
             raise exc.CommandError(_("You must provide value >= 1 for "
                                      "--retry-interval"))
         client_args = (
-            'os_auth_token', 'ironic_url', 'os_username', 'os_password',
-            'os_auth_url', 'os_project_id', 'os_project_name', 'os_tenant_id',
-            'os_tenant_name', 'os_region_name', 'os_user_domain_id',
-            'os_user_domain_name', 'os_project_domain_id',
-            'os_project_domain_name', 'os_service_type', 'os_endpoint_type',
-            'os_cacert', 'os_cert', 'os_key', 'max_retries', 'retry_interval',
-            'timeout', 'insecure'
+            'token', 'endpoint', 'username', 'password', 'auth_url',
+            'project_id', 'project_name', 'tenant_id', 'tenant_name',
+            'region_name', 'user_domain_id', 'user_domain_name',
+            'project_domain_id', 'project_domain_name', 'service_type',
+            'interface', 'max_retries', 'retry_interval', 'timeout', 'insecure'
         )
         kwargs = {}
         for key in client_args:
-            kwargs[key] = getattr(args, key)
+            value = getattr(args, key)
+            # NOTE(vdrok): check for both None and ''. If the default value
+            # for option is set using cliutils.env function, default empty
+            # value is ''. If the default is not set explicitly, it is None.
+            if value not in (None, ''):
+                kwargs[key] = value
+        # NOTE(vdrok): this is to workaround the fact that these options are
+        # named differently in keystoneauth, depending on whether they are
+        # provided through CLI or loaded from conf options, here we unify them.
+        for cli_ssl_opt, conf_ssl_opt in [
+                ('os_cacert', 'cafile'), ('os_cert', 'certfile'),
+                ('os_key', 'keyfile')]:
+            value = getattr(args, cli_ssl_opt)
+            if value not in (None, ''):
+                kwargs[conf_ssl_opt] = value
         kwargs['os_ironic_api_version'] = os_ironic_api_version
         client = ironicclient.client.get_client(api_major_version, **kwargs)
         if options.ironic_api_version in ('1', 'latest'):
