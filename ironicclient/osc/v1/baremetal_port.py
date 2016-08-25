@@ -17,14 +17,13 @@
 import itertools
 import logging
 
-from cliff import command
-from cliff import show
+from osc_lib.command import command
 
 from ironicclient.common import utils
 from ironicclient.v1 import resource_fields as res_fields
 
 
-class CreateBaremetalPort(show.ShowOne):
+class CreateBaremetalPort(command.ShowOne):
     """Create a new port"""
 
     log = logging.getLogger(__name__ + ".CreateBaremetalPort")
@@ -104,7 +103,7 @@ class CreateBaremetalPort(show.ShowOne):
         return self.dict2columns(data)
 
 
-class ShowBaremetalPort(show.ShowOne):
+class ShowBaremetalPort(command.ShowOne):
     """Show baremetal port details."""
 
     log = logging.getLogger(__name__ + ".ShowBaremetalPort")

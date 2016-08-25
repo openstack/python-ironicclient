@@ -18,10 +18,8 @@ import argparse
 import itertools
 import logging
 
-from cliff import command
-from cliff import lister
-from cliff import show
 from openstackclient.common import utils as oscutils
+from osc_lib.command import command
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
@@ -112,7 +110,7 @@ class CleanBaremetalNode(ProvisionStateBaremetalNode):
             cleansteps=clean_steps)
 
 
-class CreateBaremetalNode(show.ShowOne):
+class CreateBaremetalNode(command.ShowOne):
     """Register a new node with the baremetal service"""
 
     log = logging.getLogger(__name__ + ".CreateBaremetalNode")
@@ -272,7 +270,7 @@ class InspectBaremetalNode(ProvisionStateBaremetalNode):
     PROVISION_STATE = 'inspect'
 
 
-class ListBaremetalNode(lister.Lister):
+class ListBaremetalNode(command.Lister):
     """List baremetal nodes"""
 
     log = logging.getLogger(__name__ + ".ListBaremetalNode")
@@ -663,7 +661,7 @@ class SetBaremetal(SetBaremetalNode):
         return super(SetBaremetal, self).take_action(parsed_args)
 
 
-class ShowBaremetalNode(show.ShowOne):
+class ShowBaremetalNode(command.ShowOne):
     """Show baremetal node details"""
 
     log = logging.getLogger(__name__ + ".ShowBaremetalNode")
