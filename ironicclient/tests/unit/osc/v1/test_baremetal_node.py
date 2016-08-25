@@ -34,6 +34,28 @@ class TestBaremetal(baremetal_fakes.TestBaremetal):
         self.baremetal_mock.reset_mock()
 
 
+class TestAdopt(TestBaremetal):
+    def setUp(self):
+        super(TestAdopt, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.AdoptBaremetalNode(self.app, None)
+
+    def test_adopt(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'adopt'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'adopt')
+
+
 class TestBaremetalCreate(TestBaremetal):
     def setUp(self):
         super(TestBaremetalCreate, self).setUp()
