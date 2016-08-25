@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Allows setting and unsetting (clearing) the node's target
+    RAID configuration via the OpenStackClient plugin commands
+    'openstack baremetal node set --target-raid-config' and
+    'openstack baremetal node unset --target-raid-config'
+    respectively.
