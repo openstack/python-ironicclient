@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Extend the OpenStackClient plugin with the new command:
+
+    * openstack baremetal port list
