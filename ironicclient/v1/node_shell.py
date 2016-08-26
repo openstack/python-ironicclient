@@ -331,13 +331,7 @@ def do_node_update(cc, args):
               help=argparse.SUPPRESS)
 def do_node_vendor_passthru(cc, args):
     """Call a vendor-passthru extension for a node."""
-    arguments = utils.args_array_to_dict({'args': args.arguments[0]},
-                                         'args')['args']
-
-    # If there were no arguments for the method, arguments will still
-    # be an empty list. So make it an empty dict.
-    if not arguments:
-        arguments = {}
+    arguments = utils.key_value_pairs_to_dict(args.arguments[0])
 
     resp = cc.node.vendor_passthru(args.node, args.method,
                                    http_method=args.http_method,
