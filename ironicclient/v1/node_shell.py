@@ -272,7 +272,7 @@ def do_node_create(cc, args):
 def do_node_delete(cc, args):
     """Unregister node(s) from the Ironic service.
 
-    :raises: ClientException, if error happens during the delete
+    Returns errors for any nodes that could not be unregistered.
     """
 
     failures = []
