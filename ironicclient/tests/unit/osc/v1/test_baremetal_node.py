@@ -56,6 +56,66 @@ class TestAdopt(TestBaremetal):
             'node_uuid', 'adopt')
 
 
+class TestConsoleDisable(TestBaremetal):
+    def setUp(self):
+        super(TestConsoleDisable, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ConsoleDisableBaremetalNode(self.app, None)
+
+    def test_console_disable(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_console_mode.assert_called_once_with(
+            'node_uuid', False)
+
+
+class TestConsoleEnable(TestBaremetal):
+    def setUp(self):
+        super(TestConsoleEnable, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ConsoleEnableBaremetalNode(self.app, None)
+
+    def test_console_enable(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_console_mode.assert_called_once_with(
+            'node_uuid', True)
+
+
+class TestConsoleShow(TestBaremetal):
+    def setUp(self):
+        super(TestConsoleShow, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ConsoleShowBaremetalNode(self.app, None)
+
+        self.baremetal_mock.node.get_console.return_value = {
+            "console_enabled": False, "console_info": None}
+
+    def test_console_show(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.get_console.assert_called_once_with(
+            'node_uuid')
+
+
 class TestBaremetalCreate(TestBaremetal):
     def setUp(self):
         super(TestBaremetalCreate, self).setUp()
