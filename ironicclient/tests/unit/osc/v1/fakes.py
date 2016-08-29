@@ -19,6 +19,15 @@ from osc_lib.tests import utils
 
 from ironicclient.tests.unit.osc import fakes
 
+baremetal_chassis_uuid = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+baremetal_chassis_description = 'chassis description'
+baremetal_chassis_extra = {}
+BAREMETAL_CHASSIS = {
+    'uuid': baremetal_chassis_uuid,
+    'description': baremetal_chassis_description,
+    'extra': baremetal_chassis_extra,
+}
+
 baremetal_uuid = 'xxx-xxxxxx-xxxx'
 baremetal_name = 'fake name'
 baremetal_instance_uuid = 'yyy-yyyyyy-yyyy'
