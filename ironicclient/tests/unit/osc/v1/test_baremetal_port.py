@@ -407,6 +407,20 @@ class TestBaremetalPortList(TestBaremetalPort):
         }
         self.baremetal_mock.port.list.assert_called_with(**kwargs)
 
+    def test_baremetal_port_list_node(self):
+        arglist = ['--node', baremetal_fakes.baremetal_uuid]
+        verifylist = [('node', baremetal_fakes.baremetal_uuid)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        columns, data = self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'node': baremetal_fakes.baremetal_uuid,
+            'marker': None,
+            'limit': None,
+        }
+        self.baremetal_mock.port.list.assert_called_with(**kwargs)
+
     def test_baremetal_port_list_long(self):
         arglist = ['--long']
         verifylist = [('detail', True)]

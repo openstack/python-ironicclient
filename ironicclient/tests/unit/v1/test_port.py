@@ -110,7 +110,14 @@ fake_responses = {
             {},
             {"ports": [PORT]},
         ),
-    }
+    },
+    '/v1/ports/?node=%s' % PORT['node_uuid']:
+    {
+        'GET': (
+            {},
+            {"ports": [PORT]},
+        ),
+    },
 }
 
 fake_responses_pagination = {
@@ -183,6 +190,14 @@ class PortManagerTest(testtools.TestCase):
         ports = self.mgr.list(address=PORT['address'], detail=True)
         expect = [
             ('GET', '/v1/ports/detail?address=%s' % PORT['address'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(ports))
+
+    def test_ports_list_by_node(self):
+        ports = self.mgr.list(node=PORT['node_uuid'])
+        expect = [
+            ('GET', '/v1/ports/?node=%s' % PORT['node_uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
