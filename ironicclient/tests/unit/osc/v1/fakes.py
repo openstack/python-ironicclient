@@ -47,6 +47,21 @@ BAREMETAL_PORT = {
     'node_uuid': baremetal_uuid,
 }
 
+baremetal_driver_hosts = ['fake-host1', 'fake-host2']
+baremetal_driver_name = 'fakedrivername'
+
+BAREMETAL_DRIVER = {
+    'hosts': baremetal_driver_hosts,
+    'name': baremetal_driver_name,
+}
+
+baremetal_driver_passthru_method = 'lookup'
+
+BAREMETAL_DRIVER_PASSTHRU = {"lookup": {"attach": "false",
+                                        "http_methods": ["POST"],
+                                        "description": "",
+                                        "async": "false"}}
+
 
 class TestBaremetal(utils.TestCommand):
 
