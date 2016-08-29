@@ -120,6 +120,33 @@ class TestCreateBaremetalPort(TestBaremetalPort):
                                        'switch_id=aa:bb:cc:dd:ee:ff'])]
         )
 
+    def test_baremetal_port_create_portgroup_uuid(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--port-group', baremetal_fakes.baremetal_portgroup_uuid,
+        ]
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_port_address),
+            ('portgroup_uuid', baremetal_fakes.baremetal_portgroup_uuid)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = {
+            'address': baremetal_fakes.baremetal_port_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'portgroup_uuid': baremetal_fakes.baremetal_portgroup_uuid
+        }
+
+        self.baremetal_mock.port.create.assert_called_once_with(**args)
+
 
 class TestShowBaremetalPort(TestBaremetalPort):
     def setUp(self):
@@ -231,6 +258,18 @@ class TestBaremetalPortUnset(TestBaremetalPort):
             [{'path': '/extra/foo', 'op': 'remove'},
              {'path': '/extra/bar', 'op': 'remove'}])
 
+    def test_baremetal_port_unset_portgroup_uuid(self):
+        arglist = ['port', '--port-group']
+        verifylist = [('port', 'port'),
+                      ('portgroup', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port',
+            [{'path': '/portgroup_uuid', 'op': 'remove'}])
+
 
 class TestBaremetalPortSet(TestBaremetalPort):
     def setUp(self):
@@ -288,6 +327,23 @@ class TestBaremetalPortSet(TestBaremetalPort):
         self.baremetal_mock.port.update.assert_called_once_with(
             'port',
             [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}])
+
+    def test_baremetal_port_set_portgroup_uuid(self):
+        new_portgroup_uuid = '1111-111111-1111'
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--port-group', new_portgroup_uuid]
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('portgroup_uuid', new_portgroup_uuid)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/portgroup_uuid', 'value': new_portgroup_uuid,
+              'op': 'add'}])
 
     def test_baremetal_port_set_no_options(self):
         arglist = []
@@ -414,6 +470,21 @@ class TestBaremetalPortList(TestBaremetalPort):
 
         kwargs = {
             'node': baremetal_fakes.baremetal_uuid,
+            'marker': None,
+            'limit': None,
+        }
+        self.baremetal_mock.port.list.assert_called_with(**kwargs)
+
+    def test_baremetal_port_list_portgroup(self):
+        arglist = ['--port-group', baremetal_fakes.baremetal_portgroup_uuid]
+        verifylist = [('portgroup', baremetal_fakes.baremetal_portgroup_uuid)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        # DisplayCommandBase.take_action() returns two tuples
+        columns, data = self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'portgroup': baremetal_fakes.baremetal_portgroup_uuid,
             'marker': None,
             'limit': None,
         }

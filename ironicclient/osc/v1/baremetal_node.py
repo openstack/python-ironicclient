@@ -322,6 +322,7 @@ class CreateBaremetalNode(command.ShowOne):
 
         node.pop('links', None)
         node.pop('ports', None)
+        node.pop('portgroups', None)
 
         node.setdefault('chassis_uuid', '')
 
@@ -962,6 +963,7 @@ class ShowBaremetalNode(command.ShowOne):
                 parsed_args.node, fields=fields)._info
         node.pop("links", None)
         node.pop("ports", None)
+        node.pop('portgroups', None)
 
         node.setdefault('chassis_uuid', '')
 
