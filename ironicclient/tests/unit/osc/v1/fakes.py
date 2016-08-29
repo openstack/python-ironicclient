@@ -38,7 +38,8 @@ BAREMETAL = {
 
 baremetal_port_uuid = 'zzz-zzzzzz-zzzz'
 baremetal_port_address = 'AA:BB:CC:DD:EE:FF'
-baremetal_port_extra = {}
+baremetal_port_extra = {'key1': 'value1',
+                        'key2': 'value2'}
 
 BAREMETAL_PORT = {
     'uuid': baremetal_port_uuid,
