@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Extends the OpenStackClient plug-in with new commands:
+
+    * openstack baremetal node boot device set
+    * openstack baremetal node boot device show
+    * openstack baremetal node passthru call
+    * openstack baremetal node passthru list
