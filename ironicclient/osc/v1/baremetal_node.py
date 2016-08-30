@@ -642,6 +642,14 @@ class SetBaremetalNode(command.Command):
             help='Set the resource class for the node',
         )
         parser.add_argument(
+            '--target-raid-config',
+            metavar='<target_raid_config>',
+            help='Set the target RAID configuration (JSON) for the node. This '
+                 'can be one of: 1. a file containing JSON data of the RAID '
+                 'configuration; 2. "-" to read the contents from standard '
+                 'input; or 3. a valid JSON string.',
+        )
+        parser.add_argument(
             "--property",
             metavar="<key=value>",
             action='append',
@@ -676,6 +684,17 @@ class SetBaremetalNode(command.Command):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
+
+        # NOTE(rloo): Do this before updating the rest. Otherwise, it won't
+        #             work if parsed_args.node is the name and the name is
+        #             also being modified.
+        if parsed_args.target_raid_config:
+            raid_config = parsed_args.target_raid_config
+            if raid_config == '-':
+                raid_config = utils.get_from_stdin('target_raid_config')
+            raid_config = utils.handle_json_or_file_arg(raid_config)
+            baremetal_client.node.set_target_raid_config(parsed_args.node,
+                                                         raid_config)
 
         properties = []
         if parsed_args.instance_uuid:
@@ -713,7 +732,8 @@ class SetBaremetalNode(command.Command):
             properties.extend(utils.args_array_to_patch(
                 'add', ['instance_info/' + x for x
                         in parsed_args.instance_info]))
-        baremetal_client.node.update(parsed_args.node, properties)
+        if properties:
+            baremetal_client.node.update(parsed_args.node, properties)
 
 
 class SetBaremetal(SetBaremetalNode):
@@ -824,6 +844,11 @@ class UnsetBaremetalNode(command.Command):
             help="Unset the resource class of the node",
         )
         parser.add_argument(
+            "--target-raid-config",
+            action='store_true',
+            help="Unset the target RAID configuration of the node",
+        )
+        parser.add_argument(
             '--property',
             metavar='<key>',
             action='append',
@@ -859,6 +884,12 @@ class UnsetBaremetalNode(command.Command):
 
         baremetal_client = self.app.client_manager.baremetal
 
+        # NOTE(rloo): Do this before removing the rest. Otherwise, it won't
+        #             work if parsed_args.node is the name and the name is
+        #             also being removed.
+        if parsed_args.target_raid_config:
+            baremetal_client.node.set_target_raid_config(parsed_args.node, {})
+
         properties = []
         if parsed_args.instance_uuid:
             properties.extend(utils.args_array_to_patch('remove',
@@ -884,8 +915,8 @@ class UnsetBaremetalNode(command.Command):
             properties.extend(utils.args_array_to_patch('remove',
                               ['instance_info/' + x for x
                                in parsed_args.instance_info]))
-
-        baremetal_client.node.update(parsed_args.node, properties)
+        if properties:
+            baremetal_client.node.update(parsed_args.node, properties)
 
 
 class UnsetBaremetal(UnsetBaremetalNode):
