@@ -261,7 +261,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         e = exc.ClientException('foo')
         self.client.node.create.side_effect = e
         res, err = create_resources.create_single_node(self.client, **params)
-        self.assertEqual(None, res)
+        self.assertIsNone(res)
         self.assertIsInstance(err, exc.ClientException)
         self.assertIn('Unable to create the node', str(err))
         self.client.node.create.assert_called_once_with(driver='fake')
@@ -271,7 +271,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         e = exc.InvalidAttribute('foo')
         self.client.node.create.side_effect = e
         res, err = create_resources.create_single_node(self.client, **params)
-        self.assertEqual(None, res)
+        self.assertIsNone(res)
         self.assertIsInstance(err, exc.InvalidAttribute)
         self.assertIn('Cannot create the node with attributes', str(err))
         self.client.node.create.assert_called_once_with(driver='fake')
