@@ -1,9 +1,10 @@
 ---
 features:
-  - Added a new ``ironic create`` command that creates resources (chassis,
+  - Adds a new ``ironic create`` command that creates resources (chassis,
     nodes, ports) specified in one or more JSON (``*.json``) or YAML
-    (``*.yaml``) files. Similar to the ``ironic create`` command, the
-    ``openstack baremetal create`` command creates resources specified in one
-    or more files. (Note that ``openstack baremetal create`` can also be used
-    to create a node via specified node attributes. However this feature is
-    deprecated.)
+    (``*.yaml``) files.
+  - Adds a new ``openstack baremetal create`` command. Similar to the ``ironic
+    create`` command, this command creates resources specified in one or more
+    files. (Note that ``openstack baremetal create`` can also be used to create
+    a node via specified node attributes. However, this feature has been
+    deprecated since 1.4.0.)

@@ -1,8 +1,0 @@
----
-features:
-  - |
-    Extends the OpenStackClient plug-in with new commands:
-
-    * openstack baremetal node console disable
-    * openstack baremetal node console enable
-    * openstack baremetal node console show

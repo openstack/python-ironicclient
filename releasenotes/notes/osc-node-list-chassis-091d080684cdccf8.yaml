@@ -1,6 +1,6 @@
 ---
 features:
   - |
-    Adds an optional '--chassis' (chassis UUID) to the
-    "openstack baremetal node list" command. It provides the
+    Add an option ``--chassis <chassis UUID>`` to the
+    ``openstack baremetal node list`` command. It provides the
     ability to get a list of the nodes of the specified chassis.
