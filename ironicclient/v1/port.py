@@ -32,8 +32,8 @@ class PortManager(base.CreateManager):
     _resource_name = 'ports'
 
     def list(self, address=None, limit=None, marker=None, sort_key=None,
-             sort_dir=None, detail=False, fields=None):
-        """Retrieve a list of port.
+             sort_dir=None, detail=False, fields=None, node=None):
+        """Retrieve a list of ports.
 
         :param address: Optional, MAC address of a port, to get
                        the port which has this MAC address
@@ -61,6 +61,9 @@ class PortManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param node: Optional, name or UUID of a node. Used to get
+                     ports of this node.
+
         :returns: A list of ports.
 
         """
@@ -75,6 +78,8 @@ class PortManager(base.CreateManager):
                                        fields)
         if address is not None:
             filters.append('address=%s' % address)
+        if node is not None:
+            filters.append('node=%s' % node)
 
         path = ''
         if detail:

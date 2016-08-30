@@ -293,6 +293,12 @@ class ListBaremetalPort(command.Lister):
             help="Only show information for the port with this MAC address."
         )
         parser.add_argument(
+            '--node',
+            dest='node',
+            metavar='<node>',
+            help="Only list ports of this node (name or UUID)."
+        )
+        parser.add_argument(
             '--limit',
             metavar='<limit>',
             type=int,
@@ -351,6 +357,8 @@ class ListBaremetalPort(command.Lister):
 
         if parsed_args.address is not None:
             params['address'] = parsed_args.address
+        if parsed_args.node is not None:
+            params['node'] = parsed_args.node
 
         if parsed_args.detail:
             params['detail'] = parsed_args.detail
