@@ -552,6 +552,31 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
+    def test_baremetal_list_chassis(self):
+        chassis_uuid = 'aaaaaaaa-1111-bbbb-2222-cccccccccccc'
+        arglist = [
+            '--chassis', chassis_uuid,
+        ]
+        verifylist = [
+            ('chassis', chassis_uuid),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'chassis': chassis_uuid
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
     def test_baremetal_list_fields(self):
         arglist = [
             '--fields', 'uuid', 'name',

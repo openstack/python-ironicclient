@@ -181,6 +181,13 @@ fake_responses = {
             {"nodes": [NODE1]},
         )
     },
+    '/v1/nodes/?chassis_uuid=%s' % NODE2['chassis_uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]},
+        )
+    },
     '/v1/nodes/detail?instance_uuid=%s' % NODE2['instance_uuid']:
     {
         'GET': (
@@ -566,6 +573,16 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_chassis(self):
+        ch2 = NODE2['chassis_uuid']
+        nodes = self.mgr.list(chassis=ch2)
+        expect = [
+            ('GET', '/v1/nodes/?chassis_uuid=%s' % ch2, {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
     def test_node_list_no_maintenance(self):
         nodes = self.mgr.list(maintenance=False)

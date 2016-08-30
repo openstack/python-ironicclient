@@ -395,6 +395,11 @@ class ListBaremetalNode(command.Lister):
             dest='resource_class',
             metavar='<resource class>',
             help="Limit list to nodes with resource class <resource class>")
+        parser.add_argument(
+            '--chassis',
+            dest='chassis',
+            metavar='<chassis UUID>',
+            help="Limit list to nodes of this chassis")
         display_group = parser.add_mutually_exclusive_group(required=False)
         display_group.add_argument(
             '--long',
@@ -436,6 +441,8 @@ class ListBaremetalNode(command.Lister):
             params['provision_state'] = parsed_args.provision_state
         if parsed_args.resource_class:
             params['resource_class'] = parsed_args.resource_class
+        if parsed_args.chassis:
+            params['chassis'] = parsed_args.chassis
         if parsed_args.long:
             params['detail'] = parsed_args.long
             columns = res_fields.NODE_DETAILED_RESOURCE.fields
