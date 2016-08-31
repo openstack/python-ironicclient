@@ -49,7 +49,8 @@ class NodeManager(base.CreateManager):
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
              detail=False, sort_key=None, sort_dir=None, fields=None,
-             provision_state=None, driver=None, resource_class=None):
+             provision_state=None, driver=None, resource_class=None,
+             chassis=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -93,6 +94,9 @@ class NodeManager(base.CreateManager):
         :param resource_class: Optional. String value to get only nodes
                                with the given resource class set.
 
+        :param chassis: Optional, the UUID of a chassis. Used to get only
+                        nodes of this chassis.
+
         :returns: A list of nodes.
 
         """
@@ -115,6 +119,8 @@ class NodeManager(base.CreateManager):
             filters.append('driver=%s' % driver)
         if resource_class is not None:
             filters.append('resource_class=%s' % resource_class)
+        if chassis is not None:
+            filters.append('chassis_uuid=%s' % chassis)
 
         path = ''
         if detail:
