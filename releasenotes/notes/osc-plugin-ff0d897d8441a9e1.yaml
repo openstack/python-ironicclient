@@ -33,4 +33,4 @@ deprecations:
     * openstack baremetal show
     * openstack baremetal unset
 
-    These will be removed in the 'P' release.
+    These will be removed in the 'Queens' release.

@@ -35,7 +35,8 @@ class CreateBaremetal(baremetal_node.CreateBaremetalNode):
                 "arguments (DEPRECATED, use 'openstack baremetal node create' "
                 "instead)")
 
-    # TODO(vdrok): Remove support for new node creation in the 'P' cycle.
+    # TODO(vdrok): Remove support for new node creation after 11-July-2017
+    # during the 'Queens' cycle.
     def get_parser(self, prog_name):
         parser = super(CreateBaremetal, self).get_parser(prog_name)
         # NOTE(vdrok): It is a workaround to allow --driver to be optional for
