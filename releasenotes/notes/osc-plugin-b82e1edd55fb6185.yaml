@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Extend the OpenStackClient plugin with new commands:
+
+    * openstack baremetal driver list
+    * openstack baremetal driver passthru call
+    * openstack baremetal driver passthru list
+    * openstack baremetal driver show
+
