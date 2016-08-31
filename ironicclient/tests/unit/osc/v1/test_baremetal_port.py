@@ -71,6 +71,56 @@ class TestCreateBaremetalPort(TestBaremetalPort):
 
         self.baremetal_mock.port.create.assert_called_once_with(**args)
 
+    def test_baremetal_port_create_extras(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--extra', 'key1=value1',
+            '--extra', 'key2=value2'
+        ]
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_port_address),
+            ('extra', ['key1=value1', 'key2=value2'])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+
+        args = {
+            'address': baremetal_fakes.baremetal_port_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'extra': baremetal_fakes.baremetal_port_extra
+        }
+        self.baremetal_mock.port.create.assert_called_once_with(**args)
+
+    def test_baremetal_port_create_no_address(self):
+        arglist = ['--node', baremetal_fakes.baremetal_uuid]
+
+        verifylist = [('node_uuid', baremetal_fakes.baremetal_uuid)]
+        self.assertRaises(osctestutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_port_create_no_node(self):
+        arglist = [baremetal_fakes.baremetal_port_address]
+
+        verifylist = [
+            ('address', baremetal_fakes.baremetal_port_address)
+        ]
+        self.assertRaises(osctestutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_port_create_no_args(self):
+        arglist = []
+        verifylist = []
+
+        self.assertRaises(osctestutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
     def _test_baremetal_port_create_llc_warning(self, additional_args,
                                                 additional_verify_items):
         arglist = [
