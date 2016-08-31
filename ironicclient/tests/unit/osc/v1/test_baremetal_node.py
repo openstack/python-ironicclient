@@ -1644,3 +1644,44 @@ class TestBaremetalUnset(TestBaremetal):
             'node_uuid',
             [{'path': '/name', 'op': 'remove'}]
         )
+
+
+class TestValidate(TestBaremetal):
+    def setUp(self):
+        super(TestValidate, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ValidateBaremetalNode(self.app, None)
+
+        self.baremetal_mock.node.validate.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None,
+                {'management': {'result': True},
+                 'console': {'reason': "Missing 'ipmi_terminal_port'",
+                             'result': False},
+                 'network': {'result': True},
+                 'power': {'result': True},
+                 'deploy': {'result': True},
+                 'inspect': {'reason': "not supported", 'result': None},
+                 'boot': {'result': True},
+                 'raid': {'result': True}},
+                loaded=True,
+            ))
+
+    def test_baremetal_validate_no_arg(self):
+        arglist = []
+        verifylist = []
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_validate(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.validate.assert_called_once_with('node_uuid')
