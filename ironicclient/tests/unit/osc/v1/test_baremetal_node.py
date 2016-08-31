@@ -57,6 +57,55 @@ class TestAdopt(TestBaremetal):
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'adopt', cleansteps=None, configdrive=None)
 
+    def test_adopt_no_wait(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'adopt')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
+
+    def test_adopt_baremetal_provision_state_active_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'adopt'),
+            ('wait_timeout', 15)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='active',
+            poll_interval=2, timeout=15)
+
+    def test_adopt_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'adopt'),
+            ('wait_timeout', 0)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='active',
+            poll_interval=2, timeout=0)
+
 
 class TestBootdeviceSet(TestBaremetal):
     def setUp(self):
@@ -999,6 +1048,52 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
             'node_uuid', 'active',
             cleansteps=None, configdrive='path/to/drive')
 
+    def test_deploy_no_wait(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'active')
+        ]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
+
+    def test_deploy_baremetal_provision_state_active_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'active'),
+            ('wait_timeout', 15)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='active',
+            poll_interval=10, timeout=15)
+
+    def test_deploy_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'active'),
+            ('wait_timeout', 0)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='active',
+            poll_interval=10, timeout=0)
+
     def test_deploy_baremetal_provision_state_mismatch(self):
         arglist = ['node_uuid',
                    '--provision-state', 'abort']
@@ -1010,6 +1105,353 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
         self.assertRaises(oscutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
+
+
+class TestManageBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestManageBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ManageBaremetalNode(self.app, None)
+
+    def test_manage_no_wait(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'manage')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
+
+    def test_manage_baremetal_provision_state_manageable_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'manage'),
+            ('wait_timeout', 15)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='manageable',
+            poll_interval=2, timeout=15)
+
+    def test_manage_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'manage'),
+            ('wait_timeout', 0)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='manageable',
+            poll_interval=2, timeout=0)
+
+
+class TestCleanBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestCleanBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.CleanBaremetalNode(self.app, None)
+
+    def test_clean_no_wait(self):
+        arglist = ['node_uuid', '--clean-steps', '-']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'clean'),
+            ('clean_steps', '-')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
+
+    def test_clean_baremetal_provision_state_manageable_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15',
+                   '--clean-steps', '-']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'clean'),
+            ('wait_timeout', 15),
+            ('clean_steps', '-')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='manageable',
+            poll_interval=10, timeout=15)
+
+    def test_clean_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait',
+                   '--clean-steps', '-']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'clean'),
+            ('wait_timeout', 0),
+            ('clean_steps', '-')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='manageable',
+            poll_interval=10, timeout=0)
+
+
+class TestInspectBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestInspectBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.InspectBaremetalNode(self.app, None)
+
+    def test_inspect_no_wait(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'inspect')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
+
+    def test_inspect_baremetal_provision_state_managable_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'inspect'),
+            ('wait_timeout', 15)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='manageable',
+            poll_interval=2, timeout=15)
+
+    def test_inspect_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'inspect'),
+            ('wait_timeout', 0)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='manageable',
+            poll_interval=2, timeout=0)
+
+
+class TestProvideBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestProvideBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ProvideBaremetalNode(self.app, None)
+
+    def test_provide_no_wait(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'provide')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
+
+    def test_provide_baremetal_provision_state_available_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'provide'),
+            ('wait_timeout', 15)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='available',
+            poll_interval=10, timeout=15)
+
+    def test_provide_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'provide'),
+            ('wait_timeout', 0)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='available',
+            poll_interval=10, timeout=0)
+
+
+class TestRebuildBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestRebuildBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.RebuildBaremetalNode(self.app, None)
+
+    def test_rebuild_no_wait(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'rebuild')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
+
+    def test_rebuild_baremetal_provision_state_active_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'rebuild'),
+            ('wait_timeout', 15)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='active',
+            poll_interval=10, timeout=15)
+
+    def test_rebuild_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'rebuild'),
+            ('wait_timeout', 0)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='active',
+            poll_interval=10, timeout=0)
+
+
+class TestUndeployBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestUndeployBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.UndeployBaremetalNode(self.app, None)
+
+    def test_undeploy_no_wait(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'deleted')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
+
+    def test_undeploy_baremetal_provision_state_available_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'deleted'),
+            ('wait_timeout', 15)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='available',
+            poll_interval=10, timeout=15)
+
+    def test_undeploy_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'deleted'),
+            ('wait_timeout', 0)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='available',
+            poll_interval=10, timeout=0)
 
 
 class TestBaremetalReboot(TestBaremetal):

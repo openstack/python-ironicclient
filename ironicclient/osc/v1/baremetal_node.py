@@ -69,6 +69,55 @@ class ProvisionStateBaremetalNode(command.Command):
             cleansteps=clean_steps)
 
 
+class ProvisionStateWithWait(ProvisionStateBaremetalNode):
+    """Provision state class adding --wait flag."""
+
+    log = logging.getLogger(__name__ + ".ProvisionStateWithWait")
+
+    def get_parser(self, prog_name):
+        parser = super(ProvisionStateWithWait, self).get_parser(prog_name)
+
+        desired_state = v1_utils.PROVISION_ACTIONS.get(
+            self.PROVISION_STATE)['expected_state']
+        parser.add_argument(
+            '--wait',
+            type=int,
+            dest='wait_timeout',
+            default=None,
+            metavar='<time-out>',
+            const=0,
+            nargs='?',
+            help=("Wait for a node to reach the desired state, %(state)s. "
+                  "Optionally takes a timeout value (in seconds). The "
+                  "default value is 0, meaning it will wait indefinitely.") %
+            {'state': desired_state})
+        return parser
+
+    def take_action(self, parsed_args):
+        super(ProvisionStateWithWait, self).take_action(parsed_args)
+        self.log.debug("take_action(%s)", parsed_args)
+
+        if (parsed_args.wait_timeout is None):
+            return
+
+        baremetal_client = self.app.client_manager.baremetal
+        wait_args = v1_utils.PROVISION_ACTIONS.get(
+            parsed_args.provision_state)
+        if wait_args is None:
+            # This should never happen in reality, but checking just in case
+            raise exc.CommandError(
+                _("'--wait is not supported for provision state '%s'")
+                % parsed_args.provision_state)
+
+        print(_('Waiting for provision state %(state)s on node %(node)s') %
+              {'state': wait_args['expected_state'], 'node': parsed_args.node})
+
+        baremetal_client.node.wait_for_provision_state(
+            parsed_args.node,
+            timeout=parsed_args.wait_timeout,
+            **wait_args)
+
+
 class AbortBaremetalNode(ProvisionStateBaremetalNode):
     """Set provision state of baremetal node to 'abort'"""
 
@@ -76,7 +125,7 @@ class AbortBaremetalNode(ProvisionStateBaremetalNode):
     PROVISION_STATE = 'abort'
 
 
-class AdoptBaremetalNode(ProvisionStateBaremetalNode):
+class AdoptBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'adopt'"""
 
     log = logging.getLogger(__name__ + ".AdoptBaremetalNode")
@@ -157,7 +206,7 @@ class BootdeviceShowBaremetalNode(command.ShowOne):
         return zip(*sorted(info.items()))
 
 
-class CleanBaremetalNode(ProvisionStateBaremetalNode):
+class CleanBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'clean'"""
 
     log = logging.getLogger(__name__ + ".CleanBaremetalNode")
@@ -374,7 +423,7 @@ class DeleteBaremetal(DeleteBaremetalNode):
         super(DeleteBaremetal, self).take_action(parsed_args)
 
 
-class DeployBaremetalNode(ProvisionStateBaremetalNode):
+class DeployBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'deploy'"""
 
     log = logging.getLogger(__name__ + ".DeployBaremetalNode")
@@ -394,7 +443,7 @@ class DeployBaremetalNode(ProvisionStateBaremetalNode):
         return parser
 
 
-class InspectBaremetalNode(ProvisionStateBaremetalNode):
+class InspectBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'inspect'"""
 
     log = logging.getLogger(__name__ + ".InspectBaremetalNode")
@@ -599,7 +648,7 @@ class MaintenanceUnsetBaremetalNode(command.Command):
             False)
 
 
-class ManageBaremetalNode(ProvisionStateBaremetalNode):
+class ManageBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'manage'"""
 
     log = logging.getLogger(__name__ + ".ManageBaremetalNode")
@@ -741,7 +790,7 @@ class PowerBaremetalNode(command.Command):
             timeout=parsed_args.power_timeout)
 
 
-class ProvideBaremetalNode(ProvisionStateBaremetalNode):
+class ProvideBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'provide'"""
 
     log = logging.getLogger(__name__ + ".ProvideBaremetalNode")
@@ -789,7 +838,7 @@ class RebootBaremetalNode(command.Command):
             timeout=parsed_args.power_timeout)
 
 
-class RebuildBaremetalNode(ProvisionStateBaremetalNode):
+class RebuildBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'rebuild'"""
 
     log = logging.getLogger(__name__ + ".RebuildBaremetalNode")
@@ -1015,7 +1064,7 @@ class ShowBaremetal(ShowBaremetalNode):
         return super(ShowBaremetal, self).take_action(parsed_args)
 
 
-class UndeployBaremetalNode(ProvisionStateBaremetalNode):
+class UndeployBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'deleted'"""
 
     log = logging.getLogger(__name__ + ".UndeployBaremetalNode")
