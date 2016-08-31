@@ -367,7 +367,7 @@ class DeleteBaremetalNode(command.Command):
 class DeleteBaremetal(DeleteBaremetalNode):
     """Unregister a baremetal node. DEPRECATED"""
 
-    # TODO(thrash): Remove in the 'P' cycle.
+    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
     log = logging.getLogger(__name__ + ".DeleteBaremetal")
 
     def take_action(self, parsed_args):
@@ -544,7 +544,7 @@ class ListBaremetalNode(command.Lister):
 class ListBaremetal(ListBaremetalNode):
     """List baremetal nodes. DEPRECATED"""
 
-    # TODO(thrash): Remove in the 'P' cycle.
+    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
     log = logging.getLogger(__name__ + ".ListBaremetal")
 
     def take_action(self, parsed_args):
@@ -920,7 +920,7 @@ class SetBaremetalNode(command.Command):
 class SetBaremetal(SetBaremetalNode):
     """Set baremetal properties. DEPRECATED"""
 
-    # TODO(thrash): Remove in the 'P' cycle.
+    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
     log = logging.getLogger(__name__ + ".SetBaremetal")
 
     def take_action(self, parsed_args):
@@ -979,7 +979,7 @@ class ShowBaremetalNode(command.ShowOne):
 class ShowBaremetal(ShowBaremetalNode):
     """Show baremetal node details. DEPRECATED"""
 
-    # TODO(thrash): Remove in the 'P' cycle.
+    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
     log = logging.getLogger(__name__ + ".ShowBaremetal")
 
     def take_action(self, parsed_args):
@@ -1103,7 +1103,7 @@ class UnsetBaremetalNode(command.Command):
 class UnsetBaremetal(UnsetBaremetalNode):
     """Unset baremetal properties. DEPRECATED"""
 
-    # TODO(thrash): Remove in the 'P' cycle.
+    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
     log = logging.getLogger(__name__ + ".UnsetBaremetal")
 
     def take_action(self, parsed_args):
