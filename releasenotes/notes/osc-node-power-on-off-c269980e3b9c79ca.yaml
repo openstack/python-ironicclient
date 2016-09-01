@@ -1,0 +1,13 @@
+---
+fixes:
+  - |
+    Replaces ``openstack baremetal node power <on|off>`` with
+    the two commands:
+
+    * ``openstack baremetal node power on`` and
+    * ``openstack baremetal node power off``.
+
+    There is no change to the command the user enters (the actual
+    command line is the same). However, help (e.g. via
+    ``openstack -h baremetal``) will list the two power commands
+    (instead of the original one).

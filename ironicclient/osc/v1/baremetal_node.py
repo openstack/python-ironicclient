@@ -802,7 +802,7 @@ class PassthruListBaremetalNode(command.Lister):
 
 
 class PowerBaremetalNode(command.Command):
-    """Set power state of baremetal node"""
+    """Base power state class, for setting the power of a node"""
 
     log = logging.getLogger(__name__ + ".PowerBaremetalNode")
 
@@ -810,22 +810,9 @@ class PowerBaremetalNode(command.Command):
         parser = super(PowerBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'power_state',
-            metavar='<on|off>',
-            choices=['on', 'off'],
-            help=_("Power node on or off")
-        )
-        parser.add_argument(
             'node',
             metavar='<node>',
             help=_("Name or UUID of the node.")
-        )
-        parser.add_argument(
-            '--soft',
-            dest='soft',
-            action='store_true',
-            default=False,
-            help=_("Request graceful power-off.")
         )
         parser.add_argument(
             '--power-timeout',
@@ -842,9 +829,36 @@ class PowerBaremetalNode(command.Command):
 
         baremetal_client = self.app.client_manager.baremetal
 
+        soft = getattr(parsed_args, 'soft', False)
+
         baremetal_client.node.set_power_state(
-            parsed_args.node, parsed_args.power_state, parsed_args.soft,
+            parsed_args.node, self.POWER_STATE, soft,
             timeout=parsed_args.power_timeout)
+
+
+class PowerOffBaremetalNode(PowerBaremetalNode):
+    """Power off a node"""
+
+    log = logging.getLogger(__name__ + ".PowerOffBaremetalNode")
+    POWER_STATE = 'off'
+
+    def get_parser(self, prog_name):
+        parser = super(PowerOffBaremetalNode, self).get_parser(prog_name)
+        parser.add_argument(
+            '--soft',
+            dest='soft',
+            action='store_true',
+            default=False,
+            help=_("Request graceful power-off.")
+        )
+        return parser
+
+
+class PowerOnBaremetalNode(PowerBaremetalNode):
+    """Power on a node"""
+
+    log = logging.getLogger(__name__ + ".PowerOnBaremetalNode")
+    POWER_STATE = 'on'
 
 
 class ProvideBaremetalNode(ProvisionStateWithWait):

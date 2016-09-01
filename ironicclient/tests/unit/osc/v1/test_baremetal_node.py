@@ -1050,69 +1050,34 @@ class TestPassthruList(TestBaremetal):
         mock.assert_called_once_with('node_uuid')
 
 
-class TestBaremetalPower(TestBaremetal):
+class TestPower(TestBaremetal):
     def setUp(self):
-        super(TestBaremetalPower, self).setUp()
+        super(TestPower, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.PowerBaremetalNode(self.app, None)
 
-    def test_baremetal_power_just_on(self):
-        arglist = ['on']
-        verifylist = [('power_state', 'on')]
-
-        self.assertRaises(oscutils.ParserException,
-                          self.check_parser,
-                          self.cmd, arglist, verifylist)
-
-    def test_baremetal_power_just_off(self):
-        arglist = ['off']
-        verifylist = [('power_state', 'off')]
-
-        self.assertRaises(oscutils.ParserException,
-                          self.check_parser,
-                          self.cmd, arglist, verifylist)
-
-    def test_baremetal_power_uuid_only(self):
+    def test_baremetal_power(self):
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
-        self.assertRaises(oscutils.ParserException,
-                          self.check_parser,
-                          self.cmd, arglist, verifylist)
-
-    def test_baremetal_power_on(self):
-        arglist = ['on', 'node_uuid']
-        verifylist = [('power_state', 'on'),
-                      ('node', 'node_uuid'),
-                      ('soft', False),
-                      ('power_timeout', None)]
-
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        self.cmd.take_action(parsed_args)
+        self.assertRaisesRegex(AttributeError,
+                               ".*no attribute 'POWER_STATE'",
+                               self.cmd.take_action, parsed_args)
 
-        self.baremetal_mock.node.set_power_state.assert_called_once_with(
-            'node_uuid', 'on', False, timeout=None)
 
-    def test_baremetal_power_on_timeout(self):
-        arglist = ['on', 'node_uuid', '--power-timeout', '2']
-        verifylist = [('power_state', 'on'),
-                      ('node', 'node_uuid'),
-                      ('soft', False),
-                      ('power_timeout', 2)]
+class TestPowerOff(TestBaremetal):
+    def setUp(self):
+        super(TestPowerOff, self).setUp()
 
-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
-
-        self.cmd.take_action(parsed_args)
-
-        self.baremetal_mock.node.set_power_state.assert_called_once_with(
-            'node_uuid', 'on', False, timeout=2)
+        # Get the command object to test
+        self.cmd = baremetal_node.PowerOffBaremetalNode(self.app, None)
 
     def test_baremetal_power_off(self):
-        arglist = ['off', 'node_uuid']
-        verifylist = [('power_state', 'off'),
-                      ('node', 'node_uuid'),
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid'),
                       ('soft', False),
                       ('power_timeout', None)]
 
@@ -1124,9 +1089,8 @@ class TestBaremetalPower(TestBaremetal):
             'node_uuid', 'off', False, timeout=None)
 
     def test_baremetal_power_off_timeout(self):
-        arglist = ['off', 'node_uuid', '--power-timeout', '2']
-        verifylist = [('power_state', 'off'),
-                      ('node', 'node_uuid'),
+        arglist = ['node_uuid', '--power-timeout', '2']
+        verifylist = [('node', 'node_uuid'),
                       ('soft', False),
                       ('power_timeout', 2)]
 
@@ -1138,9 +1102,8 @@ class TestBaremetalPower(TestBaremetal):
             'node_uuid', 'off', False, timeout=2)
 
     def test_baremetal_soft_power_off(self):
-        arglist = ['off', 'node_uuid', '--soft']
-        verifylist = [('power_state', 'off'),
-                      ('node', 'node_uuid'),
+        arglist = ['node_uuid', '--soft']
+        verifylist = [('node', 'node_uuid'),
                       ('soft', True),
                       ('power_timeout', None)]
 
@@ -1152,9 +1115,8 @@ class TestBaremetalPower(TestBaremetal):
             'node_uuid', 'off', True, timeout=None)
 
     def test_baremetal_soft_power_off_timeout(self):
-        arglist = ['off', 'node_uuid', '--soft', '--power-timeout', '2']
-        verifylist = [('power_state', 'off'),
-                      ('node', 'node_uuid'),
+        arglist = ['node_uuid', '--soft', '--power-timeout', '2']
+        verifylist = [('node', 'node_uuid'),
                       ('soft', True),
                       ('power_timeout', 2)]
 
@@ -1164,6 +1126,54 @@ class TestBaremetalPower(TestBaremetal):
 
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'off', True, timeout=2)
+
+    def test_baremetal_power_off_no_args(self):
+        arglist = []
+        verifylist = []
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+
+class TestPowerOn(TestBaremetal):
+    def setUp(self):
+        super(TestPowerOn, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.PowerOnBaremetalNode(self.app, None)
+
+    def test_baremetal_power_on(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid'),
+                      ('power_timeout', None)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'on', False, timeout=None)
+
+    def test_baremetal_power_on_timeout(self):
+        arglist = ['node_uuid', '--power-timeout', '2']
+        verifylist = [('node', 'node_uuid'),
+                      ('power_timeout', 2)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_power_state.assert_called_once_with(
+            'node_uuid', 'on', False, timeout=2)
+
+    def test_baremetal_power_on_no_args(self):
+        arglist = []
+        verifylist = []
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
 
 
 class TestDeployBaremetalProvisionState(TestBaremetal):
