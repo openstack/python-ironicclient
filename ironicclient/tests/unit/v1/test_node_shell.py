@@ -23,6 +23,7 @@ from ironicclient.common import utils as commonutils
 from ironicclient import exc
 from ironicclient.tests.unit import utils
 import ironicclient.v1.node_shell as n_shell
+import ironicclient.v1.utils as v1_utils
 
 
 class NodeShellTest(utils.BaseTestCase):
@@ -507,7 +508,7 @@ class NodeShellTest(utils.BaseTestCase):
             'node_uuid', 'active', configdrive='foo', cleansteps=None)
         client_mock.node.wait_for_provision_state.assert_called_once_with(
             'node_uuid', expected_state='active', timeout=0,
-            poll_interval=n_shell._LONG_ACTION_POLL_INTERVAL)
+            poll_interval=v1_utils._LONG_ACTION_POLL_INTERVAL)
 
     def test_do_node_set_provision_state_deleted(self):
         client_mock = mock.MagicMock()

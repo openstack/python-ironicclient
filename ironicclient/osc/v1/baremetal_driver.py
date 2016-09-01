@@ -21,6 +21,7 @@ from osc_lib import utils as oscutils
 
 from ironicclient.common import utils
 from ironicclient.v1 import resource_fields as res_fields
+from ironicclient.v1 import utils as v1_utils
 
 
 class ListBaremetalDriver(command.Lister):
@@ -52,7 +53,6 @@ class PassthruCallBaremetalDriver(command.ShowOne):
     """Call a vendor passthru method for a driver."""
 
     log = logging.getLogger(__name__ + ".PassthruCallBaremetalDriver")
-    http_methods = ['POST', 'PUT', 'GET', 'DELETE', 'PATCH']
 
     def get_parser(self, prog_name):
         parser = super(PassthruCallBaremetalDriver, self).get_parser(prog_name)
@@ -77,11 +77,11 @@ class PassthruCallBaremetalDriver(command.ShowOne):
             '--http-method',
             dest='http_method',
             metavar='<http-method>',
-            choices=self.http_methods,
+            choices=v1_utils.HTTP_METHODS,
             default='POST',
             help="The HTTP method to use in the passthru request. One of "
                  "%s. Defaults to 'POST'." %
-                 oscutils.format_list(self.http_methods)
+                 oscutils.format_list(v1_utils.HTTP_METHODS)
         )
         return parser
 
