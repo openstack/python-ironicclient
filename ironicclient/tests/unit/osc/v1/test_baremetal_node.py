@@ -54,7 +54,7 @@ class TestAdopt(TestBaremetal):
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'adopt')
+            'node_uuid', 'adopt', cleansteps=None, configdrive=None)
 
 
 class TestBootdeviceSet(TestBaremetal):
@@ -933,7 +933,8 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'active', configdrive='path/to/drive')
+            'node_uuid', 'active',
+            cleansteps=None, configdrive='path/to/drive')
 
     def test_deploy_baremetal_provision_state_mismatch(self):
         arglist = ['node_uuid',
