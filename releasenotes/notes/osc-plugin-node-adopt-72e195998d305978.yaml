@@ -1,5 +1,0 @@
----
-features:
-  - |
-    Extends the OpenStackClient plug-in with the command
-    "openstack baremetal node adopt".

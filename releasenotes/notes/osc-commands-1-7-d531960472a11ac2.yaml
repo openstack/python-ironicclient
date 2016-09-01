@@ -1,0 +1,31 @@
+---
+features:
+  - |
+    Adds new OpenStackClient commands:
+
+
+    * ``openstack baremetal chassis create``
+    * ``openstack baremetal chassis delete``
+    * ``openstack baremetal chassis list``
+    * ``openstack baremetal chassis set``
+    * ``openstack baremetal chassis show``
+    * ``openstack baremetal chassis unset``
+    * ``openstack baremetal driver list``
+    * ``openstack baremetal driver passthru call``
+    * ``openstack baremetal driver passthru list``
+    * ``openstack baremetal driver show``
+    * ``openstack baremetal node adopt``
+    * ``openstack baremetal node boot device set``
+    * ``openstack baremetal node boot device show``
+    * ``openstack baremetal node console disable``
+    * ``openstack baremetal node console enable``
+    * ``openstack baremetal node console show``
+    * ``openstack baremetal node passthru call``
+    * ``openstack baremetal node passthru list``
+    * ``openstack baremetal node validate``
+    * ``openstack baremetal port delete``
+    * ``openstack baremetal port list``
+    * ``openstack baremetal port set``
+    * ``openstack baremetal port unset``
+
+    Please see the help for each command for more information.

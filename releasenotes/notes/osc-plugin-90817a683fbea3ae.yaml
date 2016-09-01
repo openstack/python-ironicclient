@@ -1,7 +1,0 @@
----
-features:
-  - |
-    Extend the OpenStackClient plugin with new commands:
-
-    * openstack baremetal port unset
-    * openstack baremetal port set
