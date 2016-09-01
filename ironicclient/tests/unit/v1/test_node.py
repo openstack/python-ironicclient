@@ -91,6 +91,8 @@ NODE_VENDOR_PASSTHRU_METHOD = {"heartbeat": {"attach": "false",
                                              "description": "",
                                              "async": "true"}}
 
+VIFS = {'vifs': [{'id': 'aaa-aaa'}]}
+
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['id']
 del CREATE_NODE['uuid']
@@ -383,6 +385,13 @@ fake_responses = {
             NODE_VENDOR_PASSTHRU_METHOD,
         ),
     },
+    '/v1/nodes/%s/vifs' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            VIFS,
+        ),
+    }
 }
 
 fake_responses_pagination = {
@@ -1081,6 +1090,39 @@ class NodeManagerTest(testtools.TestCase):
             }
         self.assertRaises(exc.InvalidAttribute, self.mgr.vendor_passthru,
                           **kwargs)
+
+    @mock.patch.object(node.NodeManager, '_list')
+    def test_vif_list(self, _list_mock):
+        kwargs = {
+            'node_ident': NODE1['uuid'],
+            }
+
+        final_path = '/v1/nodes/%s/vifs' % NODE1['uuid']
+        self.mgr.vif_list(**kwargs)
+        _list_mock.assert_called_once_with(final_path, "vifs")
+
+    @mock.patch.object(node.NodeManager, 'update')
+    def test_vif_attach(self, update_mock):
+        kwargs = {
+            'node_ident': NODE1['uuid'],
+            'vif_id': 'vif_id',
+            }
+
+        final_path = '%s/vifs' % NODE1['uuid']
+        self.mgr.vif_attach(**kwargs)
+        update_mock.assert_called_once_with(final_path, {'id': 'vif_id'},
+                                            http_method="POST")
+
+    @mock.patch.object(node.NodeManager, 'delete')
+    def test_vif_detach(self, delete_mock):
+        kwargs = {
+            'node_ident': NODE1['uuid'],
+            'vif_id': 'vif_id',
+            }
+
+        final_path = '%s/vifs/vif_id' % NODE1['uuid']
+        self.mgr.vif_detach(**kwargs)
+        delete_mock.assert_called_once_with(final_path)
 
     def _test_node_set_boot_device(self, boot_device, persistent=False):
         self.mgr.set_boot_device(NODE1['uuid'], boot_device, persistent)

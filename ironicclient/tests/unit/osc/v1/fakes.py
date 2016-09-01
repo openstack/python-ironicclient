@@ -86,6 +86,8 @@ PORTGROUP = {'uuid': baremetal_portgroup_uuid,
              'address': baremetal_portgroup_address,
              'extra': baremetal_portgroup_extra}
 
+VIFS = {'vifs': [{'id': 'aaa-aa'}]}
+
 
 class TestBaremetal(utils.TestCommand):
 

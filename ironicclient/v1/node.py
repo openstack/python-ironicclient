@@ -244,6 +244,35 @@ class NodeManager(base.CreateManager):
             raise exc.InvalidAttribute(
                 _('Unknown HTTP method: %s') % http_method)
 
+    def vif_list(self, node_ident):
+        """List VIFs attached to a given node.
+
+        :param node_ident: The UUID or Name of the node.
+        """
+        path = "%s/vifs" % node_ident
+
+        return self._list(self._path(path), "vifs")
+
+    def vif_attach(self, node_ident, vif_id):
+        """Attach VIF to a given node.
+
+        param node_ident: The UUID or Name of the node.
+        param vif_id: The UUID or Name of the VIF to attach.
+        """
+        path = "%s/vifs" % node_ident
+        data = {"id": vif_id}
+        # TODO(vdrok): cleanup places doing custom path and http_method
+        self.update(path, data, http_method="POST")
+
+    def vif_detach(self, node_ident, vif_id):
+        """Detach VIF from a given node.
+
+        param node_ident: The UUID or Name of the node.
+        param vif_id: The UUID or Name of the VIF to detach.
+        """
+        path = "%s/vifs/%s" % (node_ident, vif_id)
+        self.delete(path)
+
     def set_maintenance(self, node_id, state, maint_reason=None):
         """Set the maintenance mode for the node.
 

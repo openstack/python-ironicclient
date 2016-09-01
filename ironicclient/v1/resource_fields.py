@@ -70,7 +70,8 @@ class Resource(object):
         'pxe_enabled': 'PXE boot enabled',
         'portgroup_uuid': 'Portgroup UUID',
         'network_interface': 'Network Interface',
-        'standalone_ports_supported': 'Standalone Ports Supported'
+        'standalone_ports_supported': 'Standalone Ports Supported',
+        'id': 'ID',
     }
 
     def __init__(self, field_ids, sort_excluded=None):
@@ -244,3 +245,8 @@ PORTGROUP_RESOURCE = Resource(
      'address',
      'name',
      ])
+
+# VIFs
+VIF_RESOURCE = Resource(
+    ['id'],
+)
