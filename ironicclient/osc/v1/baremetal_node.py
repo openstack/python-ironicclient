@@ -808,6 +808,11 @@ class SetBaremetalNode(command.Command):
             help="Set the name of the node",
         )
         parser.add_argument(
+            "--chassis-uuid",
+            metavar="<chassis UUID>",
+            help="Set the chassis for the node",
+        )
+        parser.add_argument(
             "--driver",
             metavar="<driver>",
             help="Set the driver for the node",
@@ -886,6 +891,10 @@ class SetBaremetalNode(command.Command):
             name = ["name=%s" % parsed_args.name]
             properties.extend(utils.args_array_to_patch(
                 'add', name))
+        if parsed_args.chassis_uuid:
+            chassis_uuid = ["chassis_uuid=%s" % parsed_args.chassis_uuid]
+            properties.extend(utils.args_array_to_patch(
+                'add', chassis_uuid))
         if parsed_args.driver:
             driver = ["driver=%s" % parsed_args.driver]
             properties.extend(utils.args_array_to_patch(

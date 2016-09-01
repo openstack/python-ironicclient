@@ -1,0 +1,4 @@
+---
+features:
+  - The chassis of a node can be set via the new --chassis-uuid
+    optional argument for ``openstack baremetal node set``.
