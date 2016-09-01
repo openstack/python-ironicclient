@@ -366,8 +366,12 @@ class HTTPClient(VersionNegotiationMixin):
 
         if resp.status_code >= http_client.BAD_REQUEST:
             error_json = _extract_error_json(body_str)
+            # NOTE(vdrok): exceptions from ironic controllers' _lookup methods
+            # are constructed directly by pecan instead of wsme, and contain
+            # only description field
             raise exc.from_response(
-                resp, error_json.get('faultstring'),
+                resp, (error_json.get('faultstring') or
+                       error_json.get('description')),
                 error_json.get('debuginfo'), method, url)
         elif resp.status_code in (http_client.MOVED_PERMANENTLY,
                                   http_client.FOUND,
@@ -530,7 +534,11 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
             return self._http_request(url, method, **kwargs)
         if resp.status_code >= http_client.BAD_REQUEST:
             error_json = _extract_error_json(resp.content)
-            raise exc.from_response(resp, error_json.get('faultstring'),
+            # NOTE(vdrok): exceptions from ironic controllers' _lookup methods
+            # are constructed directly by pecan instead of wsme, and contain
+            # only description field
+            raise exc.from_response(resp, (error_json.get('faultstring') or
+                                           error_json.get('description')),
                                     error_json.get('debuginfo'), method, url)
         elif resp.status_code in (http_client.MOVED_PERMANENTLY,
                                   http_client.FOUND, http_client.USE_PROXY):

@@ -35,11 +35,14 @@ DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '1234'
 
 
-def _get_error_body(faultstring=None, debuginfo=None):
-    error_body = {
-        'faultstring': faultstring,
-        'debuginfo': debuginfo
-    }
+def _get_error_body(faultstring=None, debuginfo=None, description=None):
+    if description:
+        error_body = {'description': description}
+    else:
+        error_body = {
+            'faultstring': faultstring,
+            'debuginfo': debuginfo
+        }
     raw_error_body = jsonutils.dump_as_bytes(error_body)
     body = {'error_message': raw_error_body}
     return jsonutils.dumps(body)
@@ -242,6 +245,20 @@ class HttpClientTest(utils.BaseTestCase):
         self.assertRaises(exc.InternalServerError,
                           client.json_request,
                           'GET', '/v1/resources')
+
+    def test_server_exception_description_only(self):
+        error_msg = 'test error msg'
+        error_body = _get_error_body(description=error_msg)
+        client = http.HTTPClient('http://localhost/')
+        client.session = utils.mockSession(
+            {'Content-Type': 'application/json'},
+            error_body,
+            version=1,
+            status_code=http_client.BAD_REQUEST)
+
+        self.assertRaisesRegex(exc.BadRequest, 'test error msg',
+                               client.json_request,
+                               'GET', '/v1/resources')
 
     def test_server_https_request_ok(self):
         client = http.HTTPClient('https://localhost/')
@@ -453,6 +470,18 @@ class SessionClientTest(utils.BaseTestCase):
         self.assertRaises(exc.InternalServerError,
                           client.json_request,
                           'GET', '/v1/resources')
+
+    def test_server_exception_description_only(self):
+        error_msg = 'test error msg'
+        error_body = _get_error_body(description=error_msg)
+        fake_session = utils.mockSession(
+            {'Content-Type': 'application/json'},
+            error_body, status_code=http_client.BAD_REQUEST)
+        client = _session_client(session=fake_session)
+
+        self.assertRaisesRegex(exc.BadRequest, 'test error msg',
+                               client.json_request,
+                               'GET', '/v1/resources')
 
     def test__parse_version_headers(self):
         # Test parsing of version headers from SessionClient
