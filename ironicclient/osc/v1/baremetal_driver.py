@@ -89,11 +89,7 @@ class PassthruCallBaremetalDriver(command.ShowOne):
         self.log.debug("take_action(%s)", parsed_args)
         baremetal_client = self.app.client_manager.baremetal
 
-        arguments = utils.args_array_to_dict(
-            {'args': parsed_args.arg}, 'args')['args']
-        if not arguments:
-            arguments = {}
-
+        arguments = utils.key_value_pairs_to_dict(parsed_args.arg)
         response = (baremetal_client.driver.
                     vendor_passthru(parsed_args.driver,
                                     parsed_args.method,

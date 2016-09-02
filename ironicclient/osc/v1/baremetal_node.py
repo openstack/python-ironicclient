@@ -662,14 +662,7 @@ class PassthruCallBaremetalNode(command.Command):
 
         baremetal_client = self.app.client_manager.baremetal
 
-        arguments = utils.args_array_to_dict(
-            {'args': parsed_args.arg}, 'args')['args']
-
-        # If there were no arguments for the method, arguments will still
-        # be an empty list. So make it an empty dict.
-        if not arguments:
-            arguments = {}
-
+        arguments = utils.key_value_pairs_to_dict(parsed_args.arg)
         resp = baremetal_client.node.vendor_passthru(
             parsed_args.node,
             parsed_args.method,
