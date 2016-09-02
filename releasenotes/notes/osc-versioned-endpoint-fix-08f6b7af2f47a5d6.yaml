@@ -1,0 +1,4 @@
+---
+fixes:
+  - Fixes an issue with OpenStackClient plugin not being able to work with
+    versioned ironic endpoints.
