@@ -1,0 +1,4 @@
+---
+fixes:
+  - Fixes the OpenStackClient plugin so that
+    microversions 1.21 and 1.22 are supported.
