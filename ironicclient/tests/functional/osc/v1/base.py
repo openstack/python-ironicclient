@@ -227,3 +227,60 @@ class TestCase(base.FunctionalTestBase):
         output = self.openstack('baremetal port group show {0} {1} {2}'
                                 .format(identifier, opts, params))
         return json.loads(output)
+
+    def chassis_create(self, params=''):
+        """Create baremetal chassis and add cleanup.
+
+        :param String params: Additional args and kwargs
+        :return: JSON object of created chassis
+        """
+        opts = self.get_opts()
+        chassis = self.openstack('baremetal chassis create {0} {1}'
+                                 .format(opts, params))
+
+        chassis = json.loads(chassis)
+        if not chassis:
+            self.fail('Baremetal chassis has not been created!')
+        self.addCleanup(self.chassis_delete, chassis['uuid'], True)
+
+        return chassis
+
+    def chassis_delete(self, uuid, ignore_exceptions=False):
+        """Try to delete baremetal chassis by UUID.
+
+        :param String uuid: UUID of the chassis
+        :param Bool ignore_exceptions: Ignore exception (needed for cleanUp)
+        :return: raw values output
+        :raise: CommandFailed exception when command fails to delete a chassis
+        """
+        try:
+            return self.openstack('baremetal chassis delete {0}'
+                                  .format(uuid))
+        except exceptions.CommandFailed:
+            if not ignore_exceptions:
+                raise
+
+    def chassis_list(self, fields=None, params=''):
+        """List baremetal chassis.
+
+        :param List fields: List of fields to show
+        :param String params: Additional kwargs
+        :return: list of JSON chassis objects
+        """
+        opts = self.get_opts(fields=fields)
+        output = self.openstack('baremetal chassis list {0} {1}'
+                                .format(opts, params))
+        return json.loads(output)
+
+    def chassis_show(self, uuid, fields=None, params=''):
+        """Show specified baremetal chassis.
+
+        :param String uuid: UUID of the chassis
+        :param List fields: List of fields to show
+        :param List params: Additional kwargs
+        :return: JSON object of chassis
+        """
+        opts = self.get_opts(fields)
+        chassis = self.openstack('baremetal chassis show {0} {1} {2}'
+                                 .format(opts, uuid, params))
+        return json.loads(chassis)
