@@ -5,6 +5,6 @@
 .. toctree::
    :maxdepth: 1
 
-   Current Series <current-series>
+   unreleased
    newton
    mitaka
