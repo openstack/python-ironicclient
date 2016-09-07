@@ -63,6 +63,7 @@ class CreateBaremetalChassis(command.ShowOne):
         chassis = baremetal_client.chassis.create(**fields)._info
 
         chassis.pop('links', None)
+        chassis.pop('nodes', None)
 
         return self.dict2columns(chassis)
 
@@ -260,6 +261,7 @@ class ShowBaremetalChassis(command.ShowOne):
         chassis = baremetal_client.chassis.get(parsed_args.chassis,
                                                fields=fields)._info
         chassis.pop("links", None)
+        chassis.pop("nodes", None)
 
         return zip(*sorted(chassis.items()))
 

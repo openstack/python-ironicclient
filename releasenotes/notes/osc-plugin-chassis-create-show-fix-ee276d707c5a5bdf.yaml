@@ -1,0 +1,5 @@
+---
+upgrade:
+  - Hide nodes field in 'chasiss create' and 'chassis show'
+    OSC subcommand output because this field is not meant
+    for CLI users.

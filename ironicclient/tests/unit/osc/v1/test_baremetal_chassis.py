@@ -72,6 +72,7 @@ class TestChassisCreate(TestChassis):
 
         collist = copy.copy(self.collist)
         self.assertEqual(collist, columns)
+        self.assertNotIn('nodes', columns)
 
         datalist = copy.copy(self.datalist)
         self.assertEqual(datalist, tuple(data))
@@ -431,6 +432,7 @@ class TestChassisShow(TestChassis):
             'uuid'
         )
         self.assertEqual(collist, columns)
+        self.assertNotIn('nodes', columns)
         datalist = (
             baremetal_fakes.baremetal_chassis_description,
             baremetal_fakes.baremetal_chassis_extra,
