@@ -94,6 +94,30 @@ class ListBaremetalDriverProperty(command.Lister):
         return labels, sorted(driver_properties.items())
 
 
+class ListBaremetalDriverRaidProperty(command.Lister):
+    """List a driver's RAID logical disk properties."""
+
+    log = logging.getLogger(__name__ + ".ListBaremetalDriverRaidProperty")
+
+    def get_parser(self, prog_name):
+        parser = super(ListBaremetalDriverRaidProperty, self).get_parser(
+            prog_name)
+        parser.add_argument(
+            'driver',
+            metavar='<driver>',
+            help='Name of the driver.')
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+        baremetal_client = self.app.client_manager.baremetal
+
+        raid_props = baremetal_client.driver.raid_logical_disk_properties(
+            parsed_args.driver)
+        labels = ['Property', 'Description']
+        return labels, sorted(raid_props.items())
+
+
 class PassthruCallBaremetalDriver(command.ShowOne):
     """Call a vendor passthru method for a driver."""
 
