@@ -284,3 +284,28 @@ class TestCase(base.FunctionalTestBase):
         chassis = self.openstack('baremetal chassis show {0} {1} {2}'
                                  .format(opts, uuid, params))
         return json.loads(chassis)
+
+    def driver_show(self, driver_name, fields=None, params=''):
+        """Show specified baremetal driver.
+
+        :param String driver_name: Name of the driver
+        :param List fields: List of fields to show
+        :param List params: Additional kwargs
+        :return: JSON object of driver
+        """
+        opts = self.get_opts(fields=fields)
+        driver = self.openstack('baremetal driver show {0} {1} {2}'
+                                .format(opts, driver_name, params))
+        return json.loads(driver)
+
+    def driver_list(self, fields=None, params=''):
+        """List baremetal drivers.
+
+        :param List fields: List of fields to show
+        :param String params: Additional kwargs
+        :return: list of JSON driver objects
+        """
+        opts = self.get_opts(fields=fields)
+        output = self.openstack('baremetal driver list {0} {1}'
+                                .format(opts, params))
+        return json.loads(output)
