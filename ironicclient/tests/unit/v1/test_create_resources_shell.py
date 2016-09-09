@@ -26,6 +26,6 @@ class TestCreateResourcesShell(utils.BaseTestCase):
     def test_create_shell(self, mock_create_resources):
         args = mock.MagicMock()
         files = ['file1', 'file2', 'file3']
-        args.resource_files = [files]
+        args.resource_files = files
         create_resources_shell.do_create(self.client, args)
         mock_create_resources.assert_called_once_with(self.client, files)
