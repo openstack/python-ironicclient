@@ -25,4 +25,4 @@ def do_create(cc, args):
     create all the resources; those that could not be created are skipped
     (with a corresponding error message).
     """
-    create_resources.create_resources(cc, args.resource_files[0])
+    create_resources.create_resources(cc, args.resource_files)
