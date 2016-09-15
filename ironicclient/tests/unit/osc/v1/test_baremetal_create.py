@@ -42,14 +42,22 @@ class TestBaremetalCreate(baremetal_fakes.TestBaremetal):
         # DisplayCommandBase.take_action() returns two tuples
         columns, data = self.cmd.take_action(parsed_args)
 
-        self.assertEqual(('instance_uuid', 'maintenance', 'name',
-                          'power_state', 'provision_state', 'uuid'), columns)
-        self.assertEqual(('yyy-yyyyyy-yyyy',
-                          baremetal_fakes.baremetal_maintenance,
-                          baremetal_fakes.baremetal_name,
-                          baremetal_fakes.baremetal_power_state,
-                          baremetal_fakes.baremetal_provision_state,
-                          baremetal_fakes.baremetal_uuid), tuple(data))
+        self.assertEqual(('chassis_uuid',
+                          'instance_uuid',
+                          'maintenance',
+                          'name',
+                          'power_state',
+                          'provision_state',
+                          'uuid'), columns)
+        self.assertEqual(
+            (baremetal_fakes.baremetal_chassis_uuid_empty,
+             baremetal_fakes.baremetal_instance_uuid,
+             baremetal_fakes.baremetal_maintenance,
+             baremetal_fakes.baremetal_name,
+             baremetal_fakes.baremetal_power_state,
+             baremetal_fakes.baremetal_provision_state,
+             baremetal_fakes.baremetal_uuid), tuple(data))
+
         self.baremetal_mock.node.create.assert_called_once_with(
             driver='fake_driver')
 

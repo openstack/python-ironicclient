@@ -20,6 +20,8 @@ from osc_lib.tests import utils
 from ironicclient.tests.unit.osc import fakes
 
 baremetal_chassis_uuid = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+baremetal_chassis_uuid_empty = ''
+baremetal_properties_empty = ''
 baremetal_chassis_description = 'chassis description'
 baremetal_chassis_extra = {}
 BAREMETAL_CHASSIS = {

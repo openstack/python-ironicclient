@@ -219,16 +219,17 @@ class TestBaremetalCreate(TestBaremetal):
         self.cmd = baremetal_node.CreateBaremetalNode(self.app, None)
         self.arglist = ['--driver', 'fake_driver']
         self.verifylist = [('driver', 'fake_driver')]
-        self.collist = (
-            'instance_uuid',
-            'maintenance',
-            'name',
-            'power_state',
-            'provision_state',
-            'uuid'
-        )
+        self.collist = ('chassis_uuid',
+                        'instance_uuid',
+                        'maintenance',
+                        'name',
+                        'power_state',
+                        'provision_state',
+                        'uuid'
+                        )
         self.datalist = (
-            'yyy-yyyyyy-yyyy',
+            baremetal_fakes.baremetal_chassis_uuid_empty,
+            baremetal_fakes.baremetal_instance_uuid,
             baremetal_fakes.baremetal_maintenance,
             baremetal_fakes.baremetal_name,
             baremetal_fakes.baremetal_power_state,
@@ -1329,18 +1330,19 @@ class TestBaremetalShow(TestBaremetal):
             *args, fields=None
         )
 
-        collist = (
-            'instance_uuid',
-            'maintenance',
-            'name',
-            'power_state',
-            'provision_state',
-            'uuid'
-        )
+        collist = ('chassis_uuid',
+                   'instance_uuid',
+                   'maintenance',
+                   'name',
+                   'power_state',
+                   'provision_state',
+                   'uuid'
+                   )
         self.assertEqual(collist, columns)
         self.assertNotIn('ports', columns)
         datalist = (
-            'yyy-yyyyyy-yyyy',
+            baremetal_fakes.baremetal_chassis_uuid_empty,
+            baremetal_fakes.baremetal_instance_uuid,
             baremetal_fakes.baremetal_maintenance,
             baremetal_fakes.baremetal_name,
             baremetal_fakes.baremetal_power_state,

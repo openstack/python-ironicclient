@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    If a node does not have ``chassis_uuid`` field in the API response, it
+    is added to the output of the node commands as an empty string.

@@ -323,6 +323,8 @@ class CreateBaremetalNode(command.ShowOne):
         node.pop('links', None)
         node.pop('ports', None)
 
+        node.setdefault('chassis_uuid', '')
+
         return self.dict2columns(node)
 
 
@@ -950,7 +952,9 @@ class ShowBaremetalNode(command.ShowOne):
         node.pop("links", None)
         node.pop("ports", None)
 
-        return zip(*sorted(node.items()))
+        node.setdefault('chassis_uuid', '')
+
+        return self.dict2columns(node)
 
 
 class ShowBaremetal(ShowBaremetalNode):
