@@ -555,6 +555,41 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
+    def test_baremetal_list_no_maintenance(self):
+        arglist = [
+            '--no-maintenance',
+        ]
+        verifylist = [
+            ('no_maintenance', True),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'maintenance': False,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_both_maintenances(self):
+        arglist = [
+            '--maintenance',
+            '--no-maintenance',
+        ]
+        verifylist = []
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
     def test_baremetal_list_associated(self):
         arglist = [
             '--associated',

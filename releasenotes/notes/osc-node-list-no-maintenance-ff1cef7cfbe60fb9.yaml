@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    For OSC, adds ability to get list of nodes that are not in
+    maintenance mode via the --no-maintenance optional argument
+    to the ``openstack baremetal node list`` command.
