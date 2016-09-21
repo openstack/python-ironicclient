@@ -14,6 +14,7 @@
 
 import os
 
+import six
 import six.moves.configparser as config_parser
 from tempest.lib.cli import base
 from tempest.lib.common.utils import data_utils
@@ -58,7 +59,11 @@ class FunctionalTestBase(base.ClientTestBase):
     def _get_config(self):
         config_file = os.environ.get('IRONICCLIENT_TEST_CONFIG',
                                      DEFAULT_CONFIG_FILE)
-        config = config_parser.SafeConfigParser()
+        # SafeConfigParser was deprecated in Python 3.2
+        if six.PY3:
+            config = config_parser.ConfigParser()
+        else:
+            config = config_parser.SafeConfigParser()
         if not config.read(config_file):
             self.skipTest('Skipping, no test config found @ %s' % config_file)
         try:
