@@ -327,6 +327,7 @@ class CreateBaremetalNode(command.ShowOne):
         node = baremetal_client.node.create(**fields)._info
 
         node.pop('links', None)
+        node.pop('ports', None)
 
         return self.dict2columns(node)
 
@@ -965,6 +966,7 @@ class ShowBaremetalNode(command.ShowOne):
             node = baremetal_client.node.get(
                 parsed_args.node, fields=fields)._info
         node.pop("links", None)
+        node.pop("ports", None)
 
         return zip(*sorted(node.items()))
 

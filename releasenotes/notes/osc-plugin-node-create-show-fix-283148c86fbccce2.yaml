@@ -1,0 +1,5 @@
+---
+upgrade:
+  - Hide ports field in 'node create' and 'node show'
+    OSC subcommand output because this field is not meant
+    for CLI users.

@@ -278,6 +278,7 @@ class TestBaremetalCreate(TestBaremetal):
 
         collist = copy.copy(self.collist)
         self.assertEqual(collist, columns)
+        self.assertNotIn('ports', columns)
 
         datalist = copy.copy(self.datalist)
         self.assertEqual(datalist, tuple(data))
@@ -1335,6 +1336,7 @@ class TestBaremetalShow(TestBaremetal):
             'uuid'
         )
         self.assertEqual(collist, columns)
+        self.assertNotIn('ports', columns)
         datalist = (
             'yyy-yyyyyy-yyyy',
             baremetal_fakes.baremetal_maintenance,
