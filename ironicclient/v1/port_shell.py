@@ -184,7 +184,7 @@ def do_port_delete(cc, args):
     """Delete a port."""
     for p in args.port:
         cc.port.delete(p)
-        print ('Deleted port %s' % p)
+        print('Deleted port %s' % p)
 
 
 @cliutils.arg('port', metavar='<port>', help="UUID of the port.")

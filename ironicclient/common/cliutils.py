@@ -289,5 +289,5 @@ def pretty_choice_list(l):
 
 def exit(msg=''):
     if msg:
-        print (msg, file=sys.stderr)
+        print(msg, file=sys.stderr)
     sys.exit(1)
