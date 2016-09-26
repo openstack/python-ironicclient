@@ -151,7 +151,7 @@ class ListBaremetalChassis(command.Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)" % parsed_args)
+        self.log.debug("take_action(%s)", parsed_args)
         client = self.app.client_manager.baremetal
 
         columns = res_fields.CHASSIS_RESOURCE.fields
@@ -176,7 +176,7 @@ class ListBaremetalChassis(command.Lister):
             labels = resource.labels
             params['fields'] = columns
 
-        self.log.debug("params(%s)" % params)
+        self.log.debug("params(%s)", params)
         data = client.chassis.list(**params)
 
         data = oscutils.sort_items(data, parsed_args.sort)

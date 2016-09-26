@@ -33,7 +33,7 @@ class ListBaremetalDriver(command.Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)" % parsed_args)
+        self.log.debug("take_action(%s)", parsed_args)
         client = self.app.client_manager.baremetal
 
         labels = ['Supported driver(s)', 'Active host(s)']
