@@ -19,12 +19,12 @@ import os
 import fixtures
 import mock
 from oslo_utils import strutils
+import requests
 import six
 import testtools
 
 
 class BaseTestCase(testtools.TestCase):
-
     def setUp(self):
         super(BaseTestCase, self).setUp()
         self.useFixture(fixtures.FakeLogger())
@@ -107,31 +107,26 @@ class FakeResponse(object):
                  self.reason))
 
 
-class FakeSessionResponse(object):
+def mockSessionResponse(headers, content=None, status_code=None, version=None):
+    raw = mock.Mock()
+    raw.version = version
+    response = mock.Mock(spec=requests.Response,
+                         headers=headers,
+                         content=content,
+                         status_code=status_code,
+                         raw=raw,
+                         reason='',
+                         encoding='UTF-8')
+    response.text = content
 
-    def __init__(self, headers, content=None, status_code=None, version=None):
-        self.headers = headers
-        self.content = content
-        self.status_code = status_code
-        self.raw = mock.Mock()
-        self.raw.version = version
-        self.reason = ''
-
-    def iter_content(self, chunk_size):
-        return iter(self.content)
+    return response
 
 
-class FakeSession(object):
+def mockSession(headers, content=None, status_code=None, version=None):
+    session = mock.Mock(spec=requests.Session,
+                        verify=False,
+                        cert=('test_cert', 'test_key'))
+    response = mockSessionResponse(headers, content, status_code, version)
+    session.request = mock.Mock(return_value=response)
 
-    def __init__(self, headers, content=None, status_code=None, version=None):
-        self.headers = headers
-        self.content = content
-        self.status_code = status_code
-        self.version = version
-        self.verify = False
-        self.cert = ('test_cert', 'test_key')
-
-    def request(self, url, method, **kwargs):
-        request = FakeSessionResponse(
-            self.headers, self.content, self.status_code, self.version)
-        return request
+    return session

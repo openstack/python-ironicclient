@@ -17,7 +17,6 @@ import copy
 from distutils.version import StrictVersion
 import functools
 import hashlib
-import json
 import logging
 import os
 import socket
@@ -27,6 +26,7 @@ import time
 
 from keystoneauth1 import adapter
 from keystoneauth1 import exceptions as kexc
+from oslo_serialization import jsonutils
 from oslo_utils import strutils
 import requests
 import six
@@ -73,10 +73,10 @@ def _extract_error_json(body):
     """Return  error_message from the HTTP response body."""
     error_json = {}
     try:
-        body_json = json.loads(body)
+        body_json = jsonutils.loads(body)
         if 'error_message' in body_json:
             raw_msg = body_json['error_message']
-            error_json = json.loads(raw_msg)
+            error_json = jsonutils.loads(raw_msg)
     except ValueError:
         pass
 
@@ -354,16 +354,15 @@ class HTTPClient(VersionNegotiationMixin):
 
             raise exc.ConnectionRefused(message)
 
-        body_iter = resp.iter_content(chunk_size=CHUNKSIZE)
-
-        # Read body into string if it isn't obviously image data
         body_str = None
-        if resp.headers.get('Content-Type') != 'application/octet-stream':
-            body_str = ''.join([chunk for chunk in body_iter])
+        if resp.headers.get('Content-Type') == 'application/octet-stream':
+            body_iter = resp.iter_content(chunk_size=CHUNKSIZE)
+            self.log_http_response(resp)
+        else:
+            # Read body into string if it isn't obviously image data
+            body_str = resp.text
             self.log_http_response(resp, body_str)
             body_iter = six.StringIO(body_str)
-        else:
-            self.log_http_response(resp)
 
         if resp.status_code >= http_client.BAD_REQUEST:
             error_json = _extract_error_json(body_str)
@@ -386,7 +385,7 @@ class HTTPClient(VersionNegotiationMixin):
         kwargs['headers'].setdefault('Accept', 'application/json')
 
         if 'body' in kwargs:
-            kwargs['body'] = json.dumps(kwargs['body'])
+            kwargs['body'] = jsonutils.dump_as_bytes(kwargs['body'])
 
         resp, body_iter = self._http_request(url, method, **kwargs)
         content_type = resp.headers.get('Content-Type')
@@ -399,7 +398,7 @@ class HTTPClient(VersionNegotiationMixin):
         if 'application/json' in content_type:
             body = ''.join([chunk for chunk in body_iter])
             try:
-                body = json.loads(body)
+                body = jsonutils.loads(body)
             except ValueError:
                 LOG.error(_LE('Could not decode response body as JSON'))
         else:
@@ -548,7 +547,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         kwargs['headers'].setdefault('Accept', 'application/json')
 
         if 'body' in kwargs:
-            kwargs['data'] = json.dumps(kwargs.pop('body'))
+            kwargs['data'] = jsonutils.dump_as_bytes(kwargs.pop('body'))
 
         resp = self._http_request(url, method, **kwargs)
         body = resp.content

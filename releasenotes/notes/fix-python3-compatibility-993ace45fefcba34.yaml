@@ -1,0 +1,5 @@
+---
+fixes:
+  - Fixes an issue in a python 3 environment, where TypeError
+    exceptions were being raised (due to the "requests"
+    library returning bytes instead of a string).

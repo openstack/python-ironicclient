@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import time
 
 import mock
+from oslo_serialization import jsonutils
+import requests
 import six
 from six.moves import http_client
 
@@ -39,10 +40,9 @@ def _get_error_body(faultstring=None, debuginfo=None):
         'faultstring': faultstring,
         'debuginfo': debuginfo
     }
-    raw_error_body = json.dumps(error_body)
+    raw_error_body = jsonutils.dump_as_bytes(error_body)
     body = {'error_message': raw_error_body}
-    raw_body = json.dumps(body)
-    return raw_body
+    return jsonutils.dumps(body)
 
 
 def _session_client(**kwargs):
@@ -204,12 +204,24 @@ class HttpClientTest(utils.BaseTestCase):
         url = client._make_connection_url('v1/resources')
         self.assertEqual('http://localhost/v1/resources', url)
 
+    def test_server_https_request_with_application_octet_stream(self):
+        client = http.HTTPClient('https://localhost/')
+        client.session = utils.mockSession(
+            {'Content-Type': 'application/octet-stream'},
+            "Body",
+            version=1,
+            status_code=http_client.OK)
+
+        response, body = client.json_request('GET', '/v1/resources')
+        self.assertEqual(client.session.request.return_value, response)
+        self.assertIsNone(body)
+
     def test_server_exception_empty_body(self):
         error_body = _get_error_body()
         client = http.HTTPClient('http://localhost/')
-        client.session = utils.FakeSession(
+        client.session = utils.mockSession(
             {'Content-Type': 'application/json'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.INTERNAL_SERVER_ERROR)
 
@@ -221,9 +233,9 @@ class HttpClientTest(utils.BaseTestCase):
         error_msg = 'test error msg'
         error_body = _get_error_body(error_msg)
         client = http.HTTPClient('http://localhost/')
-        client.session = utils.FakeSession(
+        client.session = utils.mockSession(
             {'Content-Type': 'application/json'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.INTERNAL_SERVER_ERROR)
 
@@ -233,9 +245,9 @@ class HttpClientTest(utils.BaseTestCase):
 
     def test_server_https_request_ok(self):
         client = http.HTTPClient('https://localhost/')
-        client.session = utils.FakeSession(
+        client.session = utils.mockSession(
             {'Content-Type': 'application/json'},
-            six.StringIO("Body"),
+            "Body",
             version=1,
             status_code=http_client.OK)
 
@@ -245,9 +257,9 @@ class HttpClientTest(utils.BaseTestCase):
         error_body = _get_error_body()
 
         client = http.HTTPClient('https://localhost/')
-        client.session = utils.FakeSession(
+        client.session = utils.mockSession(
             {'Content-Type': 'application/json'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.INTERNAL_SERVER_ERROR)
 
@@ -258,9 +270,9 @@ class HttpClientTest(utils.BaseTestCase):
     def test_401_unauthorized_exception(self):
         error_body = _get_error_body()
         client = http.HTTPClient('http://localhost/')
-        client.session = utils.FakeSession(
+        client.session = utils.mockSession(
             {'Content-Type': 'text/plain'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.UNAUTHORIZED)
 
@@ -281,12 +293,12 @@ class HttpClientTest(utils.BaseTestCase):
         expected_result = ('1.1', '1.6')
 
         client = http.HTTPClient('http://localhost/')
-        fake_resp = utils.FakeSessionResponse(
+        fake_resp = utils.mockSessionResponse(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
              'Content-Type': 'text/plain',
              },
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.NOT_ACCEPTABLE)
         result = client._parse_version_headers(fake_resp)
@@ -299,12 +311,12 @@ class HttpClientTest(utils.BaseTestCase):
         error_body = _get_error_body()
 
         client = http.HTTPClient('http://%s:%s/' % (host, port))
-        client.session = utils.FakeSession(
+        client.session = utils.mockSession(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': latest_ver,
              'content-type': 'text/plain',
              },
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.NOT_ACCEPTABLE)
         self.assertRaises(
@@ -321,20 +333,20 @@ class HttpClientTest(utils.BaseTestCase):
         # Test when fallback to a supported version succeeds
         mock_negotiate.return_value = '1.6'
         error_body = _get_error_body()
-        bad_resp = utils.FakeSessionResponse(
+        bad_resp = utils.mockSessionResponse(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
              'content-type': 'text/plain',
              },
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.NOT_ACCEPTABLE)
-        good_resp = utils.FakeSessionResponse(
+        good_resp = utils.mockSessionResponse(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
              'content-type': 'text/plain',
              },
-            six.StringIO("We got some text"),
+            "We got some text",
             version=1,
             status_code=http_client.OK)
         client = http.HTTPClient('http://localhost/')
@@ -432,7 +444,7 @@ class SessionClientTest(utils.BaseTestCase):
     def test_server_exception_empty_body(self):
         error_body = _get_error_body()
 
-        fake_session = utils.FakeSession({'Content-Type': 'application/json'},
+        fake_session = utils.mockSession({'Content-Type': 'application/json'},
                                          error_body,
                                          http_client.INTERNAL_SERVER_ERROR)
 
@@ -444,7 +456,7 @@ class SessionClientTest(utils.BaseTestCase):
 
     def test__parse_version_headers(self):
         # Test parsing of version headers from SessionClient
-        fake_session = utils.FakeSession(
+        fake_session = utils.mockSession(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
              'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
              'content-type': 'text/plain',
@@ -453,15 +465,15 @@ class SessionClientTest(utils.BaseTestCase):
             http_client.HTTP_VERSION_NOT_SUPPORTED)
         expected_result = ('1.1', '1.6')
         client = _session_client(session=fake_session)
-        result = client._parse_version_headers(fake_session)
+        result = client._parse_version_headers(fake_session.request())
         self.assertEqual(expected_result, result)
 
     def _test_endpoint_override(self, endpoint):
-        fake_session = utils.FakeSession({'content-type': 'application/json'},
+        fake_session = utils.mockSession({'content-type': 'application/json'},
                                          status_code=http_client.NO_CONTENT)
         request_mock = mock.Mock()
         fake_session.request = request_mock
-        request_mock.return_value = utils.FakeSessionResponse(
+        request_mock.return_value = utils.mockSessionResponse(
             headers={'content-type': 'application/json'},
             status_code=http_client.NO_CONTENT)
         client = _session_client(session=fake_session,
@@ -503,9 +515,9 @@ class RetriesTestCase(utils.BaseTestCase):
 
     def test_http_no_retry(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeSessionResponse(
+        bad_resp = utils.mockSessionResponse(
             {'Content-Type': 'text/plain'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/', max_retries=0)
@@ -519,14 +531,14 @@ class RetriesTestCase(utils.BaseTestCase):
 
     def test_http_retry(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeSessionResponse(
+        bad_resp = utils.mockSessionResponse(
             {'Content-Type': 'text/plain'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.CONFLICT)
-        good_resp = utils.FakeSessionResponse(
+        good_resp = utils.mockSessionResponse(
             {'Content-Type': 'text/plain'},
-            six.StringIO("meow"),
+            "meow",
             version=1,
             status_code=http_client.OK)
         client = http.HTTPClient('http://localhost/')
@@ -542,14 +554,14 @@ class RetriesTestCase(utils.BaseTestCase):
 
     def test_http_retry_503(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeSessionResponse(
+        bad_resp = utils.mockSessionResponse(
             {'Content-Type': 'text/plain'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.SERVICE_UNAVAILABLE)
-        good_resp = utils.FakeSessionResponse(
+        good_resp = utils.mockSessionResponse(
             {'Content-Type': 'text/plain'},
-            six.StringIO("meow"),
+            "meow",
             version=1,
             status_code=http_client.OK)
         client = http.HTTPClient('http://localhost/')
@@ -563,9 +575,9 @@ class RetriesTestCase(utils.BaseTestCase):
         self.assertEqual(2, mock_session.request.call_count)
 
     def test_http_retry_connection_refused(self):
-        good_resp = utils.FakeSessionResponse(
+        good_resp = utils.mockSessionResponse(
             {'content-type': 'text/plain'},
-            six.StringIO("meow"),
+            "meow",
             version=1,
             status_code=http_client.OK)
         client = http.HTTPClient('http://localhost/')
@@ -581,9 +593,9 @@ class RetriesTestCase(utils.BaseTestCase):
 
     def test_http_failed_retry(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeSessionResponse(
+        bad_resp = utils.mockSessionResponse(
             {'content-type': 'text/plain'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/')
@@ -598,9 +610,9 @@ class RetriesTestCase(utils.BaseTestCase):
 
     def test_http_max_retries_none(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeSessionResponse(
+        bad_resp = utils.mockSessionResponse(
             {'content-type': 'text/plain'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/', max_retries=None)
@@ -615,9 +627,9 @@ class RetriesTestCase(utils.BaseTestCase):
 
     def test_http_change_max_retries(self):
         error_body = _get_error_body()
-        bad_resp = utils.FakeSessionResponse(
+        bad_resp = utils.mockSessionResponse(
             {'content-type': 'text/plain'},
-            six.StringIO(error_body),
+            error_body,
             version=1,
             status_code=http_client.CONFLICT)
         client = http.HTTPClient('http://localhost/',
@@ -634,15 +646,15 @@ class RetriesTestCase(utils.BaseTestCase):
     def test_session_retry(self):
         error_body = _get_error_body()
 
-        fake_resp = utils.FakeSessionResponse(
+        fake_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
             http_client.CONFLICT)
-        ok_resp = utils.FakeSessionResponse(
+        ok_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
             http_client.OK)
-        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session = mock.Mock(spec=requests.Session)
         fake_session.request.side_effect = iter((fake_resp, ok_resp))
 
         client = _session_client(session=fake_session)
@@ -652,15 +664,15 @@ class RetriesTestCase(utils.BaseTestCase):
     def test_session_retry_503(self):
         error_body = _get_error_body()
 
-        fake_resp = utils.FakeSessionResponse(
+        fake_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
             http_client.SERVICE_UNAVAILABLE)
-        ok_resp = utils.FakeSessionResponse(
+        ok_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
             http_client.OK)
-        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session = mock.Mock(spec=requests.Session)
         fake_session.request.side_effect = iter((fake_resp, ok_resp))
 
         client = _session_client(session=fake_session)
@@ -668,11 +680,11 @@ class RetriesTestCase(utils.BaseTestCase):
         self.assertEqual(2, fake_session.request.call_count)
 
     def test_session_retry_connection_refused(self):
-        ok_resp = utils.FakeSessionResponse(
+        ok_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
             http_client.OK)
-        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session = mock.Mock(spec=requests.Session)
         fake_session.request.side_effect = iter((exc.ConnectionRefused(),
                                                  ok_resp))
 
@@ -681,11 +693,11 @@ class RetriesTestCase(utils.BaseTestCase):
         self.assertEqual(2, fake_session.request.call_count)
 
     def test_session_retry_retriable_connection_failure(self):
-        ok_resp = utils.FakeSessionResponse(
+        ok_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
             http_client.OK)
-        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session = mock.Mock(spec=requests.Session)
         fake_session.request.side_effect = iter(
             (kexc.RetriableConnectionFailure(), ok_resp))
 
@@ -696,11 +708,11 @@ class RetriesTestCase(utils.BaseTestCase):
     def test_session_retry_fail(self):
         error_body = _get_error_body()
 
-        fake_resp = utils.FakeSessionResponse(
+        fake_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
             http_client.CONFLICT)
-        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session = mock.Mock(spec=requests.Session)
         fake_session.request.return_value = fake_resp
 
         client = _session_client(session=fake_session)
@@ -713,11 +725,11 @@ class RetriesTestCase(utils.BaseTestCase):
     def test_session_max_retries_none(self):
         error_body = _get_error_body()
 
-        fake_resp = utils.FakeSessionResponse(
+        fake_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
             http_client.CONFLICT)
-        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session = mock.Mock(spec=requests.Session)
         fake_session.request.return_value = fake_resp
 
         client = _session_client(session=fake_session)
@@ -731,11 +743,11 @@ class RetriesTestCase(utils.BaseTestCase):
     def test_session_change_max_retries(self):
         error_body = _get_error_body()
 
-        fake_resp = utils.FakeSessionResponse(
+        fake_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             error_body,
             http_client.CONFLICT)
-        fake_session = mock.Mock(spec=utils.FakeSession)
+        fake_session = mock.Mock(spec=requests.Session)
         fake_session.request.return_value = fake_resp
 
         client = _session_client(session=fake_session)
