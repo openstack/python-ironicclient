@@ -264,8 +264,7 @@ class TestChassisList(TestChassis):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         kwargs = {
@@ -290,7 +289,7 @@ class TestChassisList(TestChassis):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         kwargs = {
@@ -461,8 +460,7 @@ class TestChassisShow(TestChassis):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         args = [uuid]
@@ -486,7 +484,7 @@ class TestChassisShow(TestChassis):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         args = [uuid]
