@@ -40,34 +40,34 @@ the ``--os-tenant-name``, ``--os-username``, ``--os-password`` and
 ``--os-auth-url`` parameters, though it may be easier to set them
 as environment variables::
 
-    export OS_TENANT_NAME=project
-    export OS_USERNAME=user
-    export OS_PASSWORD=pass
-    export OS_AUTH_URL=http://auth.example.com:5000/v2.0
+    $ export OS_TENANT_NAME=project
+    $ export OS_USERNAME=user
+    $ export OS_PASSWORD=pass
+    $ export OS_AUTH_URL=http://auth.example.com:5000/v2.0
 
 To use a specific Ironic API endpoint::
 
-    export IRONIC_URL=http://ironic.example.com:6385
+    $ export IRONIC_URL=http://ironic.example.com:6385
 
 An example of how to create a basic node with the pxe_ipmitool driver::
 
-    ironic node-create -d pxe_ipmitool
+    $ ironic node-create -d pxe_ipmitool
 
 An example of creating a port on a node::
 
-    ironic port-create -a AA:BB:CC:DD:EE:FF -n nodeUUID
+    $ ironic port-create -a AA:BB:CC:DD:EE:FF -n nodeUUID
 
 An example of updating driver properties for a node::
 
-    ironic node-update nodeUUID add driver_info/ipmi_address=<IPaddress>
-    ironic node-update nodeUUID add driver_info/ipmi_username=<username>
-    ironic node-update nodeUUID add driver_info/ipmi_password=<password>
+    $ ironic node-update nodeUUID add driver_info/ipmi_address=<IPaddress>
+    $ ironic node-update nodeUUID add driver_info/ipmi_username=<username>
+    $ ironic node-update nodeUUID add driver_info/ipmi_password=<password>
 
 
 For more information about the ``ironic`` command and the subcommands
 available, run::
 
-    ironic help
+    $ ironic help
 
 * License: Apache License, Version 2.0
 * Documentation: http://docs.openstack.org/developer/python-ironicclient

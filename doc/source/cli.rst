@@ -28,11 +28,11 @@ configuration options :option:`--os-username`, :option:`--os-password`,
 and :option:`--os-auth-url`, or set the corresponding
 environment variables::
 
-    export OS_USERNAME=user
-    export OS_PASSWORD=password
-    export OS_TENANT_ID=b363706f891f48019483f8bd6503c54b   # or OS_TENANT_NAME
-    export OS_TENANT_NAME=project                          # or OS_TENANT_ID
-    export OS_AUTH_URL=http://auth.example.com:5000/v2.0
+    $ export OS_USERNAME=user
+    $ export OS_PASSWORD=password
+    $ export OS_TENANT_ID=b363706f891f48019483f8bd6503c54b  # or OS_TENANT_NAME
+    $ export OS_TENANT_NAME=project                         # or OS_TENANT_ID
+    $ export OS_AUTH_URL=http://auth.example.com:5000/v2.0
 
 The command-line tool will attempt to reauthenticate using the provided
 credentials for every request. You can override this behavior by manually
@@ -40,8 +40,8 @@ supplying an auth token using :option:`--ironic-url` and
 :option:`--os-auth-token`, or by setting the corresponding environment
 variables::
 
-    export IRONIC_URL=http://ironic.example.org:6385/
-    export OS_AUTH_TOKEN=3bcc3d3a03f44e3d8377f9247b0ad155
+    $ export IRONIC_URL=http://ironic.example.org:6385/
+    $ export OS_AUTH_TOKEN=3bcc3d3a03f44e3d8377f9247b0ad155
 
 Since Keystone can return multiple regions in the Service Catalog, you can
 specify the one you want with :option:`--os-region-name` or set the following
@@ -56,7 +56,7 @@ fill partially typed commands. To use this feature, source the below file
 https://git.openstack.org/cgit/openstack/python-ironicclient/tree/tools/ironic.bash_completion)
 to your terminal and then bash completion should work::
 
-    source ironic.bash_completion
+    $ source ironic.bash_completion
 
 To avoid doing this every time, add this to your ``.bashrc`` or copy the
 ironic.bash_completion file to the default bash completion scripts directory
@@ -67,11 +67,11 @@ OPTIONS
 
 To get a list of available (sub)commands and options, run::
 
-    ironic help
+    $ ironic help
 
 To get usage and options of a command, run::
 
-    ironic help <command>
+    $ ironic help <command>
 
 
 EXAMPLES
@@ -79,16 +79,16 @@ EXAMPLES
 
 Get information about the node-create command::
 
-    ironic help node-create
+    $ ironic help node-create
 
 Get a list of available drivers::
 
-    ironic driver-list
+    $ ironic driver-list
 
 Enroll a node with "fake" deploy driver and "ipmitool" power driver::
 
-    ironic node-create -d fake_ipmitool -i ipmi_address=1.2.3.4
+    $ ironic node-create -d fake_ipmitool -i ipmi_address=1.2.3.4
 
 Get a list of nodes::
 
-    ironic node-list
+    $ ironic node-list
