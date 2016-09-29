@@ -334,10 +334,7 @@ class NodeManager(base.CreateManager):
 
     def get_console(self, node_uuid):
         path = "%s/states/console" % node_uuid
-        info = self.get(path)
-        if not info:
-            return {}
-        return info.to_dict()
+        return self._get_as_dict(path)
 
     def set_console_mode(self, node_uuid, enabled):
         """Set the console mode for the node.
@@ -358,15 +355,15 @@ class NodeManager(base.CreateManager):
 
     def get_boot_device(self, node_uuid):
         path = "%s/management/boot_device" % node_uuid
-        return self.get(path).to_dict()
+        return self._get_as_dict(path)
 
     def get_supported_boot_devices(self, node_uuid):
         path = "%s/management/boot_device/supported" % node_uuid
-        return self.get(path).to_dict()
+        return self._get_as_dict(path)
 
     def get_vendor_passthru_methods(self, node_ident):
         path = "%s/vendor_passthru/methods" % node_ident
-        return self.get(path).to_dict()
+        return self._get_as_dict(path)
 
     def wait_for_provision_state(self, node_ident, expected_state,
                                  timeout=0,
