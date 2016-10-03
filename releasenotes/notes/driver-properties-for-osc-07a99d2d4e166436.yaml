@@ -1,0 +1,6 @@
+---
+features:
+  - Adds the ``openstack baremetal driver property list <driver>`` command.
+    For the specified driver, this returns a list of its properties, along
+    with descriptions for each property. (The values of these properties
+    are specified in a node's driver_info.)
