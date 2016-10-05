@@ -10,7 +10,7 @@ Python Guideline Enforcement
 All code has to pass the pep8 style guideline to merge into OpenStack, to
 validate the code against these guidelines you can run::
 
-    tox -e pep8
+    $ tox -e pep8
 
 Unit Testing
 ............
@@ -19,12 +19,12 @@ It is strongly encouraged to run the unit tests locally under one or more
 test environments prior to submitting a patch. To run all the recommended
 environments sequentially and pep8 style guideline run::
 
-    tox
+    $ tox
 
 You can also selectively pick specific test environments by listing your
 chosen environments after a -e flag::
 
-    tox -e py27,py33,py34,pep8
+    $ tox -e py27,py33,py34,pep8
 
 .. note::
   Tox sets up virtual environment and installs all necessary dependencies.
@@ -44,7 +44,7 @@ cloud installation along with admin credentials. The test.conf file lives in
 ironicclient/tests/functional/ directory. To run functional tests in that way
 create test.conf manually and run::
 
-    tox -e functional
+    $ tox -e functional
 
 An example test.conf file::
 
