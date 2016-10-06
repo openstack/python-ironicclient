@@ -207,7 +207,7 @@ def do_node_list(cc, args):
     '-d', '--driver',
     metavar='<driver>',
     required=True,
-    help='Driver used to control the node [REQUIRED].')
+    help='Driver used to control the node.')
 @cliutils.arg(
     '-i', '--driver-info',
     metavar='<key=value>',

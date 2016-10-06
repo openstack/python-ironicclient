@@ -58,8 +58,13 @@ def define_command(subparsers, command, callback, cmd_mapper):
     subparser.add_argument('-h', '--help', action='help',
                            help=argparse.SUPPRESS)
     cmd_mapper[command] = subparser
+    required_args = subparser.add_argument_group(_("Required arguments"))
+
     for (args, kwargs) in arguments:
-        subparser.add_argument(*args, **kwargs)
+        if kwargs.get('required'):
+            required_args.add_argument(*args, **kwargs)
+        else:
+            subparser.add_argument(*args, **kwargs)
     subparser.set_defaults(func=callback)
 
 

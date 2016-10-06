@@ -106,11 +106,41 @@ class ShellTest(utils.BaseTestCase):
 
     def test_help_on_subcommand(self):
         required = [
-            '.*?^usage: ironic chassis-show',
+            ".*?^usage: ironic chassis-show",
             ".*?^Show detailed information about a chassis",
         ]
         argstrings = [
             'help chassis-show',
+        ]
+        for argstr in argstrings:
+            help_text = self.shell(argstr)
+            for r in required:
+                self.assertThat(help_text,
+                                matchers.MatchesRegex(r, self.re_options))
+
+    def test_required_args_on_node_create_help(self):
+        required = [
+            ".*?^usage: ironic node-create",
+            ".*?^Register a new node with the Ironic service",
+            ".*?^Required arguments:",
+        ]
+        argstrings = [
+            'help node-create',
+        ]
+        for argstr in argstrings:
+            help_text = self.shell(argstr)
+            for r in required:
+                self.assertThat(help_text,
+                                matchers.MatchesRegex(r, self.re_options))
+
+    def test_required_args_on_port_create_help(self):
+        required = [
+            ".*?^usage: ironic port-create",
+            ".*?^Create a new port",
+            ".*?^Required arguments:",
+        ]
+        argstrings = [
+            'help port-create',
         ]
         for argstr in argstrings:
             help_text = self.shell(argstr)
