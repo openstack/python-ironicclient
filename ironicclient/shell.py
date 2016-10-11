@@ -26,7 +26,6 @@ from oslo_utils import encodeutils
 import six
 
 import ironicclient
-from ironicclient import client as iroclient
 from ironicclient.common import cliutils
 from ironicclient.common import http
 from ironicclient.common.i18n import _
@@ -381,7 +380,7 @@ class IronicShell(object):
         for key in client_args:
             kwargs[key] = getattr(args, key)
         kwargs['os_ironic_api_version'] = os_ironic_api_version
-        client = iroclient.get_client(api_major_version, **kwargs)
+        client = ironicclient.client.get_client(api_major_version, **kwargs)
 
         try:
             args.func(client, args)
