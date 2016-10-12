@@ -16,11 +16,11 @@
 
 import logging
 
+from ironicclient.common import http
 from osc_lib import utils
 
 LOG = logging.getLogger(__name__)
 
-DEFAULT_BAREMETAL_API_VERSION = '1.6'
 API_VERSION_OPTION = 'os_baremetal_api_version'
 API_NAME = 'baremetal'
 LAST_KNOWN_API_VERSION = 20
@@ -28,7 +28,7 @@ API_VERSIONS = {
     '1.%d' % i: 'ironicclient.v1.client.Client'
     for i in range(1, LAST_KNOWN_API_VERSION + 1)
 }
-API_VERSIONS['1'] = API_VERSIONS[DEFAULT_BAREMETAL_API_VERSION]
+API_VERSIONS['1'] = API_VERSIONS[http.DEFAULT_VER]
 
 
 def make_client(instance):
@@ -38,6 +38,7 @@ def make_client(instance):
         instance._api_version[API_NAME],
         API_VERSIONS)
     LOG.debug('Instantiating baremetal client: %s', baremetal_client_class)
+    LOG.debug('Baremetal API version: %s', http.DEFAULT_VER)
 
     client = baremetal_client_class(
         os_ironic_api_version=instance._api_version[API_NAME],
@@ -55,8 +56,8 @@ def build_option_parser(parser):
         metavar='<baremetal-api-version>',
         default=utils.env(
             'OS_BAREMETAL_API_VERSION',
-            default=DEFAULT_BAREMETAL_API_VERSION),
+            default=http.DEFAULT_VER),
         help='Baremetal API version, default=' +
-             DEFAULT_BAREMETAL_API_VERSION +
+             http.DEFAULT_VER +
              ' (Env: OS_BAREMETAL_API_VERSION)')
     return parser
