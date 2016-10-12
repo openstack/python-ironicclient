@@ -157,3 +157,69 @@ class TestCase(base.FunctionalTestBase):
         except exceptions.CommandFailed:
             if not ignore_exceptions:
                 raise
+
+    def port_group_list(self, fields=None, params=''):
+        """List baremetal port groups.
+
+        :param List fields: List of fields to show
+        :param String params: Additional kwargs
+        :return: JSON object of port group list
+        """
+        opts = self.get_opts(fields=fields)
+        output = self.openstack('baremetal port group list {0} {1}'
+                                .format(opts, params))
+        return json.loads(output)
+
+    def port_group_create(self, node_id, name=None, params=''):
+        """Create baremetal port group.
+
+        :param String node_id: baremetal node UUID
+        :param String name: port group name
+        :param String params: Additional args and kwargs
+        :return: JSON object of created port group
+        """
+        if not name:
+            name = data_utils.rand_name('port_group')
+
+        opts = self.get_opts()
+        output = self.openstack(
+            'baremetal port group create {0} --node {1} --name {2} {3}'
+            .format(opts, node_id, name, params))
+
+        port_group = json.loads(output)
+        if not port_group:
+            self.fail('Baremetal port group has not been created!')
+
+        self.addCleanup(self.port_group_delete, port_group['uuid'],
+                        params=params, ignore_exceptions=True)
+        return port_group
+
+    def port_group_delete(self, identifier, params='',
+                          ignore_exceptions=False):
+        """Try to delete baremetal port group by Name or UUID.
+
+        :param String identifier: Name or UUID of the port group
+        :param String params: temporary arg to pass api version.
+        :param Bool ignore_exceptions: Ignore exception (needed for cleanUp)
+        :return: raw values output
+        :raise: CommandFailed exception if not ignore_exceptions
+        """
+        try:
+            return self.openstack('baremetal port group delete {0} {1}'
+                                  .format(identifier, params))
+        except exceptions.CommandFailed:
+            if not ignore_exceptions:
+                raise
+
+    def port_group_show(self, identifier, fields=None, params=''):
+        """Show specified baremetal port group.
+
+        :param String identifier: Name or UUID of the port group
+        :param List fields: List of fields to show
+        :param List params: Additional kwargs
+        :return: JSON object of port group
+        """
+        opts = self.get_opts(fields)
+        output = self.openstack('baremetal port group show {0} {1} {2}'
+                                .format(identifier, opts, params))
+        return json.loads(output)
