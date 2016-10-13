@@ -23,6 +23,7 @@ from ironicclient.common import utils as commonutils
 from ironicclient import exc
 from ironicclient.osc.v1 import baremetal_node
 from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
+from ironicclient.v1 import utils as v1_utils
 
 
 class TestBaremetal(baremetal_fakes.TestBaremetal):
@@ -118,7 +119,7 @@ class TestBootdeviceShow(TestBaremetal):
             "boot_device": "pxe", "persistent": False}
 
         self.baremetal_mock.node.get_supported_boot_devices.return_value = {
-            "supported_boot_devices": ["cdrom", "bios", "safe", "disk", "pxe"]}
+            "supported_boot_devices": v1_utils.BOOT_DEVICES}
 
     def test_bootdevice_show(self):
         arglist = ['node_uuid']

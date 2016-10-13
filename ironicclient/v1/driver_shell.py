@@ -18,6 +18,7 @@ import argparse
 from ironicclient.common import cliutils
 from ironicclient.common import utils
 from ironicclient.v1 import resource_fields as res_fields
+from ironicclient.v1 import utils as v1_utils
 
 
 def _print_driver_show(driver, json=False):
@@ -95,10 +96,10 @@ def do_driver_raid_logical_disk_properties(cc, args):
                    "Can be specified multiple times.")
 @cliutils.arg('--http-method',
               metavar='<http-method>',
-              choices=['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
-              help="The HTTP method to use in the request. Valid HTTP "
-              "methods are: 'POST', 'PUT', 'GET', 'DELETE', and 'PATCH'. "
-              "Defaults to 'POST'.")
+              choices=v1_utils.HTTP_METHODS,
+              help=("The HTTP method to use in the request. Valid HTTP "
+                    "methods are: %s. Defaults to 'POST'." %
+                    ', '.join(v1_utils.HTTP_METHODS)))
 @cliutils.arg('--http_method',
               help=argparse.SUPPRESS)
 def do_driver_vendor_passthru(cc, args):

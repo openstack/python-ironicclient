@@ -25,6 +25,7 @@ from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
+from ironicclient.v1 import utils as v1_utils
 
 
 class ProvisionStateBaremetalNode(command.Command):
@@ -77,8 +78,6 @@ class BootdeviceSetBaremetalNode(command.Command):
 
     log = logging.getLogger(__name__ + ".BootdeviceSetBaremetalNode")
 
-    BOOT_DEVICES = ['pxe', 'disk', 'cdrom', 'bios', 'safe']
-
     def get_parser(self, prog_name):
         parser = super(BootdeviceSetBaremetalNode, self).get_parser(prog_name)
 
@@ -90,8 +89,8 @@ class BootdeviceSetBaremetalNode(command.Command):
         parser.add_argument(
             'device',
             metavar='<device>',
-            choices=self.BOOT_DEVICES,
-            help="One of %s" % (oscutils.format_list(self.BOOT_DEVICES))
+            choices=v1_utils.BOOT_DEVICES,
+            help="One of %s" % (oscutils.format_list(v1_utils.BOOT_DEVICES))
         )
         parser.add_argument(
             '--persistent',
@@ -624,8 +623,6 @@ class PassthruCallBaremetalNode(command.Command):
 
     log = logging.getLogger(__name__ + ".PassthuCallBaremetalNode")
 
-    HTTP_METHODS = ['POST', 'PUT', 'GET', 'DELETE', 'PATCH']
-
     def get_parser(self, prog_name):
         parser = super(PassthruCallBaremetalNode, self).get_parser(
             prog_name)
@@ -650,11 +647,11 @@ class PassthruCallBaremetalNode(command.Command):
         parser.add_argument(
             '--http-method',
             metavar='<http-method>',
-            choices=self.HTTP_METHODS,
+            choices=v1_utils.HTTP_METHODS,
             default='POST',
             help="The HTTP method to use in the passthru request. One of "
                  "%s. Defaults to POST." %
-                 oscutils.format_list(self.HTTP_METHODS)
+                 oscutils.format_list(v1_utils.HTTP_METHODS)
         )
         return parser
 

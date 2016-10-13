@@ -21,35 +21,7 @@ from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
-
-
-# Polling intervals in seconds.
-_LONG_ACTION_POLL_INTERVAL = 10
-_SHORT_ACTION_POLL_INTERVAL = 2
-# This dict acts as both list of possible provision actions and arguments for
-# wait_for_provision_state invocation.
-PROVISION_ACTIONS = {
-    'active': {'expected_state': 'active',
-               'poll_interval': _LONG_ACTION_POLL_INTERVAL},
-    'deleted': {'expected_state': 'available',
-                'poll_interval': _LONG_ACTION_POLL_INTERVAL},
-    'rebuild': {'expected_state': 'active',
-                'poll_interval': _LONG_ACTION_POLL_INTERVAL},
-    'inspect': {'expected_state': 'manageable',
-                # This is suboptimal for in-band inspection, but it's probably
-                # not worth making people wait 10 seconds for OOB inspection
-                'poll_interval': _SHORT_ACTION_POLL_INTERVAL},
-    'provide': {'expected_state': 'available',
-                # This assumes cleaning is in place
-                'poll_interval': _LONG_ACTION_POLL_INTERVAL},
-    'manage': {'expected_state': 'manageable',
-               'poll_interval': _SHORT_ACTION_POLL_INTERVAL},
-    'clean': {'expected_state': 'manageable',
-              'poll_interval': _LONG_ACTION_POLL_INTERVAL},
-    'adopt': {'expected_state': 'active',
-              'poll_interval': _SHORT_ACTION_POLL_INTERVAL},
-    'abort': None,  # no support for --wait in abort
-}
+from ironicclient.v1 import utils as v1_utils
 
 
 def _print_node_show(node, fields=None, json=False):
@@ -325,10 +297,10 @@ def do_node_update(cc, args):
                     "be specified multiple times."))
 @cliutils.arg('--http-method',
               metavar='<http-method>',
-              choices=['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
-              help="The HTTP method to use in the request. Valid HTTP "
-              "methods are: 'POST', 'PUT', 'GET', 'DELETE', and 'PATCH'. "
-              "Defaults to 'POST'.")
+              choices=v1_utils.HTTP_METHODS,
+              help=("The HTTP method to use in the request. Valid HTTP "
+                    "methods are: %s. Defaults to 'POST'." %
+                    ', '.join(v1_utils.HTTP_METHODS)))
 @cliutils.arg('--http_method',
               help=argparse.SUPPRESS)
 def do_node_vendor_passthru(cc, args):
@@ -470,9 +442,8 @@ def do_node_set_target_raid_config(cc, args):
 @cliutils.arg(
     'provision_state',
     metavar='<provision-state>',
-    choices=list(PROVISION_ACTIONS),
-    help="Supported states: %s." % ', '.join("'%s'" % state
-                                             for state in PROVISION_ACTIONS))
+    choices=v1_utils.PROVISION_STATES,
+    help="Supported states: %s." % ', '.join(v1_utils.PROVISION_STATES))
 @cliutils.arg(
     '--config-drive',
     metavar='<config-drive>',
@@ -518,7 +489,7 @@ def do_node_set_provision_state(cc, args):
                                         'setting provision state to "clean"'))
 
     if args.wait_timeout is not None:
-        wait_args = PROVISION_ACTIONS.get(args.provision_state)
+        wait_args = v1_utils.PROVISION_ACTIONS.get(args.provision_state)
         if wait_args is None:
             raise exceptions.CommandError(
                 _("--wait is not supported for provision state '%s'")
@@ -576,8 +547,8 @@ def do_node_set_console_mode(cc, args):
 @cliutils.arg(
     'device',
     metavar='<boot-device>',
-    choices=['pxe', 'disk', 'cdrom', 'bios', 'safe'],
-    help="'pxe', 'disk', 'cdrom', 'bios', or 'safe'.")
+    choices=v1_utils.BOOT_DEVICES,
+    help="One of %s." % ', '.join(v1_utils.BOOT_DEVICES))
 @cliutils.arg(
     '--persistent',
     dest='persistent',
