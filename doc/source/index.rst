@@ -14,6 +14,7 @@ Contents
 
    api_v1
    cli
+   create_command
    contributing
    testing
    Release Notes <http://docs.openstack.org/releasenotes/python-ironicclient/>
