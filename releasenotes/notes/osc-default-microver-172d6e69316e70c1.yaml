@@ -1,0 +1,4 @@
+---
+fixes:
+  - Fixes the OpenStackClient plugin so that it uses the same
+    default API version as the Ironic CLI (1.9 instead of 1.6).
