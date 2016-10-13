@@ -1,0 +1,8 @@
+---
+fixes:
+  - For node resources that had no boot devices, no supported boot devices, or
+    no passthru methods (and driver resources with no properties or no passthru
+    methods), issuing a request to get that information (for example,
+    'ironic driver-get-vendor-passthru-methods fake') would result in the
+    error "'NoneType' has no attribute 'to_dict'". This is fixed; an empty
+    list is now returned.

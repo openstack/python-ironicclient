@@ -83,6 +83,20 @@ class Manager(object):
         except IndexError:
             return None
 
+    def _get_as_dict(self, resource_id, fields=None):
+        """Retrieve a resource as a dictionary
+
+        :param resource_id: Identifier of the resource.
+        :param fields: List of specific fields to be returned.
+        :returns: a dictionary representing the resource; may be empty
+        """
+
+        resource = self._get(resource_id, fields=fields)
+        if resource:
+            return resource.to_dict()
+        else:
+            return {}
+
     def _format_body_data(self, body, response_key):
         if response_key:
             try:

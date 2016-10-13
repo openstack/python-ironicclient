@@ -15,6 +15,7 @@
 
 import copy
 
+import mock
 import testtools
 
 from ironicclient.common import base
@@ -120,6 +121,35 @@ class ManagerTestCase(testtools.TestCase):
         self.assertRaisesRegex(exc.InvalidAttribute, "non-existent-attribute",
                                self.manager.create,
                                **INVALID_ATTRIBUTE_TESTABLE_RESOURCE)
+
+    def test__get(self):
+        resource_id = TESTABLE_RESOURCE['uuid']
+        resource = self.manager._get(resource_id)
+        expect = [
+            ('GET', '/v1/testableresources/%s' % resource_id,
+             {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(resource_id, resource.uuid)
+        self.assertEqual(TESTABLE_RESOURCE['attribute1'], resource.attribute1)
+
+    def test__get_as_dict(self):
+        resource_id = TESTABLE_RESOURCE['uuid']
+        resource = self.manager._get_as_dict(resource_id)
+        expect = [
+            ('GET', '/v1/testableresources/%s' % resource_id,
+             {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(TESTABLE_RESOURCE, resource)
+
+    @mock.patch.object(base.Manager, '_get', autospec=True)
+    def test__get_as_dict_empty(self, mock_get):
+        mock_get.return_value = None
+        resource_id = TESTABLE_RESOURCE['uuid']
+        resource = self.manager._get_as_dict(resource_id)
+        mock_get.assert_called_once_with(mock.ANY, resource_id, fields=None)
+        self.assertEqual({}, resource)
 
     def test_get(self):
         resource = self.manager.get(TESTABLE_RESOURCE['uuid'])

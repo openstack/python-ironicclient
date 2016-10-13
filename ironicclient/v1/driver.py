@@ -41,7 +41,7 @@ class DriverManager(base.Manager):
         return self._delete(resource_id=driver_name)
 
     def properties(self, driver_name):
-        return self._get(resource_id='%s/properties' % driver_name).to_dict()
+        return self._get_as_dict('%s/properties' % driver_name)
 
     def raid_logical_disk_properties(self, driver_name):
         """Returns the RAID logical disk properties for the driver.
@@ -92,5 +92,4 @@ class DriverManager(base.Manager):
                 _('Unknown HTTP method: %s') % http_method)
 
     def get_vendor_passthru_methods(self, driver_name):
-        path = "%s/vendor_passthru/methods" % driver_name
-        return self.get(path).to_dict()
+        return self._get_as_dict("%s/vendor_passthru/methods" % driver_name)
