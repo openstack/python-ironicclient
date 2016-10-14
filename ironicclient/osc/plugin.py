@@ -14,6 +14,8 @@
 #   under the License.
 #
 
+"""OpenStackClient plugin for Bare Metal service."""
+
 import logging
 
 from ironicclient.common import http
