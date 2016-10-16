@@ -54,9 +54,19 @@ class ProvisionStateBaremetalNode(command.Command):
 
         baremetal_client = self.app.client_manager.baremetal
 
+        clean_steps = getattr(parsed_args, 'clean_steps', None)
+        if clean_steps == '-':
+            clean_steps = utils.get_from_stdin('clean steps')
+        if clean_steps:
+            clean_steps = utils.handle_json_or_file_arg(clean_steps)
+
+        config_drive = getattr(parsed_args, 'config_drive', None)
+
         baremetal_client.node.set_provision_state(
             parsed_args.node,
-            parsed_args.provision_state)
+            parsed_args.provision_state,
+            configdrive=config_drive,
+            cleansteps=clean_steps)
 
 
 class AbortBaremetalNode(ProvisionStateBaremetalNode):
@@ -168,21 +178,6 @@ class CleanBaremetalNode(ProvisionStateBaremetalNode):
                   "dictionary should have keys 'interface' and 'step', and "
                   "optional key 'args'."))
         return parser
-
-    def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)", parsed_args)
-
-        baremetal_client = self.app.client_manager.baremetal
-
-        clean_steps = parsed_args.clean_steps
-        if parsed_args.clean_steps == '-':
-            clean_steps = utils.get_from_stdin('clean steps')
-        if clean_steps:
-            clean_steps = utils.handle_json_or_file_arg(clean_steps)
-        baremetal_client.node.set_provision_state(
-            parsed_args.node,
-            parsed_args.provision_state,
-            cleansteps=clean_steps)
 
 
 class ConsoleDisableBaremetalNode(command.Command):
@@ -394,16 +389,6 @@ class DeployBaremetalNode(ProvisionStateBaremetalNode):
                   "directory containing the config drive files. In case it's "
                   "a directory, a config drive will be generated from it. "))
         return parser
-
-    def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)", parsed_args)
-
-        baremetal_client = self.app.client_manager.baremetal
-
-        baremetal_client.node.set_provision_state(
-            parsed_args.node,
-            parsed_args.provision_state,
-            configdrive=parsed_args.config_drive)
 
 
 class InspectBaremetalNode(ProvisionStateBaremetalNode):
