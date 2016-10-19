@@ -61,7 +61,6 @@ class TestCreateBaremetalPort(TestBaremetalPort):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        # DisplayCommandBase.take_action() returns two tuples
         self.cmd.take_action(parsed_args)
 
         # Set expected values
@@ -90,8 +89,7 @@ class TestCreateBaremetalPort(TestBaremetalPort):
 
         self.cmd.log = mock.Mock()
 
-        # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         # Set expected values
         args = {
@@ -398,7 +396,7 @@ class TestBaremetalPortList(TestBaremetalPort):
         verifylist = [('address', baremetal_fakes.baremetal_port_address)]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         kwargs = {
             'address': baremetal_fakes.baremetal_port_address,
@@ -412,7 +410,7 @@ class TestBaremetalPortList(TestBaremetalPort):
         verifylist = [('node', baremetal_fakes.baremetal_uuid)]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         kwargs = {
             'node': baremetal_fakes.baremetal_uuid,
