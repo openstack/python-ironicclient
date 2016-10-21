@@ -67,7 +67,7 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
             "driver_info": {"type": "object"},
             "created_at": {"type": "string"},
             "driver_internal_info": {"type": "object"},
-            "chassis_uuid": {"type": "string"},
+            "chassis_uuid": {"type": ["string", "null"]},
             "instance_info": {"type": "object"}
             }
         }
@@ -144,7 +144,7 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
                 "driver_info": {"type": "object"},
                 "extra": {"type": "object"},
                 "driver": {"type": "string"},
-                "chassis_uuid": {"type": "string"},
+                "chassis_uuid": {"type": ["string", "null"]},
                 "properties": {"type": "object"},
                 "name": {"type": ["string", "null"]},
             }
