@@ -26,7 +26,6 @@ import subprocess
 import sys
 import tempfile
 
-from oslo_utils import importutils
 from oslo_utils import strutils
 
 from ironicclient.common.i18n import _
@@ -71,13 +70,6 @@ def define_commands_from_module(subparsers, command_module, cmd_mapper):
         command = method_name[3:].replace('_', '-')
         callback = getattr(command_module, method_name)
         define_command(subparsers, command, callback, cmd_mapper)
-
-
-def import_versioned_module(version, submodule=None):
-    module = 'ironicclient.v%s' % version
-    if submodule:
-        module = '.'.join((module, submodule))
-    return importutils.import_module(module)
 
 
 def split_and_deserialize(string):

@@ -11,9 +11,9 @@
 #    under the License.
 
 from keystoneauth1 import loading as kaloading
+from oslo_utils import importutils
 
 from ironicclient.common.i18n import _
-from ironicclient.common import utils
 from ironicclient import exc
 
 
@@ -146,6 +146,7 @@ def get_client(api_version, os_auth_token=None, ironic_url=None,
 
 
 def Client(version, *args, **kwargs):
-    module = utils.import_versioned_module(version, 'client')
+    module = importutils.import_versioned_module('ironicclient',
+                                                 version, 'client')
     client_class = getattr(module, 'Client')
     return client_class(*args, **kwargs)
