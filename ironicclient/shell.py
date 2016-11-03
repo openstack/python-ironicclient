@@ -23,6 +23,7 @@ import sys
 
 from keystoneauth1.loading import session as kasession
 from oslo_utils import encodeutils
+from oslo_utils import importutils
 import six
 
 import ironicclient
@@ -240,7 +241,8 @@ class IronicShell(object):
         self.subcommands = {}
         subparsers = parser.add_subparsers(metavar='<subcommand>',
                                            dest='subparser_name')
-        submodule = utils.import_versioned_module(version, 'shell')
+        submodule = importutils.import_versioned_module('ironicclient',
+                                                        version, 'shell')
         submodule.enhance_parser(parser, subparsers, self.subcommands)
         utils.define_commands_from_module(subparsers, self, self.subcommands)
         return parser
