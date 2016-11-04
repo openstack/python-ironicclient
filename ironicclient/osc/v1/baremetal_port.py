@@ -77,7 +77,7 @@ class CreateBaremetalPort(command.ShowOne):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)" % parsed_args)
+        self.log.debug("take_action(%s)", parsed_args)
         baremetal_client = self.app.client_manager.baremetal
 
         if parsed_args.local_link_connection_deprecated:
@@ -341,7 +341,7 @@ class ListBaremetalPort(command.Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)" % parsed_args)
+        self.log.debug("take_action(%s)", parsed_args)
         client = self.app.client_manager.baremetal
 
         columns = res_fields.PORT_RESOURCE.fields
@@ -373,7 +373,7 @@ class ListBaremetalPort(command.Lister):
             labels = resource.labels
             params['fields'] = columns
 
-        self.log.debug("params(%s)" % params)
+        self.log.debug("params(%s)", params)
         data = client.port.list(**params)
 
         data = oscutils.sort_items(data, parsed_args.sort)
