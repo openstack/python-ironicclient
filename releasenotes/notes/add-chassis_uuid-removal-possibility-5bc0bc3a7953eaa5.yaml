@@ -1,0 +1,5 @@
+---
+features:
+  - Add possibility to remove chassis_uuid for node by adding
+    '--chassis-uuid' argument to 'openstack baremetal node unset'
+    command.

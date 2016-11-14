@@ -1651,6 +1651,25 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/name', 'op': 'remove'}]
         )
 
+    def test_baremetal_unset_chassis_uuid(self):
+        arglist = [
+            'node_uuid',
+            '--chassis-uuid',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('chassis_uuid', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/chassis_uuid', 'op': 'remove'}]
+        )
+
 
 class TestValidate(TestBaremetal):
     def setUp(self):

@@ -1038,6 +1038,12 @@ class UnsetBaremetalNode(command.Command):
             help='Instance information to unset on this baremetal node '
                  '(repeat option to unset multiple instance informations)',
         )
+        parser.add_argument(
+            "--chassis-uuid",
+            dest='chassis_uuid',
+            action='store_true',
+            help=_('Unset chassis UUID on this baremetal node'),
+        )
 
         return parser
 
@@ -1077,6 +1083,9 @@ class UnsetBaremetalNode(command.Command):
             properties.extend(utils.args_array_to_patch('remove',
                               ['instance_info/' + x for x
                                in parsed_args.instance_info]))
+        if parsed_args.chassis_uuid:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['chassis_uuid']))
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
 
