@@ -1085,6 +1085,26 @@ class TestBaremetalSet(TestBaremetal):
             [{'path': '/name', 'value': 'xxxxx', 'op': 'add'}]
         )
 
+    def test_baremetal_set_chassis(self):
+        chassis = '4f4135ea-7e58-4e3d-bcc4-b87ca16e980b'
+        arglist = [
+            'node_uuid',
+            '--chassis-uuid', chassis,
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('chassis_uuid', chassis)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/chassis_uuid', 'value': chassis, 'op': 'add'}]
+        )
+
     def test_baremetal_set_driver(self):
         arglist = [
             'node_uuid',
