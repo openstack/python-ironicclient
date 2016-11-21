@@ -12,12 +12,12 @@
 
 import re
 import sys
-import uuid
 
 import fixtures
 from keystoneauth1 import exceptions as keystone_exc
 from keystoneauth1 import fixture as ks_fixture
 import mock
+from oslo_utils import uuidutils
 import requests_mock
 import six
 import testtools
@@ -259,7 +259,7 @@ class TestCase(testtools.TestCase):
         request_mocker.post(
             '%s/auth/tokens' % V3_URL,
             json=v3_token,
-            headers={'X-Subject-Token': uuid.uuid4().hex})
+            headers={'X-Subject-Token': uuidutils.generate_uuid()})
 
     def register_keystone_auth_fixture(self, request_mocker):
         self.register_keystone_v2_token_fixture(request_mocker)
