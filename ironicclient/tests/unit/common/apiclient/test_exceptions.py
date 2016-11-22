@@ -24,7 +24,7 @@ class FakeResponse(object):
     json_data = {}
 
     def __init__(self, **kwargs):
-        for key, value in six.iteritems(kwargs):
+        for key, value in kwargs.items():
             setattr(self, key, value)
 
     def json(self):
