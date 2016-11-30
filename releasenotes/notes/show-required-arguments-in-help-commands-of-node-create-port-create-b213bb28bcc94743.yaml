@@ -1,0 +1,6 @@
+fixes:
+  - |
+      Starting with this release the output of
+      commands ``ironic help node-create`` and
+      ``ironic help port-create`` will show which
+      arguments are required
