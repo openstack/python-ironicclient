@@ -1,6 +1,6 @@
 fixes:
   - |
-      Starting with this release the output of
-      commands ``ironic help node-create`` and
-      ``ironic help port-create`` will show which
-      arguments are required
+      Where applicable, help for commands will output the required
+      arguments in a separate section from the optional arguments.
+      For example, the commands ``ironic help node-create`` and
+      ``ironic help port-create``.
