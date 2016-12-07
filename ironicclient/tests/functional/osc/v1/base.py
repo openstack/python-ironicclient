@@ -21,7 +21,7 @@ from ironicclient.tests.functional import base
 class TestCase(base.FunctionalTestBase):
 
     def openstack(self, *args, **kwargs):
-        return self.clients.openstack(*args, **kwargs)
+        return self._ironic_osc(*args, **kwargs)
 
     def get_opts(self, fields=None, output_format='json'):
         """Get options for OSC output fields format.

@@ -148,6 +148,22 @@ class FunctionalTestBase(base.ClientTestBase):
             return self.client.cmd_with_auth('ironic',
                                              action, flags, params)
 
+    def _ironic_osc(self, action, flags='', params=''):
+        """Execute baremetal commands via OpenStack Client."""
+        config = self._get_config()
+        id_api_version = config.get('functional', 'os_identity_api_version')
+        flags += ' --os-identity-api-version {0}'.format(id_api_version)
+
+        for keystone_object in 'user', 'project':
+            domain_attr = 'os_%s_domain_id' % keystone_object
+            if hasattr(self, domain_attr):
+                flags += ' --os-%(ks_obj)s-domain-id %(value)s' % {
+                    'ks_obj': keystone_object,
+                    'value': getattr(self, domain_attr)
+                }
+        return self.client.cmd_with_auth(
+            'openstack', action, flags, params)
+
     def ironic(self, action, flags='', params='', parse=True):
         """Return parsed list of dicts with basic item info.
 
