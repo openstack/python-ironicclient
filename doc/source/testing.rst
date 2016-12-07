@@ -53,7 +53,7 @@ An example test.conf file::
     os_auth_url=http://192.168.0.2:5000/v2.0/
     os_username=admin
     os_password=admin
-    os_tenant_name=admin
+    os_project_name=admin
 
 If you are testing ironic in standalone mode, only the parameters
 'auth_strategy', 'os_auth_token' and 'ironic_url' are required;
