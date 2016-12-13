@@ -22,20 +22,17 @@ from ironicclient import exc
 from ironicclient.tests.unit import utils
 import ironicclient.v1.chassis
 
-CHASSIS = {'id': 42,
-           'uuid': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+CHASSIS = {'uuid': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
            'extra': {},
            'description': 'data-center-1-chassis'}
 
-CHASSIS2 = {'id': 43,
-            'uuid': 'eeeeeeee-dddd-cccc-bbbb-aaaaaaaaaaaa',
+CHASSIS2 = {'uuid': 'eeeeeeee-dddd-cccc-bbbb-aaaaaaaaaaaa',
             'extra': {},
             'description': 'data-center-1-chassis'}
 
 
-NODE = {'id': 123,
-        'uuid': '66666666-7777-8888-9999-000000000000',
-        'chassis_id': 42,
+NODE = {'uuid': '66666666-7777-8888-9999-000000000000',
+        'chassis_uuid': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
         'provision_state': 'available',
         'driver': 'fake',
         'driver_info': {'user': 'foo', 'password': 'bar'},
@@ -43,11 +40,9 @@ NODE = {'id': 123,
         'extra': {}}
 
 CREATE_CHASSIS = copy.deepcopy(CHASSIS)
-del CREATE_CHASSIS['id']
 del CREATE_CHASSIS['uuid']
 
 CREATE_WITH_UUID = copy.deepcopy(CHASSIS)
-del CREATE_WITH_UUID['id']
 
 UPDATED_CHASSIS = copy.deepcopy(CHASSIS)
 NEW_DESCR = 'new-description'
