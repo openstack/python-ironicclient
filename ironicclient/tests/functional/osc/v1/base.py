@@ -88,6 +88,7 @@ class TestCase(base.FunctionalTestBase):
         :param String identifier: Name or UUID of the node
         :param Bool ignore_exceptions: Ignore exception (needed for cleanUp)
         :return: raw values output
+        :raise: CommandFailed exception when command fails to delete a node
         """
         try:
             return self.openstack('baremetal node delete {0}'
