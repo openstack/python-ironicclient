@@ -134,7 +134,8 @@ def get_client(api_version, os_auth_token=None, ironic_url=None,
                 )
             except Exception as e:
                 raise exc.AmbiguousAuthSystem(
-                    exception_msg + _(', error was: %s') % e)
+                    _('%(message)s, error was: %(error)s') %
+                    {'message': exception_msg, 'error': e})
         else:
             # Neither session, nor valid auth parameters provided
             raise exc.AmbiguousAuthSystem(exception_msg)
