@@ -198,6 +198,16 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with(name=args.name)
 
+    def test_do_node_create_with_network_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.network_interface = 'neutron'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            network_interface='neutron')
+
     def test_do_node_show(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
