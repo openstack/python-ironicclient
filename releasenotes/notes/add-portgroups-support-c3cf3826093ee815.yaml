@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Extends the Ironic CLI with new commands:
+
+    * ironic portgroup-create
+    * ironic portgroup-show
+    * ironic portgroup-list
+    * ironic portgroup-delete
+    * ironic portgroup-update
+    * ironic portgroup-port-list
+
+    Also extends ironic port-create with --portgroup.
+    Portgroup support was added in Ironic API version 1.24.

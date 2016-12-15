@@ -56,6 +56,13 @@ PORT = {'id': 456,
         'node_id': 123,
         'address': 'AA:AA:AA:AA:AA:AA',
         'extra': {}}
+PORTGROUP = {'id': 987,
+             'uuid': '11111111-2222-3333-4444-555555555555',
+             'name': 'Portgroup',
+             'node_id': 123,
+             'address': 'AA:BB:CC:DD:EE:FF',
+             'extra': {}}
+
 POWER_STATE = {'power_state': 'power off',
                'target_power_state': 'power on'}
 
@@ -266,6 +273,27 @@ fake_responses = {
             {"ports": [PORT]},
         ),
     },
+    '/v1/nodes/%s/portgroups' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"portgroups": [PORTGROUP]},
+        ),
+    },
+    '/v1/nodes/%s/portgroups/detail' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"portgroups": [PORTGROUP]},
+        ),
+    },
+    '/v1/nodes/%s/portgroups?fields=uuid,address' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"portgroups": [PORTGROUP]},
+        ),
+    },
     '/v1/nodes/%s/maintenance' % NODE1['uuid']:
     {
         'PUT': (
@@ -394,6 +422,20 @@ fake_responses_pagination = {
             {"ports": [PORT]},
         ),
     },
+    '/v1/nodes/%s/portgroups?limit=1' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"portgroups": [PORTGROUP]},
+        ),
+    },
+    '/v1/nodes/%s/portgroups?marker=%s' % (NODE1['uuid'], PORTGROUP['uuid']):
+    {
+        'GET': (
+            {},
+            {"portgroups": [PORTGROUP]},
+        ),
+    },
 }
 
 fake_responses_sorting = {
@@ -423,6 +465,20 @@ fake_responses_sorting = {
         'GET': (
             {},
             {"ports": [PORT]},
+        ),
+    },
+    '/v1/nodes/%s/portgroups?sort_key=updated_at' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"portgroups": [PORTGROUP]},
+        ),
+    },
+    '/v1/nodes/%s/portgroups?sort_dir=desc' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"portgroups": [PORTGROUP]},
         ),
     },
 }

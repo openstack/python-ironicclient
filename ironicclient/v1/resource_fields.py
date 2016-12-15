@@ -68,7 +68,9 @@ class Resource(object):
         'uuid': 'UUID',
         'local_link_connection': 'Local Link Connection',
         'pxe_enabled': 'PXE boot enabled',
+        'portgroup_uuid': 'Portgroup UUID',
         'network_interface': 'Network Interface',
+        'standalone_ports_supported': 'Standalone Ports Supported'
     }
 
     def __init__(self, field_ids, sort_excluded=None):
@@ -197,19 +199,48 @@ PORT_DETAILED_RESOURCE = Resource(
      'extra',
      'node_uuid',
      'local_link_connection',
+     'portgroup_uuid',
      'pxe_enabled',
      'updated_at',
      'internal_info',
      ],
     sort_excluded=[
         'extra',
-        # The server cannot sort on "node_uuid" because it isn't a column in
-        # the "ports" database table. "node_id" is stored, but it is internal
-        # to ironic. See bug #1443003 for more details.
+        # The server cannot sort on "node_uuid" or "portgroup_uuid" because
+        # they aren't columns in the "ports" database table. "node_id" and
+        # "portgroup_id" are stored, but it is internal to ironic.
+        # See bug #1443003 for more details.
         'node_uuid',
+        'portgroup_uuid',
         'internal_info',
     ])
 PORT_RESOURCE = Resource(
     ['uuid',
      'address',
+     ])
+
+# Portgroups
+PORTGROUP_DETAILED_RESOURCE = Resource(
+    ['uuid',
+     'address',
+     'created_at',
+     'extra',
+     'standalone_ports_supported',
+     'node_uuid',
+     'name',
+     'updated_at',
+     'internal_info',
+     ],
+    sort_excluded=[
+        'extra',
+        # The server cannot sort on "node_uuid" because it isn't a column in
+        # the "portgroups" database table. "node_id" is stored, but it is
+        # internal to ironic. See bug #1443003 for more details.
+        'node_uuid',
+        'internal_info',
+    ])
+PORTGROUP_RESOURCE = Resource(
+    ['uuid',
+     'address',
+     'name',
      ])

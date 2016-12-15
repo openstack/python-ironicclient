@@ -17,11 +17,13 @@ from ironicclient.v1 import create_resources_shell
 from ironicclient.v1 import driver_shell
 from ironicclient.v1 import node_shell
 from ironicclient.v1 import port_shell
+from ironicclient.v1 import portgroup_shell
 
 COMMAND_MODULES = [
     chassis_shell,
     node_shell,
     port_shell,
+    portgroup_shell,
     driver_shell,
     create_resources_shell,
 ]
