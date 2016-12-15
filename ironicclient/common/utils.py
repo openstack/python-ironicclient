@@ -16,7 +16,6 @@
 from __future__ import print_function
 
 import argparse
-import base64
 import contextlib
 import gzip
 import json
@@ -26,6 +25,7 @@ import subprocess
 import sys
 import tempfile
 
+from oslo_serialization import base64
 from oslo_utils import strutils
 
 from ironicclient.common.i18n import _
@@ -272,7 +272,7 @@ def make_configdrive(path):
             g.close()
 
             tmpzipfile.seek(0)
-            return base64.b64encode(tmpzipfile.read())
+            return base64.encode_as_bytes(tmpzipfile.read())
 
 
 def check_empty_arg(arg, arg_descriptor):
