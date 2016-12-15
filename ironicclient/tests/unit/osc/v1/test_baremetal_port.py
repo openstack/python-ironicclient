@@ -231,6 +231,14 @@ class TestBaremetalPortUnset(TestBaremetalPort):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
+    def test_baremetal_port_unset_no_property(self):
+        arglist = [baremetal_fakes.baremetal_port_uuid]
+        verifylist = [('port', baremetal_fakes.baremetal_port_uuid)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+        self.assertFalse(self.baremetal_mock.port.update.called)
+
     def test_baremetal_port_unset_extra(self):
         arglist = ['port', '--extra', 'foo']
         verifylist = [('port', 'port'),
@@ -351,6 +359,14 @@ class TestBaremetalPortSet(TestBaremetalPort):
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
+
+    def test_baremetal_port_set_no_property(self):
+        arglist = [baremetal_fakes.baremetal_port_uuid]
+        verifylist = [('port', baremetal_fakes.baremetal_port_uuid)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+        self.assertFalse(self.baremetal_mock.port.update.called)
 
 
 class TestBaremetalPortDelete(TestBaremetalPort):
