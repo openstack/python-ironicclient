@@ -23,22 +23,19 @@ from ironicclient.tests.unit import utils
 import ironicclient.v1.portgroup
 import ironicclient.v1.portgroup_shell as pg_shell
 
-PORTGROUP = {'id': 987,
-             'uuid': '11111111-2222-3333-4444-555555555555',
+PORTGROUP = {'uuid': '11111111-2222-3333-4444-555555555555',
              'name': 'Portgroup-name',
              'node_uuid': '66666666-7777-8888-9999-000000000000',
              'address': 'AA:BB:CC:DD:EE:FF',
              'extra': {}}
 
-PORTGROUP2 = {'id': 988,
-              'uuid': '55555555-4444-3333-2222-111111111111',
+PORTGROUP2 = {'uuid': '55555555-4444-3333-2222-111111111111',
               'name': 'Portgroup2-name',
               'node_uuid': '66666666-7777-8888-9999-000000000000',
               'address': 'AA:AA:AA:BB:BB:BB',
               'extra': {}}
 
-NODE1 = {'id': 123,
-         'uuid': '66666666-7777-8888-9999-000000000000',
+NODE1 = {'uuid': '66666666-7777-8888-9999-000000000000',
          'chassis_uuid': 'aaaaaaaa-1111-bbbb-2222-cccccccccccc',
          'maintenance': False,
          'provision_state': 'available',
@@ -49,15 +46,13 @@ NODE1 = {'id': 123,
          'resource_class': 'foo',
          'extra': {}}
 
-PORT = {'id': 456,
-        'uuid': '11111111-2222-3333-4444-555555555555',
+PORT = {'uuid': '11111111-2222-3333-4444-555555555555',
         'portgroup_uuid': '11111111-2222-3333-4444-555555555555',
-        'node_id': 123,
+        'node_uuid': '66666666-7777-8888-9999-000000000000',
         'address': 'AA:AA:AA:AA:AA:AA',
         'extra': {}}
 
 CREATE_PORTGROUP = copy.deepcopy(PORTGROUP)
-del CREATE_PORTGROUP['id']
 del CREATE_PORTGROUP['uuid']
 
 UPDATED_PORTGROUP = copy.deepcopy(PORTGROUP)

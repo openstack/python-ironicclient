@@ -30,8 +30,7 @@ if six.PY3:
     import io
     file = io.BytesIO
 
-NODE1 = {'id': 123,
-         'uuid': '66666666-7777-8888-9999-000000000000',
+NODE1 = {'uuid': '66666666-7777-8888-9999-000000000000',
          'chassis_uuid': 'aaaaaaaa-1111-bbbb-2222-cccccccccccc',
          'maintenance': False,
          'provision_state': 'available',
@@ -41,8 +40,7 @@ NODE1 = {'id': 123,
          'name': 'fake-node-1',
          'resource_class': 'foo',
          'extra': {}}
-NODE2 = {'id': 456,
-         'uuid': '66666666-7777-8888-9999-111111111111',
+NODE2 = {'uuid': '66666666-7777-8888-9999-111111111111',
          'instance_uuid': '66666666-7777-8888-9999-222222222222',
          'chassis_uuid': 'aaaaaaaa-1111-bbbb-2222-cccccccccccc',
          'maintenance': True,
@@ -51,15 +49,13 @@ NODE2 = {'id': 456,
          'properties': {'num_cpu': 4},
          'resource_class': 'bar',
          'extra': {}}
-PORT = {'id': 456,
-        'uuid': '11111111-2222-3333-4444-555555555555',
-        'node_id': 123,
+PORT = {'uuid': '11111111-2222-3333-4444-555555555555',
+        'node_uuid': '66666666-7777-8888-9999-000000000000',
         'address': 'AA:AA:AA:AA:AA:AA',
         'extra': {}}
-PORTGROUP = {'id': 987,
-             'uuid': '11111111-2222-3333-4444-555555555555',
+PORTGROUP = {'uuid': '11111111-2222-3333-4444-555555555555',
              'name': 'Portgroup',
-             'node_id': 123,
+             'node_uuid': '66666666-7777-8888-9999-000000000000',
              'address': 'AA:BB:CC:DD:EE:FF',
              'extra': {}}
 
@@ -92,7 +88,6 @@ NODE_VENDOR_PASSTHRU_METHOD = {"heartbeat": {"attach": "false",
                                              "async": "true"}}
 
 CREATE_NODE = copy.deepcopy(NODE1)
-del CREATE_NODE['id']
 del CREATE_NODE['uuid']
 del CREATE_NODE['maintenance']
 del CREATE_NODE['provision_state']
@@ -102,7 +97,6 @@ NEW_DRIVER = 'new-driver'
 UPDATED_NODE['driver'] = NEW_DRIVER
 
 CREATE_WITH_UUID = copy.deepcopy(NODE1)
-del CREATE_WITH_UUID['id']
 del CREATE_WITH_UUID['maintenance']
 del CREATE_WITH_UUID['provision_state']
 

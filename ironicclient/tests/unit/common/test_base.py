@@ -24,14 +24,12 @@ from ironicclient.tests.unit import utils
 
 
 TESTABLE_RESOURCE = {
-    'id': 987,
     'uuid': '11111111-2222-3333-4444-555555555555',
     'attribute1': '1',
     'attribute2': '2',
 }
 
 CREATE_TESTABLE_RESOURCE = copy.deepcopy(TESTABLE_RESOURCE)
-del CREATE_TESTABLE_RESOURCE['id']
 del CREATE_TESTABLE_RESOURCE['uuid']
 
 INVALID_ATTRIBUTE_TESTABLE_RESOURCE = {

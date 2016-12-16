@@ -22,8 +22,7 @@ from ironicclient import exc
 from ironicclient.tests.unit import utils
 import ironicclient.v1.port
 
-PORT = {'id': 987,
-        'uuid': '11111111-2222-3333-4444-555555555555',
+PORT = {'uuid': '11111111-2222-3333-4444-555555555555',
         'node_uuid': '55555555-4444-3333-2222-111111111111',
         'address': 'AA:BB:CC:DD:EE:FF',
         'pxe_enabled': True,
@@ -31,8 +30,7 @@ PORT = {'id': 987,
         'portgroup_uuid': '55555555-4444-3333-2222-111111111111',
         'extra': {}}
 
-PORT2 = {'id': 988,
-         'uuid': '55555555-4444-3333-2222-111111111111',
+PORT2 = {'uuid': '55555555-4444-3333-2222-111111111111',
          'node_uuid': '55555555-4444-3333-2222-111111111111',
          'address': 'AA:AA:AA:BB:BB:BB',
          'pxe_enabled': True,
@@ -41,11 +39,9 @@ PORT2 = {'id': 988,
          'extra': {}}
 
 CREATE_PORT = copy.deepcopy(PORT)
-del CREATE_PORT['id']
 del CREATE_PORT['uuid']
 
 CREATE_PORT_WITH_UUID = copy.deepcopy(PORT)
-del CREATE_PORT_WITH_UUID['id']
 
 UPDATED_PORT = copy.deepcopy(PORT)
 NEW_ADDR = 'AA:AA:AA:AA:AA:AA'
