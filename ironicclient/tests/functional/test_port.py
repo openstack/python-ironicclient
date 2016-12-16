@@ -115,3 +115,20 @@ class PortSanityTestIronicClient(base.FunctionalTestBase):
         addresses = {x['Address'] for x in port_list}
         self.assertTrue({self.port['address'],
                          other_port['address']}.issubset(addresses))
+
+    def test_port_create_with_portgroup_uuid(self):
+        """Test steps:
+
+        1) Create node in setUp().
+        2) Create a port group.
+        3) Create a port with specified port group UUID.
+        4) Check port properties for portgroup_uuid.
+        """
+        flag = '--ironic-api-version 1.25'
+        port_group = self.create_portgroup(self.node['uuid'])
+        port = self.create_port(
+            self.node['uuid'],
+            flags=flag,
+            params='--portgroup {0}'.format(port_group['uuid']))
+
+        self.assertEqual(port_group['uuid'], port['portgroup_uuid'])
