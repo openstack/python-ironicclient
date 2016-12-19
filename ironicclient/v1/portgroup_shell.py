@@ -172,13 +172,25 @@ def do_portgroup_list(cc, args):
     '-u', '--uuid',
     metavar='<uuid>',
     help="UUID of the portgroup.")
+@cliutils.arg(
+    '-m', '--mode',
+    metavar='<mode>',
+    help="Portgroup mode. For possible values, refer to "
+         "https://www.kernel.org/doc/Documentation/networking/bonding.txt")
+@cliutils.arg(
+    '-p', '--properties',
+    metavar="<key=value>",
+    action='append',
+    help="Record key/value properties related to this portgroup's "
+         "configuration.")
 def do_portgroup_create(cc, args):
     """Create a new portgroup."""
     field_list = ['address', 'extra', 'node_uuid', 'name', 'uuid',
-                  'standalone_ports_supported']
+                  'standalone_ports_supported', 'mode', 'properties']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'extra')
+    fields = utils.args_array_to_dict(fields, 'properties')
     portgroup = cc.portgroup.create(**fields)
 
     data = dict([(f, getattr(portgroup, f, '')) for f in field_list])

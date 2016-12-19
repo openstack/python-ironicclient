@@ -353,7 +353,7 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
 
         collist = ('UUID', 'Address', 'Created At', 'Extra',
                    'Standalone Ports Supported', 'Node UUID', 'Name',
-                   'Updated At', 'Internal Info')
+                   'Updated At', 'Internal Info', 'Mode', 'Properties')
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_portgroup_uuid,
@@ -363,6 +363,8 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
                      '',
                      baremetal_fakes.baremetal_uuid,
                      baremetal_fakes.baremetal_portgroup_name,
+                     '',
+                     '',
                      '',
                      ''),)
         self.assertEqual(datalist, tuple(data))

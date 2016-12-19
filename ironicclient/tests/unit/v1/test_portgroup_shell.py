@@ -30,7 +30,8 @@ class PortgroupShellTest(utils.BaseTestCase):
             portgroup = object()
             pg_shell._print_portgroup_show(portgroup)
         exp = ['address', 'created_at', 'extra', 'standalone_ports_supported',
-               'node_uuid', 'updated_at', 'uuid', 'name', 'internal_info']
+               'node_uuid', 'updated_at', 'uuid', 'name', 'internal_info',
+               'mode', 'properties']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
 
@@ -272,10 +273,13 @@ class PortgroupShellTest(utils.BaseTestCase):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
         args.address = 'aa:bb:cc:dd:ee:ff'
+        args.mode = '802.3ad'
+        args.properties = ['xmit_hash_policy=layer3+4', 'miimon=100']
         args.json = False
         pg_shell.do_portgroup_create(client_mock, args)
         client_mock.portgroup.create.assert_called_once_with(
-            address='aa:bb:cc:dd:ee:ff')
+            address='aa:bb:cc:dd:ee:ff', mode='802.3ad',
+            properties={'xmit_hash_policy': 'layer3+4', 'miimon': 100})
 
     def test_do_portgroup_node_uuid(self):
         client_mock = mock.MagicMock()
