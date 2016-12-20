@@ -408,9 +408,7 @@ class IronicShell(object):
 
 class HelpFormatter(argparse.HelpFormatter):
     def start_section(self, heading):
-        # Title-case the headings
-        heading = '%s%s' % (heading[0].upper(), heading[1:])
-        super(HelpFormatter, self).start_section(heading)
+        super(HelpFormatter, self).start_section(heading.capitalize())
 
 
 def main():
