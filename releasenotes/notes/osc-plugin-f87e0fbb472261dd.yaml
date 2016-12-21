@@ -1,0 +1,16 @@
+---
+features:
+  - |
+    Extend the OpenStackClient plugin with new commands:
+
+    * openstack baremetal port group create
+    * openstack baremetal port group show
+    * openstack baremetal port group list
+    * openstack baremetal port group delete
+    * openstack baremetal port group set
+    * openstack baremetal port group unset
+
+    Extends the 'openstack baremetal port' commands
+    (where applicable) to allow specifying the port group
+    (if any) that a port is a member of, via the new --port-group
+    argument.

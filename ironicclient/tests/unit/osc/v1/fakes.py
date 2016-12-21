@@ -74,6 +74,18 @@ BAREMETAL_DRIVER_PASSTHRU = {"lookup": {"attach": "false",
                                         "description": "",
                                         "async": "false"}}
 
+baremetal_portgroup_uuid = 'ppp-gggggg-pppp'
+baremetal_portgroup_name = 'Portgroup-name'
+baremetal_portgroup_address = 'AA:BB:CC:CC:BB:AA'
+baremetal_portgroup_extra = {'key1': 'value1',
+                             'key2': 'value2'}
+
+PORTGROUP = {'uuid': baremetal_portgroup_uuid,
+             'name': baremetal_portgroup_name,
+             'node_uuid': baremetal_uuid,
+             'address': baremetal_portgroup_address,
+             'extra': baremetal_portgroup_extra}
+
 
 class TestBaremetal(utils.TestCommand):
 

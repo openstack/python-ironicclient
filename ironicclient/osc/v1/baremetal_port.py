@@ -74,6 +74,12 @@ class CreateBaremetalPort(command.ShowOne):
             help='Indicates whether this Port should be used when '
                  'PXE booting this Node.')
 
+        parser.add_argument(
+            '--port-group',
+            dest='portgroup_uuid',
+            metavar='<uuid>',
+            help="UUID of the port group that this port belongs to.")
+
         return parser
 
     def take_action(self, parsed_args):
@@ -93,7 +99,7 @@ class CreateBaremetalPort(command.ShowOne):
                     parsed_args.local_link_connection_deprecated)
 
         field_list = ['address', 'extra', 'node_uuid', 'pxe_enabled',
-                      'local_link_connection']
+                      'local_link_connection', 'portgroup_uuid']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'extra')
@@ -173,6 +179,12 @@ class UnsetBaremetalPort(command.Command):
             help='Extra to unset on this baremetal port '
                  '(repeat option to unset multiple extras)')
 
+        parser.add_argument(
+            '--port-group',
+            action='store_true',
+            dest='portgroup',
+            help="Remove port from the port group")
+
         return parser
 
     def take_action(self, parsed_args):
@@ -184,6 +196,9 @@ class UnsetBaremetalPort(command.Command):
             properties.extend(utils.args_array_to_patch(
                 'remove',
                 ['extra/' + x for x in parsed_args.extra]))
+        if parsed_args.portgroup:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['portgroup_uuid']))
         if not properties:
             self.log.warning("Please specify what to unset.")
 
@@ -222,6 +237,12 @@ class SetBaremetalPort(command.Command):
             help='Extra to set on this baremetal port '
                  '(repeat option to set multiple extras)')
 
+        parser.add_argument(
+            "--port-group",
+            metavar="<uuid>",
+            dest='portgroup_uuid',
+            help='Set UUID of the port group that this port belongs to.')
+
         return parser
 
     def take_action(self, parsed_args):
@@ -240,6 +261,9 @@ class SetBaremetalPort(command.Command):
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch(
                 'add', ['extra/' + x for x in parsed_args.extra]))
+        if parsed_args.portgroup_uuid:
+            portgroup_uuid = ["portgroup_uuid=%s" % parsed_args.portgroup_uuid]
+            properties.extend(utils.args_array_to_patch('add', portgroup_uuid))
         if not properties:
             self.log.warning("Please specify what to set.")
 
@@ -298,6 +322,11 @@ class ListBaremetalPort(command.Lister):
             metavar='<node>',
             help="Only list ports of this node (name or UUID)."
         )
+        parser.add_argument(
+            "--port-group",
+            metavar="<port group>",
+            dest='portgroup',
+            help='Only list ports of this port group (name or UUID).')
         parser.add_argument(
             '--limit',
             metavar='<limit>',
@@ -359,6 +388,8 @@ class ListBaremetalPort(command.Lister):
             params['address'] = parsed_args.address
         if parsed_args.node is not None:
             params['node'] = parsed_args.node
+        if parsed_args.portgroup is not None:
+            params['portgroup'] = parsed_args.portgroup
 
         if parsed_args.detail:
             params['detail'] = parsed_args.detail
