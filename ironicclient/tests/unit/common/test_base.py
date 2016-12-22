@@ -133,6 +133,12 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(resource_id, resource.uuid)
         self.assertEqual(TESTABLE_RESOURCE['attribute1'], resource.attribute1)
 
+    def test__get_invalid_resource_id_raises(self):
+        resource_ids = [[], {}, False, '', 0, None, ()]
+        for resource_id in resource_ids:
+            self.assertRaises(exc.ValidationError, self.manager._get,
+                              resource_id=resource_id)
+
     def test__get_as_dict(self):
         resource_id = TESTABLE_RESOURCE['uuid']
         resource = self.manager._get_as_dict(resource_id)
