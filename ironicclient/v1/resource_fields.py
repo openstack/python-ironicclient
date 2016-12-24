@@ -52,6 +52,7 @@ class Resource(object):
         'last_error': 'Last Error',
         'maintenance': 'Maintenance',
         'maintenance_reason': 'Maintenance Reason',
+        'mode': 'Mode',
         'name': 'Name',
         'node_uuid': 'Node UUID',
         'power_state': 'Power State',
@@ -230,6 +231,8 @@ PORTGROUP_DETAILED_RESOURCE = Resource(
      'name',
      'updated_at',
      'internal_info',
+     'mode',
+     'properties',
      ],
     sort_excluded=[
         'extra',
@@ -238,6 +241,7 @@ PORTGROUP_DETAILED_RESOURCE = Resource(
         # internal to ironic. See bug #1443003 for more details.
         'node_uuid',
         'internal_info',
+        'properties',
     ])
 PORTGROUP_RESOURCE = Resource(
     ['uuid',
