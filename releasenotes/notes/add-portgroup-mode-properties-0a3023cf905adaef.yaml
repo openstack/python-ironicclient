@@ -1,5 +1,5 @@
 ---
 features:
   - Mode and properties fields were added to the portgroup object, along with
-    respective arguments for the ironic CLI, they are available starting with
-    ironic API microversion 1.26.
+    respective arguments for the ironic CLI and the OpenStackClient plugin,
+    they are available starting with ironic API microversion 1.26.

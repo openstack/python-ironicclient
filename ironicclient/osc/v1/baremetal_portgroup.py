@@ -58,6 +58,19 @@ class CreateBaremetalPortGroup(command.ShowOne):
             action='append',
             help="Record arbitrary key/value metadata. "
                  "Can be specified multiple times.")
+        parser.add_argument(
+            '--mode',
+            help='Mode of the port group. For possible values, refer to '
+                 'https://www.kernel.org/doc/Documentation/networking'
+                 '/bonding.txt.')
+        parser.add_argument(
+            '--property',
+            dest='properties',
+            metavar="<key=value>",
+            action='append',
+            help="Key/value property related to this port group's "
+                 "configuration. Can be specified multiple times."
+        )
         standalone_ports_group = parser.add_mutually_exclusive_group()
         standalone_ports_group.add_argument(
             '--support-standalone-ports',
@@ -78,7 +91,8 @@ class CreateBaremetalPortGroup(command.ShowOne):
         self.log.debug("take_action(%s)" % parsed_args)
         baremetal_client = self.app.client_manager.baremetal
 
-        field_list = ['node_uuid', 'address', 'name', 'uuid', 'extra']
+        field_list = ['node_uuid', 'address', 'name', 'uuid', 'extra', 'mode',
+                      'properties']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         if parsed_args.support_standalone_ports:
@@ -87,6 +101,7 @@ class CreateBaremetalPortGroup(command.ShowOne):
             fields['standalone_ports_supported'] = False
 
         fields = utils.args_array_to_dict(fields, 'extra')
+        fields = utils.args_array_to_dict(fields, 'properties')
         portgroup = baremetal_client.portgroup.create(**fields)
 
         data = dict([(f, getattr(portgroup, f, '')) for f in
@@ -319,6 +334,18 @@ class SetBaremetalPortGroup(command.Command):
             help='Extra to set on this baremetal port group '
                  '(repeat option to set multiple extras).',
         )
+        parser.add_argument(
+            '--mode',
+            help='Mode of the port group. For possible values, refer to '
+                 'https://www.kernel.org/doc/Documentation/networking'
+                 '/bonding.txt.')
+        parser.add_argument(
+            '--property',
+            dest='properties',
+            metavar="<key=value>",
+            action='append',
+            help="Key/value property related to this port group's "
+                 "configuration (repeat option to set multiple properties).")
         standalone_ports_group = parser.add_mutually_exclusive_group()
         standalone_ports_group.add_argument(
             '--support-standalone-ports',
@@ -358,10 +385,16 @@ class SetBaremetalPortGroup(command.Command):
         if parsed_args.unsupport_standalone_ports:
             properties.extend(utils.args_array_to_patch(
                 'add', ["standalone_ports_supported=False"]))
+        if parsed_args.mode:
+            properties.extend(utils.args_array_to_patch(
+                'add', ["mode=%s" % parsed_args.mode]))
 
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch(
                 'add', ['extra/' + x for x in parsed_args.extra]))
+        if parsed_args.properties:
+            properties.extend(utils.args_array_to_patch(
+                'add', ['properties/' + x for x in parsed_args.properties]))
 
         if properties:
             baremetal_client.portgroup.update(parsed_args.portgroup,
@@ -399,6 +432,14 @@ class UnsetBaremetalPortGroup(command.Command):
             help='Extra to unset on this baremetal port group '
                  '(repeat option to unset multiple extras).',
         )
+        parser.add_argument(
+            "--property",
+            dest='properties',
+            metavar="<key>",
+            action='append',
+            help='Property to unset on this baremetal port group '
+                 '(repeat option to unset multiple properties).',
+        )
 
         return parser
 
@@ -417,6 +458,9 @@ class UnsetBaremetalPortGroup(command.Command):
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch('remove',
                               ['extra/' + x for x in parsed_args.extra]))
+        if parsed_args.properties:
+            properties.extend(utils.args_array_to_patch(
+                'remove', ['properties/' + x for x in parsed_args.properties]))
 
         if properties:
             baremetal_client.portgroup.update(parsed_args.portgroup,
