@@ -83,7 +83,8 @@ class FunctionalTestBase(base.ClientTestBase):
             conf_settings += ['os_auth_url', 'os_username',
                               'os_password', 'os_project_name']
             keystone_v3_conf_settings += ['os_user_domain_id',
-                                          'os_project_domain_id']
+                                          'os_project_domain_id',
+                                          'os_identity_api_version']
         else:
             conf_settings += ['os_auth_token', 'ironic_url']
 
@@ -126,10 +127,13 @@ class FunctionalTestBase(base.ClientTestBase):
         return base.execute(cmd, action, flags, params,
                             cli_dir=self.client.cli_dir)
 
-    def _ironic(self, action, flags='', params='', merge_stderr=False):
+    def _ironic(self, action, cmd='ironic', flags='', params='',
+                merge_stderr=False):
         """Execute ironic command for the given action.
 
         :param action: the cli command to run using Ironic
+        :type action: string
+        :param cmd: the base of cli command to run
         :type action: string
         :param flags: any optional cli flags to use
         :type flags: string
@@ -138,9 +142,15 @@ class FunctionalTestBase(base.ClientTestBase):
         :param merge_stderr: whether to merge stderr into the result
         :type merge_stderr: bool
         """
-        flags += ' --os-endpoint-type publicURL'
+        if cmd == 'openstack':
+            config = self._get_config()
+            id_api_version = config['os_identity_api_version']
+            flags += ' --os-identity-api-version {0}'.format(id_api_version)
+        else:
+            flags += ' --os-endpoint-type publicURL'
+
         if hasattr(self, 'os_auth_token'):
-            return self._cmd_no_auth('ironic', action, flags, params)
+            return self._cmd_no_auth(cmd, action, flags, params)
         else:
             for keystone_object in 'user', 'project':
                 domain_attr = 'os_%s_domain_id' % keystone_object
@@ -149,25 +159,8 @@ class FunctionalTestBase(base.ClientTestBase):
                         'ks_obj': keystone_object,
                         'value': getattr(self, domain_attr)
                     }
-            return self.client.cmd_with_auth('ironic',
-                                             action, flags, params,
-                                             merge_stderr=merge_stderr)
-
-    def _ironic_osc(self, action, flags='', params='', merge_stderr=False):
-        """Execute baremetal commands via OpenStack Client."""
-        config = self._get_config()
-        id_api_version = config.get('functional', 'os_identity_api_version')
-        flags += ' --os-identity-api-version {0}'.format(id_api_version)
-
-        for keystone_object in 'user', 'project':
-            domain_attr = 'os_%s_domain_id' % keystone_object
-            if hasattr(self, domain_attr):
-                flags += ' --os-%(ks_obj)s-domain-id %(value)s' % {
-                    'ks_obj': keystone_object,
-                    'value': getattr(self, domain_attr)
-                }
-        return self.client.cmd_with_auth(
-            'openstack', action, flags, params, merge_stderr=merge_stderr)
+            return self.client.cmd_with_auth(
+                cmd, action, flags, params, merge_stderr=merge_stderr)
 
     def ironic(self, action, flags='', params='', parse=True):
         """Return parsed list of dicts with basic item info.

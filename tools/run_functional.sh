@@ -16,7 +16,7 @@ cat <<END >$CONFIG_FILE
 [functional]
 api_version = 1
 os_auth_url=$OS_AUTH_URL
-os_identity_api_version = $OS_IDENTITY_API_VERSION
+os_identity_api_version=$OS_IDENTITY_API_VERSION
 os_username=$OS_USERNAME
 os_password=$OS_PASSWORD
 os_project_name=$OS_PROJECT_NAME
