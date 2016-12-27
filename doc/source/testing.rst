@@ -24,7 +24,7 @@ environments sequentially and pep8 style guideline run::
 You can also selectively pick specific test environments by listing your
 chosen environments after a -e flag::
 
-    $ tox -e py27,py33,py34,pep8
+    $ tox -e py35,py27,pep8,pypy
 
 .. note::
   Tox sets up virtual environment and installs all necessary dependencies.
