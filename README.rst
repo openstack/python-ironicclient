@@ -58,7 +58,7 @@ To use a specific Ironic API endpoint::
 
     $ export IRONIC_URL=http://ironic.example.com:6385
 
-An example of how to create a basic node with the pxe_ipmitool driver::
+An example of creating a basic node with the pxe_ipmitool driver::
 
     $ ironic node-create -d pxe_ipmitool
 
@@ -77,6 +77,30 @@ For more information about the ``ironic`` command and the subcommands
 available, run::
 
     $ ironic help
+
+OpenStackClient Baremetal Plugin
+--------------------------------
+
+In order to use Baremetal Plugin the OpenStackClient should be installed::
+
+    # pip install python-openstackclient
+
+An example of creating a basic node with the agent_ipmitool driver::
+
+    $ openstack baremetal node create --driver agent_ipmitool
+
+An example of creating a port on a node::
+
+    $ openstack baremetal port create --node <UUID> AA:BB:CC:DD:EE:FF
+
+An example of updating driver properties for a node::
+
+    $ openstack baremetal node set --driver-info ipmi_address=<IPaddress> <UUID or name>
+
+For more information about the ``openstack baremetal`` command and
+the subcommands available, run::
+
+    $ openstack help baremetal
 
 * License: Apache License, Version 2.0
 * Documentation: http://docs.openstack.org/developer/python-ironicclient
