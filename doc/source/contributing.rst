@@ -46,7 +46,7 @@ notifications of important events.
 
 
 Project Hosting Details
--------------------------
+-----------------------
 
 Bug tracker
     http://launchpad.net/python-ironicclient
