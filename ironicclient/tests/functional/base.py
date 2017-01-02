@@ -212,6 +212,7 @@ class FunctionalTestBase(base.ClientTestBase):
         """Delete node method works only with fake driver.
 
         :param node_id: node uuid
+        :raises: CommandFailed exception when command fails to delete a node
         """
         node_list = self.list_nodes()
 
