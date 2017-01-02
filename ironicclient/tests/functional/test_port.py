@@ -91,7 +91,7 @@ class PortSanityTestIronicClient(base.FunctionalTestBase):
         node_to_replace = self.create_node()
         updated_port = self.update_port(self.port['uuid'],
                                         'replace',
-                                        'node_uuid={0}'
+                                        params='node_uuid={0}'
                                         .format(node_to_replace['uuid']))
 
         self.assertEqual(node_to_replace['uuid'], updated_port['node_uuid'])
