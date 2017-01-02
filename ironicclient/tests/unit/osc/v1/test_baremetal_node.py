@@ -1001,6 +1001,16 @@ class TestBaremetalSet(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
+    def test_baremetal_set_no_property(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+        self.assertFalse(self.baremetal_mock.node.update.called)
+
     def test_baremetal_set_one_property(self):
         arglist = ['node_uuid', '--property', 'path/to/property=value']
         verifylist = [
@@ -1483,6 +1493,14 @@ class TestBaremetalUnset(TestBaremetal):
         self.assertRaises(oscutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
+
+    def test_baremetal_unset_no_property(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+        self.assertFalse(self.baremetal_mock.node.update.called)
 
     def test_baremetal_unset_one_property(self):
         arglist = ['node_uuid', '--property', 'path/to/property']

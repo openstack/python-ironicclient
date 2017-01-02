@@ -352,6 +352,15 @@ class TestChassisSet(TestChassis):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
+    def test_chassis_set_no_property(self):
+        uuid = baremetal_fakes.baremetal_chassis_uuid
+        arglist = [uuid]
+        verifylist = [('chassis', uuid)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+        self.assertFalse(self.baremetal_mock.chassis.update.called)
+
     def test_chassis_set_description(self):
         description = 'new description'
         uuid = baremetal_fakes.baremetal_chassis_uuid
@@ -531,6 +540,15 @@ class TestChassisUnset(TestChassis):
         self.assertRaises(oscutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
+
+    def test_chassis_unset_no_property(self):
+        uuid = baremetal_fakes.baremetal_chassis_uuid
+        arglist = [uuid]
+        verifylist = [('chassis', uuid)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+        self.assertFalse(self.baremetal_mock.chassis.update.called)
 
     def test_chassis_unset_description(self):
         uuid = baremetal_fakes.baremetal_chassis_uuid
