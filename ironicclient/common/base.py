@@ -72,7 +72,13 @@ class Manager(object):
 
         :param resource_id: Identifier of the resource.
         :param fields: List of specific fields to be returned.
+        :raises exc.ValidationError: For invalid resource_id arg value.
         """
+
+        if not resource_id:
+            raise exc.ValidationError(
+                "The identifier argument is invalid. "
+                "Value provided: {!r}".format(resource_id))
 
         if fields is not None:
             resource_id = '%s?fields=' % resource_id
