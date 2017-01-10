@@ -13,7 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from ironicclient.common.apiclient import exceptions
 from ironicclient.common import cliutils
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient.v1 import resource_fields as res_fields
 
@@ -188,9 +190,16 @@ def do_port_create(cc, args):
 @cliutils.arg('port', metavar='<port>', nargs='+', help="UUID of the port.")
 def do_port_delete(cc, args):
     """Delete a port."""
+    failures = []
     for p in args.port:
-        cc.port.delete(p)
-        print('Deleted port %s' % p)
+        try:
+            cc.port.delete(p)
+            print(_('Deleted port %s') % p)
+        except exceptions.ClientException as e:
+            failures.append(_("Failed to delete port %(port)s: %(error)s")
+                            % {'port': p, 'error': e})
+    if failures:
+        raise exceptions.ClientException("\n".join(failures))
 
 
 @cliutils.arg('port', metavar='<port>', help="UUID of the port.")

@@ -294,3 +294,23 @@ class PortShellTest(utils.BaseTestCase):
         args.port = ['port_uuid']
         p_shell.do_port_delete(client_mock, args)
         client_mock.port.delete.assert_called_once_with('port_uuid')
+
+    def test_do_port_delete_multiple(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.port = ['port_uuid', 'port_uuid2']
+        p_shell.do_port_delete(client_mock, args)
+        client_mock.port.delete.assert_has_calls(
+            [mock.call('port_uuid'), mock.call('port_uuid2')])
+
+    def test_do_port_delete_multiple_with_exception(self):
+        client_mock = mock.MagicMock()
+        client_mock.port.delete.side_effect = (
+            [exceptions.ClientException, None])
+        args = mock.MagicMock()
+        args.port = ['port_uuid', 'port_uuid2']
+
+        self.assertRaises(exceptions.ClientException,
+                          p_shell.do_port_delete, client_mock, args)
+        client_mock.port.delete.assert_has_calls(
+            [mock.call('port_uuid'), mock.call('port_uuid2')])
