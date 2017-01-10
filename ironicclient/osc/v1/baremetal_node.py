@@ -294,10 +294,58 @@ class CreateBaremetalNode(command.ShowOne):
             metavar='<name>',
             help="Unique name for the node.")
         parser.add_argument(
+            '--boot-interface',
+            metavar='<boot_interface>',
+            help='Boot interface used by the node\'s driver. This is '
+                 'only applicable when the specified --driver is a '
+                 'hardware type.')
+        parser.add_argument(
+            '--console-interface',
+            metavar='<console_interface>',
+            help='Console interface used by the node\'s driver. This is '
+                 'only applicable when the specified --driver is a '
+                 'hardware type.')
+        parser.add_argument(
+            '--deploy-interface',
+            metavar='<deploy_interface>',
+            help='Deploy interface used by the node\'s driver. This is '
+                 'only applicable when the specified --driver is a '
+                 'hardware type.')
+        parser.add_argument(
+            '--inspect-interface',
+            metavar='<inspect_interface>',
+            help='Inspect interface used by the node\'s driver. This is '
+                 'only applicable when the specified --driver is a '
+                 'hardware type.')
+        parser.add_argument(
+            '--management-interface',
+            metavar='<management_interface>',
+            help='Management interface used by the node\'s driver. This is '
+                 'only applicable when the specified --driver is a '
+                 'hardware type.')
+        parser.add_argument(
             '--network-interface',
             metavar='<network_interface>',
             help='Network interface used for switching node to '
                  'cleaning/provisioning networks.')
+        parser.add_argument(
+            '--power-interface',
+            metavar='<power_interface>',
+            help='Power interface used by the node\'s driver. This is '
+                 'only applicable when the specified --driver is a '
+                 'hardware type.')
+        parser.add_argument(
+            '--raid-interface',
+            metavar='<raid_interface>',
+            help='RAID interface used by the node\'s driver. This is '
+                 'only applicable when the specified --driver is a '
+                 'hardware type.')
+        parser.add_argument(
+            '--vendor-interface',
+            metavar='<vendor_interface>',
+            help='Vendor interface used by the node\'s driver. This is '
+                 'only applicable when the specified --driver is a '
+                 'hardware type.')
         parser.add_argument(
             '--resource-class',
             metavar='<resource_class>',
@@ -312,7 +360,11 @@ class CreateBaremetalNode(command.ShowOne):
 
         field_list = ['chassis_uuid', 'driver', 'driver_info',
                       'properties', 'extra', 'uuid', 'name',
-                      'network_interface', 'resource_class']
+                      'boot_interface', 'console_interface',
+                      'deploy_interface', 'inspect_interface',
+                      'management_interface', 'network_interface',
+                      'power_interface', 'raid_interface',
+                      'vendor_interface', 'resource_class']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'driver_info')

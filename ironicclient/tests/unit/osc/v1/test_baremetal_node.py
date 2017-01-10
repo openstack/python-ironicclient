@@ -334,10 +334,50 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('name', 'name')],
                                 {'name': 'name'})
 
+    def test_baremetal_create_with_boot_interface(self):
+        self.check_with_options(['--boot-interface', 'boot'],
+                                [('boot_interface', 'boot')],
+                                {'boot_interface': 'boot'})
+
+    def test_baremetal_create_with_console_interface(self):
+        self.check_with_options(['--console-interface', 'console'],
+                                [('console_interface', 'console')],
+                                {'console_interface': 'console'})
+
+    def test_baremetal_create_with_deploy_interface(self):
+        self.check_with_options(['--deploy-interface', 'deploy'],
+                                [('deploy_interface', 'deploy')],
+                                {'deploy_interface': 'deploy'})
+
+    def test_baremetal_create_with_inspect_interface(self):
+        self.check_with_options(['--inspect-interface', 'inspect'],
+                                [('inspect_interface', 'inspect')],
+                                {'inspect_interface': 'inspect'})
+
+    def test_baremetal_create_with_management_interface(self):
+        self.check_with_options(['--management-interface', 'management'],
+                                [('management_interface', 'management')],
+                                {'management_interface': 'management'})
+
     def test_baremetal_create_with_network_interface(self):
         self.check_with_options(['--network-interface', 'neutron'],
                                 [('network_interface', 'neutron')],
                                 {'network_interface': 'neutron'})
+
+    def test_baremetal_create_with_power_interface(self):
+        self.check_with_options(['--power-interface', 'power'],
+                                [('power_interface', 'power')],
+                                {'power_interface': 'power'})
+
+    def test_baremetal_create_with_raid_interface(self):
+        self.check_with_options(['--raid-interface', 'raid'],
+                                [('raid_interface', 'raid')],
+                                {'raid_interface': 'raid'})
+
+    def test_baremetal_create_with_vendor_interface(self):
+        self.check_with_options(['--vendor-interface', 'vendor'],
+                                [('vendor_interface', 'vendor')],
+                                {'vendor_interface': 'vendor'})
 
     def test_baremetal_create_with_resource_class(self):
         self.check_with_options(['--resource-class', 'foo'],
@@ -499,7 +539,11 @@ class TestBaremetalList(TestBaremetal):
                    'Target RAID configuration',
                    'Updated At', 'Inspection Finished At',
                    'Inspection Started At', 'UUID', 'Name',
-                   'Network Interface')
+                   'Boot Interface', 'Console Interface',
+                   'Deploy Interface', 'Inspect Interface',
+                   'Management Interface', 'Network Interface',
+                   'Power Interface', 'RAID Interface',
+                   'Vendor Interface')
         self.assertEqual(collist, columns)
         datalist = ((
             '',
@@ -530,6 +574,14 @@ class TestBaremetalList(TestBaremetal):
             '',
             baremetal_fakes.baremetal_uuid,
             baremetal_fakes.baremetal_name,
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
             '',
         ), )
         self.assertEqual(datalist, tuple(data))

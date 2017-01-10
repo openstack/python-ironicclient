@@ -47,7 +47,15 @@ class NodeShellTest(utils.BaseTestCase):
                'maintenance',
                'maintenance_reason',
                'name',
+               'boot_interface',
+               'console_interface',
+               'deploy_interface',
+               'inspect_interface',
+               'management_interface',
                'network_interface',
+               'power_interface',
+               'raid_interface',
+               'vendor_interface',
                'power_state',
                'properties',
                'provision_state',
@@ -198,6 +206,56 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with(name=args.name)
 
+    def test_do_node_create_with_boot_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.boot_interface = 'boot'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            boot_interface='boot')
+
+    def test_do_node_create_with_console_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.console_interface = 'console'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            console_interface='console')
+
+    def test_do_node_create_with_deploy_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.deploy_interface = 'deploy'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            deploy_interface='deploy')
+
+    def test_do_node_create_with_inspect_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.inspect_interface = 'inspect'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            inspect_interface='inspect')
+
+    def test_do_node_create_with_management_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.management_interface = 'management'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            management_interface='management')
+
     def test_do_node_create_with_network_interface(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()
@@ -207,6 +265,36 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with(
             network_interface='neutron')
+
+    def test_do_node_create_with_power_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.power_interface = 'power'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            power_interface='power')
+
+    def test_do_node_create_with_raid_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.raid_interface = 'raid'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            raid_interface='raid')
+
+    def test_do_node_create_with_vendor_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.vendor_interface = 'vendor'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            vendor_interface='vendor')
 
     def test_do_node_show(self):
         client_mock = mock.MagicMock()

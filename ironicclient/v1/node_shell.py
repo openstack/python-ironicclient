@@ -213,10 +213,58 @@ def do_node_list(cc, args):
     metavar='<name>',
     help="Unique name for the node.")
 @cliutils.arg(
+    '--boot-interface',
+    metavar='<boot-interface>',
+    help='Boot interface used by the node\'s driver. This is '
+         'only applicable when the specified --driver is a '
+         'hardware type.')
+@cliutils.arg(
+    '--console-interface',
+    metavar='<console-interface>',
+    help='Console interface used by the node\'s driver. This is '
+         'only applicable when the specified --driver is a '
+         'hardware type.')
+@cliutils.arg(
+    '--deploy-interface',
+    metavar='<deploy-interface>',
+    help='Deploy interface used by the node\'s driver. This is '
+         'only applicable when the specified --driver is a '
+         'hardware type.')
+@cliutils.arg(
+    '--inspect-interface',
+    metavar='<inspect-interface>',
+    help='Inspect interface used by the node\'s driver. This is '
+         'only applicable when the specified --driver is a '
+         'hardware type.')
+@cliutils.arg(
+    '--management-interface',
+    metavar='<management-interface>',
+    help='Management interface used by the node\'s driver. This is '
+         'only applicable when the specified --driver is a '
+         'hardware type.')
+@cliutils.arg(
     '--network-interface',
     metavar='<network_interface>',
     help='Network interface used for switching node to cleaning/provisioning '
          'networks.')
+@cliutils.arg(
+    '--power-interface',
+    metavar='<power-interface>',
+    help='Power interface used by the node\'s driver. This is '
+         'only applicable when the specified --driver is a '
+         'hardware type.')
+@cliutils.arg(
+    '--raid-interface',
+    metavar='<raid-interface>',
+    help='RAID interface used by the node\'s driver. This is '
+         'only applicable when the specified --driver is a '
+         'hardware type.')
+@cliutils.arg(
+    '--vendor-interface',
+    metavar='<vendor-interface>',
+    help='Vendor interface used by the node\'s driver. This is '
+         'only applicable when the specified --driver is a '
+         'hardware type.')
 @cliutils.arg(
     '--resource-class',
     metavar='<resource_class>',
@@ -226,7 +274,11 @@ def do_node_create(cc, args):
     """Register a new node with the Ironic service."""
     field_list = ['chassis_uuid', 'driver', 'driver_info',
                   'properties', 'extra', 'uuid', 'name',
-                  'network_interface', 'resource_class']
+                  'boot_interface', 'console_interface',
+                  'deploy_interface', 'inspect_interface',
+                  'management_interface', 'network_interface',
+                  'power_interface', 'raid_interface',
+                  'vendor_interface', 'resource_class']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'driver_info')
