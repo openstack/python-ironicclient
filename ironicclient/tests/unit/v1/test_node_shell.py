@@ -1145,6 +1145,16 @@ class NodeShellTest(utils.BaseTestCase):
         client_mock.node.vif_attach.assert_called_once_with(
             'node_uuid', 'aaa-aaa')
 
+    def test_do_node_vif_attach_custom_fields(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.vif_id = 'aaa-aaa'
+        args.vif_info = ['aaa=bbb', 'ccc=ddd']
+        n_shell.do_node_vif_attach(client_mock, args)
+        client_mock.node.vif_attach.assert_called_once_with(
+            'node_uuid', 'aaa-aaa', aaa='bbb', ccc='ddd')
+
     def test_do_node_vif_detach(self):
         client_mock = mock.MagicMock()
         args = mock.MagicMock()

@@ -1196,13 +1196,23 @@ class VifAttachBaremetalNode(command.Command):
             metavar='<vif-id>',
             help="Name or UUID of the VIF to attach to a node."
         )
+        parser.add_argument(
+            '--vif-info',
+            metavar='<key=value>',
+            action='append',
+            help="Record arbitrary key/value metadata. "
+                 "Can be specified multiple times. The mandatory 'id' "
+                 "parameter cannot be specified as a key.")
         return parser
 
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-        baremetal_client.node.vif_attach(parsed_args.node, parsed_args.vif_id)
+
+        fields = utils.key_value_pairs_to_dict(parsed_args.vif_info or [])
+        baremetal_client.node.vif_attach(parsed_args.node, parsed_args.vif_id,
+                                         **fields)
 
 
 class VifDetachBaremetalNode(command.Command):
