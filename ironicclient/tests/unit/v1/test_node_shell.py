@@ -1127,3 +1127,29 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_get_vendor_passthru_methods(client_mock, args)
         client_mock.node.get_vendor_passthru_methods.assert_called_once_with(
             'node_uuid')
+
+    def test_do_node_vif_list(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        n_shell.do_node_vif_list(client_mock, args)
+        client_mock.node.vif_list.assert_called_once_with(
+            'node_uuid')
+
+    def test_do_node_vif_attach(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.vif_id = 'aaa-aaa'
+        n_shell.do_node_vif_attach(client_mock, args)
+        client_mock.node.vif_attach.assert_called_once_with(
+            'node_uuid', 'aaa-aaa')
+
+    def test_do_node_vif_detach(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.node = 'node_uuid'
+        args.vif_id = 'aaa-aaa'
+        n_shell.do_node_vif_detach(client_mock, args)
+        client_mock.node.vif_detach.assert_called_once_with(
+            'node_uuid', 'aaa-aaa')

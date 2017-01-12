@@ -1748,3 +1748,69 @@ class TestValidate(TestBaremetal):
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.validate.assert_called_once_with('node_uuid')
+
+
+class TestVifList(TestBaremetal):
+    def setUp(self):
+        super(TestVifList, self).setUp()
+
+        self.baremetal_mock.node.vif_list.return_value = [
+            baremetal_fakes.FakeBaremetalResource(
+                None,
+                copy.deepcopy(baremetal_fakes.VIFS),
+                loaded=True,
+            ),
+        ]
+
+        # Get the command object to test
+        self.cmd = baremetal_node.VifListBaremetalNode(self.app, None)
+
+    def test_baremetal_vif_list(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.vif_list.assert_called_once_with('node_uuid')
+
+
+class TestVifAttach(TestBaremetal):
+    def setUp(self):
+        super(TestVifAttach, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.VifAttachBaremetalNode(self.app, None)
+
+    def test_baremetal_vif_attach(self):
+        arglist = ['node_uuid', 'aaa-aaa']
+        verifylist = [('node', 'node_uuid'),
+                      ('vif_id', 'aaa-aaa')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.vif_attach.assert_called_once_with(
+            'node_uuid', 'aaa-aaa')
+
+
+class TestVifDetach(TestBaremetal):
+    def setUp(self):
+        super(TestVifDetach, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.VifDetachBaremetalNode(self.app, None)
+
+    def test_baremetal_vif_detach(self):
+        arglist = ['node_uuid', 'aaa-aaa']
+        verifylist = [('node', 'node_uuid'),
+                      ('vif_id', 'aaa-aaa')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.vif_detach.assert_called_once_with(
+            'node_uuid', 'aaa-aaa')

@@ -599,3 +599,30 @@ def do_node_get_vendor_passthru_methods(cc, args):
                         field_labels=field_labels,
                         sortby_index=None,
                         json_flag=args.json)
+
+
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
+def do_node_vif_list(cc, args):
+    """List VIFs for a given node."""
+    vifs = cc.node.vif_list(args.node)
+    fields = res_fields.VIF_RESOURCE.fields
+    field_labels = res_fields.VIF_RESOURCE.labels
+    cliutils.print_list(vifs, fields, field_labels=field_labels,
+                        sortby_index=None,
+                        json_flag=args.json)
+
+
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
+@cliutils.arg('vif_id', metavar='<vif-id>',
+              help="Name or UUID of the VIF to attach to node.")
+def do_node_vif_attach(cc, args):
+    """Attach VIF to a given node."""
+    cc.node.vif_attach(args.node, args.vif_id)
+
+
+@cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
+@cliutils.arg('vif_id', metavar='<vif-id>',
+              help="Name or UUID of the VIF to detach from node.")
+def do_node_vif_detach(cc, args):
+    """Detach VIF from a given node."""
+    cc.node.vif_detach(args.node, args.vif_id)

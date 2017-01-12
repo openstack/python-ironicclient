@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 API_VERSION_OPTION = 'os_baremetal_api_version'
 API_NAME = 'baremetal'
-LAST_KNOWN_API_VERSION = 25
+LAST_KNOWN_API_VERSION = 28
 API_VERSIONS = {
     '1.%d' % i: 'ironicclient.v1.client.Client'
     for i in range(1, LAST_KNOWN_API_VERSION + 1)

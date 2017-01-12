@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Adds support for attaching and detaching VIFs. This is available starting
+    with ironic API microversion 1.28.
+
+    The new commands are:
+
+    * ``ironic node-vif-list <node>``
+    * ``ironic node-vif-attach <node> <vif-id>``
+    * ``ironic node-vif-detach <node> <vif-id>``
+    * ``openstack baremetal node vif list <node>``
+    * ``openstack baremetal node vif attach <node> <vif-id>``
+    * ``openstack baremetal node vif detach <node> <vif-id>``

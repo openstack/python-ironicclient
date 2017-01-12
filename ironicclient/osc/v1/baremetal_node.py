@@ -1148,3 +1148,85 @@ class ValidateBaremetalNode(command.Lister):
         data = oscutils.sort_items(data, 'interface')
         return (field_labels,
                 (oscutils.get_dict_properties(s, fields) for s in data))
+
+
+class VifListBaremetalNode(command.Lister):
+    """Show attached VIFs for a node"""
+
+    log = logging.getLogger(__name__ + ".VifListBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(VifListBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node"
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        columns = res_fields.VIF_RESOURCE.fields
+        labels = res_fields.VIF_RESOURCE.labels
+
+        baremetal_client = self.app.client_manager.baremetal
+        data = baremetal_client.node.vif_list(parsed_args.node)
+
+        return (labels,
+                (oscutils.get_item_properties(s, columns) for s in data))
+
+
+class VifAttachBaremetalNode(command.Command):
+    """Attach VIF to a given node"""
+
+    log = logging.getLogger(__name__ + ".VifAttachBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(VifAttachBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node"
+        )
+        parser.add_argument(
+            'vif_id',
+            metavar='<vif-id>',
+            help="Name or UUID of the VIF to attach to a node."
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        baremetal_client.node.vif_attach(parsed_args.node, parsed_args.vif_id)
+
+
+class VifDetachBaremetalNode(command.Command):
+    """Detach VIF from a given node"""
+
+    log = logging.getLogger(__name__ + ".VifDetachBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(VifDetachBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help="Name or UUID of the node"
+        )
+        parser.add_argument(
+            'vif_id',
+            metavar='<vif-id>',
+            help="Name or UUID of the VIF to detach from a node."
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        baremetal_client.node.vif_detach(parsed_args.node, parsed_args.vif_id)
