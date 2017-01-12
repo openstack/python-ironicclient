@@ -38,10 +38,28 @@ class Resource(object):
         'clean_step': 'Clean Step',
         'console_enabled': 'Console Enabled',
         'created_at': 'Created At',
+        'default_boot_interface': 'Default Boot Interface',
+        'default_console_interface': 'Default Console Interface',
+        'default_deploy_interface': 'Default Deploy Interface',
+        'default_inspect_interface': 'Default Inspect Interface',
+        'default_management_interface': 'Default Management Interface',
+        'default_network_interface': 'Default Network Interface',
+        'default_power_interface': 'Default Power Interface',
+        'default_raid_interface': 'Default RAID Interface',
+        'default_vendor_interface': 'Default Vendor Interface',
         'description': 'Description',
         'driver': 'Driver',
         'driver_info': 'Driver Info',
         'driver_internal_info': 'Driver Internal Info',
+        'enabled_boot_interfaces': 'Enabled Boot Interfaces',
+        'enabled_console_interfaces': 'Enabled Console Interfaces',
+        'enabled_deploy_interfaces': 'Enabled Deploy Interfaces',
+        'enabled_inspect_interfaces': 'Enabled Inspect Interfaces',
+        'enabled_management_interfaces': 'Enabled Management Interfaces',
+        'enabled_network_interfaces': 'Enabled Network Interfaces',
+        'enabled_power_interfaces': 'Enabled Power Interfaces',
+        'enabled_raid_interfaces': 'Enabled RAID Interfaces',
+        'enabled_vendor_interfaces': 'Enabled Vendor Interfaces',
         'extra': 'Extra',
         'hosts': 'Active host(s)',
         'http_methods': 'Supported HTTP methods',
@@ -66,6 +84,7 @@ class Resource(object):
         'target_power_state': 'Target Power State',
         'target_provision_state': 'Target Provision State',
         'target_raid_config': 'Target RAID configuration',
+        'type': 'Type',
         'updated_at': 'Updated At',
         'uuid': 'UUID',
         'local_link_connection': 'Local Link Connection',
@@ -157,7 +176,6 @@ CHASSIS_RESOURCE = Resource(
     ['uuid',
      'description',
      ])
-
 
 # Nodes
 NODE_DETAILED_RESOURCE = Resource(
@@ -292,6 +310,31 @@ VIF_RESOURCE = Resource(
 )
 
 # Drivers
+DRIVER_DETAILED_RESOURCE = Resource(
+    ['name',
+     'type',
+     'hosts',
+     'default_boot_interface',
+     'default_console_interface',
+     'default_deploy_interface',
+     'default_inspect_interface',
+     'default_management_interface',
+     'default_network_interface',
+     'default_power_interface',
+     'default_raid_interface',
+     'default_vendor_interface',
+     'enabled_boot_interfaces',
+     'enabled_console_interfaces',
+     'enabled_deploy_interfaces',
+     'enabled_inspect_interfaces',
+     'enabled_management_interfaces',
+     'enabled_network_interfaces',
+     'enabled_power_interfaces',
+     'enabled_raid_interfaces',
+     'enabled_vendor_interfaces'
+     ],
+    override_labels={'name': 'Supported driver(s)'}
+)
 DRIVER_RESOURCE = Resource(
     ['name',
      'hosts',

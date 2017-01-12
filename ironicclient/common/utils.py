@@ -27,6 +27,7 @@ import tempfile
 
 from oslo_serialization import base64
 from oslo_utils import strutils
+import six
 
 from ironicclient.common.i18n import _
 from ironicclient import exc
@@ -143,6 +144,27 @@ def args_array_to_patch(op, attributes):
         else:
             raise exc.CommandError(_('Unknown PATCH operation: %s') % op)
     return patch
+
+
+def convert_list_props_to_comma_separated(data, props=None):
+    """Convert the list-type properties to comma-separated strings
+
+    :param data: the input dict object.
+    :param props: the properties whose values will be converted.
+        Default to None to convert all list-type properties of the input.
+    :returns: the result dict instance.
+    """
+    result = dict(data)
+
+    if props is None:
+        props = data.keys()
+
+    for prop in props:
+        val = data.get(prop, None)
+        if isinstance(val, list):
+            result[prop] = ', '.join(map(six.text_type, val))
+
+    return result
 
 
 def common_params_for_list(args, fields, field_labels):
