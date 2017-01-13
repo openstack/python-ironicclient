@@ -68,7 +68,7 @@ class ClientTest(utils.BaseTestCase):
 
     def test_get_client_no_auth_token(self):
         kwargs = {
-            'os_tenant_name': 'TENANT_NAME',
+            'os_project_name': 'PROJECT_NAME',
             'os_username': 'USERNAME',
             'os_password': 'PASSWORD',
             'os_auth_url': 'http://localhost:35357/v2.0',
@@ -78,7 +78,7 @@ class ClientTest(utils.BaseTestCase):
 
     def test_get_client_service_and_endpoint_type_defaults(self):
         kwargs = {
-            'os_tenant_name': 'TENANT_NAME',
+            'os_project_name': 'PROJECT_NAME',
             'os_username': 'USERNAME',
             'os_password': 'PASSWORD',
             'os_auth_url': 'http://localhost:35357/v2.0',
@@ -90,7 +90,7 @@ class ClientTest(utils.BaseTestCase):
 
     def test_get_client_with_region_no_auth_token(self):
         kwargs = {
-            'os_tenant_name': 'TENANT_NAME',
+            'os_project_name': 'PROJECT_NAME',
             'os_username': 'USERNAME',
             'os_password': 'PASSWORD',
             'os_region_name': 'REGIONONE',
@@ -101,7 +101,7 @@ class ClientTest(utils.BaseTestCase):
 
     def test_get_client_no_url(self):
         kwargs = {
-            'os_tenant_name': 'TENANT_NAME',
+            'os_project_name': 'PROJECT_NAME',
             'os_username': 'USERNAME',
             'os_password': 'PASSWORD',
             'os_auth_url': '',
@@ -114,7 +114,7 @@ class ClientTest(utils.BaseTestCase):
 
     def test_get_client_incorrect_auth_params(self):
         kwargs = {
-            'os_tenant_name': 'TENANT_NAME',
+            'os_project_name': 'PROJECT_NAME',
             'os_username': 'USERNAME',
             'os_auth_url': 'http://localhost:35357/v2.0',
         }
@@ -123,7 +123,7 @@ class ClientTest(utils.BaseTestCase):
 
     def test_get_client_with_api_version_latest(self):
         kwargs = {
-            'os_tenant_name': 'TENANT_NAME',
+            'os_project_name': 'PROJECT_NAME',
             'os_username': 'USERNAME',
             'os_password': 'PASSWORD',
             'os_auth_url': 'http://localhost:35357/v2.0',
@@ -134,7 +134,7 @@ class ClientTest(utils.BaseTestCase):
 
     def test_get_client_with_api_version_numeric(self):
         kwargs = {
-            'os_tenant_name': 'TENANT_NAME',
+            'os_project_name': 'PROJECT_NAME',
             'os_username': 'USERNAME',
             'os_password': 'PASSWORD',
             'os_auth_url': 'http://localhost:35357/v2.0',
@@ -148,7 +148,7 @@ class ClientTest(utils.BaseTestCase):
         # Make sure we don't coincidentally succeed
         self.assertNotEqual(v1.DEFAULT_VER, version)
         kwargs = {
-            'os_tenant_name': 'TENANT_NAME',
+            'os_project_name': 'PROJECT_NAME',
             'os_username': 'USERNAME',
             'os_password': 'PASSWORD',
             'os_auth_url': 'http://localhost:35357/v2.0',
@@ -237,7 +237,7 @@ class ClientTest(utils.BaseTestCase):
         passed_kwargs = {
             'os_auth_url': 'http://localhost:35357/v3',
             'os_region_name': 'REGIONONE',
-            'os_tenant_name': 'TENANT',
+            'os_project_name': 'PROJECT',
             'os_username': 'user',
             'os_password': '1234',
             'os_project_domain_id': 'DEFAULT',
@@ -246,7 +246,7 @@ class ClientTest(utils.BaseTestCase):
         expected_kwargs = {
             'auth_url': 'http://localhost:35357/v3',
             'project_id': None,
-            'project_name': 'TENANT',
+            'project_name': 'PROJECT',
             'user_domain_id': 'DEFAULT',
             'user_domain_name': None,
             'project_domain_id': 'DEFAULT',

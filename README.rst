@@ -49,7 +49,7 @@ the ``--os-tenant-name``, ``--os-username``, ``--os-password`` and
 ``--os-auth-url`` parameters, though it may be easier to set them
 as environment variables::
 
-    $ export OS_TENANT_NAME=project
+    $ export OS_PROJECT_NAME=project
     $ export OS_USERNAME=user
     $ export OS_PASSWORD=pass
     $ export OS_AUTH_URL=http://auth.example.com:5000/v2.0

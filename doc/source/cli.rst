@@ -30,8 +30,8 @@ environment variables::
 
     $ export OS_USERNAME=user
     $ export OS_PASSWORD=password
-    $ export OS_TENANT_ID=b363706f891f48019483f8bd6503c54b  # or OS_TENANT_NAME
-    $ export OS_TENANT_NAME=project                         # or OS_TENANT_ID
+    $ export OS_PROJECT_ID=b363706f891f48019483f8bd6503c54b  # or OS_PROJECT_NAME
+    $ export OS_PROJECT_NAME=project                         # or OS_PROJECT_ID
     $ export OS_AUTH_URL=http://auth.example.com:5000/v2.0
 
 The command-line tool will attempt to reauthenticate using the provided

@@ -35,20 +35,20 @@ V3_URL = BASE_URL + '/v3'
 
 FAKE_ENV = {'OS_USERNAME': 'username',
             'OS_PASSWORD': 'password',
-            'OS_TENANT_NAME': 'tenant_name',
+            'OS_PROJECT_NAME': 'project_name',
             'OS_AUTH_URL': V2_URL}
 
 FAKE_ENV_KEYSTONE_V2 = {
     'OS_USERNAME': 'username',
     'OS_PASSWORD': 'password',
-    'OS_TENANT_NAME': 'tenant_name',
+    'OS_PROJECT_NAME': 'project_name',
     'OS_AUTH_URL': V2_URL
 }
 
 FAKE_ENV_KEYSTONE_V3 = {
     'OS_USERNAME': 'username',
     'OS_PASSWORD': 'password',
-    'OS_TENANT_NAME': 'tenant_name',
+    'OS_PROJECT_NAME': 'project_name',
     'OS_AUTH_URL': V3_URL,
     'OS_USER_DOMAIN_ID': 'default',
     'OS_PROJECT_DOMAIN_ID': 'default',
@@ -56,7 +56,7 @@ FAKE_ENV_KEYSTONE_V3 = {
 
 FAKE_ENV_KEYSTONE_V2_TOKEN = {
     'OS_AUTH_TOKEN': 'admin_token',
-    'OS_TENANT_NAME': 'tenant_name',
+    'OS_PROJECT_NAME': 'project_name',
     'OS_AUTH_URL': V2_URL
 }
 
@@ -163,11 +163,12 @@ class ShellTest(utils.BaseTestCase):
                           self.shell, 'node-list')
         expected_kwargs = {
             'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
-            'os_tenant_id': '', 'os_tenant_name': FAKE_ENV['OS_TENANT_NAME'],
+            'os_tenant_id': '', 'os_tenant_name': '',
             'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
             'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
             'os_auth_token': '', 'os_project_id': '',
-            'os_project_name': '', 'os_project_domain_id': '',
+            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
+            'os_project_domain_id': '',
             'os_project_domain_name': '', 'os_region_name': '',
             'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
             'os_cert': None, 'os_key': None,
@@ -191,11 +192,12 @@ class ShellTest(utils.BaseTestCase):
             'ironic_url': '',
             'os_auth_url': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_AUTH_URL'],
             'os_tenant_id': '',
-            'os_tenant_name': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_TENANT_NAME'],
+            'os_tenant_name': '',
             'os_username': '', 'os_user_domain_id': '',
             'os_user_domain_name': '', 'os_password': '',
             'os_auth_token': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_AUTH_TOKEN'],
-            'os_project_id': '', 'os_project_name': '',
+            'os_project_id': '',
+            'os_project_name': FAKE_ENV_KEYSTONE_V2_TOKEN['OS_PROJECT_NAME'],
             'os_project_domain_id': '', 'os_project_domain_name': '',
             'os_region_name': '', 'os_service_type': '',
             'os_endpoint_type': '', 'os_cacert': None, 'os_cert': None,
@@ -255,8 +257,8 @@ class ShellTest(utils.BaseTestCase):
 class TestCase(testtools.TestCase):
 
     def set_fake_env(self, fake_env):
-        client_env = ('OS_USERNAME', 'OS_PASSWORD', 'OS_TENANT_ID',
-                      'OS_TENANT_NAME', 'OS_AUTH_URL', 'OS_REGION_NAME',
+        client_env = ('OS_USERNAME', 'OS_PASSWORD', 'OS_PROJECT_ID',
+                      'OS_PROJECT_NAME', 'OS_AUTH_URL', 'OS_REGION_NAME',
                       'OS_AUTH_TOKEN', 'OS_NO_CLIENT_AUTH', 'OS_SERVICE_TYPE',
                       'OS_ENDPOINT_TYPE', 'OS_CACERT', 'OS_CERT', 'OS_KEY')
 
