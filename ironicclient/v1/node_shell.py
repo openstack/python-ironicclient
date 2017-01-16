@@ -615,9 +615,15 @@ def do_node_vif_list(cc, args):
 @cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 @cliutils.arg('vif_id', metavar='<vif-id>',
               help="Name or UUID of the VIF to attach to node.")
+@cliutils.arg('--vif-info', metavar='<key=value>',
+              action='append',
+              help="Record arbitrary key/value metadata. "
+                   "Can be specified multiple times. The mandatory 'id' "
+                   "parameter cannot be specified as a key.")
 def do_node_vif_attach(cc, args):
-    """Attach VIF to a given node."""
-    cc.node.vif_attach(args.node, args.vif_id)
+    """List vifs for a given node."""
+    fields = utils.key_value_pairs_to_dict(args.vif_info or [])
+    cc.node.vif_attach(args.node, args.vif_id, **fields)
 
 
 @cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")

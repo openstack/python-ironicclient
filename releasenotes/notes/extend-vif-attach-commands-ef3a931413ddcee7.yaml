@@ -1,0 +1,6 @@
+---
+features:
+  - Adds ability to set custom VIF information fields via the `--vif-info <key=value>`
+    option in the `ironic node-vif-attach` and `openstack baremetal node vif attach`
+    commands.
+

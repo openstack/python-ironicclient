@@ -253,14 +253,20 @@ class NodeManager(base.CreateManager):
 
         return self._list(self._path(path), "vifs")
 
-    def vif_attach(self, node_ident, vif_id):
+    def vif_attach(self, node_ident, vif_id, **kwargs):
         """Attach VIF to a given node.
 
         param node_ident: The UUID or Name of the node.
         param vif_id: The UUID or Name of the VIF to attach.
+        :param kwargs: A dictionary containing the attributes of the resource
+                       that will be created.
         """
         path = "%s/vifs" % node_ident
         data = {"id": vif_id}
+        if 'id' in kwargs:
+            raise exc.InvalidAttribute("The attribute 'id' can't be "
+                                       "specified in vif-info")
+        data.update(kwargs)
         # TODO(vdrok): cleanup places doing custom path and http_method
         self.update(path, data, http_method="POST")
 

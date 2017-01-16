@@ -1107,6 +1107,31 @@ class NodeManagerTest(testtools.TestCase):
         update_mock.assert_called_once_with(final_path, {'id': 'vif_id'},
                                             http_method="POST")
 
+    @mock.patch.object(node.NodeManager, 'update')
+    def test_vif_attach_custom_fields(self, update_mock):
+        kwargs = {
+            'node_ident': NODE1['uuid'],
+            'vif_id': 'vif_id',
+            'foo': 'bar',
+            }
+
+        final_path = '%s/vifs' % NODE1['uuid']
+        self.mgr.vif_attach(**kwargs)
+        update_mock.assert_called_once_with(
+            final_path, {'id': 'vif_id', 'foo': 'bar'},
+            http_method="POST")
+
+    @mock.patch.object(node.NodeManager, 'update')
+    def test_vif_attach_custom_fields_id(self, update_mock):
+        kwargs = {
+            'node_ident': NODE1['uuid'],
+            'vif_id': 'vif_id',
+            'id': 'bar',
+            }
+        self.assertRaises(
+            exc.InvalidAttribute,
+            self.mgr.vif_attach, **kwargs)
+
     @mock.patch.object(node.NodeManager, 'delete')
     def test_vif_detach(self, delete_mock):
         kwargs = {
