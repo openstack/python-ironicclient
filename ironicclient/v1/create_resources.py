@@ -83,7 +83,7 @@ def load_from_file(filename):
     try:
         with open(filename) as f:
             if filename.endswith('.yaml'):
-                return yaml.load(f)
+                return yaml.safe_load(f)
             elif filename.endswith('.json'):
                 return json.load(f)
             else:
