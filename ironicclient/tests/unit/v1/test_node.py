@@ -59,8 +59,8 @@ PORTGROUP = {'uuid': '11111111-2222-3333-4444-555555555555',
              'address': 'AA:BB:CC:DD:EE:FF',
              'extra': {}}
 
-POWER_STATE = {'power_state': 'power off',
-               'target_power_state': 'power on'}
+POWER_STATE = {'power_state': 'power on',
+               'target_power_state': 'power off'}
 
 DRIVER_IFACES = {'deploy': {'result': True},
                  'power': {'result': False, 'reason': 'Invalid IPMI username'},
@@ -900,13 +900,56 @@ class NodeManagerTest(testtools.TestCase):
         self.assertIsNone(maintenance)
 
     def test_node_set_power_state(self):
-        power_state = self.mgr.set_power_state(NODE1['uuid'], "on")
-        body = {'target': 'power on'}
+        power_state = self.mgr.set_power_state(NODE1['uuid'], "off")
+        body = {'target': 'power off'}
         expect = [
             ('PUT', '/v1/nodes/%s/states/power' % NODE1['uuid'], {}, body),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual('power on', power_state.target_power_state)
+        self.assertEqual('power off', power_state.target_power_state)
+
+    def test_node_set_power_timeout(self):
+        power_state = self.mgr.set_power_state(NODE1['uuid'], "off", timeout=2)
+        body = {'target': 'power off', 'timeout': 2}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/power' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual('power off', power_state.target_power_state)
+
+    def test_node_set_power_timeout_str(self):
+        power_state = self.mgr.set_power_state(NODE1['uuid'], "off",
+                                               timeout="2")
+        body = {'target': 'power off', 'timeout': 2}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/power' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual('power off', power_state.target_power_state)
+
+    def test_node_set_power_state_soft(self):
+        power_state = self.mgr.set_power_state(NODE1['uuid'], "off", soft=True)
+        body = {'target': 'soft power off'}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/power' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual('power off', power_state.target_power_state)
+
+    def test_node_set_power_state_soft_fail(self):
+        self.assertRaises(ValueError,
+                          self.mgr.set_power_state,
+                          NODE1['uuid'], 'on', soft=True)
+
+    def test_node_set_power_state_on_timeout_fail(self):
+        self.assertRaises(ValueError,
+                          self.mgr.set_power_state,
+                          NODE1['uuid'], 'off', soft=False, timeout=0)
+
+    def test_node_set_power_state_on_timeout_type_error(self):
+        self.assertRaises(ValueError,
+                          self.mgr.set_power_state,
+                          NODE1['uuid'], 'off', soft=False, timeout='a')
 
     def test_set_target_raid_config(self):
         self.mgr.set_target_raid_config(
