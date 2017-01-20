@@ -19,6 +19,9 @@ from __future__ import print_function
 import argparse
 import getpass
 import logging
+import os
+import pkgutil
+import re
 import sys
 
 from keystoneauth1.loading import session as kasession
@@ -27,6 +30,7 @@ from oslo_utils import importutils
 import six
 
 import ironicclient
+from ironicclient.common.apiclient import exceptions
 from ironicclient.common import cliutils
 from ironicclient.common import http
 from ironicclient.common.i18n import _
@@ -235,14 +239,31 @@ class IronicShell(object):
 
         return parser
 
+    def get_available_major_versions(self):
+        matcher = re.compile(r"^v[0-9]+$")
+        submodules = pkgutil.iter_modules([os.path.dirname(__file__)])
+        available_versions = [name[1:] for loader, name, ispkg in submodules
+                              if matcher.search(name)]
+
+        return available_versions
+
     def get_subcommand_parser(self, version):
         parser = self.get_base_parser()
 
         self.subcommands = {}
         subparsers = parser.add_subparsers(metavar='<subcommand>',
                                            dest='subparser_name')
-        submodule = importutils.import_versioned_module('ironicclient',
-                                                        version, 'shell')
+        try:
+            submodule = importutils.import_versioned_module('ironicclient',
+                                                            version, 'shell')
+        except ImportError as e:
+            msg = _("Invalid client version '%(version)s'. "
+                    "Major part must be one of: '%(major)s'") % {
+                "version": version,
+                "major": ", ".join(self.get_available_major_versions())}
+            raise exceptions.UnsupportedVersion(
+                _('%(message)s, error was: %(error)s') %
+                {'message': msg, 'error': e})
         submodule.enhance_parser(parser, subparsers, self.subcommands)
         utils.define_commands_from_module(subparsers, self, self.subcommands)
         return parser
