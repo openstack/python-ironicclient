@@ -1,0 +1,3 @@
+---
+features:
+  - Add a new command "ironic node-inject-nmi" to support inject nmi.
