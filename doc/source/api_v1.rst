@@ -25,7 +25,7 @@ Bare Metal Provisioning system is configured so that only administrators
 .. note::
     Explicit instantiation of `ironicclient.v1.client.Client`_ may cause
     errors since it doesn't verify provided arguments, using
-    `ironicclient.client.get_client()` is prefered way to get client object.
+    `ironicclient.client.get_client()` is preferred way to get client object.
 
 There are two different sets of credentials that can be used::
 
