@@ -149,8 +149,11 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
                 "name": {"type": ["string", "null"]},
             }
         }
+        node_name = 'nodejson'
         response = self.ironic('node-create', flags='--json',
-                               params='-d fake', parse=False)
+                               params='-d fake -n {0}'.format(node_name),
+                               parse=False)
+        self.addCleanup(self.delete_node, node_name)
         self.assertTrue(_is_valid_json(response, schema))
 
     def test_node_update_json(self):
