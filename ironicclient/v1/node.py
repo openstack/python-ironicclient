@@ -425,7 +425,7 @@ class NodeManager(base.CreateManager):
 
     def inject_nmi(self, node_uuid):
         path = "%s/management/inject_nmi" % node_uuid
-        return self.update(path, None, http_method='PUT')
+        return self.update(path, {}, http_method='PUT')
 
     def get_supported_boot_devices(self, node_uuid):
         path = "%s/management/boot_device/supported" % node_uuid

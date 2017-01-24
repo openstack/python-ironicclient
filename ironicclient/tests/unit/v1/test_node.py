@@ -1221,7 +1221,7 @@ class NodeManagerTest(testtools.TestCase):
         self.mgr.inject_nmi(NODE1['uuid'])
         expect = [
             ('PUT', '/v1/nodes/%s/management/inject_nmi' % NODE1['uuid'],
-             {}, None),
+             {}, {}),
         ]
         self.assertEqual(expect, self.api.calls)
 
