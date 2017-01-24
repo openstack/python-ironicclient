@@ -588,7 +588,7 @@ def do_node_get_boot_device(cc, args):
 
 @cliutils.arg('node', metavar='<node>', help="Name or UUID of the node.")
 def do_node_inject_nmi(cc, args):
-    """Inject NMI for a node."""
+    """Inject NMI to a node."""
     cc.node.inject_nmi(args.node)
 
 
