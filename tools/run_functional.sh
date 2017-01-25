@@ -19,11 +19,11 @@ os_auth_url=$OS_AUTH_URL
 os_identity_api_version = $OS_IDENTITY_API_VERSION
 os_username=$OS_USERNAME
 os_password=$OS_PASSWORD
-os_tenant_name=$OS_TENANT_NAME
+os_project_name=$OS_PROJECT_NAME
 os_user_domain_id=$OS_USER_DOMAIN_ID
 os_project_domain_id=$OS_PROJECT_DOMAIN_ID
 os_service_type=baremetal
 os_endpoint_type=public
 END
 fi
-tox -e  functional
+tox -e functional

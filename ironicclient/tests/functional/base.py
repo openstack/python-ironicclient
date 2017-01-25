@@ -42,7 +42,7 @@ class FunctionalTestBase(base.ClientTestBase):
             client = base.CLIClient(cli_dir=cli_dir,
                                     username=config['os_username'],
                                     password=config['os_password'],
-                                    tenant_name=config['os_tenant_name'],
+                                    tenant_name=config['os_project_name'],
                                     uri=config['os_auth_url'])
             for keystone_object in 'user', 'project':
                 domain_attr = 'os_%s_domain_id' % keystone_object
@@ -79,7 +79,7 @@ class FunctionalTestBase(base.ClientTestBase):
         keystone_v3_conf_settings = []
         if auth_strategy == 'keystone':
             conf_settings += ['os_auth_url', 'os_username',
-                              'os_password', 'os_tenant_name']
+                              'os_password', 'os_project_name']
             keystone_v3_conf_settings += ['os_user_domain_id',
                                           'os_project_domain_id']
         else:
