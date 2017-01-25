@@ -482,12 +482,20 @@ class ListBaremetalNode(command.Lister):
                  '(asc or desc) (default: asc). Multiple fields and '
                  'directions can be specified, separated by comma.',
         )
-        parser.add_argument(
+        maint_group = parser.add_mutually_exclusive_group(required=False)
+        maint_group.add_argument(
             '--maintenance',
             dest='maintenance',
             action='store_true',
             default=False,
-            help="List nodes in maintenance mode.",
+            help="Limit list to nodes in maintenance mode",
+        )
+        maint_group.add_argument(
+            '--no-maintenance',
+            dest='no_maintenance',
+            action='store_true',
+            default=False,
+            help="Limit list to nodes not in maintenance mode",
         )
         associated_group = parser.add_mutually_exclusive_group()
         associated_group.add_argument(
@@ -555,7 +563,9 @@ class ListBaremetalNode(command.Lister):
         if parsed_args.unassociated:
             params['associated'] = False
         if parsed_args.maintenance:
-            params['maintenance'] = parsed_args.maintenance
+            params['maintenance'] = True
+        elif parsed_args.no_maintenance:
+            params['maintenance'] = False
         if parsed_args.provision_state:
             params['provision_state'] = parsed_args.provision_state
         if parsed_args.resource_class:
