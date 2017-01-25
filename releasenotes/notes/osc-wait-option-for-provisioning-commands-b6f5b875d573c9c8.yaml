@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Adds an option ``--wait [<time-out>]`` to all  of the
+    OSC provisioning commands, except for abort which is not
+    supported. When specified, provisioning commands will
+    wait for the node to reach the desired state before
+    returning. An optional argument, time-out, can be specified
+    which will end the waiting after the specified amount of
+    time (in seconds). The default value for this timeout is
+    0, which means it will wait indefinitely.
