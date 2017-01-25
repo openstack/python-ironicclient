@@ -10,11 +10,11 @@ or YAML format. It can be done in one of three ways:
     $ ironic help create
     usage: ironic create <file> [<file> ...]
 
-    Create baremetal resources (chassis, nodes, and ports). The resources may
-    be described in one or more JSON or YAML files. If any file cannot be
-    validated, no resources are created. An attempt is made to create all the
-    resources; those that could not be created are skipped (with a
-    corresponding error message).
+    Create baremetal resources (chassis, nodes, port groups and ports). The
+    resources may be described in one or more JSON or YAML files. If any file
+    cannot be validated, no resources are created. An attempt is made to
+    create all the resources; those that could not be created are skipped
+    (with a corresponding error message).
 
     Positional arguments:
       <file>  File (.yaml or .json) containing descriptions of the resources
@@ -64,10 +64,11 @@ ending with ``.json`` is assumed to contain valid JSON, and a file ending with
 ``.yaml`` is assumed to contain valid YAML. Specifying a file with any other
 extension leads to an error.
 
-The resources that can be created are chassis, nodes, and ports. Only chassis
-and nodes are accepted at the top level of the file structure, but chassis and
-nodes themselves can contain nodes or ports definitions nested under ``nodes``
-(in case of chassis) or ``ports`` (in case of nodes) keys.
+The resources that can be created are chassis, nodes, port groups and ports.
+A chassis can contain nodes (and resources of nodes) definitions nested under
+``"nodes"`` key. A node can contain port groups definitions nested under
+``"portgroups"``, and ports definitions under ``"ports"`` keys. Ports can be
+also nested under port groups in ``"ports"`` key.
 
 The schema used to validate the supplied data is the following::
 
@@ -109,6 +110,19 @@ command::
                     {
                         "name": "node-3",
                         "driver": "agent_ipmitool",
+                        "portgroups": [
+                            {
+                                "name": "switch.cz7882.ports.1-2",
+                                "ports": [
+                                    {
+                                        "address": "ff:00:00:00:00:00"
+                                    },
+                                    {
+                                        "address": "ff:00:00:00:00:01"
+                                    }
+                                ]
+                            }
+                        ],
                         "ports": [
                             {
                                 "address": "00:00:00:00:00:02"
@@ -162,11 +176,12 @@ Creation Process
 
 #. Each resource is created via issuing a POST request (with the resource's
    dictionary representation in the body) to the ironic-api service. In the
-   case of nested resources (``"nodes"`` key inside chassis, or ``"ports"``
-   key inside nodes), the top-level resource is created first, followed by the
-   sub-resources. For example, if a chassis contains a list of nodes, the
-   chassis will be created first followed by the creation of each node. The
-   same is true for ports described within nodes.
+   case of nested resources (``"nodes"`` key inside chassis, ``"portgroups"``
+   key inside nodes, ``"ports"`` key inside nodes or portgroups), the top-level
+   resource is created first, followed by the sub-resources. For example, if a
+   chassis contains a list of nodes, the chassis will be created first followed
+   by the creation of each node. The same is true for ports and port groups
+   described within nodes.
 
 #. If a resource could not be created, it does not stop the entire process.
    Any sub-resources of the failed resource will not be created, but otherwise,
