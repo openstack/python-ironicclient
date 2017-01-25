@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adds an option ``--unassociated`` to the
+    ``openstack baremetal node list`` command. It provides the
+    ability to get a list of the nodes that are not associated
+    with instances.

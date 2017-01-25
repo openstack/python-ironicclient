@@ -631,6 +631,39 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
+    def test_baremetal_list_unassociated(self):
+        arglist = [
+            '--unassociated',
+        ]
+        verifylist = [
+            ('associated', False),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'associated': False,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_both_associated_unassociated_not_allowed(self):
+        arglist = [
+            '--associated', '--unassociated',
+        ]
+        verifylist = []
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
     def test_baremetal_list_provision_state(self):
         arglist = [
             '--provision-state', 'active',

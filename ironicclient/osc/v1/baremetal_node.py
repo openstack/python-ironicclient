@@ -489,12 +489,16 @@ class ListBaremetalNode(command.Lister):
             default=False,
             help="List nodes in maintenance mode.",
         )
-        parser.add_argument(
+        associated_group = parser.add_mutually_exclusive_group()
+        associated_group.add_argument(
             '--associated',
-            dest='associated',
             action='store_true',
-            default=False,
-            help="List only nodes associated with an instance."
+            help=_('List only nodes associated with an instance.'),
+        )
+        associated_group.add_argument(
+            '--unassociated',
+            action='store_true',
+            help=_('List only nodes not associated with an instance.'),
         )
         parser.add_argument(
             '--provision-state',
@@ -547,7 +551,9 @@ class ListBaremetalNode(command.Lister):
         params['limit'] = parsed_args.limit
         params['marker'] = parsed_args.marker
         if parsed_args.associated:
-            params['associated'] = parsed_args.associated
+            params['associated'] = True
+        if parsed_args.unassociated:
+            params['associated'] = False
         if parsed_args.maintenance:
             params['maintenance'] = parsed_args.maintenance
         if parsed_args.provision_state:
