@@ -35,6 +35,10 @@ class FakeClientManager(object):
     def __init__(self):
         self.identity = None
         self.auth_ref = None
+        self.interface = 'public'
+        self._region_name = 'RegionOne'
+        self.session = 'fake session'
+        self._api_version = {'baremetal': '1.6'}
 
 
 class FakeResource(object):
