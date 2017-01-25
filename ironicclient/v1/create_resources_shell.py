@@ -18,7 +18,7 @@ from ironicclient.v1 import create_resources
               help='File (.yaml or .json) containing descriptions of the '
                    'resources to create. Can be specified multiple times.')
 def do_create(cc, args):
-    """Create baremetal resources (chassis, nodes, and ports).
+    """Create baremetal resources (chassis, nodes, port groups and ports).
 
     The resources may be described in one or more JSON or YAML files. If any
     file cannot be validated, no resources are created. An attempt is made to

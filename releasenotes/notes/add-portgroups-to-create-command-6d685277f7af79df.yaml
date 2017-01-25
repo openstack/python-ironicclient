@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Supports creation of port groups via ``ironic create`` and
+    ``openstack baremetal create`` commands.
+

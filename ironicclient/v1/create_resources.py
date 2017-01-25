@@ -142,7 +142,7 @@ def create_single_node(client, **params):
 
     :param client: ironic client instance.
     :param params: dictionary to be POSTed to /nodes endpoint, excluding
-        "ports" key.
+        "ports" and "portgroups" keys.
     :returns: UUID of the created node or None in case of exception, and an
         exception, if it appears.
     :raises: InvalidAttribute, if some parameters passed to client's
@@ -150,6 +150,7 @@ def create_single_node(client, **params):
     :raises: ClientException, if the creation of the node fails.
     """
     params.pop('ports', None)
+    params.pop('portgroups', None)
     ret = client.node.create(**params)
     return ret.uuid
 
@@ -167,6 +168,24 @@ def create_single_port(client, **params):
     :raises: ClientException, if the creation of the port fails.
     """
     ret = client.port.create(**params)
+    return ret.uuid
+
+
+@create_single_handler('port group')
+def create_single_portgroup(client, **params):
+    """Call the client to create a port group.
+
+    :param client: ironic client instance.
+    :param params: dictionary to be POSTed to /portgroups endpoint, excluding
+        "ports" key.
+    :returns: UUID of the created port group or None in case of exception, and
+        an exception, if it appears.
+    :raises: InvalidAttribute, if some parameters passed to client's
+        create_method are invalid.
+    :raises: ClientException, if the creation of the portgroup fails.
+    """
+    params.pop('ports', None)
+    ret = client.portgroup.create(**params)
     return ret.uuid
 
 
@@ -188,13 +207,15 @@ def create_single_chassis(client, **params):
     return ret.uuid
 
 
-def create_ports(client, port_list, node_uuid):
+def create_ports(client, port_list, node_uuid, portgroup_uuid=None):
     """Create ports from dictionaries.
 
     :param client: ironic client instance.
     :param port_list: list of dictionaries to be POSTed to /ports
         endpoint.
     :param node_uuid: UUID of a node the ports should be associated with.
+    :param portgroup_uuid: UUID of a port group the ports should be associated
+        with, if they are its members.
     :returns: array of exceptions encountered during creation.
     """
     errors = []
@@ -209,9 +230,54 @@ def create_ports(client, port_list, node_uuid):
                  'port': port}))
             continue
         port['node_uuid'] = node_uuid
+        if portgroup_uuid:
+            port_portgroup_uuid = port.get('portgroup_uuid')
+            if port_portgroup_uuid and port_portgroup_uuid != portgroup_uuid:
+                errors.append(exc.ClientException(
+                    'Cannot create a port as part of port group '
+                    '%(portgroup_uuid)s because the port %(port)s has a '
+                    'different port group UUID specified.',
+                    {'portgroup_uuid': portgroup_uuid,
+                     'port': port}))
+                continue
+            port['portgroup_uuid'] = portgroup_uuid
         port_uuid, error = create_single_port(client, **port)
         if error:
             errors.append(error)
+    return errors
+
+
+def create_portgroups(client, portgroup_list, node_uuid):
+    """Create port groups from dictionaries.
+
+    :param client: ironic client instance.
+    :param portgroup_list: list of dictionaries to be POSTed to /portgroups
+        endpoint, if some of them contain "ports" key, its content is POSTed
+        separately to /ports endpoint.
+    :param node_uuid: UUID of a node the port groups should be associated with.
+    :returns: array of exceptions encountered during creation.
+    """
+    errors = []
+    for portgroup in portgroup_list:
+        portgroup_node_uuid = portgroup.get('node_uuid')
+        if portgroup_node_uuid and portgroup_node_uuid != node_uuid:
+            errors.append(exc.ClientException(
+                'Cannot create a port group as part of node %(node_uuid)s '
+                'because the port group %(portgroup)s has a different node '
+                'UUID specified.',
+                {'node_uuid': node_uuid,
+                 'portgroup': portgroup}))
+            continue
+        portgroup['node_uuid'] = node_uuid
+        portgroup_uuid, error = create_single_portgroup(client, **portgroup)
+        if error:
+            errors.append(error)
+        ports = portgroup.get('ports')
+        # Port group UUID == None means that port group creation failed, don't
+        # create the ports inside it
+        if ports is not None and portgroup_uuid is not None:
+            errors.extend(create_ports(client, ports, node_uuid,
+                                       portgroup_uuid=portgroup_uuid))
     return errors
 
 
@@ -242,10 +308,15 @@ def create_nodes(client, node_list, chassis_uuid=None):
         if error:
             errors.append(error)
         ports = node.get('ports')
+        portgroups = node.get('portgroups')
         # Node UUID == None means that node creation failed, don't
-        # create the ports inside it
-        if ports is not None and node_uuid is not None:
-            errors.extend(create_ports(client, ports, node_uuid=node_uuid))
+        # create the port(group)s inside it
+        if node_uuid is not None:
+            if portgroups is not None:
+                errors.extend(
+                    create_portgroups(client, portgroups, node_uuid))
+            if ports is not None:
+                errors.extend(create_ports(client, ports, node_uuid))
     return errors
 
 

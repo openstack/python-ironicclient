@@ -12,6 +12,7 @@
 
 import jsonschema
 import mock
+import six
 import six.moves.builtins as __builtin__
 
 from ironicclient import exc
@@ -35,6 +36,13 @@ valid_json = {
                 "extra": {
                     "a": "b"
                 }
+            }],
+            "portgroups": [{
+                "address": "00:00:00:00:00:02",
+                "name": "portgroup1",
+                "ports": [{
+                    "address": "00:00:00:00:00:03"
+                }]
             }]
         }]
     }],
@@ -256,6 +264,15 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.node.create.assert_called_once_with(driver='fake')
 
+    def test_create_single_node_with_portgroups(self):
+        params = {'driver': 'fake', 'portgroups': ['some portgroups']}
+        self.client.node.create.return_value = mock.Mock(uuid='uuid')
+        self.assertEqual(
+            ('uuid', None),
+            create_resources.create_single_node(self.client, **params)
+        )
+        self.client.node.create.assert_called_once_with(driver='fake')
+
     def test_create_single_node_raises_client_exception(self):
         params = {'driver': 'fake'}
         e = exc.ClientException('foo')
@@ -285,6 +302,28 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.port.create.assert_called_once_with(**params)
 
+    def test_create_single_portgroup(self):
+        params = {'address': 'fake-address', 'node_uuid': 'fake-node-uuid'}
+        self.client.portgroup.create.return_value = mock.Mock(
+            uuid='fake-portgroup-uuid')
+        self.assertEqual(
+            ('fake-portgroup-uuid', None),
+            create_resources.create_single_portgroup(self.client, **params)
+        )
+        self.client.portgroup.create.assert_called_once_with(**params)
+
+    def test_create_single_portgroup_with_ports(self):
+        params = {'ports': ['some ports'], 'node_uuid': 'fake-node-uuid'}
+        self.client.portgroup.create.return_value = mock.Mock(
+            uuid='fake-portgroup-uuid')
+        self.assertEqual(
+            ('fake-portgroup-uuid', None),
+            create_resources.create_single_portgroup(
+                self.client, **params)
+        )
+        self.client.portgroup.create.assert_called_once_with(
+            node_uuid='fake-node-uuid')
+
     def test_create_single_chassis(self):
         self.client.chassis.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual(
@@ -313,31 +352,49 @@ class CreateMethodsTest(utils.BaseTestCase):
 
     def test_create_ports_two_node_uuids(self):
         port = {'address': 'fake-address', 'node_uuid': 'node-uuid-1'}
-        self.client.port.create.return_value = mock.Mock(uuid='uuid')
         errs = create_resources.create_ports(self.client, [port],
                                              'node-uuid-2')
         self.assertIsInstance(errs[0], exc.ClientException)
         self.assertEqual(1, len(errs))
+        self.assertFalse(self.client.port.create.called)
 
+    def test_create_ports_two_portgroup_uuids(self):
+        port = {'address': 'fake-address', 'node_uuid': 'node-uuid-1',
+                'portgroup_uuid': 'pg-uuid-1'}
+        errs = create_resources.create_ports(self.client, [port],
+                                             'node-uuid-1', 'pg-uuid-2')
+        self.assertEqual(1, len(errs))
+        self.assertIsInstance(errs[0], exc.ClientException)
+        self.assertIn('port group', six.text_type(errs[0]))
+        self.assertFalse(self.client.port.create.called)
+
+    @mock.patch.object(create_resources, 'create_portgroups', autospec=True)
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_nodes(self, mock_create_ports):
-        node = {'driver': 'fake', 'ports': ['list of ports']}
+    def test_create_nodes(self, mock_create_ports, mock_create_portgroups):
+        node = {'driver': 'fake', 'ports': ['list of ports'],
+                'portgroups': ['list of portgroups']}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_nodes(self.client,
                                                            [node]))
         self.client.node.create.assert_called_once_with(driver='fake')
         mock_create_ports.assert_called_once_with(
             self.client, ['list of ports'], node_uuid='uuid')
+        mock_create_portgroups.assert_called_once_with(
+            self.client, ['list of portgroups'], node_uuid='uuid')
 
+    @mock.patch.object(create_resources, 'create_portgroups', autospec=True)
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_nodes_exception(self, mock_create_ports):
-        node = {'driver': 'fake', 'ports': ['list of ports']}
+    def test_create_nodes_exception(self, mock_create_ports,
+                                    mock_create_portgroups):
+        node = {'driver': 'fake', 'ports': ['list of ports'],
+                'portgroups': ['list of portgroups']}
         self.client.node.create.side_effect = exc.ClientException('bar')
         errs = create_resources.create_nodes(self.client, [node])
         self.assertIsInstance(errs[0], exc.ClientException)
         self.assertEqual(1, len(errs))
         self.client.node.create.assert_called_once_with(driver='fake')
         self.assertFalse(mock_create_ports.called)
+        self.assertFalse(mock_create_portgroups.called)
 
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
     def test_create_nodes_two_chassis_uuids(self, mock_create_ports):
@@ -350,14 +407,17 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertEqual(1, len(errs))
         self.assertIsInstance(errs[0], exc.ClientException)
 
+    @mock.patch.object(create_resources, 'create_portgroups', autospec=True)
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_nodes_no_ports(self, mock_create_ports):
+    def test_create_nodes_no_ports_portgroups(self, mock_create_ports,
+                                              mock_create_portgroups):
         node = {'driver': 'fake'}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_nodes(self.client,
                                                            [node]))
         self.client.node.create.assert_called_once_with(driver='fake')
         self.assertFalse(mock_create_ports.called)
+        self.assertFalse(mock_create_portgroups.called)
 
     @mock.patch.object(create_resources, 'create_nodes', autospec=True)
     def test_create_chassis(self, mock_create_nodes):
@@ -387,3 +447,52 @@ class CreateMethodsTest(utils.BaseTestCase):
                                                              [chassis]))
         self.client.chassis.create.assert_called_once_with(description='fake')
         self.assertFalse(mock_create_nodes.called)
+
+    @mock.patch.object(create_resources, 'create_ports', autospec=True)
+    def test_create_portgroups(self, mock_create_ports):
+        portgroup = {'name': 'fake', 'ports': ['list of ports']}
+        portgroup_posted = {'name': 'fake', 'node_uuid': 'fake-node-uuid'}
+        self.client.portgroup.create.return_value = mock.Mock(uuid='uuid')
+        self.assertEqual([], create_resources.create_portgroups(
+            self.client, [portgroup], node_uuid='fake-node-uuid'))
+        self.client.portgroup.create.assert_called_once_with(
+            **portgroup_posted)
+        mock_create_ports.assert_called_once_with(
+            self.client, ['list of ports'], node_uuid='fake-node-uuid',
+            portgroup_uuid='uuid')
+
+    @mock.patch.object(create_resources, 'create_ports', autospec=True)
+    def test_create_portgroups_exception(self, mock_create_ports):
+        portgroup = {'name': 'fake', 'ports': ['list of ports']}
+        portgroup_posted = {'name': 'fake', 'node_uuid': 'fake-node-uuid'}
+        self.client.portgroup.create.side_effect = exc.ClientException('bar')
+        errs = create_resources.create_portgroups(
+            self.client, [portgroup], node_uuid='fake-node-uuid')
+        self.client.portgroup.create.assert_called_once_with(
+            **portgroup_posted)
+        self.assertFalse(mock_create_ports.called)
+        self.assertEqual(1, len(errs))
+        self.assertIsInstance(errs[0], exc.ClientException)
+
+    @mock.patch.object(create_resources, 'create_ports', autospec=True)
+    def test_create_portgroups_two_node_uuids(self, mock_create_ports):
+        portgroup = {'name': 'fake', 'node_uuid': 'fake-node-uuid-1',
+                     'ports': ['list of ports']}
+        self.client.portgroup.create.side_effect = exc.ClientException('bar')
+        errs = create_resources.create_portgroups(
+            self.client, [portgroup], node_uuid='fake-node-uuid-2')
+        self.assertFalse(self.client.portgroup.create.called)
+        self.assertFalse(mock_create_ports.called)
+        self.assertEqual(1, len(errs))
+        self.assertIsInstance(errs[0], exc.ClientException)
+
+    @mock.patch.object(create_resources, 'create_ports', autospec=True)
+    def test_create_portgroups_no_ports(self, mock_create_ports):
+        portgroup = {'name': 'fake'}
+        portgroup_posted = {'name': 'fake', 'node_uuid': 'fake-node-uuid'}
+        self.client.portgroup.create.return_value = mock.Mock(uuid='uuid')
+        self.assertEqual([], create_resources.create_portgroups(
+            self.client, [portgroup], node_uuid='fake-node-uuid'))
+        self.client.portgroup.create.assert_called_once_with(
+            **portgroup_posted)
+        self.assertFalse(mock_create_ports.called)
