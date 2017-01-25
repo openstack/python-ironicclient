@@ -16,6 +16,7 @@
 
 """OpenStackClient plugin for Bare Metal service."""
 
+import argparse
 import logging
 
 from ironicclient.common import http
@@ -53,7 +54,6 @@ def make_client(instance):
             region_name=instance._region_name
         )
     )
-
     return client
 
 
@@ -65,7 +65,24 @@ def build_option_parser(parser):
         default=utils.env(
             'OS_BAREMETAL_API_VERSION',
             default=http.DEFAULT_VER),
+        choices=sorted(
+            API_VERSIONS,
+            key=lambda k: [int(x) for x in k.split('.')]) + ['latest'],
+        action=ReplaceLatestVersion,
         help='Baremetal API version, default=' +
              http.DEFAULT_VER +
-             ' (Env: OS_BAREMETAL_API_VERSION)')
+             ' (Env: OS_BAREMETAL_API_VERSION). '
+             '"latest" is the latest known API version',
+    )
     return parser
+
+
+class ReplaceLatestVersion(argparse.Action):
+    """Replaces `latest` keyword by last known version."""
+    def __call__(self, parser, namespace, values, option_string=None):
+        latest = values == 'latest'
+        if latest:
+            values = '1.%d' % LAST_KNOWN_API_VERSION
+        LOG.debug("Replacing 'latest' API version with the "
+                  "latest known version '%s'", values)
+        setattr(namespace, self.dest, values)

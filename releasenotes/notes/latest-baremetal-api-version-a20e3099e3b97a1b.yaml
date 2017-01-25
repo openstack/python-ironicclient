@@ -1,0 +1,6 @@
+---
+features:
+  - For OSC commands, the --os-baremetal-api-version optional argument
+    (or OS_BAREMETAL_API_VERSION environment variable) can have the
+    value 'latest'. If set to 'latest', the latest API version known by client
+    will be used in requests to the Bare Metal service.
