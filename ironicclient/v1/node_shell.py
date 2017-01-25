@@ -646,7 +646,7 @@ def do_node_vif_list(cc, args):
                    "Can be specified multiple times. The mandatory 'id' "
                    "parameter cannot be specified as a key.")
 def do_node_vif_attach(cc, args):
-    """List vifs for a given node."""
+    """Attach VIF to a given node."""
     fields = utils.key_value_pairs_to_dict(args.vif_info or [])
     cc.node.vif_attach(args.node, args.vif_id, **fields)
 
