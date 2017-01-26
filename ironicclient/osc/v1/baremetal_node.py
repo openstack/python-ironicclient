@@ -487,14 +487,14 @@ class ListBaremetalNode(command.Lister):
             '--maintenance',
             dest='maintenance',
             action='store_true',
-            default=False,
+            default=None,
             help="Limit list to nodes in maintenance mode",
         )
         maint_group.add_argument(
             '--no-maintenance',
-            dest='no_maintenance',
-            action='store_true',
-            default=False,
+            dest='maintenance',
+            action='store_false',
+            default=None,
             help="Limit list to nodes not in maintenance mode",
         )
         associated_group = parser.add_mutually_exclusive_group()
@@ -562,10 +562,8 @@ class ListBaremetalNode(command.Lister):
             params['associated'] = True
         if parsed_args.unassociated:
             params['associated'] = False
-        if parsed_args.maintenance:
-            params['maintenance'] = True
-        elif parsed_args.no_maintenance:
-            params['maintenance'] = False
+        if parsed_args.maintenance is not None:
+            params['maintenance'] = parsed_args.maintenance
         if parsed_args.provision_state:
             params['provision_state'] = parsed_args.provision_state
         if parsed_args.resource_class:

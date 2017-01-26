@@ -583,12 +583,12 @@ class TestBaremetalList(TestBaremetal):
         ), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_list_maintenance(self):
+    def _test_baremetal_list_maintenance(self, maint_option, maint_value):
         arglist = [
-            '--maintenance',
+            maint_option,
         ]
         verifylist = [
-            ('maintenance', True),
+            ('maintenance', maint_value),
         ]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
@@ -600,19 +600,23 @@ class TestBaremetalList(TestBaremetal):
         kwargs = {
             'marker': None,
             'limit': None,
-            'maintenance': True,
+            'maintenance': maint_value,
         }
 
         self.baremetal_mock.node.list.assert_called_with(
             **kwargs
         )
 
+    def test_baremetal_list_maintenance(self):
+        self._test_baremetal_list_maintenance('--maintenance', True)
+
     def test_baremetal_list_no_maintenance(self):
+        self._test_baremetal_list_maintenance('--no-maintenance', False)
+
+    def test_baremetal_list_none_maintenance(self):
         arglist = [
-            '--no-maintenance',
         ]
         verifylist = [
-            ('no_maintenance', True),
         ]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
@@ -624,7 +628,6 @@ class TestBaremetalList(TestBaremetal):
         kwargs = {
             'marker': None,
             'limit': None,
-            'maintenance': False,
         }
 
         self.baremetal_mock.node.list.assert_called_with(
