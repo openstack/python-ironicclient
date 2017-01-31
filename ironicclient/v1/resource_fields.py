@@ -101,6 +101,7 @@ class Resource(object):
         'vendor_interface': 'Vendor Interface',
         'standalone_ports_supported': 'Standalone Ports Supported',
         'id': 'ID',
+        'connector_id': 'Connector ID',
     }
 
     def __init__(self, field_ids, sort_excluded=None, override_labels=None):
@@ -340,4 +341,30 @@ DRIVER_RESOURCE = Resource(
      'hosts',
      ],
     override_labels={'name': 'Supported driver(s)'}
+)
+
+# Volume connectors
+VOLUME_CONNECTOR_DETAILED_RESOURCE = Resource(
+    ['uuid',
+     'node_uuid',
+     'type',
+     'connector_id',
+     'extra',
+     'created_at',
+     'updated_at',
+     ],
+    sort_excluded=[
+        # The server cannot sort on "node_uuid" because it isn't a column in
+        # the "volume_connectors" database table. "node_id" is stored, but it
+        # is internal to ironic. See bug #1443003 for more details.
+        'node_uuid',
+        'extra',
+    ])
+VOLUME_CONNECTOR_RESOURCE = Resource(
+    ['uuid',
+     'node_uuid',
+     'type',
+     'connector_id',
+     ],
+    sort_excluded=['node_uuid']
 )
