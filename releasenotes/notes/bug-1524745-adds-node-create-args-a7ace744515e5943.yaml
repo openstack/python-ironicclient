@@ -1,0 +1,6 @@
+---
+features:
+  - Add new arguments to the CLI node-create to allow selecting
+    boot, console, deploy, inspect, management, power, raid, and vendor
+    hardware interfaces, when hardware types are used. They are available
+    starting with ironic API microversion 1.31.

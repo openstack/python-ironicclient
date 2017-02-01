@@ -46,7 +46,11 @@ class NodeManager(base.CreateManager):
     resource_class = Node
     _creation_attributes = ['chassis_uuid', 'driver', 'driver_info',
                             'extra', 'uuid', 'properties', 'name',
-                            'network_interface', 'resource_class']
+                            'boot_interface', 'console_interface',
+                            'deploy_interface', 'inspect_interface',
+                            'management_interface', 'network_interface',
+                            'power_interface', 'raid_interface',
+                            'vendor_interface', 'resource_class']
     _resource_name = 'nodes'
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
