@@ -1113,7 +1113,8 @@ class ShowBaremetalNode(command.ShowOne):
         node.pop("ports", None)
         node.pop('portgroups', None)
 
-        node.setdefault('chassis_uuid', '')
+        if not fields or 'chassis_uuid' in fields:
+            node.setdefault('chassis_uuid', '')
 
         return self.dict2columns(node)
 

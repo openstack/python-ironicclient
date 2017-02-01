@@ -2090,7 +2090,8 @@ class TestBaremetalShow(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
-        self.cmd.take_action(parsed_args)
+        columns, data = self.cmd.take_action(parsed_args)
+        self.assertNotIn('chassis_uuid', columns)
 
         # Set expected values
         args = ['xxxxx']
@@ -2113,8 +2114,8 @@ class TestBaremetalShow(TestBaremetal):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        self.cmd.take_action(parsed_args)
-
+        columns, data = self.cmd.take_action(parsed_args)
+        self.assertNotIn('chassis_uuid', columns)
         # Set expected values
         args = ['xxxxx']
         fields = ['uuid', 'name', 'extra']
