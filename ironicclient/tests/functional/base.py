@@ -31,6 +31,8 @@ class FunctionalTestBase(base.ClientTestBase):
     def setUp(self):
         super(FunctionalTestBase, self).setUp()
         self.client = self._get_clients()
+        # NOTE(kromanenko) set ironic api version for portgroups
+        self.pg_api_ver = '--ironic-api-version 1.25'
 
     def _get_clients(self):
         # NOTE(aarefiev): {toxinidir} is a current working directory, so
@@ -375,8 +377,64 @@ class FunctionalTestBase(base.ClientTestBase):
         port_list = self.list_ports()
         return [x['UUID'] for x in port_list]
 
-    def update_port(self, port_id, operation, params=''):
+    def update_port(self, port_id, operation, flags='', params=''):
         updated_port = self.ironic('port-update',
+                                   flags=flags,
                                    params='{0} {1} {2}'
                                    .format(port_id, operation, params))
         return utils.get_dict_from_output(updated_port)
+
+    def create_portgroup(self, node_id, params=''):
+        """Create a new portgroup."""
+        portgroup = self.ironic('portgroup-create',
+                                flags=self.pg_api_ver,
+                                params='--node {0} {1}'
+                                .format(node_id, params))
+        if not portgroup:
+            self.fail('Ironic portgroup failed to create!')
+        portgroup = utils.get_dict_from_output(portgroup)
+        self.addCleanup(self.delete_portgroup, portgroup['uuid'],
+                        ignore_exceptions=True)
+        return portgroup
+
+    def delete_portgroup(self, portgroup_id, ignore_exceptions=False):
+        """Delete a port group."""
+        try:
+            self.ironic('portgroup-delete',
+                        flags=self.pg_api_ver,
+                        params=portgroup_id)
+        except exceptions.CommandFailed:
+            if not ignore_exceptions:
+                raise
+
+    def list_portgroups(self, params=''):
+        """List the port groups."""
+        return self.ironic('portgroup-list',
+                           flags=self.pg_api_ver,
+                           params=params)
+
+    def show_portgroup(self, portgroup_id, params=''):
+        """Show detailed information about a port group."""
+        portgroup_show = self.ironic('portgroup-show',
+                                     flags=self.pg_api_ver,
+                                     params='{0} {1}'
+                                     .format(portgroup_id, params))
+        return utils.get_dict_from_output(portgroup_show)
+
+    def update_portgroup(self, portgroup_id, op, params=''):
+        """Update information about a port group."""
+        updated_portgroup = self.ironic('portgroup-update',
+                                        flags=self.pg_api_ver,
+                                        params='{0} {1} {2}'
+                                        .format(portgroup_id, op, params))
+        return utils.get_dict_from_output(updated_portgroup)
+
+    def get_portgroup_uuids_from_portgroup_list(self):
+        """Get UUIDs from list of port groups."""
+        portgroup_list = self.list_portgroups()
+        return [x['UUID'] for x in portgroup_list]
+
+    def portgroup_port_list(self, portgroup_id, params=''):
+        """List the ports associated with a port group."""
+        return self.ironic('portgroup-port-list', flags=self.pg_api_ver,
+                           params='{0} {1}'.format(portgroup_id, params))
