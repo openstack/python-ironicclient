@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Adds OpenStackClient commands for volume target:
+
+    * ``openstack baremetal volume target create``
+    * ``openstack baremetal volume target list``
+    * ``openstack baremetal volume target show``
+    * ``openstack baremetal volume target set``
+    * ``openstack baremetal volume target unset``
+    * ``openstack baremetal volume target delete``

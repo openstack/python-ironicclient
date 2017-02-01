@@ -34,6 +34,7 @@ class Resource(object):
         'address': 'Address',
         'async': 'Async',
         'attach': 'Response is attachment',
+        'boot_index': 'Boot Index',
         'chassis_uuid': 'Chassis UUID',
         'clean_step': 'Clean Step',
         'console_enabled': 'Console Enabled',
@@ -87,6 +88,8 @@ class Resource(object):
         'type': 'Type',
         'updated_at': 'Updated At',
         'uuid': 'UUID',
+        'volume_id': 'Volume ID',
+        'volume_type': 'Driver Volume Type',
         'local_link_connection': 'Local Link Connection',
         'pxe_enabled': 'PXE boot enabled',
         'portgroup_uuid': 'Portgroup UUID',
@@ -365,6 +368,36 @@ VOLUME_CONNECTOR_RESOURCE = Resource(
      'node_uuid',
      'type',
      'connector_id',
+     ],
+    sort_excluded=['node_uuid']
+)
+
+# Volume targets
+VOLUME_TARGET_DETAILED_RESOURCE = Resource(
+    ['uuid',
+     'node_uuid',
+     'volume_type',
+     'properties',
+     'boot_index',
+     'extra',
+     'volume_id',
+     'created_at',
+     'updated_at',
+     ],
+    sort_excluded=[
+        # The server cannot sort on "node_uuid" because it isn't a column in
+        # the "volume_targets" database table. "node_id" is stored, but it
+        # is internal to ironic. See bug #1443003 for more details.
+        'node_uuid',
+        'extra',
+        'properties'
+    ])
+VOLUME_TARGET_RESOURCE = Resource(
+    ['uuid',
+     'node_uuid',
+     'volume_type',
+     'boot_index',
+     'volume_id',
      ],
     sort_excluded=['node_uuid']
 )

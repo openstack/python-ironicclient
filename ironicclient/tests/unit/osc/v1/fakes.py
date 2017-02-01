@@ -146,6 +146,24 @@ VOLUME_CONNECTOR = {
     'extra': baremetal_volume_connector_extra,
 }
 
+baremetal_volume_target_uuid = 'vvv-tttttt-vvvv'
+baremetal_volume_target_volume_type = 'iscsi'
+baremetal_volume_target_boot_index = 0
+baremetal_volume_target_volume_id = 'vvv-tttttt-iii'
+baremetal_volume_target_extra = {'key1': 'value1',
+                                 'key2': 'value2'}
+baremetal_volume_target_properties = {'key11': 'value11',
+                                      'key22': 'value22'}
+VOLUME_TARGET = {
+    'uuid': baremetal_volume_target_uuid,
+    'node_uuid': baremetal_uuid,
+    'volume_type': baremetal_volume_target_volume_type,
+    'boot_index': baremetal_volume_target_boot_index,
+    'volume_id': baremetal_volume_target_volume_id,
+    'extra': baremetal_volume_target_extra,
+    'properties': baremetal_volume_target_properties,
+}
+
 
 class TestBaremetal(utils.TestCommand):
 
