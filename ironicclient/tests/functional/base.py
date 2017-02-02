@@ -352,12 +352,14 @@ class FunctionalTestBase(base.ClientTestBase):
     def create_port(self,
                     node_id,
                     mac_address=None,
+                    flags='',
                     params=''):
 
         if mac_address is None:
             mac_address = data_utils.rand_mac_address()
 
         port = self.ironic('port-create',
+                           flags=flags,
                            params='--address {0} --node {1} {2}'
                            .format(mac_address, node_id, params))
         if not port:
