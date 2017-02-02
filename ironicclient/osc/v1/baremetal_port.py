@@ -37,48 +37,54 @@ class CreateBaremetalPort(command.ShowOne):
         parser.add_argument(
             'address',
             metavar='<address>',
-            help='MAC address for this port.')
+            help=_('MAC address for this port.')
+        )
         parser.add_argument(
             '--node',
             dest='node_uuid',
             metavar='<uuid>',
             required=True,
-            help='UUID of the node that this port belongs to.')
+            help=_('UUID of the node that this port belongs to.')
+        )
         parser.add_argument(
             '--extra',
             metavar="<key=value>",
             action='append',
-            help="Record arbitrary key/value metadata. "
-                 "Can be specified multiple times.")
+            help=_("Record arbitrary key/value metadata. "
+                   "Can be specified multiple times.")
+        )
         parser.add_argument(
             '--local-link-connection',
             metavar="<key=value>",
             action='append',
-            help="Key/value metadata describing Local link connection "
-                 "information. Valid keys are switch_info, switch_id, "
-                 "port_id; switch_id and port_id are obligatory. Can be "
-                 "specified multiple times.")
+            help=_("Key/value metadata describing Local link connection "
+                   "information. Valid keys are switch_info, switch_id, "
+                   "port_id; switch_id and port_id are obligatory. Can be "
+                   "specified multiple times.")
+        )
         parser.add_argument(
             '-l',
             dest='local_link_connection_deprecated',
             metavar="<key=value>",
             action='append',
-            help="DEPRECATED. Please use --local-link-connection instead. "
-                 "Key/value metadata describing Local link connection "
-                 "information. Valid keys are switch_info, switch_id, "
-                 "port_id; switch_id and port_id are obligatory. Can be "
-                 "specified multiple times.")
+            help=_("DEPRECATED. Please use --local-link-connection instead. "
+                   "Key/value metadata describing Local link connection "
+                   "information. Valid keys are switch_info, switch_id, "
+                   "port_id; switch_id and port_id are obligatory. Can be "
+                   "specified multiple times.")
+        )
         parser.add_argument(
             '--pxe-enabled',
             metavar='<boolean>',
-            help='Indicates whether this Port should be used when '
-                 'PXE booting this Node.')
+            help=_('Indicates whether this Port should be used when '
+                   'PXE booting this Node.')
+        )
 
         parser.add_argument(
             '--port-group',
             dest='portgroup_uuid',
             metavar='<uuid>',
-            help="UUID of the port group that this port belongs to.")
+            help=_("UUID of the port group that this port belongs to."))
 
         return parser
 
@@ -87,9 +93,9 @@ class CreateBaremetalPort(command.ShowOne):
         baremetal_client = self.app.client_manager.baremetal
 
         if parsed_args.local_link_connection_deprecated:
-            self.log.warning("Please use --local-link-connection instead of "
-                             "-l, as it is deprecated and will be removed in "
-                             "future releases.")
+            self.log.warning(_LW("Please use --local-link-connection instead "
+                                 "of -l, as it is deprecated and will be "
+                                 "removed in future releases."))
             # It is parsed to either None, or to an array
             if parsed_args.local_link_connection:
                 parsed_args.local_link_connection.extend(
@@ -122,14 +128,17 @@ class ShowBaremetalPort(command.ShowOne):
         parser.add_argument(
             "port",
             metavar="<id>",
-            help="UUID of the port (or MAC address if --address is specified)."
+            help=_("UUID of the port (or MAC address if --address is "
+                   "specified).")
         )
         parser.add_argument(
             '--address',
             dest='address',
             action='store_true',
             default=False,
-            help='<id> is the MAC address (instead of the UUID) of the port.')
+            help=_('<id> is the MAC address (instead of the UUID) of the '
+                   'port.')
+        )
         parser.add_argument(
             '--fields',
             nargs='+',
@@ -138,8 +147,9 @@ class ShowBaremetalPort(command.ShowOne):
             action='append',
             choices=res_fields.PORT_DETAILED_RESOURCE.fields,
             default=[],
-            help="One or more port fields. Only these fields will be fetched "
-                 "from the server.")
+            help=_("One or more port fields. Only these fields will be "
+                   "fetched from the server.")
+        )
         return parser
 
     def take_action(self, parsed_args):
@@ -170,20 +180,21 @@ class UnsetBaremetalPort(command.Command):
         parser.add_argument(
             'port',
             metavar='<port>',
-            help="UUID of the port.")
-
+            help=_("UUID of the port.")
+        )
         parser.add_argument(
             "--extra",
             metavar="<key>",
             action='append',
-            help='Extra to unset on this baremetal port '
-                 '(repeat option to unset multiple extras)')
+            help=_('Extra to unset on this baremetal port '
+                   '(repeat option to unset multiple extras)')
+        )
 
         parser.add_argument(
             '--port-group',
             action='store_true',
             dest='portgroup',
-            help="Remove port from the port group")
+            help=_("Remove port from the port group"))
 
         return parser
 
@@ -217,32 +228,33 @@ class SetBaremetalPort(command.Command):
         parser.add_argument(
             'port',
             metavar='<port>',
-            help="UUID of the port")
-
+            help=_("UUID of the port")
+        )
         parser.add_argument(
             '--node',
             dest='node_uuid',
             metavar='<uuid>',
-            help='Set UUID of the node that this port belongs to')
-
+            help=_('Set UUID of the node that this port belongs to')
+        )
         parser.add_argument(
             "--address",
             metavar="<address>",
             dest='address',
-            help="Set MAC address for this port")
-
+            help=_("Set MAC address for this port")
+        )
         parser.add_argument(
             "--extra",
             metavar="<key=value>",
             action='append',
-            help='Extra to set on this baremetal port '
-                 '(repeat option to set multiple extras)')
+            help=_('Extra to set on this baremetal port '
+                   '(repeat option to set multiple extras)')
+        )
 
         parser.add_argument(
             "--port-group",
             metavar="<uuid>",
             dest='portgroup_uuid',
-            help='Set UUID of the port group that this port belongs to.')
+            help=_('Set UUID of the port group that this port belongs to.'))
 
         return parser
 
@@ -283,7 +295,8 @@ class DeleteBaremetalPort(command.Command):
             "ports",
             metavar="<port>",
             nargs="+",
-            help="UUID(s) of the port(s) to delete.")
+            help=_("UUID(s) of the port(s) to delete.")
+        )
 
         return parser
 
@@ -316,40 +329,40 @@ class ListBaremetalPort(command.Lister):
             '--address',
             dest='address',
             metavar='<mac-address>',
-            help="Only show information for the port with this MAC address."
+            help=_("Only show information for the port with this MAC address.")
         )
         parser.add_argument(
             '--node',
             dest='node',
             metavar='<node>',
-            help="Only list ports of this node (name or UUID)."
+            help=_("Only list ports of this node (name or UUID).")
         )
         parser.add_argument(
             "--port-group",
             metavar="<port group>",
             dest='portgroup',
-            help='Only list ports of this port group (name or UUID).')
+            help=_('Only list ports of this port group (name or UUID).'))
         parser.add_argument(
             '--limit',
             metavar='<limit>',
             type=int,
-            help='Maximum number of ports to return per request, '
-                 '0 for no limit. Default is the maximum number used '
-                 'by the Ironic API Service.'
+            help=_('Maximum number of ports to return per request, '
+                   '0 for no limit. Default is the maximum number used '
+                   'by the Ironic API Service.')
         )
         parser.add_argument(
             '--marker',
             metavar='<port>',
-            help='Port UUID (for example, of the last port in the list from a '
-                 'previous request). '
-                 'Returns the list of ports after this UUID.'
+            help=_('Port UUID (for example, of the last port in the list '
+                   'from a previous request). Returns the list of ports '
+                   'after this UUID.')
         )
         parser.add_argument(
             '--sort',
             metavar="<key>[:<direction>]",
-            help='Sort output by specified port fields and directions '
-                 '(asc or desc) (default: asc). Multiple fields and '
-                 'directions can be specified, separated by comma.'
+            help=_('Sort output by specified port fields and directions '
+                   '(asc or desc) (default: asc). Multiple fields and '
+                   'directions can be specified, separated by comma.')
         )
         display_group = parser.add_mutually_exclusive_group()
         display_group.add_argument(
@@ -357,7 +370,8 @@ class ListBaremetalPort(command.Lister):
             dest='detail',
             action='store_true',
             default=False,
-            help="Show detailed information about ports.")
+            help=_("Show detailed information about ports.")
+        )
         display_group.add_argument(
             '--fields',
             nargs='+',
@@ -366,9 +380,10 @@ class ListBaremetalPort(command.Lister):
             action='append',
             default=[],
             choices=res_fields.PORT_DETAILED_RESOURCE.fields,
-            help="One or more port fields. Only these fields will be fetched "
-                 "from the server. "
-                 "Can not be used when '--long' is specified.")
+            help=_("One or more port fields. Only these fields will be "
+                   "fetched from the server. Can not be used when "
+                   "'--long' is specified.")
+        )
         return parser
 
     def take_action(self, parsed_args):
