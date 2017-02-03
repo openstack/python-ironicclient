@@ -50,12 +50,12 @@ class TestCase(base.FunctionalTestBase):
         output = self.openstack('baremetal node create {0} '
                                 '--driver {1} --name {2} {3}'
                                 .format(opts, driver, name, params))
-
-        self.addCleanup(self.node_delete, name, True)
+        node = json.loads(output)
+        self.addCleanup(self.node_delete, node['uuid'], True)
         if not output:
             self.fail('Baremetal node has not been created!')
 
-        return json.loads(output)
+        return node
 
     def node_list(self, fields=None, params=''):
         """List baremetal nodes.
