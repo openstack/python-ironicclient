@@ -88,7 +88,7 @@ class CreateBaremetalPortGroup(command.ShowOne):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)" % parsed_args)
+        self.log.debug("take_action(%s)", parsed_args)
         baremetal_client = self.app.client_manager.baremetal
 
         field_list = ['node_uuid', 'address', 'name', 'uuid', 'extra', 'mode',
@@ -224,7 +224,7 @@ class ListBaremetalPortGroup(command.Lister):
         return parser
 
     def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)" % parsed_args)
+        self.log.debug("take_action(%s)", parsed_args)
         client = self.app.client_manager.baremetal
 
         columns = res_fields.PORTGROUP_RESOURCE.fields
@@ -254,7 +254,7 @@ class ListBaremetalPortGroup(command.Lister):
             labels = resource.labels
             params['fields'] = columns
 
-        self.log.debug("params(%s)" % params)
+        self.log.debug("params(%s)", params)
         data = client.portgroup.list(**params)
 
         data = oscutils.sort_items(data, parsed_args.sort)
