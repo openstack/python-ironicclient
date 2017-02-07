@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Bump the last known API version to 1.29 in OSC. This version is
+    required for users to be able to use the "inject nmi" command.
