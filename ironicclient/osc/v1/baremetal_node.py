@@ -946,9 +946,49 @@ class SetBaremetalNode(command.Command):
             help=_("Set the driver for the node"),
         )
         parser.add_argument(
+            '--boot-interface',
+            metavar='<boot_interface>',
+            help=_('Set the boot interface for the node'),
+        )
+        parser.add_argument(
+            '--console-interface',
+            metavar='<console_interface>',
+            help=_('Set the console interface for the node'),
+        )
+        parser.add_argument(
+            '--deploy-interface',
+            metavar='<deploy_interface>',
+            help=_('Set the deploy interface for the node'),
+        )
+        parser.add_argument(
+            '--inspect-interface',
+            metavar='<inspect_interface>',
+            help=_('Set the inspect interface for the node'),
+        )
+        parser.add_argument(
+            '--management-interface',
+            metavar='<management_interface>',
+            help=_('Set the management interface for the node'),
+        )
+        parser.add_argument(
             '--network-interface',
             metavar='<network_interface>',
             help=_('Set the network interface for the node'),
+        )
+        parser.add_argument(
+            '--power-interface',
+            metavar='<power_interface>',
+            help=_('Set the power interface for the node'),
+        )
+        parser.add_argument(
+            '--raid-interface',
+            metavar='<raid_interface>',
+            help=_('Set the RAID interface for the node'),
+        )
+        parser.add_argument(
+            '--vendor-interface',
+            metavar='<vendor_interface>',
+            help=_('Set the vendor interface for the node'),
         )
         parser.add_argument(
             '--resource-class',
@@ -1027,11 +1067,51 @@ class SetBaremetalNode(command.Command):
             driver = ["driver=%s" % parsed_args.driver]
             properties.extend(utils.args_array_to_patch(
                 'add', driver))
+        if parsed_args.boot_interface:
+            boot_interface = [
+                "boot_interface=%s" % parsed_args.boot_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', boot_interface))
+        if parsed_args.console_interface:
+            console_interface = [
+                "console_interface=%s" % parsed_args.console_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', console_interface))
+        if parsed_args.deploy_interface:
+            deploy_interface = [
+                "deploy_interface=%s" % parsed_args.deploy_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', deploy_interface))
+        if parsed_args.inspect_interface:
+            inspect_interface = [
+                "inspect_interface=%s" % parsed_args.inspect_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', inspect_interface))
+        if parsed_args.management_interface:
+            management_interface = [
+                "management_interface=%s" % parsed_args.management_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', management_interface))
         if parsed_args.network_interface:
             network_interface = [
                 "network_interface=%s" % parsed_args.network_interface]
             properties.extend(utils.args_array_to_patch(
                 'add', network_interface))
+        if parsed_args.power_interface:
+            power_interface = [
+                "power_interface=%s" % parsed_args.power_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', power_interface))
+        if parsed_args.raid_interface:
+            raid_interface = [
+                "raid_interface=%s" % parsed_args.raid_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', raid_interface))
+        if parsed_args.vendor_interface:
+            vendor_interface = [
+                "vendor_interface=%s" % parsed_args.vendor_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', vendor_interface))
         if parsed_args.resource_class:
             resource_class = [
                 "resource_class=%s" % parsed_args.resource_class]
@@ -1208,6 +1288,60 @@ class UnsetBaremetalNode(command.Command):
             action='store_true',
             help=_('Unset chassis UUID on this baremetal node'),
         )
+        parser.add_argument(
+            "--boot-interface",
+            dest='boot_interface',
+            action='store_true',
+            help=_('Unset boot interface on this baremetal node'),
+        )
+        parser.add_argument(
+            "--console-interface",
+            dest='console_interface',
+            action='store_true',
+            help=_('Unset console interface on this baremetal node'),
+        )
+        parser.add_argument(
+            "--deploy-interface",
+            dest='deploy_interface',
+            action='store_true',
+            help=_('Unset deploy interface on this baremetal node'),
+        )
+        parser.add_argument(
+            "--inspect-interface",
+            dest='inspect_interface',
+            action='store_true',
+            help=_('Unset inspect interface on this baremetal node'),
+        )
+        parser.add_argument(
+            "--management-interface",
+            dest='management_interface',
+            action='store_true',
+            help=_('Unset management interface on this baremetal node'),
+        )
+        parser.add_argument(
+            "--network-interface",
+            dest='network_interface',
+            action='store_true',
+            help=_('Unset network interface on this baremetal node'),
+        )
+        parser.add_argument(
+            "--power-interface",
+            dest='power_interface',
+            action='store_true',
+            help=_('Unset power interface on this baremetal node'),
+        )
+        parser.add_argument(
+            "--raid-interface",
+            dest='raid_interface',
+            action='store_true',
+            help=_('Unset RAID interface on this baremetal node'),
+        )
+        parser.add_argument(
+            "--vendor-interface",
+            dest='vendor_interface',
+            action='store_true',
+            help=_('Unset vendor interface on this baremetal node'),
+        )
 
         return parser
 
@@ -1250,6 +1384,33 @@ class UnsetBaremetalNode(command.Command):
         if parsed_args.chassis_uuid:
             properties.extend(utils.args_array_to_patch('remove',
                               ['chassis_uuid']))
+        if parsed_args.boot_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['boot_interface']))
+        if parsed_args.console_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['console_interface']))
+        if parsed_args.deploy_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['deploy_interface']))
+        if parsed_args.inspect_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['inspect_interface']))
+        if parsed_args.management_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['management_interface']))
+        if parsed_args.network_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['network_interface']))
+        if parsed_args.power_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['power_interface']))
+        if parsed_args.raid_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['raid_interface']))
+        if parsed_args.vendor_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['vendor_interface']))
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
         else:

@@ -1801,14 +1801,14 @@ class TestBaremetalSet(TestBaremetal):
             [{'path': '/driver', 'value': 'xxxxx', 'op': 'add'}]
         )
 
-    def test_baremetal_set_network_interface(self):
+    def _test_baremetal_set_hardware_interface(self, interface):
         arglist = [
             'node_uuid',
-            '--network-interface', 'xxxxx',
+            '--%s-interface' % interface, 'xxxxx',
         ]
         verifylist = [
             ('node', 'node_uuid'),
-            ('network_interface', 'xxxxx')
+            ('%s_interface' % interface, 'xxxxx')
         ]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
@@ -1817,8 +1817,36 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/network_interface', 'value': 'xxxxx', 'op': 'add'}]
+            [{'path': '/%s_interface' % interface,
+              'value': 'xxxxx', 'op': 'add'}]
         )
+
+    def test_baremetal_set_boot_interface(self):
+        self._test_baremetal_set_hardware_interface('boot')
+
+    def test_baremetal_set_console_interface(self):
+        self._test_baremetal_set_hardware_interface('console')
+
+    def test_baremetal_set_deploy_interface(self):
+        self._test_baremetal_set_hardware_interface('deploy')
+
+    def test_baremetal_set_inspect_interface(self):
+        self._test_baremetal_set_hardware_interface('inspect')
+
+    def test_baremetal_set_management_interface(self):
+        self._test_baremetal_set_hardware_interface('management')
+
+    def test_baremetal_set_network_interface(self):
+        self._test_baremetal_set_hardware_interface('network')
+
+    def test_baremetal_set_power_interface(self):
+        self._test_baremetal_set_hardware_interface('power')
+
+    def test_baremetal_set_raid_interface(self):
+        self._test_baremetal_set_hardware_interface('raid')
+
+    def test_baremetal_set_vendor_interface(self):
+        self._test_baremetal_set_hardware_interface('vendor')
 
     def test_baremetal_set_resource_class(self):
         arglist = [
@@ -2376,6 +2404,52 @@ class TestBaremetalUnset(TestBaremetal):
             'node_uuid',
             [{'path': '/chassis_uuid', 'op': 'remove'}]
         )
+
+    def _test_baremetal_unset_hw_interface(self, interface):
+        arglist = [
+            'node_uuid',
+            '--%s-interface' % interface,
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('%s_interface' % interface, True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/%s_interface' % interface, 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_boot_interface(self):
+        self._test_baremetal_unset_hw_interface('boot')
+
+    def test_baremetal_unset_console_interface(self):
+        self._test_baremetal_unset_hw_interface('console')
+
+    def test_baremetal_unset_deploy_interface(self):
+        self._test_baremetal_unset_hw_interface('deploy')
+
+    def test_baremetal_unset_inspect_interface(self):
+        self._test_baremetal_unset_hw_interface('inspect')
+
+    def test_baremetal_unset_management_interface(self):
+        self._test_baremetal_unset_hw_interface('management')
+
+    def test_baremetal_unset_network_interface(self):
+        self._test_baremetal_unset_hw_interface('network')
+
+    def test_baremetal_unset_power_interface(self):
+        self._test_baremetal_unset_hw_interface('power')
+
+    def test_baremetal_unset_raid_interface(self):
+        self._test_baremetal_unset_hw_interface('raid')
+
+    def test_baremetal_unset_vendor_interface(self):
+        self._test_baremetal_unset_hw_interface('vendor')
 
 
 class TestValidate(TestBaremetal):
