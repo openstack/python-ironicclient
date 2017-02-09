@@ -778,18 +778,6 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_invalid_provision_state(self):
-        arglist = [
-            '--provision-state', 'invalid',
-        ]
-        verifylist = [
-            ('provision_state', 'invalid'),
-        ]
-
-        self.assertRaises(oscutils.ParserException,
-                          self.check_parser,
-                          self.cmd, arglist, verifylist)
-
     def test_baremetal_list_resource_class(self):
         arglist = [
             '--resource-class', 'foo',
