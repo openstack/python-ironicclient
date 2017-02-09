@@ -512,9 +512,7 @@ class ListBaremetalNode(command.Lister):
             '--provision-state',
             dest='provision_state',
             metavar='<provision state>',
-            choices=self.PROVISION_STATES,
-            help="Limit list to nodes in <provision state>. One of %s." % (
-                 ", ".join(self.PROVISION_STATES)))
+            help=_("List nodes in specified provision state."))
         parser.add_argument(
             '--resource-class',
             dest='resource_class',
