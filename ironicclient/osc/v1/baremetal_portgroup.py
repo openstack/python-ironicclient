@@ -39,51 +39,48 @@ class CreateBaremetalPortGroup(command.ShowOne):
             dest='node_uuid',
             metavar='<uuid>',
             required=True,
-            help='UUID of the node that this port group belongs to.')
+            help=_('UUID of the node that this port group belongs to.'))
         parser.add_argument(
             '--address',
             metavar='<mac-address>',
-            help='MAC address for this port group.')
+            help=_('MAC address for this port group.'))
         parser.add_argument(
             '--name',
             dest='name',
-            help='Name of the port group.')
+            help=_('Name of the port group.'))
         parser.add_argument(
             '--uuid',
             dest='uuid',
-            help='UUID of the port group.')
+            help=_('UUID of the port group.'))
         parser.add_argument(
             '--extra',
             metavar="<key=value>",
             action='append',
-            help="Record arbitrary key/value metadata. "
-                 "Can be specified multiple times.")
+            help=_("Record arbitrary key/value metadata. "
+                   "Can be specified multiple times."))
         parser.add_argument(
             '--mode',
-            help='Mode of the port group. For possible values, refer to '
-                 'https://www.kernel.org/doc/Documentation/networking'
-                 '/bonding.txt.')
+            help=_('Mode of the port group. For possible values, refer to '
+                   'https://www.kernel.org/doc/Documentation/networking'
+                   '/bonding.txt.'))
         parser.add_argument(
             '--property',
             dest='properties',
             metavar="<key=value>",
             action='append',
-            help="Key/value property related to this port group's "
-                 "configuration. Can be specified multiple times."
-        )
+            help=_("Key/value property related to this port group's "
+                   "configuration. Can be specified multiple times."))
         standalone_ports_group = parser.add_mutually_exclusive_group()
         standalone_ports_group.add_argument(
             '--support-standalone-ports',
             action='store_true',
-            help="Ports that are members of this port group "
-                 "can be used as stand-alone ports. (default)"
-        )
+            help=_("Ports that are members of this port group "
+                   "can be used as stand-alone ports. (default)"))
         standalone_ports_group.add_argument(
             '--unsupport-standalone-ports',
             action='store_true',
-            help="Ports that are members of this port group "
-                 "cannot be used as stand-alone ports."
-        )
+            help=_("Ports that are members of this port group "
+                   "cannot be used as stand-alone ports."))
 
         return parser
 
@@ -120,16 +117,15 @@ class ShowBaremetalPortGroup(command.ShowOne):
         parser.add_argument(
             "portgroup",
             metavar="<id>",
-            help="UUID or name of the port group "
-                 "(or MAC address if --address is specified)."
-        )
+            help=_("UUID or name of the port group "
+                   "(or MAC address if --address is specified)."))
         parser.add_argument(
             '--address',
             dest='address',
             action='store_true',
             default=False,
-            help='<id> is the MAC address (instead of UUID or name) '
-                 'of the port group.')
+            help=_('<id> is the MAC address (instead of UUID or name) '
+                   'of the port group.'))
         parser.add_argument(
             '--fields',
             nargs='+',
@@ -138,8 +134,8 @@ class ShowBaremetalPortGroup(command.ShowOne):
             action='append',
             choices=res_fields.PORTGROUP_DETAILED_RESOURCE.fields,
             default=[],
-            help="One or more port group fields. Only these fields will be "
-                 "fetched from the server.")
+            help=_("One or more port group fields. Only these fields will be "
+                   "fetched from the server."))
         return parser
 
     def take_action(self, parsed_args):
@@ -172,43 +168,38 @@ class ListBaremetalPortGroup(command.Lister):
             '--limit',
             metavar='<limit>',
             type=int,
-            help='Maximum number of port groups to return per request, '
-                 '0 for no limit. Default is the maximum number used '
-                 'by the Baremetal API Service.'
-        )
+            help=_('Maximum number of port groups to return per request, '
+                   '0 for no limit. Default is the maximum number used '
+                   'by the Baremetal API Service.'))
         parser.add_argument(
             '--marker',
             metavar='<port group>',
-            help='Port group UUID (for example, of the last port group in the '
-                 'list from a previous request). Returns the list of '
-                 'port groups after this UUID.'
-        )
+            help=_('Port group UUID (for example, of the last port group in '
+                   'the list from a previous request). Returns the list of '
+                   'port groups after this UUID.'))
         parser.add_argument(
             '--sort',
             metavar="<key>[:<direction>]",
-            help='Sort output by specified port group fields and directions '
-                 '(asc or desc) (default: asc). Multiple fields and '
-                 'directions can be specified, separated by comma.',
-        )
+            help=_('Sort output by specified port group fields and directions '
+                   '(asc or desc) (default: asc). Multiple fields and '
+                   'directions can be specified, separated by comma.'))
         parser.add_argument(
             '--address',
             metavar='<mac-address>',
-            help="Only show information for the port group with this MAC "
-                 "address.",
-        )
+            help=_("Only show information for the port group with this MAC "
+                   "address."))
         parser.add_argument(
             '--node',
             dest='node',
             metavar='<node>',
-            help="Only list port groups of this node (name or UUID)."
-        )
+            help=_("Only list port groups of this node (name or UUID)."))
 
         display_group = parser.add_mutually_exclusive_group(required=False)
         display_group.add_argument(
             '--long',
             default=False,
             dest='detail',
-            help="Show detailed information about the port groups.",
+            help=_("Show detailed information about the port groups."),
             action='store_true')
         display_group.add_argument(
             '--fields',
@@ -218,9 +209,9 @@ class ListBaremetalPortGroup(command.Lister):
             action='append',
             default=[],
             choices=res_fields.PORTGROUP_DETAILED_RESOURCE.fields,
-            help="One or more port group fields. Only these fields will be "
-                 "fetched from the server. Can not be used when '--long' is "
-                 "specified.")
+            help=_("One or more port group fields. Only these fields will be "
+                   "fetched from the server. Can not be used when '--long' is "
+                   "specified."))
         return parser
 
     def take_action(self, parsed_args):
@@ -275,7 +266,7 @@ class DeleteBaremetalPortGroup(command.Command):
             "portgroups",
             metavar="<port group>",
             nargs="+",
-            help="Port group(s) to delete (name or UUID).")
+            help=_("Port group(s) to delete (name or UUID)."))
 
         return parser
 
@@ -309,56 +300,57 @@ class SetBaremetalPortGroup(command.Command):
         parser.add_argument(
             'portgroup',
             metavar='<port group>',
-            help="Name or UUID of the port group.",
+            help=_("Name or UUID of the port group."),
         )
         parser.add_argument(
             '--node',
             dest='node_uuid',
             metavar='<uuid>',
-            help='Update UUID of the node that this port group belongs to.'
+            help=_('Update UUID of the node that this port group belongs to.')
         )
         parser.add_argument(
             "--address",
             metavar="<mac-address>",
-            help="MAC address for this port group.",
+            help=_("MAC address for this port group."),
         )
         parser.add_argument(
             "--name",
             metavar="<name>",
-            help="Name of the port group.",
+            help=_("Name of the port group."),
         )
         parser.add_argument(
             "--extra",
             metavar="<key=value>",
             action='append',
-            help='Extra to set on this baremetal port group '
-                 '(repeat option to set multiple extras).',
+            help=_('Extra to set on this baremetal port group '
+                   '(repeat option to set multiple extras).'),
         )
         parser.add_argument(
             '--mode',
-            help='Mode of the port group. For possible values, refer to '
-                 'https://www.kernel.org/doc/Documentation/networking'
-                 '/bonding.txt.')
+            help=_('Mode of the port group. For possible values, refer to '
+                   'https://www.kernel.org/doc/Documentation/networking'
+                   '/bonding.txt.'))
         parser.add_argument(
             '--property',
             dest='properties',
             metavar="<key=value>",
             action='append',
-            help="Key/value property related to this port group's "
-                 "configuration (repeat option to set multiple properties).")
+            help=_("Key/value property related to this port group's "
+                   "configuration (repeat option to set multiple "
+                   "properties)."))
         standalone_ports_group = parser.add_mutually_exclusive_group()
         standalone_ports_group.add_argument(
             '--support-standalone-ports',
             action='store_true',
             default=None,
-            help="Ports that are members of this port group "
-                 "can be used as stand-alone ports."
+            help=_("Ports that are members of this port group "
+                   "can be used as stand-alone ports.")
         )
         standalone_ports_group.add_argument(
             '--unsupport-standalone-ports',
             action='store_true',
-            help="Ports that are members of this port group "
-                 "cannot be used as stand-alone ports."
+            help=_("Ports that are members of this port group "
+                   "cannot be used as stand-alone ports.")
         )
 
         return parser
@@ -413,32 +405,32 @@ class UnsetBaremetalPortGroup(command.Command):
         parser.add_argument(
             'portgroup',
             metavar='<port group>',
-            help="Name or UUID of the port group."
+            help=_("Name or UUID of the port group.")
         )
         parser.add_argument(
             "--name",
             action='store_true',
-            help="Unset the name of the port group.",
+            help=_("Unset the name of the port group."),
         )
         parser.add_argument(
             "--address",
             action='store_true',
-            help="Unset the address of the port group.",
+            help=_("Unset the address of the port group."),
         )
         parser.add_argument(
             "--extra",
             metavar="<key>",
             action='append',
-            help='Extra to unset on this baremetal port group '
-                 '(repeat option to unset multiple extras).',
+            help=_('Extra to unset on this baremetal port group '
+                   '(repeat option to unset multiple extras).'),
         )
         parser.add_argument(
             "--property",
             dest='properties',
             metavar="<key>",
             action='append',
-            help='Property to unset on this baremetal port group '
-                 '(repeat option to unset multiple properties).',
+            help=_('Property to unset on this baremetal port group '
+                   '(repeat option to unset multiple properties).'),
         )
 
         return parser

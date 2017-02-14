@@ -13,7 +13,7 @@
 import argparse
 import logging
 
-from ironicclient.common.i18n import _
+from ironicclient.common.i18n import _, _LW
 from ironicclient import exc
 from ironicclient.osc.v1 import baremetal_node
 from ironicclient.v1 import create_resources
@@ -30,10 +30,10 @@ class CreateBaremetal(baremetal_node.CreateBaremetalNode):
     log = logging.getLogger(__name__ + ".CreateBaremetal")
 
     def get_description(self):
-        return ("Create resources from files (by only specifying the files) "
-                "or register a new node by specifying one or more optional "
-                "arguments (DEPRECATED, use 'openstack baremetal node create' "
-                "instead)")
+        return _("Create resources from files (by only specifying the files) "
+                 "or register a new node by specifying one or more optional "
+                 "arguments (DEPRECATED, use 'openstack baremetal node "
+                 "create' instead)")
 
     # TODO(vdrok): Remove support for new node creation after 11-July-2017
     # during the 'Queens' cycle.
@@ -48,21 +48,21 @@ class CreateBaremetal(baremetal_node.CreateBaremetalNode):
         parser.add_argument(
             '--driver',
             metavar='<driver>',
-            help='Specify this and any other optional arguments if you want '
-                 'to create a node only. Note that this is deprecated; please '
-                 'use "openstack baremetal node create" instead.')
+            help=_('Specify this and any other optional arguments if you want '
+                   'to create a node only. Note that this is deprecated; '
+                   'please use "openstack baremetal node create" instead.'))
         parser.add_argument(
             "resource_files", metavar="<file>", default=[], nargs="*",
-            help="File (.yaml or .json) containing descriptions of the "
-                 "resources to create. Can be specified multiple times. If "
-                 "you want to create resources, only specify the files. Do "
-                 "not specify any of the optional arguments.")
+            help=_("File (.yaml or .json) containing descriptions of the "
+                   "resources to create. Can be specified multiple times. If "
+                   "you want to create resources, only specify the files. Do "
+                   "not specify any of the optional arguments."))
         return parser
 
     def take_action(self, parsed_args):
         if parsed_args.driver:
-            self.log.warning("This command is deprecated. Instead, use "
-                             "'openstack baremetal node create'.")
+            self.log.warning(_LW("This command is deprecated. Instead, use "
+                                 "'openstack baremetal node create'."))
             return super(CreateBaremetal, self).take_action(parsed_args)
         if not parsed_args.resource_files:
             raise exc.ValidationError(_(
