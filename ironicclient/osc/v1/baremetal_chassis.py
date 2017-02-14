@@ -38,17 +38,21 @@ class CreateBaremetalChassis(command.ShowOne):
             '--description',
             dest='description',
             metavar='<description>',
-            help='Description for the chassis')
+            help=_('Description for the chassis')
+        )
         parser.add_argument(
             '--extra',
             metavar='<key=value>',
             action='append',
-            help="Record arbitrary key/value metadata. "
-                 "Can be specified multiple times.")
+            help=_("Record arbitrary key/value metadata. "
+                   "Can be specified multiple times.")
+        )
         parser.add_argument(
             '--uuid',
             metavar='<uuid>',
-            help="Unique UUID of the chassis")
+            help=_("Unique UUID of the chassis")
+        )
+
         return parser
 
     def take_action(self, parsed_args):
@@ -79,7 +83,8 @@ class DeleteBaremetalChassis(command.Command):
             "chassis",
             metavar="<chassis>",
             nargs="+",
-            help="UUIDs of chassis to delete")
+            help=_("UUIDs of chassis to delete")
+        )
 
         return parser
 
@@ -118,35 +123,37 @@ class ListBaremetalChassis(command.Lister):
             action='append',
             default=[],
             choices=res_fields.CHASSIS_DETAILED_RESOURCE.fields,
-            help="One or more chassis fields. Only these fields will be "
-                 "fetched from the server. Cannot be used when '--long' is "
-                 "specified.")
+            help=_("One or more chassis fields. Only these fields will be "
+                   "fetched from the server. Cannot be used when '--long' is "
+                   "specified.")
+        )
         parser.add_argument(
             '--limit',
             metavar='<limit>',
             type=int,
-            help='Maximum number of chassis to return per request, '
-                 '0 for no limit. Default is the maximum number used '
-                 'by the Baremetal API Service.'
+            help=_('Maximum number of chassis to return per request, '
+                   '0 for no limit. Default is the maximum number used '
+                   'by the Baremetal API Service.')
         )
         display_group.add_argument(
             '--long',
             default=False,
-            help="Show detailed information about the chassis",
-            action='store_true')
+            action='store_true',
+            help=_("Show detailed information about the chassis")
+        )
         parser.add_argument(
             '--marker',
             metavar='<chassis>',
-            help='Chassis UUID (for example, of the last chassis in the list '
-                 'from a previous request). Returns the list of chassis after '
-                 'this UUID.'
+            help=_('Chassis UUID (for example, of the last chassis in the '
+                   'list from a previous request). Returns the list of '
+                   'chassis after this UUID.')
         )
         parser.add_argument(
             '--sort',
             metavar="<key>[:<direction>]",
-            help='Sort output by specified chassis fields and directions '
-                 '(asc or desc) (default: asc). Multiple fields and '
-                 'directions can be specified, separated by comma.',
+            help=_('Sort output by specified chassis fields and directions '
+                   '(asc or desc) (default: asc). Multiple fields and '
+                   'directions can be specified, separated by comma.')
         )
         return parser
 
@@ -197,19 +204,19 @@ class SetBaremetalChassis(command.Command):
         parser.add_argument(
             'chassis',
             metavar='<chassis>',
-            help="UUID of the chassis",
+            help=_("UUID of the chassis")
         )
         parser.add_argument(
             "--description",
             metavar="<description>",
-            help="Set the description of the chassis",
+            help=_("Set the description of the chassis")
         )
         parser.add_argument(
             "--extra",
             metavar="<key=value>",
             action='append',
-            help='Extra to set on this chassis '
-                 '(repeat option to set multiple extras)',
+            help=_('Extra to set on this chassis '
+                   '(repeat option to set multiple extras)')
         )
         return parser
 
@@ -243,7 +250,8 @@ class ShowBaremetalChassis(command.ShowOne):
         parser.add_argument(
             "chassis",
             metavar="<chassis>",
-            help="UUID of the chassis")
+            help=_("UUID of the chassis")
+        )
         parser.add_argument(
             '--fields',
             nargs='+',
@@ -252,8 +260,9 @@ class ShowBaremetalChassis(command.ShowOne):
             action='append',
             choices=res_fields.CHASSIS_DETAILED_RESOURCE.fields,
             default=[],
-            help="One or more chassis fields. Only these fields will be "
-                 "fetched from the server.")
+            help=_("One or more chassis fields. Only these fields will be "
+                   "fetched from the server.")
+        )
         return parser
 
     def take_action(self, parsed_args):
@@ -280,20 +289,20 @@ class UnsetBaremetalChassis(command.Command):
         parser.add_argument(
             'chassis',
             metavar='<chassis>',
-            help="UUID of the chassis"
+            help=_("UUID of the chassis")
         )
         parser.add_argument(
             '--description',
             action='store_true',
             default=False,
-            help='Clear the chassis description',
+            help=_('Clear the chassis description')
         )
         parser.add_argument(
             "--extra",
             metavar="<key>",
             action='append',
-            help='Extra to unset on this chassis '
-                 '(repeat option to unset multiple extras)',
+            help=_('Extra to unset on this chassis '
+                   '(repeat option to unset multiple extras)')
         )
         return parser
 
