@@ -96,3 +96,64 @@ class TestCase(base.FunctionalTestBase):
         except exceptions.CommandFailed:
             if not ignore_exceptions:
                 raise
+
+    def port_create(self, node_id, mac_address=None, params=''):
+        """Create baremetal port and add cleanup.
+
+        :param String node_id: baremetal node UUID
+        :param String mac_address: MAC address for port
+        :param String params: Additional args and kwargs
+        :return: JSON object of created port
+        """
+        if not mac_address:
+            mac_address = data_utils.rand_mac_address()
+
+        opts = self.get_opts()
+        port = self.openstack('baremetal port create {0} '
+                              '--node {1} {2} {3}'
+                              .format(opts, node_id, mac_address, params))
+        port = json.loads(port)
+        if not port:
+            self.fail('Baremetal port has not been created!')
+        self.addCleanup(self.port_delete, port['uuid'], True)
+        return port
+
+    def port_list(self, fields=None, params=''):
+        """List baremetal ports.
+
+        :param List fields: List of fields to show
+        :param String params: Additional kwargs
+        :return: list of JSON port objects
+        """
+        opts = self.get_opts(fields=fields)
+        output = self.openstack('baremetal port list {0} {1}'
+                                .format(opts, params))
+        return json.loads(output)
+
+    def port_show(self, uuid, fields=None, params=''):
+        """Show specified baremetal port.
+
+        :param String uuid: UUID of the port
+        :param List fields: List of fields to show
+        :param List params: Additional kwargs
+        :return: JSON object of port
+        """
+        opts = self.get_opts(fields)
+        output = self.openstack('baremetal port show {0} {1} {2}'
+                                .format(opts, uuid, params))
+        return json.loads(output)
+
+    def port_delete(self, uuid, ignore_exceptions=False):
+        """Try to delete baremetal port by UUID.
+
+        :param String uuid: UUID of the port
+        :param Bool ignore_exceptions: Ignore exception (needed for cleanUp)
+        :return: raw values output
+        :raise: CommandFailed exception when command fails to delete a port
+        """
+        try:
+            return self.openstack('baremetal port delete {0}'
+                                  .format(uuid))
+        except exceptions.CommandFailed:
+            if not ignore_exceptions:
+                raise
