@@ -424,6 +424,7 @@ class CreateBaremetalNode(command.ShowOne):
         node.pop('links', None)
         node.pop('ports', None)
         node.pop('portgroups', None)
+        node.pop('states', None)
 
         node.setdefault('chassis_uuid', '')
 
@@ -1112,6 +1113,7 @@ class ShowBaremetalNode(command.ShowOne):
         node.pop("links", None)
         node.pop("ports", None)
         node.pop('portgroups', None)
+        node.pop('states', None)
 
         if not fields or 'chassis_uuid' in fields:
             node.setdefault('chassis_uuid', '')

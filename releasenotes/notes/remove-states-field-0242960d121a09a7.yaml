@@ -1,0 +1,5 @@
+---
+upgrade:
+  - Hides 'states' field in 'node create' and 'node show'
+    OSC subcommands output because this field is not meant
+    to be present in the output.
