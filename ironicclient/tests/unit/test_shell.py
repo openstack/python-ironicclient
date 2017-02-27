@@ -24,6 +24,7 @@ import testtools
 from testtools import matchers
 
 from ironicclient import client
+from ironicclient.common.apiclient import exceptions
 from ironicclient.common import http
 from ironicclient import exc
 from ironicclient import shell as ironic_shell
@@ -252,6 +253,10 @@ class ShellTest(utils.BaseTestCase):
         self.shell('--ironic-api-version latest help')
         self.assertRaises(exc.CommandError,
                           self.shell, '--ironic-api-version 1.2.1 help')
+
+    def test_invalid_ironic_api_version(self):
+        self.assertRaises(exceptions.UnsupportedVersion,
+                          self.shell, '--ironic-api-version 0.8 help')
 
 
 class TestCase(testtools.TestCase):
