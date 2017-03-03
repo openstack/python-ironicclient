@@ -43,6 +43,7 @@ class Resource(object):
         'driver_info': 'Driver Info',
         'driver_internal_info': 'Driver Internal Info',
         'extra': 'Extra',
+        'hosts': 'Active host(s)',
         'http_methods': 'Supported HTTP methods',
         'inspection_finished_at': 'Inspection Finished At',
         'inspection_started_at': 'Inspection Started At',
@@ -83,7 +84,7 @@ class Resource(object):
         'id': 'ID',
     }
 
-    def __init__(self, field_ids, sort_excluded=None):
+    def __init__(self, field_ids, sort_excluded=None, override_labels=None):
         """Create a Resource object
 
         :param field_ids:  A list of strings that the Resource object will
@@ -91,21 +92,39 @@ class Resource(object):
                            FIELDS.
         :param sort_excluded: Optional. A list of strings that will not be used
                               for sorting.  Must be a subset of 'field_ids'.
+        :param override_labels: Optional. A dictionary, where key is a field ID
+                                and value is the label to be used. If
+                                unspecified, uses the labels associated with
+                                the fields from global FIELDS.
 
-        :raises: ValueError if sort_excluded contains value not in field_ids
+        :raises: ValueError if sort_excluded or override_labels contains values
+                 not in field_ids
         """
+        def check_param_fields(param_name, param_fields):
+            not_existing = set(param_fields) - set(field_ids)
+            if not_existing:
+                raise ValueError(
+                    _("%(param)s specified with value not contained in "
+                      "field_ids.  Unknown value(s): %(unknown)s")
+                    % {'param': param_name, 'unknown': ','.join(not_existing)})
+
+        if override_labels is None:
+            override_labels = {}
+        else:
+            check_param_fields('override_labels', override_labels.keys())
+
         self._fields = tuple(field_ids)
-        self._labels = tuple([self.FIELDS[x] for x in field_ids])
+        self._labels = tuple([override_labels.get(x) or self.FIELDS[x]
+                             for x in field_ids])
+
         if sort_excluded is None:
             sort_excluded = []
-        not_existing = set(sort_excluded) - set(field_ids)
-        if not_existing:
-            raise ValueError(
-                _("sort_excluded specified with value not contained in "
-                  "field_ids.  Unknown value(s): %s") % ','.join(not_existing))
+        else:
+            check_param_fields('sort_excluded', sort_excluded)
         self._sort_fields = tuple(
             [x for x in field_ids if x not in sort_excluded])
-        self._sort_labels = tuple([self.FIELDS[x] for x in self._sort_fields])
+        self._sort_labels = tuple([override_labels.get(x) or self.FIELDS[x]
+                                  for x in self._sort_fields])
 
     @property
     def fields(self):
@@ -269,4 +288,12 @@ PORTGROUP_RESOURCE = Resource(
 # VIFs
 VIF_RESOURCE = Resource(
     ['id'],
+)
+
+# Drivers
+DRIVER_RESOURCE = Resource(
+    ['name',
+     'hosts',
+     ],
+    override_labels={'name': 'Supported driver(s)'}
 )
