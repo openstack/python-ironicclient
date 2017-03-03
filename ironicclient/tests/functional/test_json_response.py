@@ -211,3 +211,77 @@ class TestDriverJsonResponse(base.FunctionalTestBase):
             response = self.ironic('driver-properties', flags='--json',
                                    params='{0}'.format(driver), parse=False)
             self.assertTrue(_is_valid_json(response, schema))
+
+
+class TestChassisJsonResponse(base.FunctionalTestBase):
+    """Test JSON responses for chassis commands."""
+
+    chassis_schema = {
+        "type": "object",
+        "properties": {
+            "uuid": {"type": "string"},
+            "updated_at": {"type": ["string", "null"]},
+            "created_at": {"type": "string"},
+            "description": {"type": ["string", "null"]},
+            "extra": {"type": "object"}}
+    }
+
+    def setUp(self):
+        super(TestChassisJsonResponse, self).setUp()
+        self.chassis = self.create_chassis()
+
+    def test_chassis_list_json(self):
+        """Test JSON response for chassis list."""
+        schema = {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "uuid": {"type": "string"},
+                    "description": {"type": ["string", "null"]}}
+            }
+        }
+        response = self.ironic('chassis-list', flags='--json', parse=False)
+        self.assertTrue(_is_valid_json(response, schema))
+
+    def test_chassis_show_json(self):
+        """Test JSON response for chassis show."""
+        response = self.ironic('chassis-show', flags='--json',
+                               params='{0}'.format(self.chassis['uuid']),
+                               parse=False)
+        self.assertTrue(_is_valid_json(response, self.chassis_schema))
+
+    def test_chassis_create_json(self):
+        """Test JSON response for chassis create."""
+        response = self.ironic('chassis-create', flags='--json', parse=False)
+        self.assertTrue(_is_valid_json(response, self.chassis_schema))
+
+    def test_chassis_update_json(self):
+        """Test JSON response for chassis update."""
+        response = self.ironic(
+            'chassis-update', flags='--json', params='{0} {1} {2}'.format(
+                self.chassis['uuid'], 'add', 'description=test-chassis'),
+            parse=False)
+        self.assertTrue(_is_valid_json(response, self.chassis_schema))
+
+    def test_chassis_node_list_json(self):
+        """Test JSON response for chassis-node-list command."""
+        schema = {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "instance_uuid": {"type": ["string", "null"]},
+                    "maintenance": {"type": "boolean"},
+                    "name": {"type": ["string", "null"]},
+                    "power_state": {"type": ["string", "null"]},
+                    "provision_state": {"type": "string"},
+                    "uuid": {"type": "string"}}}
+        }
+        self.node = self.create_node()
+        self.update_node(self.node['uuid'], 'add chassis_uuid={0}'
+                         .format(self.chassis['uuid']))
+        response = self.ironic('chassis-node-list', flags='--json',
+                               params='{0}'.format(self.chassis['uuid']),
+                               parse=False)
+        self.assertTrue(_is_valid_json(response, schema))
