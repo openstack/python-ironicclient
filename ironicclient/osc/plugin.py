@@ -32,10 +32,23 @@ API_VERSIONS = {
     for i in range(1, LAST_KNOWN_API_VERSION + 1)
 }
 API_VERSIONS['1'] = API_VERSIONS[http.DEFAULT_VER]
+OS_BAREMETAL_API_VERSION_SPECIFIED = False
+MISSING_VERSION_WARNING = (
+    "You are using the default API version of the OpenStack CLI baremetal "
+    "(ironic) plugin. This is currently API version %s. In the future, "
+    "the default will be the latest API version understood by both API "
+    "and CLI. You can preserve the current behavior by passing the "
+    "--os-baremetal-api-version argument with the desired version or using "
+    "the OS_BAREMETAL_API_VERSION environment variable."
+)
 
 
 def make_client(instance):
     """Returns a baremetal service client."""
+    if (not OS_BAREMETAL_API_VERSION_SPECIFIED and not
+            utils.env('OS_BAREMETAL_API_VERSION')):
+        LOG.warning(MISSING_VERSION_WARNING, http.DEFAULT_VER)
+
     baremetal_client_class = utils.get_client_class(
         API_NAME,
         instance._api_version[API_NAME],
@@ -80,6 +93,8 @@ def build_option_parser(parser):
 class ReplaceLatestVersion(argparse.Action):
     """Replaces `latest` keyword by last known version."""
     def __call__(self, parser, namespace, values, option_string=None):
+        global OS_BAREMETAL_API_VERSION_SPECIFIED
+        OS_BAREMETAL_API_VERSION_SPECIFIED = True
         latest = values == 'latest'
         if latest:
             values = '1.%d' % LAST_KNOWN_API_VERSION
