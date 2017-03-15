@@ -38,8 +38,8 @@ class ListBaremetalDriver(command.Lister):
         self.log.debug("take_action(%s)", parsed_args)
         client = self.app.client_manager.baremetal
 
-        labels = ['Supported driver(s)', 'Active host(s)']
-        columns = ['name', 'hosts']
+        labels = res_fields.DRIVER_RESOURCE.labels
+        columns = res_fields.DRIVER_RESOURCE.fields
 
         drivers = client.driver.list()
         drivers = oscutils.sort_items(drivers, 'name')

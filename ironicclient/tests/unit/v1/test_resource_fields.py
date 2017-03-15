@@ -62,6 +62,31 @@ class ResourceTest(testtools.TestCase):
             ['item_3', 'item1', '2nd_item'],
             sort_excluded=['item1', 'foo'])
 
+    def test_override_labels(self):
+        # Test overriding labels
+        foo = resource_fields.Resource(['item_3', 'item1', '2nd_item'],
+                                       override_labels={'item1': 'One'})
+        self.assertEqual(('Third item', 'One', 'A second item'), foo.labels)
+        self.assertEqual(('Third item', 'One', 'A second item'),
+                         foo.sort_labels)
+
+    def test_override_labels_unknown(self):
+        # Test overriding labels with key not in field_ids
+        self.assertRaises(
+            ValueError,
+            resource_fields.Resource,
+            ['item_3', 'item1', '2nd_item'],
+            override_labels={'foo': 'One'})
+
+    def test_sort_excluded_override_labels(self):
+        # Test excluding of fields for sort purposes and overriding labels
+        foo = resource_fields.Resource(['item_3', 'item1', '2nd_item'],
+                                       sort_excluded=['item1'],
+                                       override_labels={'item_3': 'Three'})
+        self.assertEqual(('Three', 'ITEM1', 'A second item'), foo.labels)
+        self.assertEqual(('item_3', '2nd_item'), foo.sort_fields)
+        self.assertEqual(('Three', 'A second item'), foo.sort_labels)
+
     def test_unknown_field_id(self):
         self.assertRaises(
             KeyError,

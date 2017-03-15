@@ -22,7 +22,7 @@ from ironicclient.v1 import utils as v1_utils
 
 
 def _print_driver_show(driver, json=False):
-    fields = ['name', 'hosts']
+    fields = res_fields.DRIVER_RESOURCE.fields
     data = dict([(f, getattr(driver, f, '')) for f in fields])
     cliutils.print_dict(data, wrap=72, json_flag=json)
 
@@ -34,8 +34,8 @@ def do_driver_list(cc, args):
     # It's easier to read.
     for d in drivers:
         d.hosts = ', '.join(d.hosts)
-    field_labels = ['Supported driver(s)', 'Active host(s)']
-    fields = ['name', 'hosts']
+    field_labels = res_fields.DRIVER_RESOURCE.labels
+    fields = res_fields.DRIVER_RESOURCE.fields
     cliutils.print_list(drivers, fields, field_labels=field_labels,
                         json_flag=args.json)
 
