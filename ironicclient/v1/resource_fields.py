@@ -106,7 +106,8 @@ class Resource(object):
                 raise ValueError(
                     _("%(param)s specified with value not contained in "
                       "field_ids.  Unknown value(s): %(unknown)s")
-                    % {'param': param_name, 'unknown': ','.join(not_existing)})
+                    % {'param': param_name,
+                       'unknown': ', '.join(not_existing)})
 
         if override_labels is None:
             override_labels = {}
