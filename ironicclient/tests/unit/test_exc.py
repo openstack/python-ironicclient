@@ -21,7 +21,7 @@ from ironicclient import exc
 from ironicclient.tests.unit import utils as test_utils
 
 
-@mock.patch.object(exceptions, 'from_response')
+@mock.patch.object(exceptions, 'from_response', autospec=True)
 class ExcTest(test_utils.BaseTestCase):
 
     def setUp(self):

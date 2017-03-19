@@ -152,10 +152,10 @@ class ShellTest(utils.BaseTestCase):
         self.make_env(exclude='OS_USERNAME')
         self.test_help()
 
-    @mock.patch.object(client, 'get_client',
+    @mock.patch.object(client, 'get_client', autospec=True,
                        side_effect=keystone_exc.ConnectFailure)
-    @mock.patch('sys.stdin', side_effect=mock.MagicMock)
-    @mock.patch('getpass.getpass', return_value='password')
+    @mock.patch('sys.stdin', side_effect=mock.MagicMock, autospec=True)
+    @mock.patch('getpass.getpass', return_value='password', autospec=True)
     def test_password_prompted(self, mock_getpass, mock_stdin, mock_client):
         self.make_env(exclude='OS_PASSWORD')
         # We will get a ConnectFailure because there is no keystone.
@@ -179,9 +179,9 @@ class ShellTest(utils.BaseTestCase):
         # Make sure we are actually prompted.
         mock_getpass.assert_called_with('OpenStack Password: ')
 
-    @mock.patch.object(client, 'get_client',
+    @mock.patch.object(client, 'get_client', autospec=True,
                        side_effect=keystone_exc.ConnectFailure)
-    @mock.patch('getpass.getpass', return_value='password')
+    @mock.patch('getpass.getpass', return_value='password', autospec=True)
     def test_token_auth(self, mock_getpass, mock_client):
         self.make_env(environ_dict=FAKE_ENV_KEYSTONE_V2_TOKEN)
         # We will get a ConnectFailure because there is no keystone.
@@ -206,8 +206,8 @@ class ShellTest(utils.BaseTestCase):
         mock_client.assert_called_once_with(1, **expected_kwargs)
         self.assertFalse(mock_getpass.called)
 
-    @mock.patch('sys.stdin', side_effect=mock.MagicMock)
-    @mock.patch('getpass.getpass', side_effect=EOFError)
+    @mock.patch('sys.stdin', side_effect=mock.MagicMock, autospec=True)
+    @mock.patch('getpass.getpass', side_effect=EOFError, autospec=True)
     def test_password_prompted_ctrlD(self, mock_getpass, mock_stdin):
         self.make_env(exclude='OS_PASSWORD')
         # We should get Command Error because we mock Ctl-D.
@@ -216,7 +216,7 @@ class ShellTest(utils.BaseTestCase):
         # Make sure we are actually prompted.
         mock_getpass.assert_called_with('OpenStack Password: ')
 
-    @mock.patch('sys.stdin')
+    @mock.patch('sys.stdin', autospec=True)
     def test_no_password_no_tty(self, mock_stdin):
         # delete the isatty attribute so that we do not get
         # prompted when manually running the tests

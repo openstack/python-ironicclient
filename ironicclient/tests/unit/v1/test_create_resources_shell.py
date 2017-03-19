@@ -22,7 +22,7 @@ class TestCreateResourcesShell(utils.BaseTestCase):
         super(TestCreateResourcesShell, self).setUp()
         self.client = mock.MagicMock(autospec=True)
 
-    @mock.patch.object(create_resources, 'create_resources')
+    @mock.patch.object(create_resources, 'create_resources', autospec=True)
     def test_create_shell(self, mock_create_resources):
         args = mock.MagicMock()
         files = ['file1', 'file2', 'file3']

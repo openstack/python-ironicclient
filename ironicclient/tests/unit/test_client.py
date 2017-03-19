@@ -281,7 +281,7 @@ class ClientTest(utils.BaseTestCase):
         self._test_loader_arguments_passed_correctly(
             passed_kwargs=passed_kwargs, expected_kwargs=expected_kwargs)
 
-    @mock.patch.object(iroclient, 'Client')
+    @mock.patch.object(iroclient, 'Client', autospec=True)
     @mock.patch.object(kaloading.session, 'Session', autospec=True)
     def test_correct_arguments_passed_to_client_constructor_noauth_mode(
             self, mock_ks_session, mock_client):
@@ -312,7 +312,7 @@ class ClientTest(utils.BaseTestCase):
         )
         self.assertFalse(mock_ks_session.called)
 
-    @mock.patch.object(iroclient, 'Client')
+    @mock.patch.object(iroclient, 'Client', autospec=True)
     @mock.patch.object(kaloading.session, 'Session', autospec=True)
     def test_correct_arguments_passed_to_client_constructor_session_created(
             self, mock_ks_session, mock_client):
@@ -337,7 +337,7 @@ class ClientTest(utils.BaseTestCase):
             }
         )
 
-    @mock.patch.object(iroclient, 'Client')
+    @mock.patch.object(iroclient, 'Client', autospec=True)
     @mock.patch.object(kaloading.session, 'Session', autospec=True)
     def test_correct_arguments_passed_to_client_constructor_session_passed(
             self, mock_ks_session, mock_client):

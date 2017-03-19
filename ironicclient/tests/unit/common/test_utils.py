@@ -230,7 +230,7 @@ class CommonFiltersTest(test_utils.BaseTestCase):
         self.assertEqual(['fields=a,b,c'], result)
 
 
-@mock.patch.object(subprocess, 'Popen')
+@mock.patch.object(subprocess, 'Popen', autospec=True)
 class MakeConfigDriveTest(test_utils.BaseTestCase):
 
     def setUp(self):
@@ -256,14 +256,14 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
                                            stdout=subprocess.PIPE)
         fake_process.communicate.assert_called_once_with()
 
-    @mock.patch.object(os, 'access')
+    @mock.patch.object(os, 'access', autospec=True)
     def test_make_configdrive_non_readable_dir(self, mock_access, mock_popen):
         mock_access.return_value = False
         self.assertRaises(exc.CommandError, utils.make_configdrive, 'fake-dir')
         mock_access.assert_called_once_with('fake-dir', os.R_OK)
         self.assertFalse(mock_popen.called)
 
-    @mock.patch.object(os, 'access')
+    @mock.patch.object(os, 'access', autospec=True)
     def test_make_configdrive_oserror(self, mock_access, mock_popen):
         mock_access.return_value = True
         mock_popen.side_effect = OSError('boom')
@@ -274,7 +274,7 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
                                            stderr=subprocess.PIPE,
                                            stdout=subprocess.PIPE)
 
-    @mock.patch.object(os, 'access')
+    @mock.patch.object(os, 'access', autospec=True)
     def test_make_configdrive_non_zero_returncode(self, mock_access,
                                                   mock_popen):
         fake_process = mock.Mock(returncode=123)

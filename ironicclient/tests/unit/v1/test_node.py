@@ -954,7 +954,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    @mock.patch.object(common_utils, 'make_configdrive')
+    @mock.patch.object(common_utils, 'make_configdrive', autospec=True)
     def test_node_set_provision_state_with_configdrive_dir(self,
                                                            mock_configdrive):
         mock_configdrive.return_value = 'fake-configdrive'
@@ -1022,7 +1022,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(CONSOLE_DATA_DISABLED, info)
 
-    @mock.patch.object(node.NodeManager, 'update')
+    @mock.patch.object(node.NodeManager, 'update', autospec=True)
     def test_vendor_passthru_update(self, update_mock):
         # For now just mock the tests because vendor-passthru doesn't return
         # anything to verify.
@@ -1037,12 +1037,12 @@ class NodeManagerTest(testtools.TestCase):
         for http_method in ('POST', 'PUT', 'PATCH'):
             kwargs['http_method'] = http_method
             self.mgr.vendor_passthru(**kwargs)
-            update_mock.assert_called_once_with(final_path,
+            update_mock.assert_called_once_with(mock.ANY, final_path,
                                                 vendor_passthru_args,
                                                 http_method=http_method)
             update_mock.reset_mock()
 
-    @mock.patch.object(node.NodeManager, 'get')
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
     def test_vendor_passthru_get(self, get_mock):
         kwargs = {
             'node_id': 'node_uuid',
@@ -1052,9 +1052,9 @@ class NodeManagerTest(testtools.TestCase):
 
         final_path = 'node_uuid/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
-        get_mock.assert_called_once_with(final_path)
+        get_mock.assert_called_once_with(mock.ANY, final_path)
 
-    @mock.patch.object(node.NodeManager, 'delete')
+    @mock.patch.object(node.NodeManager, 'delete', autospec=True)
     def test_vendor_passthru_delete(self, delete_mock):
         kwargs = {
             'node_id': 'node_uuid',
@@ -1064,9 +1064,9 @@ class NodeManagerTest(testtools.TestCase):
 
         final_path = 'node_uuid/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
-        delete_mock.assert_called_once_with(final_path)
+        delete_mock.assert_called_once_with(mock.ANY, final_path)
 
-    @mock.patch.object(node.NodeManager, 'delete')
+    @mock.patch.object(node.NodeManager, 'delete', autospec=True)
     def test_vendor_passthru_unknown_http_method(self, delete_mock):
         kwargs = {
             'node_id': 'node_uuid',
