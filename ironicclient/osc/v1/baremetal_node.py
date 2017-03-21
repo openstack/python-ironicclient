@@ -21,7 +21,7 @@ import logging
 from osc_lib.command import command
 from osc_lib import utils as oscutils
 
-from ironicclient.common.i18n import _, _LW
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
@@ -471,8 +471,8 @@ class DeleteBaremetal(DeleteBaremetalNode):
     log = logging.getLogger(__name__ + ".DeleteBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning(_LW("This command is deprecated. Instead, use "
-                             "'openstack baremetal node delete'."))
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node delete'.")
         super(DeleteBaremetal, self).take_action(parsed_args)
 
 
@@ -652,8 +652,8 @@ class ListBaremetal(ListBaremetalNode):
     log = logging.getLogger(__name__ + ".ListBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning(_LW("This command is deprecated. Instead, use "
-                             "'openstack baremetal node list'."))
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node list'.")
         return super(ListBaremetal, self).take_action(parsed_args)
 
 
@@ -1053,7 +1053,7 @@ class SetBaremetalNode(command.Command):
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
         else:
-            self.log.warning(_LW("Please specify what to set."))
+            self.log.warning("Please specify what to set.")
 
 
 class SetBaremetal(SetBaremetalNode):
@@ -1063,8 +1063,8 @@ class SetBaremetal(SetBaremetalNode):
     log = logging.getLogger(__name__ + ".SetBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning(_LW("This command is deprecated. Instead, use "
-                             "'openstack baremetal node set'."))
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node set'.")
         return super(SetBaremetal, self).take_action(parsed_args)
 
 
@@ -1128,8 +1128,8 @@ class ShowBaremetal(ShowBaremetalNode):
     log = logging.getLogger(__name__ + ".ShowBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning(_LW("This command is deprecated. Instead, use "
-                             "'openstack baremetal node show'."))
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node show'.")
         return super(ShowBaremetal, self).take_action(parsed_args)
 
 
@@ -1253,7 +1253,7 @@ class UnsetBaremetalNode(command.Command):
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
         else:
-            self.log.warning(_LW("Please specify what to unset."))
+            self.log.warning("Please specify what to unset.")
 
 
 class UnsetBaremetal(UnsetBaremetalNode):
@@ -1263,8 +1263,8 @@ class UnsetBaremetal(UnsetBaremetalNode):
     log = logging.getLogger(__name__ + ".UnsetBaremetal")
 
     def take_action(self, parsed_args):
-        self.log.warning(_LW("This command is deprecated. Instead, use "
-                             "'openstack baremetal node unset'."))
+        self.log.warning("This command is deprecated. Instead, use "
+                         "'openstack baremetal node unset'.")
         super(UnsetBaremetal, self).take_action(parsed_args)
 
 

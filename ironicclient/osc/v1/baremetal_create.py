@@ -13,7 +13,7 @@
 import argparse
 import logging
 
-from ironicclient.common.i18n import _, _LW
+from ironicclient.common.i18n import _
 from ironicclient import exc
 from ironicclient.osc.v1 import baremetal_node
 from ironicclient.v1 import create_resources
@@ -61,8 +61,8 @@ class CreateBaremetal(baremetal_node.CreateBaremetalNode):
 
     def take_action(self, parsed_args):
         if parsed_args.driver:
-            self.log.warning(_LW("This command is deprecated. Instead, use "
-                                 "'openstack baremetal node create'."))
+            self.log.warning("This command is deprecated. Instead, use "
+                             "'openstack baremetal node create'.")
             return super(CreateBaremetal, self).take_action(parsed_args)
         if not parsed_args.resource_files:
             raise exc.ValidationError(_(

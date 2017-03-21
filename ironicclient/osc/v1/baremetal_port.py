@@ -20,7 +20,7 @@ import logging
 from osc_lib.command import command
 from osc_lib import utils as oscutils
 
-from ironicclient.common.i18n import _, _LW
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
@@ -93,9 +93,9 @@ class CreateBaremetalPort(command.ShowOne):
         baremetal_client = self.app.client_manager.baremetal
 
         if parsed_args.local_link_connection_deprecated:
-            self.log.warning(_LW("Please use --local-link-connection instead "
-                                 "of -l, as it is deprecated and will be "
-                                 "removed in future releases."))
+            self.log.warning("Please use --local-link-connection instead "
+                             "of -l, as it is deprecated and will be "
+                             "removed in future releases.")
             # It is parsed to either None, or to an array
             if parsed_args.local_link_connection:
                 parsed_args.local_link_connection.extend(
@@ -214,7 +214,7 @@ class UnsetBaremetalPort(command.Command):
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
         else:
-            self.log.warning(_LW("Please specify what to unset."))
+            self.log.warning("Please specify what to unset.")
 
 
 class SetBaremetalPort(command.Command):
@@ -281,7 +281,7 @@ class SetBaremetalPort(command.Command):
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
         else:
-            self.log.warning(_LW("Please specify what to set."))
+            self.log.warning("Please specify what to set.")
 
 
 class DeleteBaremetalPort(command.Command):

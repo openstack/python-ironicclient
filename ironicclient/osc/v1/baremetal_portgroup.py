@@ -20,7 +20,7 @@ import logging
 from osc_lib.command import command
 from osc_lib import utils as oscutils
 
-from ironicclient.common.i18n import _, _LW
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
@@ -392,7 +392,7 @@ class SetBaremetalPortGroup(command.Command):
             baremetal_client.portgroup.update(parsed_args.portgroup,
                                               properties)
         else:
-            self.log.warning(_LW("Please specify what to set."))
+            self.log.warning("Please specify what to set.")
 
 
 class UnsetBaremetalPortGroup(command.Command):
@@ -458,4 +458,4 @@ class UnsetBaremetalPortGroup(command.Command):
             baremetal_client.portgroup.update(parsed_args.portgroup,
                                               properties)
         else:
-            self.log.warning(_LW("Please specify what to unset."))
+            self.log.warning("Please specify what to unset.")
