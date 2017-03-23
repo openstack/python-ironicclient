@@ -73,7 +73,7 @@ class DriverShellTest(utils.BaseTestCase):
         d_shell.do_driver_properties(client_mock, args)
         client_mock.driver.properties.assert_called_once_with("driver_name")
 
-    @mock.patch('ironicclient.common.cliutils.print_dict')
+    @mock.patch('ironicclient.common.cliutils.print_dict', autospec=True)
     def test_do_driver_properties_with_wrap_default(self, mock_print_dict):
         client_mock = self.client_mock
         client_mock.driver.properties.return_value = {
@@ -91,7 +91,7 @@ class DriverShellTest(utils.BaseTestCase):
             json_flag=False,
             wrap=0)
 
-    @mock.patch('ironicclient.common.cliutils.print_dict')
+    @mock.patch('ironicclient.common.cliutils.print_dict', autospec=True)
     def test_do_driver_properties_with_wrap(self, mock_print_dict):
         client_mock = self.client_mock
         client_mock.driver.properties.return_value = {
@@ -109,7 +109,7 @@ class DriverShellTest(utils.BaseTestCase):
             json_flag=False,
             wrap=80)
 
-    @mock.patch('ironicclient.common.cliutils.print_dict')
+    @mock.patch('ironicclient.common.cliutils.print_dict', autospec=True)
     def _test_do_driver_raid_logical_disk(self, print_dict_mock, wrap=0):
         cli_mock = self.client_mock
         cli_mock.driver.raid_logical_disk_properties.return_value = {

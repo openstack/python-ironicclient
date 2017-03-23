@@ -208,7 +208,7 @@ class LoadFromFileTest(utils.BaseTestCase):
                                'must have .json or .yaml extension',
                                create_resources.load_from_file, fname)
 
-    @mock.patch.object(__builtin__, 'open')
+    @mock.patch.object(__builtin__, 'open', autospec=True)
     def test_load_ioerror(self, mock_open):
         mock_open.side_effect = IOError('file does not exist')
         fname = 'abc.json'
