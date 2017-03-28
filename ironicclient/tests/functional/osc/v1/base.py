@@ -35,6 +35,10 @@ class TestCase(base.FunctionalTestBase):
         return ' -f {0} {1}'.format(output_format,
                                     ' '.join(['-c ' + it for it in fields]))
 
+    @staticmethod
+    def construct_cmd(*parts):
+        return ' '.join(str(x) for x in parts)
+
     def node_create(self, driver='fake', name=None, params=''):
         """Create baremetal node and add cleanup.
 
