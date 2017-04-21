@@ -1,0 +1,6 @@
+---
+features:
+  - Adds new arguments to the OSC baremetal-node-set to allow setting
+    boot, console, deploy, inspect, management, power, raid, and vendor
+    hardware interfaces. They are available starting with ironic API
+    microversion 1.30.
