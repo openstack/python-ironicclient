@@ -20,7 +20,7 @@ import logging
 from osc_lib.command import command
 from osc_lib import utils as oscutils
 
-from ironicclient.common.i18n import _, _LW
+from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
@@ -237,7 +237,7 @@ class SetBaremetalChassis(command.Command):
         if properties:
             baremetal_client.chassis.update(parsed_args.chassis, properties)
         else:
-            self.log.warning(_LW("Please specify what to set."))
+            self.log.warning("Please specify what to set.")
 
 
 class ShowBaremetalChassis(command.ShowOne):
@@ -322,4 +322,4 @@ class UnsetBaremetalChassis(command.Command):
         if properties:
             baremetal_client.chassis.update(parsed_args.chassis, properties)
         else:
-            self.log.warning(_LW("Please specify what to unset."))
+            self.log.warning("Please specify what to unset.")

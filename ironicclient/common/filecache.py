@@ -20,7 +20,6 @@ import os
 import appdirs
 import dogpile.cache
 
-from ironicclient.common.i18n import _LW
 
 LOG = logging.getLogger(__name__)
 
@@ -48,9 +47,9 @@ def _get_cache():
         try:
             expiry_time = int(expiry_time)
         except ValueError:
-            LOG.warning(_LW("Environment variable %(env_var)s should be an "
-                            "integer (not '%(curr_val)s'). Using default "
-                            "expiry of %(default)s seconds instead."),
+            LOG.warning("Environment variable %(env_var)s should be an "
+                        "integer (not '%(curr_val)s'). Using default "
+                        "expiry of %(default)s seconds instead.",
                         {'env_var': CACHE_EXPIRY_ENV_VAR,
                          'curr_val': expiry_time,
                          'default': DEFAULT_EXPIRY})
