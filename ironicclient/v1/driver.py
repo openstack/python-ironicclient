@@ -27,8 +27,28 @@ class DriverManager(base.Manager):
     resource_class = Driver
     _resource_name = 'drivers'
 
-    def list(self):
-        return self._list('/v1/drivers', self._resource_name)
+    def list(self, driver_type=None, detail=None):
+        """Retrieve a list of drivers.
+
+        :param driver_type: Optional, string to filter the drivers by type.
+                            Value should be 'classic' or 'dynamic'.
+        :param detail: Optional, flag whether to return detailed information
+                       about drivers. Default is None means not to send the arg
+                       to the server due to older versions of the server cannot
+                       handle filtering on detail.
+        :returns: A list of drivers.
+        """
+        filters = []
+        if driver_type is not None:
+            filters.append('type=%s' % driver_type)
+        if detail is not None:
+            filters.append('detail=%s' % detail)
+
+        path = ''
+        if filters:
+            path = '?' + '&'.join(filters)
+
+        return self._list(self._path(path), self._resource_name)
 
     def get(self, driver_name):
         return self._get(resource_id=driver_name)

@@ -32,22 +32,43 @@ class ListBaremetalDriver(command.Lister):
 
     def get_parser(self, prog_name):
         parser = super(ListBaremetalDriver, self).get_parser(prog_name)
+        parser.add_argument(
+            '--type',
+            metavar='<type>',
+            choices=["classic", "dynamic"],
+            help='Type of driver ("classic" or "dynamic"). '
+                 'The default is to list all of them.'
+        )
+        parser.add_argument(
+            '--long',
+            action='store_true',
+            default=None,
+            help="Show detailed information about the drivers.")
         return parser
 
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
         client = self.app.client_manager.baremetal
 
-        labels = res_fields.DRIVER_RESOURCE.labels
-        columns = res_fields.DRIVER_RESOURCE.fields
+        params = {'driver_type': parsed_args.type,
+                  'detail': parsed_args.long}
+        if parsed_args.long:
+            labels = res_fields.DRIVER_DETAILED_RESOURCE.labels
+            columns = res_fields.DRIVER_DETAILED_RESOURCE.fields
+        else:
+            labels = res_fields.DRIVER_RESOURCE.labels
+            columns = res_fields.DRIVER_RESOURCE.fields
 
-        drivers = client.driver.list()
+        drivers = client.driver.list(**params)
         drivers = oscutils.sort_items(drivers, 'name')
-        for d in drivers:
-            d.hosts = ', '.join(d.hosts)
+
+        # For list-type properties, show the values as comma separated
+        # strings. It's easier to read.
+        data = [utils.convert_list_props_to_comma_separated(d._info)
+                for d in drivers]
 
         return (labels,
-                (oscutils.get_item_properties(s, columns) for s in drivers))
+                (oscutils.get_dict_properties(s, columns) for s in data))
 
 
 class PassthruCallBaremetalDriver(command.ShowOne):
@@ -154,8 +175,7 @@ class ShowBaremetalDriver(command.ShowOne):
         driver = baremetal_client.driver.get(parsed_args.driver)._info
         driver.pop("links", None)
         driver.pop("properties", None)
-        # NOTE(rloo): this will show the hosts as a comma-separated string
-        #             whereas 'ironic driver show' displays this as a list
-        #             of hosts (eg "host1, host2" vs "[u'host1', u'host2']"
-        driver['hosts'] = ', '.join(driver.get('hosts', ()))
+        # For list-type properties, show the values as comma separated
+        # strings. It's easier to read.
+        driver = utils.convert_list_props_to_comma_separated(driver)
         return zip(*sorted(driver.items()))

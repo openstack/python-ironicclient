@@ -1,0 +1,16 @@
+---
+features:
+  - |
+    To support dynamic drivers (available starting with ironic API
+    microversion 1.30):
+
+    * ironic driver-list has two new optional arguments, ``--type <type>``
+      for the type of driver ('classic' or 'dynamic') to list, and
+      ``--detail`` to show detailed information about the drivers.
+    * ironic driver-show returns a lot more information, including the type
+      of driver and the default and enabled interfaces.
+    * openstack baremetal driver list has two new optional arguments,
+      ``--type <type>`` for the type of driver ('classic' or 'dynamic')
+      to list, and ``--long`` to show detailed information about the drivers.
+    * openstack baremetal driver show returns a lot more information,
+      including the type of driver and the default and enabled interfaces.

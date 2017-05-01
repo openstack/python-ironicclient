@@ -60,6 +60,80 @@ class TestListBaremetalDriver(TestBaremetalDriver):
             ', '.join(baremetal_fakes.baremetal_driver_hosts)), )
         self.assertEqual(datalist, tuple(data))
 
+    def test_baremetal_driver_list_with_type(self):
+        arglist = ['--type', baremetal_fakes.baremetal_driver_type]
+        verifylist = [('type', baremetal_fakes.baremetal_driver_type)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        columns, data = self.cmd.take_action(parsed_args)
+
+        collist = (
+            "Supported driver(s)",
+            "Active host(s)")
+        self.assertEqual(collist, tuple(columns))
+
+        datalist = ((
+            baremetal_fakes.baremetal_driver_name,
+            ', '.join(baremetal_fakes.baremetal_driver_hosts)),)
+        self.assertEqual(datalist, tuple(data))
+
+    def test_baremetal_driver_list_with_detail(self):
+        arglist = ['--long']
+        verifylist = [('long', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        columns, data = self.cmd.take_action(parsed_args)
+
+        collist = (
+            "Supported driver(s)",
+            "Type",
+            "Active host(s)",
+            'Default Boot Interface',
+            'Default Console Interface',
+            'Default Deploy Interface',
+            'Default Inspect Interface',
+            'Default Management Interface',
+            'Default Network Interface',
+            'Default Power Interface',
+            'Default RAID Interface',
+            'Default Vendor Interface',
+            'Enabled Boot Interfaces',
+            'Enabled Console Interfaces',
+            'Enabled Deploy Interfaces',
+            'Enabled Inspect Interfaces',
+            'Enabled Management Interfaces',
+            'Enabled Network Interfaces',
+            'Enabled Power Interfaces',
+            'Enabled RAID Interfaces',
+            'Enabled Vendor Interfaces'
+        )
+        self.assertEqual(collist, tuple(columns))
+
+        datalist = ((
+            baremetal_fakes.baremetal_driver_name,
+            baremetal_fakes.baremetal_driver_type,
+            ', '.join(baremetal_fakes.baremetal_driver_hosts),
+            baremetal_fakes.baremetal_driver_default_boot_if,
+            baremetal_fakes.baremetal_driver_default_console_if,
+            baremetal_fakes.baremetal_driver_default_deploy_if,
+            baremetal_fakes.baremetal_driver_default_inspect_if,
+            baremetal_fakes.baremetal_driver_default_management_if,
+            baremetal_fakes.baremetal_driver_default_network_if,
+            baremetal_fakes.baremetal_driver_default_power_if,
+            baremetal_fakes.baremetal_driver_default_raid_if,
+            baremetal_fakes.baremetal_driver_default_vendor_if,
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_boot_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_console_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_deploy_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_inspect_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_management_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_network_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_power_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_raid_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_vendor_ifs),
+        ),)
+        self.assertEqual(datalist, tuple(data))
+
 
 class TestPassthruCallBaremetalDriver(TestBaremetalDriver):
 
@@ -205,12 +279,41 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
         self.baremetal_mock.driver.get.assert_called_with(*args)
         self.assertFalse(self.baremetal_mock.driver.properties.called)
 
-        collist = ('hosts', 'name')
+        collist = ('default_boot_interface', 'default_console_interface',
+                   'default_deploy_interface', 'default_inspect_interface',
+                   'default_management_interface', 'default_network_interface',
+                   'default_power_interface', 'default_raid_interface',
+                   'default_vendor_interface', 'enabled_boot_interfaces',
+                   'enabled_console_interfaces', 'enabled_deploy_interfaces',
+                   'enabled_inspect_interfaces',
+                   'enabled_management_interfaces',
+                   'enabled_network_interfaces', 'enabled_power_interfaces',
+                   'enabled_raid_interfaces', 'enabled_vendor_interfaces',
+                   'hosts', 'name', 'type')
         self.assertEqual(collist, columns)
 
         datalist = (
+            baremetal_fakes.baremetal_driver_default_boot_if,
+            baremetal_fakes.baremetal_driver_default_console_if,
+            baremetal_fakes.baremetal_driver_default_deploy_if,
+            baremetal_fakes.baremetal_driver_default_inspect_if,
+            baremetal_fakes.baremetal_driver_default_management_if,
+            baremetal_fakes.baremetal_driver_default_network_if,
+            baremetal_fakes.baremetal_driver_default_power_if,
+            baremetal_fakes.baremetal_driver_default_raid_if,
+            baremetal_fakes.baremetal_driver_default_vendor_if,
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_boot_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_console_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_deploy_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_inspect_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_management_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_network_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_power_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_raid_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_vendor_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_hosts),
-            baremetal_fakes.baremetal_driver_name)
+            baremetal_fakes.baremetal_driver_name,
+            baremetal_fakes.baremetal_driver_type)
 
         self.assertEqual(datalist, tuple(data))
 

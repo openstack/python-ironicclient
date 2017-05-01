@@ -22,8 +22,34 @@ from ironicclient.tests.unit import utils
 from ironicclient.v1 import driver
 
 
-DRIVER1 = {'name': 'fake', 'hosts': ['fake-host1', 'fake-host2']}
-DRIVER2 = {'name': 'pxe_ipminative', 'hosts': ['fake-host1', 'fake-host2']}
+DRIVER1 = {
+    'name': 'fake',
+    'type': 'dynamic',
+    'hosts': ['fake-host1', 'fake-host2'],
+    'default_boot_interface': 'boot',
+    'default_console_interface': 'console',
+    'default_deploy_interface': 'deploy',
+    'default_inspect_interface': 'inspect',
+    'default_management_interface': 'management',
+    'default_network_interface': 'network',
+    'default_power_interface': 'power',
+    'default_raid_interface': 'raid',
+    'default_vendor_interface': 'vendor',
+    'enabled_boot_interfaces': ['boot', 'boot2'],
+    'enabled_console_interfaces': ['console', 'console2'],
+    'enabled_deploy_interfaces': ['deploy', 'deploy2'],
+    'enabled_inspect_interfaces': ['inspect', 'inspect2'],
+    'enabled_management_interfaces': ['management', 'management2'],
+    'enabled_network_interfaces': ['network', 'network2'],
+    'enabled_power_interfaces': ['power', 'power2'],
+    'enabled_raid_interfaces': ['raid', 'raid2'],
+    'enabled_vendor_interfaces': ['vendor', 'vendor2'],
+}
+DRIVER2 = {
+    'name': 'pxe_ipminative',
+    'type': 'classic',
+    'hosts': ['fake-host1', 'fake-host2'],
+}
 
 DRIVER2_PROPERTIES = {
     "username": "username. Required.",
@@ -100,8 +126,12 @@ class DriverManagerTest(testtools.TestCase):
             ('GET', '/v1/drivers/%s' % DRIVER1['name'], {}, None)
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertEqual(DRIVER1['name'], driver_.name)
-        self.assertEqual(DRIVER1['hosts'], driver_.hosts)
+
+        driver_attr = {}
+        for attr in DRIVER1.keys():
+            driver_attr[attr] = getattr(driver_, attr)
+
+        self.assertEqual(DRIVER1, driver_attr)
 
     def test_driver_properties(self):
         properties = self.mgr.properties(DRIVER2['name'])

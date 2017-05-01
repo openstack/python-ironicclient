@@ -34,7 +34,17 @@ class DriverShellTest(utils.BaseTestCase):
         with mock.patch.object(cliutils, 'print_dict', fake_print_dict):
             driver = object()
             d_shell._print_driver_show(driver)
-        exp = ['hosts', 'name']
+        exp = ['hosts', 'name', 'type',
+               'default_boot_interface', 'default_console_interface',
+               'default_deploy_interface', 'default_inspect_interface',
+               'default_management_interface', 'default_network_interface',
+               'default_power_interface', 'default_raid_interface',
+               'default_vendor_interface',
+               'enabled_boot_interfaces', 'enabled_console_interfaces',
+               'enabled_deploy_interfaces', 'enabled_inspect_interfaces',
+               'enabled_management_interfaces', 'enabled_network_interfaces',
+               'enabled_power_interfaces', 'enabled_raid_interfaces',
+               'enabled_vendor_interfaces']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
 
@@ -145,9 +155,35 @@ class DriverShellTest(utils.BaseTestCase):
     def test_do_driver_list(self):
         client_mock = self.client_mock
         args = mock.MagicMock()
+        args.type = None
+        args.detail = None
+        args.json = False
 
         d_shell.do_driver_list(client_mock, args)
-        client_mock.driver.list.assert_called_once_with()
+        client_mock.driver.list.assert_called_once_with(driver_type=None,
+                                                        detail=None)
+
+    def test_do_driver_list_with_type_and_no_detail(self):
+        client_mock = self.client_mock
+        args = mock.MagicMock()
+        args.type = 'classic'
+        args.detail = False
+        args.json = False
+
+        d_shell.do_driver_list(client_mock, args)
+        client_mock.driver.list.assert_called_once_with(driver_type='classic',
+                                                        detail=False)
+
+    def test_do_driver_list_with_detail(self):
+        client_mock = self.client_mock
+        args = mock.MagicMock()
+        args.type = None
+        args.detail = True
+        args.json = False
+
+        d_shell.do_driver_list(client_mock, args)
+        client_mock.driver.list.assert_called_once_with(driver_type=None,
+                                                        detail=True)
 
     def test_do_driver_get_vendor_passthru_methods(self):
         client_mock = mock.MagicMock()

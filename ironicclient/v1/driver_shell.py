@@ -22,21 +22,37 @@ from ironicclient.v1 import utils as v1_utils
 
 
 def _print_driver_show(driver, json=False):
-    fields = res_fields.DRIVER_RESOURCE.fields
+    fields = res_fields.DRIVER_DETAILED_RESOURCE.fields
     data = dict([(f, getattr(driver, f, '')) for f in fields])
     cliutils.print_dict(data, wrap=72, json_flag=json)
 
 
+@cliutils.arg('-t', '--type',
+              metavar='<type>',
+              choices=["classic", "dynamic"],
+              help='Type of driver ("classic" or "dynamic"). '
+                   'The default is to list all of them.')
+@cliutils.arg('--detail',
+              dest='detail',
+              action='store_true',
+              default=None,
+              help="Show detailed information about the drivers.")
 def do_driver_list(cc, args):
     """List the enabled drivers."""
-    drivers = cc.driver.list()
-    # NOTE(lucasagomes): Separate each host by a comma.
-    # It's easier to read.
-    for d in drivers:
-        d.hosts = ', '.join(d.hosts)
-    field_labels = res_fields.DRIVER_RESOURCE.labels
-    fields = res_fields.DRIVER_RESOURCE.fields
-    cliutils.print_list(drivers, fields, field_labels=field_labels,
+    drivers = cc.driver.list(driver_type=args.type, detail=args.detail)
+    # NOTE(lucasagomes): For list-type properties, show the values as
+    # comma separated strings. It's easier to read.
+    data = [utils.convert_list_props_to_comma_separated(d._info)
+            for d in drivers]
+
+    if args.detail:
+        field_labels = res_fields.DRIVER_DETAILED_RESOURCE.labels
+        fields = res_fields.DRIVER_DETAILED_RESOURCE.fields
+    else:
+        field_labels = res_fields.DRIVER_RESOURCE.labels
+        fields = res_fields.DRIVER_RESOURCE.fields
+
+    cliutils.print_list(data, fields, field_labels=field_labels,
                         json_flag=args.json)
 
 

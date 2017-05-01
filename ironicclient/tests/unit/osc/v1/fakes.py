@@ -61,10 +61,48 @@ BAREMETAL_PORT = {
 
 baremetal_driver_hosts = ['fake-host1', 'fake-host2']
 baremetal_driver_name = 'fakedrivername'
+baremetal_driver_type = 'classic'
+baremetal_driver_default_boot_if = 'boot'
+baremetal_driver_default_console_if = 'console'
+baremetal_driver_default_deploy_if = 'deploy'
+baremetal_driver_default_inspect_if = 'inspect'
+baremetal_driver_default_management_if = 'management'
+baremetal_driver_default_network_if = 'network'
+baremetal_driver_default_power_if = 'power'
+baremetal_driver_default_raid_if = 'raid'
+baremetal_driver_default_vendor_if = 'vendor'
+baremetal_driver_enabled_boot_ifs = ['boot', 'boot2']
+baremetal_driver_enabled_console_ifs = ['console', 'console2']
+baremetal_driver_enabled_deploy_ifs = ['deploy', 'deploy2']
+baremetal_driver_enabled_inspect_ifs = ['inspect', 'inspect2']
+baremetal_driver_enabled_management_ifs = ['management', 'management2']
+baremetal_driver_enabled_network_ifs = ['network', 'network2']
+baremetal_driver_enabled_power_ifs = ['power', 'power2']
+baremetal_driver_enabled_raid_ifs = ['raid', 'raid2']
+baremetal_driver_enabled_vendor_ifs = ['vendor', 'vendor2']
 
 BAREMETAL_DRIVER = {
     'hosts': baremetal_driver_hosts,
     'name': baremetal_driver_name,
+    'type': baremetal_driver_type,
+    'default_boot_interface': baremetal_driver_default_boot_if,
+    'default_console_interface': baremetal_driver_default_console_if,
+    'default_deploy_interface': baremetal_driver_default_deploy_if,
+    'default_inspect_interface': baremetal_driver_default_inspect_if,
+    'default_management_interface': baremetal_driver_default_management_if,
+    'default_network_interface': baremetal_driver_default_network_if,
+    'default_power_interface': baremetal_driver_default_power_if,
+    'default_raid_interface': baremetal_driver_default_raid_if,
+    'default_vendor_interface': baremetal_driver_default_vendor_if,
+    'enabled_boot_interfaces': baremetal_driver_enabled_boot_ifs,
+    'enabled_console_interfaces': baremetal_driver_enabled_console_ifs,
+    'enabled_deploy_interfaces': baremetal_driver_enabled_deploy_ifs,
+    'enabled_inspect_interfaces': baremetal_driver_enabled_inspect_ifs,
+    'enabled_management_interfaces': baremetal_driver_enabled_management_ifs,
+    'enabled_network_interfaces': baremetal_driver_enabled_network_ifs,
+    'enabled_power_interfaces': baremetal_driver_enabled_power_ifs,
+    'enabled_raid_interfaces': baremetal_driver_enabled_raid_ifs,
+    'enabled_vendor_interfaces': baremetal_driver_enabled_vendor_ifs,
 }
 
 baremetal_driver_passthru_method = 'lookup'

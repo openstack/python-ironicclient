@@ -139,6 +139,28 @@ class UtilsTest(test_utils.BaseTestCase):
         self.assertRaises(exc.CommandError, utils.check_for_invalid_fields,
                           ['a', 'd'], ['a', 'b', 'c'])
 
+    def test_convert_list_props_to_comma_separated_strings(self):
+        data = {'prop1': 'val1',
+                'prop2': ['item1', 'item2', 'item3']}
+        result = utils.convert_list_props_to_comma_separated(data)
+        self.assertEqual('val1', result['prop1'])
+        self.assertEqual('item1, item2, item3', result['prop2'])
+
+    def test_convert_list_props_to_comma_separated_mix(self):
+        data = {'prop1': 'val1',
+                'prop2': [1, 2.5, 'item3']}
+        result = utils.convert_list_props_to_comma_separated(data)
+        self.assertEqual('val1', result['prop1'])
+        self.assertEqual('1, 2.5, item3', result['prop2'])
+
+    def test_convert_list_props_to_comma_separated_partial(self):
+        data = {'prop1': [1, 2, 3],
+                'prop2': [1, 2.5, 'item3']}
+        result = utils.convert_list_props_to_comma_separated(
+            data, props=['prop2'])
+        self.assertEqual([1, 2, 3], result['prop1'])
+        self.assertEqual('1, 2.5, item3', result['prop2'])
+
 
 class CommonParamsForListTest(test_utils.BaseTestCase):
     def setUp(self):
