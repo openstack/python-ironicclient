@@ -91,6 +91,13 @@ class CreateBaremetalPort(command.ShowOne):
             metavar='<uuid>',
             help=_("UUID of the port group that this port belongs to."))
 
+        parser.add_argument(
+            '--physical-network',
+            dest='physical_network',
+            metavar='<physical network>',
+            help=_("Name of the physical network to which this port is "
+                   "connected."))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -110,7 +117,8 @@ class CreateBaremetalPort(command.ShowOne):
                     parsed_args.local_link_connection_deprecated)
 
         field_list = ['address', 'uuid', 'extra', 'node_uuid', 'pxe_enabled',
-                      'local_link_connection', 'portgroup_uuid']
+                      'local_link_connection', 'portgroup_uuid',
+                      'physical_network']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'extra')
@@ -201,6 +209,12 @@ class UnsetBaremetalPort(command.Command):
             dest='portgroup',
             help=_("Remove port from the port group"))
 
+        parser.add_argument(
+            '--physical-network',
+            action='store_true',
+            dest='physical_network',
+            help=_("Unset the physical network on this baremetal port."))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -215,6 +229,9 @@ class UnsetBaremetalPort(command.Command):
         if parsed_args.portgroup:
             properties.extend(utils.args_array_to_patch('remove',
                               ['portgroup_uuid']))
+        if parsed_args.physical_network:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['physical_network']))
 
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
@@ -285,6 +302,12 @@ class SetBaremetalPort(command.Command):
             help=_("Indicates that this port should not be used when "
                    "PXE booting this node")
         )
+        parser.add_argument(
+            '--physical-network',
+            metavar='<physical network>',
+            dest='physical_network',
+            help=_("Set the name of the physical network to which this port "
+                   "is connected."))
 
         return parser
 
@@ -314,6 +337,11 @@ class SetBaremetalPort(command.Command):
         if parsed_args.pxe_enabled is not None:
             properties.extend(utils.args_array_to_patch(
                 'add', ['pxe_enabled=%s' % parsed_args.pxe_enabled]))
+        if parsed_args.physical_network:
+            physical_network = ["physical_network=%s" %
+                                parsed_args.physical_network]
+            properties.extend(utils.args_array_to_patch('add',
+                                                        physical_network))
 
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
