@@ -27,13 +27,6 @@ class BaremetalNodeNegativeTests(base.TestCase):
         super(BaremetalNodeNegativeTests, self).setUp()
         self.node = self.node_create()
 
-    @staticmethod
-    def constuct_cmd(base_cmd, argument, value):
-        cmd = base_cmd
-        if argument:
-            cmd = '{} {} {}'.format(cmd, argument, value)
-        return cmd
-
     @ddt.data(
         ('', '', 'error: argument --driver is required'),
         ('--driver', 'wrongdriver',
@@ -44,7 +37,7 @@ class BaremetalNodeNegativeTests(base.TestCase):
     def test_create_driver(self, argument, value, ex_text):
         """Negative test for baremetal node driver options."""
         base_cmd = 'baremetal node create'
-        command = self.constuct_cmd(base_cmd, argument, value)
+        command = self.construct_cmd(base_cmd, argument, value)
         six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
                               self.openstack, command)
 
@@ -70,8 +63,8 @@ class BaremetalNodeNegativeTests(base.TestCase):
     def test_set_property(self, argument, value, ex_text):
         """Negative test for baremetal node set command options."""
         base_cmd = 'baremetal node set'
-        command = '{} {}'.format(
-            self.constuct_cmd(base_cmd, argument, value), self.node['uuid'])
+        command = self.construct_cmd(base_cmd, argument, value,
+                                     self.node['uuid'])
         six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
                               self.openstack, command)
 
@@ -83,7 +76,7 @@ class BaremetalNodeNegativeTests(base.TestCase):
     def test_unset_property(self, argument, value, ex_text):
         """Negative test for baremetal node unset command options."""
         base_cmd = 'baremetal node unset'
-        command = '{} {}'.format(
-            self.constuct_cmd(base_cmd, argument, value), self.node['uuid'])
+        command = self.construct_cmd(base_cmd, argument, value,
+                                     self.node['uuid'])
         six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
                               self.openstack, command)

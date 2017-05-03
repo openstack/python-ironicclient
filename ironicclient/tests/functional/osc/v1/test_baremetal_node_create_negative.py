@@ -26,13 +26,6 @@ class BaremetalNodeCreateNegativeTests(base.TestCase):
     def setUp(self):
         super(BaremetalNodeCreateNegativeTests, self).setUp()
 
-    @staticmethod
-    def constuct_cmd(base_cmd, argument, value):
-        cmd = base_cmd
-        if argument:
-            cmd = '{0} {1} {2}'.format(cmd, argument, value)
-        return cmd
-
     @ddt.data(
         ('--uuid', '', 'expected one argument'),
         ('--uuid', '!@#$^*&%^', 'Expected a UUID'),
@@ -50,6 +43,6 @@ class BaremetalNodeCreateNegativeTests(base.TestCase):
     @ddt.unpack
     def test_baremetal_node_create(self, argument, value, ex_text):
         base_cmd = 'baremetal node create --driver fake'
-        command = self.constuct_cmd(base_cmd, argument, value)
+        command = self.construct_cmd(base_cmd, argument, value)
         six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
                               self.openstack, command)
