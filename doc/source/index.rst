@@ -14,6 +14,7 @@ Contents
 
    api_v1
    cli
+   osc_plugin_cli
    create_command
    contributing
    testing
