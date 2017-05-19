@@ -39,12 +39,12 @@ class DriverShellTest(utils.BaseTestCase):
                'default_deploy_interface', 'default_inspect_interface',
                'default_management_interface', 'default_network_interface',
                'default_power_interface', 'default_raid_interface',
-               'default_vendor_interface',
+               'default_storage_interface', 'default_vendor_interface',
                'enabled_boot_interfaces', 'enabled_console_interfaces',
                'enabled_deploy_interfaces', 'enabled_inspect_interfaces',
                'enabled_management_interfaces', 'enabled_network_interfaces',
                'enabled_power_interfaces', 'enabled_raid_interfaces',
-               'enabled_vendor_interfaces']
+               'enabled_storage_interfaces', 'enabled_vendor_interfaces']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
 

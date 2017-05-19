@@ -55,6 +55,7 @@ class NodeShellTest(utils.BaseTestCase):
                'network_interface',
                'power_interface',
                'raid_interface',
+               'storage_interface',
                'vendor_interface',
                'power_state',
                'properties',
@@ -285,6 +286,16 @@ class NodeShellTest(utils.BaseTestCase):
         n_shell.do_node_create(client_mock, args)
         client_mock.node.create.assert_called_once_with(
             raid_interface='raid')
+
+    def test_do_node_create_with_storage_interface(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.storage_interface = 'storage'
+        args.json = False
+
+        n_shell.do_node_create(client_mock, args)
+        client_mock.node.create.assert_called_once_with(
+            storage_interface='storage')
 
     def test_do_node_create_with_vendor_interface(self):
         client_mock = mock.MagicMock()

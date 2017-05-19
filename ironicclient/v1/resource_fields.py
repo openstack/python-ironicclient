@@ -47,6 +47,7 @@ class Resource(object):
         'default_network_interface': 'Default Network Interface',
         'default_power_interface': 'Default Power Interface',
         'default_raid_interface': 'Default RAID Interface',
+        'default_storage_interface': 'Default Storage Interface',
         'default_vendor_interface': 'Default Vendor Interface',
         'description': 'Description',
         'driver': 'Driver',
@@ -60,6 +61,7 @@ class Resource(object):
         'enabled_network_interfaces': 'Enabled Network Interfaces',
         'enabled_power_interfaces': 'Enabled Power Interfaces',
         'enabled_raid_interfaces': 'Enabled RAID Interfaces',
+        'enabled_storage_interfaces': 'Enabled Storage Interfaces',
         'enabled_vendor_interfaces': 'Enabled Vendor Interfaces',
         'extra': 'Extra',
         'hosts': 'Active host(s)',
@@ -101,6 +103,7 @@ class Resource(object):
         'network_interface': 'Network Interface',
         'power_interface': 'Power Interface',
         'raid_interface': 'RAID Interface',
+        'storage_interface': 'Storage Interface',
         'vendor_interface': 'Vendor Interface',
         'standalone_ports_supported': 'Standalone Ports Supported',
         'id': 'ID',
@@ -219,6 +222,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'network_interface',
      'power_interface',
      'raid_interface',
+     'storage_interface',
      'vendor_interface',
      ],
     sort_excluded=[
@@ -326,6 +330,7 @@ DRIVER_DETAILED_RESOURCE = Resource(
      'default_network_interface',
      'default_power_interface',
      'default_raid_interface',
+     'default_storage_interface',
      'default_vendor_interface',
      'enabled_boot_interfaces',
      'enabled_console_interfaces',
@@ -335,6 +340,7 @@ DRIVER_DETAILED_RESOURCE = Resource(
      'enabled_network_interfaces',
      'enabled_power_interfaces',
      'enabled_raid_interfaces',
+     'enabled_storage_interfaces',
      'enabled_vendor_interfaces'
      ],
     override_labels={'name': 'Supported driver(s)'}
