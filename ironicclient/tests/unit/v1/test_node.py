@@ -1284,10 +1284,10 @@ class NodeManagerTest(testtools.TestCase):
             self._fake_node_for_wait('deploy failed', error='boom'),
         ]
 
-        self.assertRaisesRegexp(exc.StateTransitionFailed,
-                                'boom',
-                                self.mgr.wait_for_provision_state,
-                                'node', 'active')
+        self.assertRaisesRegex(exc.StateTransitionFailed,
+                               'boom',
+                               self.mgr.wait_for_provision_state,
+                               'node', 'active')
 
         mock_get.assert_called_with(self.mgr, 'node')
         self.assertEqual(2, mock_get.call_count)
@@ -1328,10 +1328,10 @@ class NodeManagerTest(testtools.TestCase):
             self._fake_node_for_wait('available'),
         ]
 
-        self.assertRaisesRegexp(exc.StateTransitionFailed,
-                                'available',
-                                self.mgr.wait_for_provision_state,
-                                'node', 'active')
+        self.assertRaisesRegex(exc.StateTransitionFailed,
+                               'available',
+                               self.mgr.wait_for_provision_state,
+                               'node', 'active')
 
         mock_get.assert_called_with(self.mgr, 'node')
         self.assertEqual(2, mock_get.call_count)
