@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    For ``openstack baremetal port set``, adds these options:
+
+    * ``--local-link-connection <key=value>``: Key/value metadata describing
+      local link connection information. Valid keys are switch_info, switch_id,
+      port_id; switch_id and port_id are obligatory (repeat option to specify
+      multiple keys).
+    * ``--pxe-enabled``: Indicates that this port should be used when PXE
+      booting this node (default)
+    * ``--pxe-disabled``: Indicates that this port should not be used when PXE
+      booting this node

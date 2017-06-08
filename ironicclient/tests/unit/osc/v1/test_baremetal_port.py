@@ -403,6 +403,51 @@ class TestBaremetalPortSet(TestBaremetalPort):
             [{'path': '/portgroup_uuid', 'value': new_portgroup_uuid,
               'op': 'add'}])
 
+    def test_baremetal_set_local_link_connection(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--local-link-connection', 'switch_info=bar']
+        verifylist = [('port', baremetal_fakes.baremetal_port_uuid),
+                      ('local_link_connection', ['switch_info=bar'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/local_link_connection/switch_info', 'value': 'bar',
+              'op': 'add'}])
+
+    def test_baremetal_port_set_pxe_enabled(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--pxe-enabled']
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('pxe_enabled', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/pxe_enabled', 'value': 'True', 'op': 'add'}])
+
+    def test_baremetal_port_set_pxe_disabled(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--pxe-disabled']
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('pxe_enabled', False)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/pxe_enabled', 'value': 'False', 'op': 'add'}])
+
     def test_baremetal_port_set_no_options(self):
         arglist = []
         verifylist = []

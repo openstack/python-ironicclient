@@ -249,12 +249,37 @@ class SetBaremetalPort(command.Command):
             help=_('Extra to set on this baremetal port '
                    '(repeat option to set multiple extras)')
         )
-
         parser.add_argument(
             "--port-group",
             metavar="<uuid>",
             dest='portgroup_uuid',
             help=_('Set UUID of the port group that this port belongs to.'))
+        parser.add_argument(
+            "--local-link-connection",
+            metavar="<key=value>",
+            action='append',
+            help=_("Key/value metadata describing local link connection "
+                   "information. Valid keys are switch_info, switch_id, "
+                   "port_id; switch_id and port_id are obligatory (repeat "
+                   "option to specify multiple keys).")
+        )
+        pxe_enabled_group = parser.add_mutually_exclusive_group(required=False)
+        pxe_enabled_group.add_argument(
+            "--pxe-enabled",
+            dest='pxe_enabled',
+            default=None,
+            action='store_true',
+            help=_("Indicates that this port should be used when "
+                   "PXE booting this node (default)")
+        )
+        pxe_enabled_group.add_argument(
+            "--pxe-disabled",
+            dest='pxe_enabled',
+            default=None,
+            action='store_false',
+            help=_("Indicates that this port should not be used when "
+                   "PXE booting this node")
+        )
 
         return parser
 
@@ -277,6 +302,13 @@ class SetBaremetalPort(command.Command):
         if parsed_args.portgroup_uuid:
             portgroup_uuid = ["portgroup_uuid=%s" % parsed_args.portgroup_uuid]
             properties.extend(utils.args_array_to_patch('add', portgroup_uuid))
+        if parsed_args.local_link_connection:
+            properties.extend(utils.args_array_to_patch(
+                'add', ['local_link_connection/' + x for x in
+                        parsed_args.local_link_connection]))
+        if parsed_args.pxe_enabled is not None:
+            properties.extend(utils.args_array_to_patch(
+                'add', ['pxe_enabled=%s' % parsed_args.pxe_enabled]))
 
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
