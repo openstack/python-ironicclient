@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Adds the ``--uuid`` option for the ``openstack baremetal port create``
+    command so that the new port's UUID can be specified.

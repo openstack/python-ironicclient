@@ -121,6 +121,34 @@ class TestCreateBaremetalPort(TestBaremetalPort):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
+    def test_baremetal_port_create_uuid(self):
+        port_uuid = "da6c8d2e-fbcd-457a-b2a7-cc5c775933af"
+        arglist = [
+            baremetal_fakes.baremetal_port_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--uuid', port_uuid
+        ]
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_port_address),
+            ('uuid', port_uuid)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = {
+            'address': baremetal_fakes.baremetal_port_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'uuid': port_uuid
+        }
+
+        self.baremetal_mock.port.create.assert_called_once_with(**args)
+
     def _test_baremetal_port_create_llc_warning(self, additional_args,
                                                 additional_verify_items):
         arglist = [
