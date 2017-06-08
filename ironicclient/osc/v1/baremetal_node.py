@@ -567,6 +567,11 @@ class ListBaremetalNode(command.Lister):
             metavar='<provision state>',
             help=_("List nodes in specified provision state."))
         parser.add_argument(
+            '--driver',
+            dest='driver',
+            metavar='<driver>',
+            help=_("Limit list to nodes with driver <driver>"))
+        parser.add_argument(
             '--resource-class',
             dest='resource_class',
             metavar='<resource class>',
@@ -617,6 +622,8 @@ class ListBaremetalNode(command.Lister):
             params['maintenance'] = parsed_args.maintenance
         if parsed_args.provision_state:
             params['provision_state'] = parsed_args.provision_state
+        if parsed_args.driver:
+            params['driver'] = parsed_args.driver
         if parsed_args.resource_class:
             params['resource_class'] = parsed_args.resource_class
         if parsed_args.chassis:
