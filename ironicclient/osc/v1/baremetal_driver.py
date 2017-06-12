@@ -71,6 +71,29 @@ class ListBaremetalDriver(command.Lister):
                 (oscutils.get_dict_properties(s, columns) for s in data))
 
 
+class ListBaremetalDriverProperty(command.Lister):
+    """List the driver properties."""
+
+    log = logging.getLogger(__name__ + ".ListBaremetalDriverProperty")
+
+    def get_parser(self, prog_name):
+        parser = super(ListBaremetalDriverProperty, self).get_parser(prog_name)
+        parser.add_argument(
+            'driver',
+            metavar='<driver>',
+            help='Name of the driver.')
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+        baremetal_client = self.app.client_manager.baremetal
+
+        driver_properties = baremetal_client.driver.properties(
+            parsed_args.driver)
+        labels = ['Property', 'Description']
+        return labels, sorted(driver_properties.items())
+
+
 class PassthruCallBaremetalDriver(command.ShowOne):
     """Call a vendor passthru method for a driver."""
 
