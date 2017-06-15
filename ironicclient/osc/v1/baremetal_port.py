@@ -47,6 +47,11 @@ class CreateBaremetalPort(command.ShowOne):
             help=_('UUID of the node that this port belongs to.')
         )
         parser.add_argument(
+            '--uuid',
+            dest='uuid',
+            metavar='<uuid>',
+            help=_('UUID of the port.'))
+        parser.add_argument(
             '--extra',
             metavar="<key=value>",
             action='append',
@@ -104,7 +109,7 @@ class CreateBaremetalPort(command.ShowOne):
                 parsed_args.local_link_connection = (
                     parsed_args.local_link_connection_deprecated)
 
-        field_list = ['address', 'extra', 'node_uuid', 'pxe_enabled',
+        field_list = ['address', 'uuid', 'extra', 'node_uuid', 'pxe_enabled',
                       'local_link_connection', 'portgroup_uuid']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
