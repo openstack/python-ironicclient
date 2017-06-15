@@ -779,6 +779,30 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
+    def test_baremetal_list_driver(self):
+        arglist = [
+            '--driver', 'ipmi',
+        ]
+        verifylist = [
+            ('driver', 'ipmi'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'driver': 'ipmi'
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
     def test_baremetal_list_resource_class(self):
         arglist = [
             '--resource-class', 'foo',

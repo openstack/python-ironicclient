@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    For the OSC command ``openstack baremetal node list``, adds the
+    ``--driver <driver>`` option to limit the list to nodes with the
+    specified driver.
