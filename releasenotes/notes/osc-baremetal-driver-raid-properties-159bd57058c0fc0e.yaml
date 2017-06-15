@@ -1,0 +1,7 @@
+---
+features:
+  - Adds the ``openstack baremetal driver raid property list <driver>``
+    command. For a specified driver, this returns a list of the
+    RAID logical disk properties that can be specified, along with
+    a description for each property. (The values of these properties
+    are specified in a node's ``target_raid_config`` field.)

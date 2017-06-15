@@ -168,6 +168,47 @@ class TestListBaremetalDriverProperty(TestBaremetalDriver):
                           self.cmd, arglist, verifylist)
 
 
+class TestListBaremetalDriverRaidProperty(TestBaremetalDriver):
+
+    def setUp(self):
+        super(TestListBaremetalDriverRaidProperty, self).setUp()
+
+        (self.baremetal_mock.driver.
+         raid_logical_disk_properties.return_value) = {
+            'RAIDProperty1': 'driver_raid_property1',
+            'RAIDProperty2': 'driver_raid_property2',
+        }
+
+        self.cmd = (
+            baremetal_driver.ListBaremetalDriverRaidProperty(
+                self.app, None))
+
+    def test_baremetal_driver_raid_property_list(self):
+        arglist = ['fakedrivername']
+        verifylist = []
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        columns, data = self.cmd.take_action(parsed_args)
+
+        (self.baremetal_mock.driver.
+         raid_logical_disk_properties.assert_called_with(*arglist))
+
+        collist = ('Property', 'Description')
+        self.assertEqual(collist, tuple(columns))
+
+        expected_data = [('RAIDProperty1', 'driver_raid_property1'),
+                         ('RAIDProperty2', 'driver_raid_property2')]
+        self.assertEqual(expected_data, data)
+
+    def test_baremetal_driver_raid_property_list_no_arg(self):
+        arglist = []
+        verifylist = []
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+
 class TestPassthruCallBaremetalDriver(TestBaremetalDriver):
 
     def setUp(self):
