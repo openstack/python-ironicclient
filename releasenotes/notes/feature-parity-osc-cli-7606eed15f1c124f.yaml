@@ -1,0 +1,4 @@
+---
+prelude: >
+    With this release, we have achieved feature parity between the
+    ``ironic`` and ``openstack baremetal`` (OpenStack Client plugin) CLI.
