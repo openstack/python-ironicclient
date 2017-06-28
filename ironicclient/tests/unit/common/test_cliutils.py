@@ -663,6 +663,10 @@ class PrintResultStringTestCase(test_base.BaseTestCase):
 '''
         self.assertEqual(expected, out)
 
+    def test_print_dict_negative_wrap(self):
+        dct = {"K": "k", "Key": "Value"}
+        self.assertRaises(ValueError, cliutils.print_dict, dct, wrap=-10)
+
 
 class DecoratorsTestCase(test_base.BaseTestCase):
 
