@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    Adds these python API client methods to support volume connector resources
+    (available starting with API version 1.32):
+
+    * ``client.volume_connector.create`` for creating a volume connector
+    * ``client.volume_connector.list`` for listing volume connectors
+    * ``client.volume_connector.get`` for getting a volume connector
+    * ``client.volume_connector.update`` for updating a volume connector
+    * ``client.volume_connector.delete``  for deleting a volume connector
+    * ``client.node.list_volume_connectors`` for getting volume connectors
+      associated with a node
