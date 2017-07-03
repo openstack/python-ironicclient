@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    Adds these python API client methods to support volume target resources
+    (available starting with API version 1.32):
+
+    * ``client.volume_target.create`` for creating a volume target
+    * ``client.volume_target.list`` for listing volume targets
+    * ``client.volume_target.get`` for getting a volume target
+    * ``client.volume_target.update`` for updating a volume target
+    * ``client.volume_target.delete``  for deleting a volume target
+    * ``client.node.list_volume_targets`` for getting volume targets
+      associated with a node

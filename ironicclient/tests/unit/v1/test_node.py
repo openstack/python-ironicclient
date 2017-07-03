@@ -26,6 +26,7 @@ from ironicclient import exc
 from ironicclient.tests.unit import utils
 from ironicclient.v1 import node
 from ironicclient.v1 import volume_connector
+from ironicclient.v1 import volume_target
 
 if six.PY3:
     import io
@@ -64,6 +65,14 @@ CONNECTOR = {'uuid': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
              'type': 'iqn',
              'connector_id': 'iqn.2010-10.org.openstack:test',
              'extra': {}}
+TARGET = {'uuid': 'cccccccc-dddd-eeee-ffff-000000000000',
+          'node_uuid': 'dddddddd-eeee-ffff-0000-111111111111',
+          'volume_type': 'iscsi',
+          'properties': {'target_iqn': 'iqn.foo'},
+          'boot_index': 0,
+          'volume_id': '12345678',
+          'extra': {}}
+
 
 POWER_STATE = {'power_state': 'power on',
                'target_power_state': 'power off'}
@@ -316,6 +325,26 @@ fake_responses = {
             {},
             {"connectors": [CONNECTOR]},
         ),
+    },    '/v1/nodes/%s/volume/targets' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"targets": [TARGET]},
+        ),
+    },
+    '/v1/nodes/%s/volume/targets?detail=True' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"targets": [TARGET]},
+        ),
+    },
+    '/v1/nodes/%s/volume/targets?fields=uuid,value' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"targets": [TARGET]},
+        ),
     },
     '/v1/nodes/%s/maintenance' % NODE1['uuid']:
     {
@@ -488,6 +517,20 @@ fake_responses_pagination = {
             {"connectors": [CONNECTOR]},
         ),
     },
+    '/v1/nodes/%s/volume/targets?limit=1' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"targets": [TARGET]},
+        ),
+    },
+    '/v1/nodes/%s/volume/targets?marker=%s' % (NODE1['uuid'], TARGET['uuid']):
+    {
+        'GET': (
+            {},
+            {"targets": [TARGET]},
+        ),
+    },
 }
 
 fake_responses_sorting = {
@@ -545,6 +588,20 @@ fake_responses_sorting = {
         'GET': (
             {},
             {"connectors": [CONNECTOR]},
+        ),
+    },
+    '/v1/nodes/%s/volume/targets?sort_key=updated_at' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"targets": [TARGET]},
+        ),
+    },
+    '/v1/nodes/%s/volume/targets?sort_dir=desc' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"targets": [TARGET]},
         ),
     },
 }
@@ -996,6 +1053,91 @@ class NodeManagerTest(testtools.TestCase):
     def test_node_volume_connector_list_detail_and_fields_fail(self):
         self.assertRaises(exc.InvalidAttribute,
                           self.mgr.list_volume_connectors,
+                          NODE1['uuid'], detail=True, fields=['uuid', 'extra'])
+
+    def _validate_node_volume_target_list(self, expect, volume_targets):
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(volume_targets))
+        self.assertIsInstance(volume_targets[0],
+                              volume_target.VolumeTarget)
+        self.assertEqual(TARGET['uuid'], volume_targets[0].uuid)
+        self.assertEqual(TARGET['volume_type'], volume_targets[0].volume_type)
+        self.assertEqual(TARGET['boot_index'], volume_targets[0].boot_index)
+        self.assertEqual(TARGET['volume_id'], volume_targets[0].volume_id)
+        self.assertEqual(TARGET['node_uuid'], volume_targets[0].node_uuid)
+
+    def test_node_volume_target_list(self):
+        volume_targets = self.mgr.list_volume_targets(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/targets' % NODE1['uuid'],
+             {}, None),
+        ]
+        self._validate_node_volume_target_list(expect, volume_targets)
+
+    def test_node_volume_target_list_limit(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = node.NodeManager(self.api)
+        volume_targets = self.mgr.list_volume_targets(NODE1['uuid'], limit=1)
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/targets?limit=1' % NODE1['uuid'],
+             {}, None),
+        ]
+        self._validate_node_volume_target_list(expect, volume_targets)
+
+    def test_node_volume_target_list_marker(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = node.NodeManager(self.api)
+        volume_targets = self.mgr.list_volume_targets(
+            NODE1['uuid'], marker=TARGET['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/targets?marker=%s' % (
+                NODE1['uuid'], TARGET['uuid']), {}, None),
+        ]
+        self._validate_node_volume_target_list(expect, volume_targets)
+
+    def test_node_volume_target_list_sort_key(self):
+        self.api = utils.FakeAPI(fake_responses_sorting)
+        self.mgr = node.NodeManager(self.api)
+        volume_targets = self.mgr.list_volume_targets(
+            NODE1['uuid'], sort_key='updated_at')
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/targets?sort_key=updated_at' %
+             NODE1['uuid'], {}, None),
+        ]
+        self._validate_node_volume_target_list(expect, volume_targets)
+
+    def test_node_volume_target_list_sort_dir(self):
+        self.api = utils.FakeAPI(fake_responses_sorting)
+        self.mgr = node.NodeManager(self.api)
+        volume_targets = self.mgr.list_volume_targets(NODE1['uuid'],
+                                                      sort_dir='desc')
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/targets?sort_dir=desc' %
+             NODE1['uuid'], {}, None),
+        ]
+        self._validate_node_volume_target_list(expect, volume_targets)
+
+    def test_node_volume_target_list_detail(self):
+        volume_targets = self.mgr.list_volume_targets(NODE1['uuid'],
+                                                      detail=True)
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/targets?detail=True' % NODE1['uuid'],
+             {}, None),
+        ]
+        self._validate_node_volume_target_list(expect, volume_targets)
+
+    def test_node_volume_target_list_fields(self):
+        volume_targets = self.mgr.list_volume_targets(
+            NODE1['uuid'], fields=['uuid', 'value'])
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/targets?fields=uuid,value' %
+             NODE1['uuid'], {}, None),
+        ]
+        self._validate_node_volume_target_list(expect, volume_targets)
+
+    def test_node_volume_target_list_detail_and_fields_fail(self):
+        self.assertRaises(exc.InvalidAttribute,
+                          self.mgr.list_volume_targets,
                           NODE1['uuid'], detail=True, fields=['uuid', 'extra'])
 
     def test_node_set_maintenance_true(self):
