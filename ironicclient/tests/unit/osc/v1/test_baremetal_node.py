@@ -1939,6 +1939,7 @@ class TestBaremetalSet(TestBaremetal):
     @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
     def test_baremetal_set_target_raid_config(self, mock_handle, mock_stdin):
+        self.cmd.log = mock.Mock(autospec=True)
         target_raid_config_string = '{"raid": "config"}'
         expected_target_raid_config = {'raid': 'config'}
         mock_handle.return_value = expected_target_raid_config.copy()
@@ -1951,6 +1952,7 @@ class TestBaremetalSet(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
         self.cmd.take_action(parsed_args)
 
+        self.cmd.log.warning.assert_not_called()
         self.assertFalse(mock_stdin.called)
         mock_handle.assert_called_once_with(target_raid_config_string)
         self.baremetal_mock.node.set_target_raid_config.\
@@ -1961,6 +1963,7 @@ class TestBaremetalSet(TestBaremetal):
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
     def test_baremetal_set_target_raid_config_and_name(
             self, mock_handle, mock_stdin):
+        self.cmd.log = mock.Mock(autospec=True)
         target_raid_config_string = '{"raid": "config"}'
         expected_target_raid_config = {'raid': 'config'}
         mock_handle.return_value = expected_target_raid_config.copy()
@@ -1975,6 +1978,7 @@ class TestBaremetalSet(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
         self.cmd.take_action(parsed_args)
 
+        self.cmd.log.warning.assert_not_called()
         self.assertFalse(mock_stdin.called)
         mock_handle.assert_called_once_with(target_raid_config_string)
         self.baremetal_mock.node.set_target_raid_config.\
@@ -1987,6 +1991,7 @@ class TestBaremetalSet(TestBaremetal):
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
     def test_baremetal_set_target_raid_config_stdin(self, mock_handle,
                                                     mock_stdin):
+        self.cmd.log = mock.Mock(autospec=True)
         target_value = '-'
         target_raid_config_string = '{"raid": "config"}'
         expected_target_raid_config = {'raid': 'config'}
@@ -2001,6 +2006,7 @@ class TestBaremetalSet(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
         self.cmd.take_action(parsed_args)
 
+        self.cmd.log.warning.assert_not_called()
         mock_stdin.assert_called_once_with('target_raid_config')
         mock_handle.assert_called_once_with(target_raid_config_string)
         self.baremetal_mock.node.set_target_raid_config.\
@@ -2011,6 +2017,7 @@ class TestBaremetalSet(TestBaremetal):
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
     def test_baremetal_set_target_raid_config_stdin_exception(
             self, mock_handle, mock_stdin):
+        self.cmd.log = mock.Mock(autospec=True)
         target_value = '-'
         mock_stdin.side_effect = exc.InvalidAttribute('bad')
 
@@ -2023,6 +2030,7 @@ class TestBaremetalSet(TestBaremetal):
         self.assertRaises(exc.InvalidAttribute,
                           self.cmd.take_action, parsed_args)
 
+        self.cmd.log.warning.assert_not_called()
         mock_stdin.assert_called_once_with('target_raid_config')
         self.assertFalse(mock_handle.called)
         self.assertFalse(
@@ -2358,6 +2366,7 @@ class TestBaremetalUnset(TestBaremetal):
         )
 
     def test_baremetal_unset_target_raid_config(self):
+        self.cmd.log = mock.Mock(autospec=True)
         arglist = [
             'node_uuid',
             '--target-raid-config',
@@ -2371,11 +2380,13 @@ class TestBaremetalUnset(TestBaremetal):
 
         self.cmd.take_action(parsed_args)
 
+        self.cmd.log.warning.assert_not_called()
         self.assertFalse(self.baremetal_mock.node.update.called)
         self.baremetal_mock.node.set_target_raid_config.\
             assert_called_once_with('node_uuid', {})
 
     def test_baremetal_unset_target_raid_config_and_name(self):
+        self.cmd.log = mock.Mock(autospec=True)
         arglist = [
             'node_uuid',
             '--name',
@@ -2391,6 +2402,7 @@ class TestBaremetalUnset(TestBaremetal):
 
         self.cmd.take_action(parsed_args)
 
+        self.cmd.log.warning.assert_not_called()
         self.baremetal_mock.node.set_target_raid_config.\
             assert_called_once_with('node_uuid', {})
         self.baremetal_mock.node.update.assert_called_once_with(
