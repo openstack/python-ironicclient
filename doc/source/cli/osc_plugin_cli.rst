@@ -1,6 +1,6 @@
-============================================================================
-:program:`openstack baremetal` OpenStack Client Command-Line Interface (CLI)
-============================================================================
+=============================================
+OpenStack Client Command-Line Interface (CLI)
+=============================================
 
 .. program:: openstack baremetal
 .. highlight:: bash

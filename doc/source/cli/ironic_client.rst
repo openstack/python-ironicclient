@@ -1,6 +1,6 @@
-==============================================
-:program:`ironic` Command-Line Interface (CLI)
-==============================================
+==========================================
+Ironic Client Command-Line Interface (CLI)
+==========================================
 
 .. program:: ironic
 .. highlight:: bash
