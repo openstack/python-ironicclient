@@ -4,8 +4,13 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
-              'oslosphinx',
+              'openstackdocstheme',
               ]
+
+# openstackdocstheme options
+repository_name = 'openstack/python-ironicclient'
+bug_project = 'python-ironicclient'
+bug_tag = ''
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
@@ -49,6 +54,9 @@ exclude_patterns = ['api/ironicclient.tests.functional.*']
 #html_theme_path = ["."]
 #html_theme = '_theme'
 #html_static_path = ['_static']
+html_theme = 'openstackdocs'
+
+html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = '%sdoc' % project
