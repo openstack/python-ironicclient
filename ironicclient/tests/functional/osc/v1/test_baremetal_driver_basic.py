@@ -38,3 +38,20 @@ class BaremetalDriverTests(base.TestCase):
             driver['Supported driver(s)'] for driver in self.driver_list()
         ]
         self.assertIn(self.driver_name, drivers)
+
+    def test_driver_raid_property_list(self):
+        """Test baremetal driver raid property list command.
+
+        Test steps:
+        1) Get list of fake driver raid properties.
+        2) Check contents of driver raid properties list.
+        """
+        props = ['controller', 'disk_type', 'interface_type',
+                 'is_root_volume', 'number_of_physical_disks',
+                 'physical_disks', 'raid_level', 'share_physical_disks',
+                 'size_gb', 'volume_name']
+        raid_props = self.driver_raid_property_list(
+            self.driver_name,
+            params='--os-baremetal-api-version 1.12')
+        for prop in props:
+            self.assertIn(prop, [i['Property'] for i in raid_props])

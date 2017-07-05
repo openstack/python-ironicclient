@@ -336,6 +336,19 @@ class TestCase(base.FunctionalTestBase):
                                 .format(opts, params))
         return json.loads(output)
 
+    def driver_raid_property_list(self, driver_name, fields=None, params=''):
+        """List a driver's RAID logical disk properties.
+
+        :param String driver_name: Name of the driver
+        :param List fields: List of fields to show
+        :param List params: Additional kwargs
+        :return: list of JSON driver RAID properties objects
+        """
+        opts = self.get_opts(fields=fields)
+        output = self.openstack('baremetal driver raid property list {} {} {}'
+                                .format(opts, driver_name, params))
+        return json.loads(output)
+
     def conductor_show(self, hostname, fields=None, params=''):
         """Show specified baremetal conductors.
 
