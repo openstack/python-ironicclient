@@ -215,7 +215,7 @@ def common_params_for_list(args, fields, field_labels):
 
 
 def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None,
-                   fields=None):
+                   fields=None, detail=False):
     """Generate common filters for any list request.
 
     :param marker: entity ID from which to start returning entities.
@@ -224,6 +224,9 @@ def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None,
     :param sort_dir: direction of sorting: 'asc' or 'desc'.
     :param fields: a list with a specified set of fields of the resource
                    to be returned.
+    :param detail: Boolean, True to return detailed information. This parameter
+                   can be used for resources which accept 'detail' as a URL
+                   parameter.
     :returns: list of string filters.
     """
     filters = []
@@ -237,6 +240,8 @@ def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None,
         filters.append('sort_dir=%s' % sort_dir)
     if fields is not None:
         filters.append('fields=%s' % ','.join(fields))
+    if detail:
+        filters.append('detail=True')
     return filters
 
 

@@ -25,6 +25,7 @@ from ironicclient.common import utils as common_utils
 from ironicclient import exc
 from ironicclient.tests.unit import utils
 from ironicclient.v1 import node
+from ironicclient.v1 import volume_connector
 
 if six.PY3:
     import io
@@ -57,6 +58,11 @@ PORTGROUP = {'uuid': '11111111-2222-3333-4444-555555555555',
              'name': 'Portgroup',
              'node_uuid': '66666666-7777-8888-9999-000000000000',
              'address': 'AA:BB:CC:DD:EE:FF',
+             'extra': {}}
+CONNECTOR = {'uuid': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+             'node_uuid': 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff',
+             'type': 'iqn',
+             'connector_id': 'iqn.2010-10.org.openstack:test',
              'extra': {}}
 
 POWER_STATE = {'power_state': 'power on',
@@ -290,6 +296,27 @@ fake_responses = {
             {"portgroups": [PORTGROUP]},
         ),
     },
+    '/v1/nodes/%s/volume/connectors' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"connectors": [CONNECTOR]},
+        ),
+    },
+    '/v1/nodes/%s/volume/connectors?detail=True' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"connectors": [CONNECTOR]},
+        ),
+    },
+    '/v1/nodes/%s/volume/connectors?fields=uuid,connector_id' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"connectors": [CONNECTOR]},
+        ),
+    },
     '/v1/nodes/%s/maintenance' % NODE1['uuid']:
     {
         'PUT': (
@@ -446,6 +473,21 @@ fake_responses_pagination = {
             {"portgroups": [PORTGROUP]},
         ),
     },
+    '/v1/nodes/%s/volume/connectors?limit=1' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"connectors": [CONNECTOR]},
+        ),
+    },
+    '/v1/nodes/%s/volume/connectors?marker=%s' % (NODE1['uuid'],
+                                                  CONNECTOR['uuid']):
+    {
+        'GET': (
+            {},
+            {"connectors": [CONNECTOR]},
+        ),
+    },
 }
 
 fake_responses_sorting = {
@@ -489,6 +531,20 @@ fake_responses_sorting = {
         'GET': (
             {},
             {"portgroups": [PORTGROUP]},
+        ),
+    },
+    '/v1/nodes/%s/volume/connectors?sort_key=updated_at' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"connectors": [CONNECTOR]},
+        ),
+    },
+    '/v1/nodes/%s/volume/connectors?sort_dir=desc' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"connectors": [CONNECTOR]},
         ),
     },
 }
@@ -854,6 +910,92 @@ class NodeManagerTest(testtools.TestCase):
 
     def test_node_port_list_detail_and_fields_fail(self):
         self.assertRaises(exc.InvalidAttribute, self.mgr.list_ports,
+                          NODE1['uuid'], detail=True, fields=['uuid', 'extra'])
+
+    def _validate_node_volume_connector_list(self, expect, volume_connectors):
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(volume_connectors))
+        self.assertIsInstance(volume_connectors[0],
+                              volume_connector.VolumeConnector)
+        self.assertEqual(CONNECTOR['uuid'], volume_connectors[0].uuid)
+        self.assertEqual(CONNECTOR['type'], volume_connectors[0].type)
+        self.assertEqual(CONNECTOR['connector_id'],
+                         volume_connectors[0].connector_id)
+
+    def test_node_volume_connector_list(self):
+        volume_connectors = self.mgr.list_volume_connectors(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/connectors' % NODE1['uuid'],
+             {}, None),
+        ]
+        self._validate_node_volume_connector_list(expect, volume_connectors)
+
+    def test_node_volume_connector_list_limit(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = node.NodeManager(self.api)
+        volume_connectors = self.mgr.list_volume_connectors(NODE1['uuid'],
+                                                            limit=1)
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/connectors?limit=1' % NODE1['uuid'],
+             {}, None),
+        ]
+        self._validate_node_volume_connector_list(expect, volume_connectors)
+
+    def test_node_volume_connector_list_marker(self):
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = node.NodeManager(self.api)
+        volume_connectors = self.mgr.list_volume_connectors(
+            NODE1['uuid'], marker=CONNECTOR['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/connectors?marker=%s' % (
+                NODE1['uuid'], CONNECTOR['uuid']), {}, None),
+        ]
+        self._validate_node_volume_connector_list(expect, volume_connectors)
+
+    def test_node_volume_connector_list_sort_key(self):
+        self.api = utils.FakeAPI(fake_responses_sorting)
+        self.mgr = node.NodeManager(self.api)
+        volume_connectors = self.mgr.list_volume_connectors(
+            NODE1['uuid'], sort_key='updated_at')
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/connectors?sort_key=updated_at' %
+             NODE1['uuid'], {}, None),
+        ]
+        self._validate_node_volume_connector_list(expect, volume_connectors)
+
+    def test_node_volume_connector_list_sort_dir(self):
+        self.api = utils.FakeAPI(fake_responses_sorting)
+        self.mgr = node.NodeManager(self.api)
+        volume_connectors = self.mgr.list_volume_connectors(NODE1['uuid'],
+                                                            sort_dir='desc')
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/connectors?sort_dir=desc' %
+             NODE1['uuid'], {}, None),
+        ]
+        self._validate_node_volume_connector_list(expect, volume_connectors)
+
+    def test_node_volume_connector_list_detail(self):
+        volume_connectors = self.mgr.list_volume_connectors(NODE1['uuid'],
+                                                            detail=True)
+        expect = [
+            ('GET',
+             '/v1/nodes/%s/volume/connectors?detail=True' % NODE1['uuid'],
+             {}, None),
+        ]
+        self._validate_node_volume_connector_list(expect, volume_connectors)
+
+    def test_node_volume_connector_list_fields(self):
+        volume_connectors = self.mgr.list_volume_connectors(
+            NODE1['uuid'], fields=['uuid', 'connector_id'])
+        expect = [
+            ('GET', '/v1/nodes/%s/volume/connectors?fields=uuid,connector_id' %
+             NODE1['uuid'], {}, None),
+        ]
+        self._validate_node_volume_connector_list(expect, volume_connectors)
+
+    def test_node_volume_connector_list_detail_and_fields_fail(self):
+        self.assertRaises(exc.InvalidAttribute,
+                          self.mgr.list_volume_connectors,
                           NODE1['uuid'], detail=True, fields=['uuid', 'extra'])
 
     def test_node_set_maintenance_true(self):

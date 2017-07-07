@@ -22,7 +22,7 @@ from ironicclient.common import base
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
-
+from ironicclient.v1 import volume_connector
 
 _power_states = {
     'on': 'power on',
@@ -194,6 +194,62 @@ class NodeManager(base.CreateManager):
         else:
             return self._list_pagination(self._path(path), "ports",
                                          limit=limit)
+
+    def list_volume_connectors(self, node_id, marker=None, limit=None,
+                               sort_key=None, sort_dir=None, detail=False,
+                               fields=None):
+        """List all the volume connectors for a given node.
+
+        :param node_id: Name or UUID of the node.
+        :param marker: Optional, the UUID of a volume connector, eg the last
+                       volume connector from a previous result set. Return
+                       the next result set.
+        :param limit: The maximum number of results to return per
+                      request, if:
+
+            1) limit > 0, the maximum number of volume connectors to return.
+            2) limit == 0, return the entire list of volume connectors.
+            3) limit param is NOT specified (None), the number of items
+               returned respect the maximum imposed by the Ironic API
+               (see Ironic's api.max_limit option).
+
+        :param sort_key: Optional, field used for sorting.
+
+        :param sort_dir: Optional, direction of sorting, either 'asc' (the
+                         default) or 'desc'.
+
+        :param detail: Optional, boolean whether to return detailed information
+                       about volume connectors.
+
+        :param fields: Optional, a list with a specified set of fields
+                       of the resource to be returned. Can not be used
+                       when 'detail' is set.
+
+        :returns: A list of volume connectors.
+
+        """
+        if limit is not None:
+            limit = int(limit)
+
+        if detail and fields:
+            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
+                                         "with 'detail' set"))
+
+        filters = utils.common_filters(marker=marker, limit=limit,
+                                       sort_key=sort_key, sort_dir=sort_dir,
+                                       fields=fields, detail=detail)
+
+        path = "%s/volume/connectors" % node_id
+        if filters:
+            path += '?' + '&'.join(filters)
+
+        if limit is None:
+            return self._list(self._path(path), response_key="connectors",
+                              obj_class=volume_connector.VolumeConnector)
+        else:
+            return self._list_pagination(
+                self._path(path), response_key="connectors", limit=limit,
+                obj_class=volume_connector.VolumeConnector)
 
     def get(self, node_id, fields=None):
         return self._get(resource_id=node_id, fields=fields)
