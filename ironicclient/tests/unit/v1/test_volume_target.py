@@ -161,11 +161,11 @@ class VolumeTargetManagerTest(testtools.TestCase):
         self.mgr = ironicclient.v1.volume_target.VolumeTargetManager(self.api)
 
     def _validate_obj(self, expect, obj):
-            self.assertEqual(expect['uuid'], obj.uuid)
-            self.assertEqual(expect['volume_type'], obj.volume_type)
-            self.assertEqual(expect['boot_index'], obj.boot_index)
-            self.assertEqual(expect['volume_id'], obj.volume_id)
-            self.assertEqual(expect['node_uuid'], obj.node_uuid)
+        self.assertEqual(expect['uuid'], obj.uuid)
+        self.assertEqual(expect['volume_type'], obj.volume_type)
+        self.assertEqual(expect['boot_index'], obj.boot_index)
+        self.assertEqual(expect['volume_id'], obj.volume_id)
+        self.assertEqual(expect['node_uuid'], obj.node_uuid)
 
     def _validate_list(self, expect_request,
                        expect_targets, actual_targets):

@@ -158,10 +158,10 @@ class VolumeConnectorManagerTest(testtools.TestCase):
             self.api)
 
     def _validate_obj(self, expect, obj):
-            self.assertEqual(expect['uuid'], obj.uuid)
-            self.assertEqual(expect['type'], obj.type)
-            self.assertEqual(expect['connector_id'], obj.connector_id)
-            self.assertEqual(expect['node_uuid'], obj.node_uuid)
+        self.assertEqual(expect['uuid'], obj.uuid)
+        self.assertEqual(expect['type'], obj.type)
+        self.assertEqual(expect['connector_id'], obj.connector_id)
+        self.assertEqual(expect['node_uuid'], obj.node_uuid)
 
     def _validate_list(self, expect_request,
                        expect_connectors, actual_connectors):
