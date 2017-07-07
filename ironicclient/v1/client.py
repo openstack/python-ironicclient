@@ -24,6 +24,7 @@ from ironicclient.v1 import node
 from ironicclient.v1 import port
 from ironicclient.v1 import portgroup
 from ironicclient.v1 import volume_connector
+from ironicclient.v1 import volume_target
 
 
 class Client(object):
@@ -64,6 +65,8 @@ class Client(object):
         self.node = node.NodeManager(self.http_client)
         self.port = port.PortManager(self.http_client)
         self.volume_connector = volume_connector.VolumeConnectorManager(
+            self.http_client)
+        self.volume_target = volume_target.VolumeTargetManager(
             self.http_client)
         self.driver = driver.DriverManager(self.http_client)
         self.portgroup = portgroup.PortgroupManager(self.http_client)
