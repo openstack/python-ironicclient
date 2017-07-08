@@ -112,10 +112,20 @@ fake_responses_pagination = {
         'GET': (
             {},
             {"connectors": [CONNECTOR1],
-             "next": "http://127.0.0.1:6385/v1/volume/connectors/?limit=1"}
+             "next": "http://127.0.0.1:6385/v1/volume/connectors/?marker=%s" %
+                     CONNECTOR1['uuid']}
         ),
     },
     '/v1/volume/connectors/?limit=1':
+    {
+        'GET': (
+            {},
+            {"connectors": [CONNECTOR1],
+             "next": "http://127.0.0.1:6385/v1/volume/connectors/?limit=1"
+                     "&marker=%s" % CONNECTOR1['uuid']}
+        ),
+    },
+    '/v1/volume/connectors/?limit=1&marker=%s' % CONNECTOR1['uuid']:
     {
         'GET': (
             {},
@@ -149,19 +159,13 @@ fake_responses_sorting = {
 }
 
 
-class VolumeConnectorManagerTest(testtools.TestCase):
-
-    def setUp(self):
-        super(VolumeConnectorManagerTest, self).setUp()
-        self.api = utils.FakeAPI(fake_responses)
-        self.mgr = ironicclient.v1.volume_connector.VolumeConnectorManager(
-            self.api)
+class VolumeConnectorManagerTestBase(testtools.TestCase):
 
     def _validate_obj(self, expect, obj):
-            self.assertEqual(expect['uuid'], obj.uuid)
-            self.assertEqual(expect['type'], obj.type)
-            self.assertEqual(expect['connector_id'], obj.connector_id)
-            self.assertEqual(expect['node_uuid'], obj.node_uuid)
+        self.assertEqual(expect['uuid'], obj.uuid)
+        self.assertEqual(expect['type'], obj.type)
+        self.assertEqual(expect['connector_id'], obj.connector_id)
+        self.assertEqual(expect['node_uuid'], obj.node_uuid)
 
     def _validate_list(self, expect_request,
                        expect_connectors, actual_connectors):
@@ -169,6 +173,15 @@ class VolumeConnectorManagerTest(testtools.TestCase):
         self.assertEqual(len(expect_connectors), len(actual_connectors))
         for expect, obj in zip(expect_connectors, actual_connectors):
             self._validate_obj(expect, obj)
+
+
+class VolumeConnectorManagerTest(VolumeConnectorManagerTestBase):
+
+    def setUp(self):
+        super(VolumeConnectorManagerTest, self).setUp()
+        self.api = utils.FakeAPI(fake_responses)
+        self.mgr = ironicclient.v1.volume_connector.VolumeConnectorManager(
+            self.api)
 
     def test_volume_connectors_list(self):
         volume_connectors = self.mgr.list()
@@ -217,63 +230,6 @@ class VolumeConnectorManagerTest(testtools.TestCase):
     def test_volume_connector_list_detail_and_fields_fail(self):
         self.assertRaises(exc.InvalidAttribute, self.mgr.list,
                           detail=True, fields=['uuid', 'connector_id'])
-
-    def test_volume_connectors_list_limit(self):
-        self.api = utils.FakeAPI(fake_responses_pagination)
-        self.mgr = ironicclient.v1.volume_connector.VolumeConnectorManager(
-            self.api)
-        volume_connectors = self.mgr.list(limit=1)
-        expect = [
-            ('GET', '/v1/volume/connectors/?limit=1', {}, None),
-        ]
-        expect_connectors = [CONNECTOR2]
-        self._validate_list(expect, expect_connectors, volume_connectors)
-
-    def test_volume_connectors_list_marker(self):
-        self.api = utils.FakeAPI(fake_responses_pagination)
-        self.mgr = ironicclient.v1.volume_connector.VolumeConnectorManager(
-            self.api)
-        volume_connectors = self.mgr.list(marker=CONNECTOR1['uuid'])
-        expect = [
-            ('GET', '/v1/volume/connectors/?marker=%s' % CONNECTOR1['uuid'],
-             {}, None),
-        ]
-        expect_connectors = [CONNECTOR2]
-        self._validate_list(expect, expect_connectors, volume_connectors)
-
-    def test_volume_connectors_list_pagination_no_limit(self):
-        self.api = utils.FakeAPI(fake_responses_pagination)
-        self.mgr = ironicclient.v1.volume_connector.VolumeConnectorManager(
-            self.api)
-        volume_connectors = self.mgr.list(limit=0)
-        expect = [
-            ('GET', '/v1/volume/connectors', {}, None),
-            ('GET', '/v1/volume/connectors/?limit=1', {}, None)
-        ]
-        expect_connectors = [CONNECTOR1, CONNECTOR2]
-        self._validate_list(expect, expect_connectors, volume_connectors)
-
-    def test_volume_connectors_list_sort_key(self):
-        self.api = utils.FakeAPI(fake_responses_sorting)
-        self.mgr = ironicclient.v1.volume_connector.VolumeConnectorManager(
-            self.api)
-        volume_connectors = self.mgr.list(sort_key='updated_at')
-        expect = [
-            ('GET', '/v1/volume/connectors/?sort_key=updated_at', {}, None)
-        ]
-        expect_connectors = [CONNECTOR2, CONNECTOR1]
-        self._validate_list(expect, expect_connectors, volume_connectors)
-
-    def test_volume_connectors_list_sort_dir(self):
-        self.api = utils.FakeAPI(fake_responses_sorting)
-        self.mgr = ironicclient.v1.volume_connector.VolumeConnectorManager(
-            self.api)
-        volume_connectors = self.mgr.list(sort_dir='desc')
-        expect = [
-            ('GET', '/v1/volume/connectors/?sort_dir=desc', {}, None)
-        ]
-        expect_connectors = [CONNECTOR2, CONNECTOR1]
-        self._validate_list(expect, expect_connectors, volume_connectors)
 
     def test_volume_connectors_show(self):
         volume_connector = self.mgr.get(CONNECTOR1['uuid'])
@@ -332,3 +288,64 @@ class VolumeConnectorManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self._validate_obj(UPDATED_CONNECTOR, volume_connector)
+
+
+class VolumeConnectorManagerPaginationTest(VolumeConnectorManagerTestBase):
+
+    def setUp(self):
+        super(VolumeConnectorManagerPaginationTest, self).setUp()
+        self.api = utils.FakeAPI(fake_responses_pagination)
+        self.mgr = ironicclient.v1.volume_connector.VolumeConnectorManager(
+            self.api)
+
+    def test_volume_connectors_list_limit(self):
+        volume_connectors = self.mgr.list(limit=1)
+        expect = [
+            ('GET', '/v1/volume/connectors/?limit=1', {}, None),
+        ]
+        expect_connectors = [CONNECTOR1]
+        self._validate_list(expect, expect_connectors, volume_connectors)
+
+    def test_volume_connectors_list_marker(self):
+        volume_connectors = self.mgr.list(marker=CONNECTOR1['uuid'])
+        expect = [
+            ('GET', '/v1/volume/connectors/?marker=%s' % CONNECTOR1['uuid'],
+             {}, None),
+        ]
+        expect_connectors = [CONNECTOR2]
+        self._validate_list(expect, expect_connectors, volume_connectors)
+
+    def test_volume_connectors_list_pagination_no_limit(self):
+        volume_connectors = self.mgr.list(limit=0)
+        expect = [
+            ('GET', '/v1/volume/connectors', {}, None),
+            ('GET', '/v1/volume/connectors/?marker=%s' % CONNECTOR1['uuid'],
+             {}, None)
+        ]
+        expect_connectors = [CONNECTOR1, CONNECTOR2]
+        self._validate_list(expect, expect_connectors, volume_connectors)
+
+
+class VolumeConnectorManagerSortingTest(VolumeConnectorManagerTestBase):
+
+    def setUp(self):
+        super(VolumeConnectorManagerSortingTest, self).setUp()
+        self.api = utils.FakeAPI(fake_responses_sorting)
+        self.mgr = ironicclient.v1.volume_connector.VolumeConnectorManager(
+            self.api)
+
+    def test_volume_connectors_list_sort_key(self):
+        volume_connectors = self.mgr.list(sort_key='updated_at')
+        expect = [
+            ('GET', '/v1/volume/connectors/?sort_key=updated_at', {}, None)
+        ]
+        expect_connectors = [CONNECTOR2, CONNECTOR1]
+        self._validate_list(expect, expect_connectors, volume_connectors)
+
+    def test_volume_connectors_list_sort_dir(self):
+        volume_connectors = self.mgr.list(sort_dir='desc')
+        expect = [
+            ('GET', '/v1/volume/connectors/?sort_dir=desc', {}, None)
+        ]
+        expect_connectors = [CONNECTOR2, CONNECTOR1]
+        self._validate_list(expect, expect_connectors, volume_connectors)
