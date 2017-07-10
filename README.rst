@@ -2,8 +2,8 @@
 Team and repository tags
 ========================
 
-.. image:: http://governance.openstack.org/badges/python-ironicclient.svg
-    :target: http://governance.openstack.org/reference/tags/index.html
+.. image:: https://governance.openstack.org/badges/python-ironicclient.svg
+    :target: https://governance.openstack.org/reference/tags/index.html
 
 .. Change things from this point on
 
@@ -15,7 +15,7 @@ This is a client for the OpenStack `Ironic
 ``ironicclient`` module) and a command-line interface (``ironic``).
 
 Development takes place via the usual OpenStack processes as outlined in the
-`developer guide <http://docs.openstack.org/infra/manual/developers.html>`_. The master
+`developer guide <https://docs.openstack.org/infra/manual/developers.html>`_. The master
 repository is on `git.openstack.org
 <https://git.openstack.org/cgit/openstack/python-ironicclient>`_.
 
@@ -103,11 +103,11 @@ the subcommands available, run::
     $ openstack help baremetal
 
 * License: Apache License, Version 2.0
-* Documentation: http://docs.openstack.org/developer/python-ironicclient
-* Source: http://git.openstack.org/cgit/openstack/python-ironicclient
-* Bugs: http://bugs.launchpad.net/python-ironicclient
+* Documentation: https://docs.openstack.org/python-ironicclient
+* Source: https://git.openstack.org/cgit/openstack/python-ironicclient
+* Bugs: https://bugs.launchpad.net/python-ironicclient
 
 Change logs with information about specific versions (or tags) are
 available at:
 
-    `<http://git.openstack.org/cgit/openstack/python-ironicclient/>`_.
+    `<https://git.openstack.org/cgit/openstack/python-ironicclient/>`_.
