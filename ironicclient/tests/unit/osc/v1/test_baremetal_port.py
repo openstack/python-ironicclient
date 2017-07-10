@@ -620,7 +620,7 @@ class TestBaremetalPortList(TestBaremetalPort):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
         # DisplayCommandBase.take_action() returns two tuples
-        columns, data = self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args)
 
         kwargs = {
             'portgroup': baremetal_fakes.baremetal_portgroup_uuid,
