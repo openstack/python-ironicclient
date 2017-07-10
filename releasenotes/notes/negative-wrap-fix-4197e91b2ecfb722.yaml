@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    ``--wrap`` CLI argument for ``ironic driver-properties`` and
+    ``ironic driver-raid-logical-disk-properties`` commands now takes
+    only non-negative integers as input. An error is shown if a
+    negative value is passed.
