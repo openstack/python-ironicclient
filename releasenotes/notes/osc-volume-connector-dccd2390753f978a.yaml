@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Adds OpenStackClient commands for volume connector:
+
+    * openstack baremetal volume connector create
+    * openstack baremetal volume connector show
+    * openstack baremetal volume connector list
+    * openstack baremetal volume connector delete
+    * openstack baremetal volume connector set
+    * openstack baremetal volume connector unset

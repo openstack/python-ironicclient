@@ -44,7 +44,8 @@ BAREMETAL = {
     'power_state': baremetal_power_state,
     'provision_state': baremetal_provision_state,
     'maintenance': baremetal_maintenance,
-    'links': []
+    'links': [],
+    'volume': [],
 }
 
 baremetal_port_uuid = 'zzz-zzzzzz-zzzz'
@@ -131,6 +132,19 @@ PORTGROUP = {'uuid': baremetal_portgroup_uuid,
              }
 
 VIFS = {'vifs': [{'id': 'aaa-aa'}]}
+
+baremetal_volume_connector_uuid = 'vvv-cccccc-vvvv'
+baremetal_volume_connector_type = 'iscsi'
+baremetal_volume_connector_connector_id = 'iqn.2017-01.connector'
+baremetal_volume_connector_extra = {'key1': 'value1',
+                                    'key2': 'value2'}
+VOLUME_CONNECTOR = {
+    'uuid': baremetal_volume_connector_uuid,
+    'node_uuid': baremetal_uuid,
+    'type': baremetal_volume_connector_type,
+    'connector_id': baremetal_volume_connector_connector_id,
+    'extra': baremetal_volume_connector_extra,
+}
 
 
 class TestBaremetal(utils.TestCommand):
