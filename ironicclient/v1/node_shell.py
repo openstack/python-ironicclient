@@ -260,6 +260,10 @@ def do_node_list(cc, args):
          'only applicable when the specified --driver is a '
          'hardware type.')
 @cliutils.arg(
+    '--storage-interface',
+    metavar='<storage-interface>',
+    help='Storage interface used by the node\'s driver.')
+@cliutils.arg(
     '--vendor-interface',
     metavar='<vendor-interface>',
     help='Vendor interface used by the node\'s driver. This is '
@@ -278,7 +282,8 @@ def do_node_create(cc, args):
                   'deploy_interface', 'inspect_interface',
                   'management_interface', 'network_interface',
                   'power_interface', 'raid_interface',
-                  'vendor_interface', 'resource_class']
+                  'storage_interface', 'vendor_interface',
+                  'resource_class']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'driver_info')
