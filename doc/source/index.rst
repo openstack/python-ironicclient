@@ -10,14 +10,12 @@ Contents
 ========
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    api_v1
-   cli
-   osc_plugin_cli
-   create_command
-   contributing
-   testing
+   cli/index
+   user/create_command
+   contributor/index
    Release Notes <http://docs.openstack.org/releasenotes/python-ironicclient/>
 
 Indices and tables
