@@ -138,7 +138,7 @@ PORTGROUP = {'uuid': baremetal_portgroup_uuid,
 VIFS = {'vifs': [{'id': 'aaa-aa'}]}
 
 baremetal_volume_connector_uuid = 'vvv-cccccc-vvvv'
-baremetal_volume_connector_type = 'iscsi'
+baremetal_volume_connector_type = 'iqn'
 baremetal_volume_connector_connector_id = 'iqn.2017-01.connector'
 baremetal_volume_connector_extra = {'key1': 'value1',
                                     'key2': 'value2'}

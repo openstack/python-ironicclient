@@ -28,7 +28,7 @@ from ironicclient.v1 import resource_fields as res_fields
 class CreateBaremetalVolumeConnector(command.ShowOne):
     """Create a new baremetal volume connector."""
 
-    log = logging.getLogger(__name__ + ".CraeteBaremetalVolumeConnector")
+    log = logging.getLogger(__name__ + ".CreateBaremetalVolumeConnector")
 
     def get_parser(self, prog_name):
         parser = (
@@ -45,6 +45,7 @@ class CreateBaremetalVolumeConnector(command.ShowOne):
             dest='type',
             metavar="<type>",
             required=True,
+            choices=('iqn', 'ip', 'mac', 'wwnn', 'wwpn'),
             help=_("Type of the volume connector. Can be 'iqn', 'ip', 'mac', "
                    "'wwnn', 'wwpn'."))
         parser.add_argument(
@@ -278,6 +279,7 @@ class SetBaremetalVolumeConnector(command.Command):
             '--type',
             dest='type',
             metavar="<type>",
+            choices=('iqn', 'ip', 'mac', 'wwnn', 'wwpn'),
             help=_("Type of the volume connector. Can be 'iqn', 'ip', 'mac', "
                    "'wwnn', 'wwpn'."))
         parser.add_argument(
