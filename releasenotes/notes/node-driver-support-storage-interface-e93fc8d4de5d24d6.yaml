@@ -4,14 +4,14 @@ features:
     Adds support for storage_interface for the commands below.
     They are available starting with ironic API microversion 1.33.
 
-    * ironic node-create
-    * ironic node-show
-    * ironic node-update
-    * ironic driver-list
-    * ironic driver-show
-    * openstack baremetal node create
-    * openstack baremetal node show
-    * openstack baremetal node set
-    * openstack baremetal node unset
-    * openstack baremetal driver list
-    * openstack baremetal driver show
+    * ``openstack baremetal node create``
+    * ``openstack baremetal node show``
+    * ``openstack baremetal node set``
+    * ``openstack baremetal node unset``
+    * ``openstack baremetal driver list``
+    * ``openstack baremetal driver show``
+    * ``ironic node-create``
+    * ``ironic node-show``
+    * ``ironic node-update``
+    * ``ironic driver-list``
+    * ``ironic driver-show``
