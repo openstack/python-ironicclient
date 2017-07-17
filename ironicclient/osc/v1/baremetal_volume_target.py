@@ -36,7 +36,7 @@ class CreateBaremetalVolumeTarget(command.ShowOne):
         parser.add_argument(
             '--node',
             dest='node_uuid',
-            metavar='<node>',
+            metavar='<uuid>',
             required=True,
             help=_('UUID of the node that this volume target belongs to.'))
         parser.add_argument(
@@ -154,7 +154,7 @@ class ListBaremetalVolumeTarget(command.Lister):
             '--node',
             dest='node',
             metavar='<node>',
-            help=_("Only list volume targts of this node (name or UUID)."))
+            help=_("Only list volume targets of this node (name or UUID)."))
         parser.add_argument(
             '--limit',
             dest='limit',
@@ -289,7 +289,7 @@ class SetBaremetalVolumeTarget(command.Command):
         parser.add_argument(
             '--node',
             dest='node_uuid',
-            metavar='<node>',
+            metavar='<uuid>',
             help=_('UUID of the node that this volume target belongs to.'))
         parser.add_argument(
             '--type',
