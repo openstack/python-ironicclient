@@ -19,6 +19,7 @@ from ironicclient.v1 import node_shell
 from ironicclient.v1 import port_shell
 from ironicclient.v1 import portgroup_shell
 from ironicclient.v1 import volume_connector_shell
+from ironicclient.v1 import volume_target_shell
 
 COMMAND_MODULES = [
     chassis_shell,
@@ -28,6 +29,7 @@ COMMAND_MODULES = [
     driver_shell,
     create_resources_shell,
     volume_connector_shell,
+    volume_target_shell,
 ]
 
 
