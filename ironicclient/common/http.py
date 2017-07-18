@@ -333,7 +333,7 @@ class HTTPClient(VersionNegotiationMixin):
 
             # TODO(deva): implement graceful client downgrade when connecting
             # to servers that did not support microversions. Details here:
-            # http://specs.openstack.org/openstack/ironic-specs/specs/kilo/api-microversions.html#use-case-3b-new-client-communicating-with-a-old-ironic-user-specified  # noqa
+            # https://specs.openstack.org/openstack/ironic-specs/specs/kilo-implemented/api-microversions.html#use-case-3b-new-client-communicating-with-a-old-ironic-user-specified  # noqa
 
             if resp.status_code == http_client.NOT_ACCEPTABLE:
                 negotiated_ver = self.negotiate_version(self.session, resp)
