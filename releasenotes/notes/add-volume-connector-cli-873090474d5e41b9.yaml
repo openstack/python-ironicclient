@@ -1,0 +1,20 @@
+---
+features:
+  - |
+    Adds these ``openstack baremetal`` and ``ironic`` CLI commands
+    for volume connector resources.
+
+    * ``openstack baremetal volume connector create``
+    * ``openstack baremetal volume connector list``
+    * ``openstack baremetal volume connector show``
+    * ``openstack baremetal volume connector set``
+    * ``openstack baremetal volume connector unset``
+    * ``openstack baremetal volume connector delete``
+    * ``ironic volume-connector-create``
+    * ``ironic volume-connector-list``
+    * ``ironic volume-connector-show``
+    * ``ironic volume-connector-update``
+    * ``ironic volume-connector-delete``
+
+    They are available starting with ironic API microversion 1.32.
+

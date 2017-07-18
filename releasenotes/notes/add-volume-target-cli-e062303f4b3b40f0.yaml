@@ -1,0 +1,18 @@
+---
+features:
+  - |
+    Adds these ``openstack baremetal`` and ``ironic`` CLI commands for volume target resources.
+
+    * ``openstack baremetal volume target create``
+    * ``openstack baremetal volume target list``
+    * ``openstack baremetal volume target show``
+    * ``openstack baremetal volume target set``
+    * ``openstack baremetal volume target unset``
+    * ``openstack baremetal volume target delete``
+    * ``ironic volume-target-create``
+    * ``ironic volume-target-list``
+    * ``ironic volume-target-show``
+    * ``ironic volume-target-update``
+    * ``ironic volume-target-delete``
+
+    They are available starting with ironic API microversion 1.32.
