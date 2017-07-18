@@ -67,3 +67,11 @@ class IronicClientHelp(base.FunctionalTestBase):
         self.assertIn(caption, output)
         for string in subcommands:
             self.assertIn(string, output)
+
+    def test_warning_on_api_version(self):
+        result = self._ironic('help', merge_stderr=True)
+        self.assertIn('You are using the default API version', result)
+
+        result = self._ironic('help', flags='--ironic-api-version 1.9',
+                              merge_stderr=True)
+        self.assertNotIn('You are using the default API version', result)

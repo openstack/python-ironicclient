@@ -1,0 +1,7 @@
+---
+deprecations:
+  - |
+    Currently, the default API version for the ``ironic`` tool is fixed to be
+    1.9.  In the Queens release, it will be changed to the latest version
+    understood by both the client and the server. In this release a warning is
+    logged, if no explicit version is provided.

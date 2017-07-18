@@ -39,6 +39,13 @@ from ironicclient import exc
 
 
 LATEST_API_VERSION = ('1', 'latest')
+MISSING_VERSION_WARNING = (
+    "You are using the default API version of the 'ironic' command "
+    "This is currently API version %s. In the future, the default will be "
+    "the latest API version understood by both API and CLI. You can preserve "
+    "the current behavior by passing the --ironic-api-version argument with "
+    "the desired version or using the IRONIC_API_VERSION environment variable."
+)
 
 
 class IronicShell(object):
@@ -153,8 +160,8 @@ class IronicShell(object):
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--ironic-api-version',
-                            default=cliutils.env(
-                                'IRONIC_API_VERSION', default='1'),
+                            default=cliutils.env('IRONIC_API_VERSION',
+                                                 default=None),
                             help=_('Accepts 1.x (where "x" is microversion) '
                                    'or "latest", Defaults to '
                                    'env[IRONIC_API_VERSION] or 1'))
@@ -294,6 +301,11 @@ class IronicShell(object):
         if api_version == 'latest':
             return LATEST_API_VERSION
         else:
+            if api_version is None:
+                print(MISSING_VERSION_WARNING % http.DEFAULT_VER,
+                      file=sys.stderr)
+                api_version = '1'
+
             try:
                 versions = tuple(int(i) for i in api_version.split('.'))
             except ValueError:
