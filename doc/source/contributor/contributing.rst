@@ -27,8 +27,8 @@ signed OpenStack's contributor's agreement.
 
 .. seealso::
 
-   * http://docs.openstack.org/infra/manual/developers.html
-   * http://wiki.openstack.org/CLA
+   * https://docs.openstack.org/infra/manual/developers.html
+   * https://wiki.openstack.org/wiki/CLA
 
 LaunchPad Project
 -----------------
@@ -40,16 +40,16 @@ notifications of important events.
 
 .. seealso::
 
-   * http://launchpad.net
-   * http://launchpad.net/python-ironicclient
-   * http://launchpad.net/~openstack
+   * https://launchpad.net
+   * https://launchpad.net/python-ironicclient
+   * https://launchpad.net/~openstack
 
 
 Project Hosting Details
 -----------------------
 
 Bug tracker
-    http://launchpad.net/python-ironicclient
+    https://launchpad.net/python-ironicclient
 
 Mailing list (prefix subjects with ``[ironic]`` for faster responses)
     http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev

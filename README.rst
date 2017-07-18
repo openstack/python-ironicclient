@@ -2,8 +2,8 @@
 Team and repository tags
 ========================
 
-.. image:: https://governance.openstack.org/badges/python-ironicclient.svg
-    :target: https://governance.openstack.org/reference/tags/index.html
+.. image:: https://governance.openstack.org/tc/badges/python-ironicclient.svg
+    :target: https://governance.openstack.org/tc/reference/tags/index.html
 
 .. Change things from this point on
 
@@ -103,7 +103,7 @@ the subcommands available, run::
     $ openstack help baremetal
 
 * License: Apache License, Version 2.0
-* Documentation: https://docs.openstack.org/python-ironicclient
+* Documentation: https://docs.openstack.org/python-ironicclient/latest/
 * Source: https://git.openstack.org/cgit/openstack/python-ironicclient
 * Bugs: https://bugs.launchpad.net/python-ironicclient
 
