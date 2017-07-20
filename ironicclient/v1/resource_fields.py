@@ -106,6 +106,7 @@ class Resource(object):
         'storage_interface': 'Storage Interface',
         'vendor_interface': 'Vendor Interface',
         'standalone_ports_supported': 'Standalone Ports Supported',
+        'physical_network': 'Physical Network',
         'id': 'ID',
         'connector_id': 'Connector ID',
     }
@@ -265,6 +266,7 @@ PORT_DETAILED_RESOURCE = Resource(
      'local_link_connection',
      'portgroup_uuid',
      'pxe_enabled',
+     'physical_network',
      'updated_at',
      'internal_info',
      ],

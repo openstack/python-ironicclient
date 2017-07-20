@@ -31,8 +31,9 @@ class PortShellTest(utils.BaseTestCase):
         with mock.patch.object(cliutils, 'print_dict', fake_print_dict):
             port = object()
             p_shell._print_port_show(port)
-        exp = ['address', 'created_at', 'extra', 'node_uuid', 'updated_at',
-               'uuid', 'pxe_enabled', 'local_link_connection', 'internal_info',
+        exp = ['address', 'created_at', 'extra', 'node_uuid',
+               'physical_network', 'updated_at', 'uuid', 'pxe_enabled',
+               'local_link_connection', 'internal_info',
                'portgroup_uuid']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
@@ -287,6 +288,18 @@ class PortShellTest(utils.BaseTestCase):
         client_mock.port.create.assert_called_once_with(
             address='address', node_uuid='uuid',
             portgroup_uuid='portgroup-uuid')
+
+    def test_do_port_create_physical_network(self):
+        client_mock = mock.MagicMock()
+        args = mock.MagicMock()
+        args.address = 'address'
+        args.node_uuid = 'uuid'
+        args.physical_network = 'physnet1'
+        args.json = False
+        p_shell.do_port_create(client_mock, args)
+        client_mock.port.create.assert_called_once_with(
+            address='address', node_uuid='uuid',
+            physical_network='physnet1')
 
     def test_do_port_delete(self):
         client_mock = mock.MagicMock()

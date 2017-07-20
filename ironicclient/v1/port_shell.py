@@ -163,6 +163,10 @@ def do_port_list(cc, args):
     help='Indicates whether this Port should be used when '
          'PXE booting this Node.')
 @cliutils.arg(
+    '--physical-network',
+    metavar='<physical network>',
+    help="Physical network of the port.")
+@cliutils.arg(
     '-e', '--extra',
     metavar="<key=value>",
     action='append',
@@ -176,7 +180,7 @@ def do_port_create(cc, args):
     """Create a new port."""
     field_list = ['address', 'extra', 'node_uuid', 'uuid',
                   'local_link_connection', 'portgroup_uuid',
-                  'pxe_enabled']
+                  'pxe_enabled', 'physical_network']
     fields = dict((k, v) for (k, v) in vars(args).items()
                   if k in field_list and not (v is None))
     fields = utils.args_array_to_dict(fields, 'extra')
