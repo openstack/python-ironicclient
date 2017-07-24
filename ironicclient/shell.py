@@ -40,7 +40,7 @@ from ironicclient import exc
 
 LATEST_API_VERSION = ('1', 'latest')
 MISSING_VERSION_WARNING = (
-    "You are using the default API version of the 'ironic' command "
+    "You are using the default API version of the 'ironic' command. "
     "This is currently API version %s. In the future, the default will be "
     "the latest API version understood by both API and CLI. You can preserve "
     "the current behavior by passing the --ironic-api-version argument with "
@@ -163,8 +163,10 @@ class IronicShell(object):
                             default=cliutils.env('IRONIC_API_VERSION',
                                                  default=None),
                             help=_('Accepts 1.x (where "x" is microversion) '
-                                   'or "latest", Defaults to '
-                                   'env[IRONIC_API_VERSION] or 1'))
+                                   'or "latest". Defaults to '
+                                   'env[IRONIC_API_VERSION] or %s. Starting '
+                                   'with the Queens release this will '
+                                   'default to "latest".') % http.DEFAULT_VER)
 
         parser.add_argument('--ironic_api_version',
                             help=argparse.SUPPRESS)
