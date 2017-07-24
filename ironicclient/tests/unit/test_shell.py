@@ -74,19 +74,18 @@ class ShellTest(utils.BaseTestCase):
         super(ShellTest, self).setUp()
 
     def shell(self, argstr):
-        orig = sys.stdout
-        try:
-            sys.stdout = six.StringIO()
-            _shell = ironic_shell.IronicShell()
-            _shell.main(argstr.split())
-        except SystemExit:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            self.assertEqual(0, exc_value.code)
-        finally:
-            out = sys.stdout.getvalue()
-            sys.stdout.close()
-            sys.stdout = orig
-        return out
+        with mock.patch.object(sys, 'stdout', six.StringIO()):
+            with mock.patch.object(sys, 'stderr', six.StringIO()):
+                try:
+                    _shell = ironic_shell.IronicShell()
+                    _shell.main(argstr.split())
+                except SystemExit:
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    self.assertEqual(0, exc_value.code)
+                finally:
+                    out = sys.stdout.getvalue()
+                    err = sys.stderr.getvalue()
+                return out, err
 
     def test_help_unknown_command(self):
         self.assertRaises(exc.CommandError, self.shell, 'help foofoo')
@@ -99,7 +98,7 @@ class ShellTest(utils.BaseTestCase):
             'for help on a specific command',
         ]
         for argstr in ['--help', 'help']:
-            help_text = self.shell(argstr)
+            help_text = self.shell(argstr)[0]
             for r in required:
                 self.assertThat(help_text,
                                 matchers.MatchesRegex(r,
@@ -114,7 +113,7 @@ class ShellTest(utils.BaseTestCase):
             'help chassis-show',
         ]
         for argstr in argstrings:
-            help_text = self.shell(argstr)
+            help_text = self.shell(argstr)[0]
             for r in required:
                 self.assertThat(help_text,
                                 matchers.MatchesRegex(r, self.re_options))
@@ -129,7 +128,7 @@ class ShellTest(utils.BaseTestCase):
             'help node-create',
         ]
         for argstr in argstrings:
-            help_text = self.shell(argstr)
+            help_text = self.shell(argstr)[0]
             for r in required:
                 self.assertThat(help_text,
                                 matchers.MatchesRegex(r, self.re_options))
@@ -144,7 +143,7 @@ class ShellTest(utils.BaseTestCase):
             'help port-create',
         ]
         for argstr in argstrings:
-            help_text = self.shell(argstr)
+            help_text = self.shell(argstr)[0]
             for r in required:
                 self.assertThat(help_text,
                                 matchers.MatchesRegex(r, self.re_options))
@@ -236,7 +235,7 @@ class ShellTest(utils.BaseTestCase):
             self.fail('CommandError not raised')
 
     def test_bash_completion(self):
-        stdout = self.shell('bash-completion')
+        stdout = self.shell('bash-completion')[0]
         # just check we have some output
         required = [
             '.*--driver_info',
@@ -249,14 +248,22 @@ class ShellTest(utils.BaseTestCase):
                             matchers.MatchesRegex(r, self.re_options))
 
     def test_ironic_api_version(self):
-        self.shell('--ironic-api-version 1.2 help')
-        self.shell('--ironic-api-version latest help')
+        err = self.shell('--ironic-api-version 1.2 help')[1]
+        self.assertFalse(err)
+
+        err = self.shell('--ironic-api-version latest help')[1]
+        self.assertFalse(err)
+
         self.assertRaises(exc.CommandError,
                           self.shell, '--ironic-api-version 1.2.1 help')
 
     def test_invalid_ironic_api_version(self):
         self.assertRaises(exceptions.UnsupportedVersion,
                           self.shell, '--ironic-api-version 0.8 help')
+
+    def test_warning_on_no_version(self):
+        err = self.shell('help')[1]
+        self.assertIn('You are using the default API version', err)
 
 
 class TestCase(testtools.TestCase):

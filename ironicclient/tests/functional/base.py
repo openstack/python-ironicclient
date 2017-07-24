@@ -126,7 +126,7 @@ class FunctionalTestBase(base.ClientTestBase):
         return base.execute(cmd, action, flags, params,
                             cli_dir=self.client.cli_dir)
 
-    def _ironic(self, action, flags='', params=''):
+    def _ironic(self, action, flags='', params='', merge_stderr=False):
         """Execute ironic command for the given action.
 
         :param action: the cli command to run using Ironic
@@ -135,6 +135,8 @@ class FunctionalTestBase(base.ClientTestBase):
         :type flags: string
         :param params: any optional positional args to use
         :type params: string
+        :param merge_stderr: whether to merge stderr into the result
+        :type merge_stderr: bool
         """
         flags += ' --os-endpoint-type publicURL'
         if hasattr(self, 'os_auth_token'):
@@ -148,7 +150,8 @@ class FunctionalTestBase(base.ClientTestBase):
                         'value': getattr(self, domain_attr)
                     }
             return self.client.cmd_with_auth('ironic',
-                                             action, flags, params)
+                                             action, flags, params,
+                                             merge_stderr=merge_stderr)
 
     def _ironic_osc(self, action, flags='', params='', merge_stderr=False):
         """Execute baremetal commands via OpenStack Client."""
