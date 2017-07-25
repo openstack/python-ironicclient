@@ -85,7 +85,9 @@ def build_option_parser(parser):
         help='Baremetal API version, default=' +
              http.DEFAULT_VER +
              ' (Env: OS_BAREMETAL_API_VERSION). '
-             '"latest" is the latest known API version',
+             'Use "latest" for the latest known API version. '
+             'The default value will change to "latest" in the Queens '
+             'release.',
     )
     return parser
 
