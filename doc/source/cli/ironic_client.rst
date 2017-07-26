@@ -23,9 +23,9 @@ OpenStack Bare Metal Service (Ironic).
 
 In order to use the CLI, you must provide your OpenStack username, password,
 project (historically called tenant), and auth endpoint. You can use
-configuration options :option:`--os-username`, :option:`--os-password`,
-:option:`--os-tenant-id` (or :option:`--os-tenant-name`),
-and :option:`--os-auth-url`, or set the corresponding
+configuration options ``--os-username``, ``--os-password``,
+``--os-tenant-id`` (or ``--os-tenant-name``),
+and ``--os-auth-url``, or set the corresponding
 environment variables::
 
     $ export OS_USERNAME=user
@@ -36,15 +36,15 @@ environment variables::
 
 The command-line tool will attempt to reauthenticate using the provided
 credentials for every request. You can override this behavior by manually
-supplying an auth token using :option:`--ironic-url` and
-:option:`--os-auth-token`, or by setting the corresponding environment
+supplying an auth token using ``--ironic-url`` and
+``--os-auth-token``, or by setting the corresponding environment
 variables::
 
     $ export IRONIC_URL=http://ironic.example.org:6385/
     $ export OS_AUTH_TOKEN=3bcc3d3a03f44e3d8377f9247b0ad155
 
 Since Keystone can return multiple regions in the Service Catalog, you can
-specify the one you want with :option:`--os-region-name` or set the following
+specify the one you want with ``--os-region-name`` or set the following
 environment variable. (It defaults to the first in the list returned.)
 ::
 

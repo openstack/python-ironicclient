@@ -376,8 +376,8 @@ class NodeManager(base.CreateManager):
     def vif_attach(self, node_ident, vif_id, **kwargs):
         """Attach VIF to a given node.
 
-        param node_ident: The UUID or Name of the node.
-        param vif_id: The UUID or Name of the VIF to attach.
+        :param node_ident: The UUID or Name of the node.
+        :param vif_id: The UUID or Name of the VIF to attach.
         :param kwargs: A dictionary containing the attributes of the resource
                        that will be created.
         """
@@ -393,8 +393,8 @@ class NodeManager(base.CreateManager):
     def vif_detach(self, node_ident, vif_id):
         """Detach VIF from a given node.
 
-        param node_ident: The UUID or Name of the node.
-        param vif_id: The UUID or Name of the VIF to detach.
+        :param node_ident: The UUID or Name of the node.
+        :param vif_id: The UUID or Name of the VIF to detach.
         """
         path = "%s/vifs/%s" % (node_ident, vif_id)
         self.delete(path)

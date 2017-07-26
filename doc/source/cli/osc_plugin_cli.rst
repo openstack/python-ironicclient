@@ -25,8 +25,8 @@ To use ``openstack`` CLI, the OpenStackClient should be installed::
 
 To use the CLI, you must provide your OpenStack username, password,
 project, and auth endpoint. You can use configuration options
-:option:`--os-username`, :option:`--os-password`, :option:`--os-project-id`
-(or :option:`--os-project-name`), and :option:`--os-auth-url`,
+``--os-username``, ``--os-password``, ``--os-project-id``
+(or ``--os-project-name``), and ``--os-auth-url``,
 or set the corresponding environment variables::
 
     $ export OS_USERNAME=user
