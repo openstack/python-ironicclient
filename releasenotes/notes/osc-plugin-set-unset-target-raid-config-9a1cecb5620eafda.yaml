@@ -1,0 +1,5 @@
+---
+fixes:
+  - No longer emits the incorrect warning "Please specify what to set/unset"
+    when only the --target-raid-config is specified in the
+    ``openstack baremetal node set/unset`` command.
