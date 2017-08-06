@@ -39,6 +39,18 @@ class TestCase(base.FunctionalTestBase):
     def construct_cmd(*parts):
         return ' '.join(str(x) for x in parts)
 
+    def assert_dict_is_subset(self, expected, actual):
+        """Check if expected keys/values exist in actual response body.
+
+        Check if the expected keys and values are in the actual response body.
+
+        :param expected: dict of key-value pairs that are expected to be in
+                         'actual' dict.
+        :param actual: dict of key-value pairs.
+        """
+        for key, value in expected.items():
+            self.assertEqual(value, actual[key])
+
     def node_create(self, driver='fake', name=None, params=''):
         """Create baremetal node and add cleanup.
 
