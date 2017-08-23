@@ -5,6 +5,7 @@
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'openstackdocstheme',
+              'cliff.sphinxext',
               ]
 
 # openstackdocstheme options
@@ -74,3 +75,5 @@ latex_documents = [
         'manual'
     ),
 ]
+
+autoprogram_cliff_application = 'openstack'

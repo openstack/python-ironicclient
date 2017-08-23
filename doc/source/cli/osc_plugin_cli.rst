@@ -83,3 +83,11 @@ The baremetal API version can be specified via:
 * or optional command line argument --os-baremetal-api-version::
 
     $ openstack baremetal port group list --os-baremetal-api-version 1.25
+
+Command Reference
+=================
+.. toctree::
+   :glob:
+   :maxdepth: 3
+
+   osc/v1/*
