@@ -27,6 +27,7 @@ LOG = logging.getLogger(__name__)
 API_VERSION_OPTION = 'os_baremetal_api_version'
 API_NAME = 'baremetal'
 LAST_KNOWN_API_VERSION = 34
+LATEST_VERSION = "1.{}".format(LAST_KNOWN_API_VERSION)
 API_VERSIONS = {
     '1.%d' % i: 'ironicclient.v1.client.Client'
     for i in range(1, LAST_KNOWN_API_VERSION + 1)
@@ -75,9 +76,7 @@ def build_option_parser(parser):
     parser.add_argument(
         '--os-baremetal-api-version',
         metavar='<baremetal-api-version>',
-        default=utils.env(
-            'OS_BAREMETAL_API_VERSION',
-            default=http.DEFAULT_VER),
+        default=_get_environment_version(http.DEFAULT_VER),
         choices=sorted(
             API_VERSIONS,
             key=lambda k: [int(x) for x in k.split('.')]) + ['latest'],
@@ -92,14 +91,20 @@ def build_option_parser(parser):
     return parser
 
 
+def _get_environment_version(default):
+    env_value = utils.env('OS_BAREMETAL_API_VERSION')
+    if not env_value:
+        return default
+    if env_value == 'latest':
+        env_value = LATEST_VERSION
+    return env_value
+
+
 class ReplaceLatestVersion(argparse.Action):
     """Replaces `latest` keyword by last known version."""
     def __call__(self, parser, namespace, values, option_string=None):
         global OS_BAREMETAL_API_VERSION_SPECIFIED
         OS_BAREMETAL_API_VERSION_SPECIFIED = True
-        latest = values == 'latest'
-        if latest:
-            values = '1.%d' % LAST_KNOWN_API_VERSION
-        LOG.debug("Replacing 'latest' API version with the "
-                  "latest known version '%s'", values)
+        if values == 'latest':
+            values = LATEST_VERSION
         setattr(namespace, self.dest, values)
