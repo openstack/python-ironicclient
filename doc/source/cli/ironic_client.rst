@@ -56,7 +56,7 @@ fill partially typed commands. To use this feature, source the below file
 https://git.openstack.org/cgit/openstack/python-ironicclient/tree/tools/ironic.bash_completion)
 to your terminal and then bash completion should work::
 
-    $ source ironic.bash_completion
+    $ . ironic.bash_completion
 
 To avoid doing this every time, add this to your ``.bashrc`` or copy the
 ironic.bash_completion file to the default bash completion scripts directory
