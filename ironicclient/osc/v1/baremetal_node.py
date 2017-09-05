@@ -1153,7 +1153,7 @@ class SetBaremetalNode(command.Command):
                         in parsed_args.instance_info]))
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
-        else:
+        elif not parsed_args.target_raid_config:
             self.log.warning("Please specify what to set.")
 
 
@@ -1444,7 +1444,7 @@ class UnsetBaremetalNode(command.Command):
                               ['vendor_interface']))
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
-        else:
+        elif not parsed_args.target_raid_config:
             self.log.warning("Please specify what to unset.")
 
 
