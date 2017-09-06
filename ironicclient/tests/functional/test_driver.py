@@ -52,5 +52,5 @@ class DriverSanityTestIronicClient(base.FunctionalTestBase):
         """
         driver = 'fake'
         available_drivers = self.get_drivers_names()
-        self.assertTrue(len(available_drivers) > 0)
+        self.assertGreater(len(available_drivers), 0)
         self.assertIn(driver, available_drivers)

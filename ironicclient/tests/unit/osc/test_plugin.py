@@ -78,7 +78,7 @@ class MakeClientTest(testtools.TestCase):
 class BuildOptionParserTest(testtools.TestCase):
 
     @mock.patch.object(plugin.utils, 'env', lambda x: None)
-    @mock.patch.object(argparse.ArgumentParser, 'add_argument')
+    @mock.patch.object(argparse.ArgumentParser, 'add_argument', autospec=True)
     def test_build_option_parser(self, mock_add_argument):
         parser = argparse.ArgumentParser()
         mock_add_argument.reset_mock()
@@ -86,12 +86,13 @@ class BuildOptionParserTest(testtools.TestCase):
         version_list = ['1'] + ['1.%d' % i for i in range(
             1, plugin.LAST_KNOWN_API_VERSION + 1)] + ['latest']
         mock_add_argument.assert_called_once_with(
-            '--os-baremetal-api-version', action=plugin.ReplaceLatestVersion,
-            choices=version_list, default=http.DEFAULT_VER, help=mock.ANY,
+            mock.ANY, '--os-baremetal-api-version',
+            action=plugin.ReplaceLatestVersion, choices=version_list,
+            default=http.DEFAULT_VER, help=mock.ANY,
             metavar='<baremetal-api-version>')
 
     @mock.patch.object(plugin.utils, 'env', lambda x: "latest")
-    @mock.patch.object(argparse.ArgumentParser, 'add_argument')
+    @mock.patch.object(argparse.ArgumentParser, 'add_argument', autospec=True)
     def test_build_option_parser_env_latest(self, mock_add_argument):
         parser = argparse.ArgumentParser()
         mock_add_argument.reset_mock()
@@ -99,11 +100,12 @@ class BuildOptionParserTest(testtools.TestCase):
         version_list = ['1'] + ['1.%d' % i for i in range(
             1, plugin.LAST_KNOWN_API_VERSION + 1)] + ['latest']
         mock_add_argument.assert_called_once_with(
-            '--os-baremetal-api-version', action=plugin.ReplaceLatestVersion,
-            choices=version_list, default=plugin.LATEST_VERSION, help=mock.ANY,
+            mock.ANY, '--os-baremetal-api-version',
+            action=plugin.ReplaceLatestVersion, choices=version_list,
+            default=plugin.LATEST_VERSION, help=mock.ANY,
             metavar='<baremetal-api-version>')
 
-    @mock.patch.object(plugin.utils, 'env')
+    @mock.patch.object(plugin.utils, 'env', autospec=True)
     def test__get_environment_version(self, mock_utils_env):
         mock_utils_env.return_value = 'latest'
         result = plugin._get_environment_version(None)
