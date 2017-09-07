@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Adds the below commands to OSC to support rescue mode for ironic
+    available starting with API version 1.38:
+
+    * ``openstack baremetal node rescue``
+    * ``openstack baremetal node unrescue``

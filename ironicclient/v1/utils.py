@@ -43,6 +43,10 @@ PROVISION_ACTIONS = {
     'adopt': {'expected_state': 'active',
               'poll_interval': _SHORT_ACTION_POLL_INTERVAL},
     'abort': None,  # no support for --wait in abort
+    'rescue': {'expected_state': 'rescue',
+               'poll_interval': _LONG_ACTION_POLL_INTERVAL},
+    'unrescue': {'expected_state': 'active',
+                 'poll_interval': _LONG_ACTION_POLL_INTERVAL},
 }
 
 PROVISION_STATES = list(PROVISION_ACTIONS)

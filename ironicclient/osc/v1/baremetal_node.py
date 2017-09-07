@@ -67,12 +67,14 @@ class ProvisionStateBaremetalNode(command.Command):
             clean_steps = utils.handle_json_or_file_arg(clean_steps)
 
         config_drive = getattr(parsed_args, 'config_drive', None)
+        rescue_password = getattr(parsed_args, 'rescue_password', None)
 
         baremetal_client.node.set_provision_state(
             parsed_args.node,
             parsed_args.provision_state,
             configdrive=config_drive,
-            cleansteps=clean_steps)
+            cleansteps=clean_steps,
+            rescuepassword=rescue_password)
 
 
 class ProvisionStateWithWait(ProvisionStateBaremetalNode):
@@ -926,6 +928,25 @@ class RebuildBaremetalNode(ProvisionStateWithWait):
         return parser
 
 
+class RescueBaremetalNode(ProvisionStateWithWait):
+    """Set provision state of baremetal node to 'rescue'"""
+
+    log = logging.getLogger(__name__ + ".RescueBaremetalNode")
+    PROVISION_STATE = 'rescue'
+
+    def get_parser(self, prog_name):
+        parser = super(RescueBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '--rescue-password',
+            metavar='<rescue-password>',
+            required=True,
+            default=None,
+            help=("The password that will be used to login to the rescue "
+                  "ramdisk. The value should be a string."))
+        return parser
+
+
 class SetBaremetalNode(command.Command):
     """Set baremetal properties"""
 
@@ -1219,6 +1240,13 @@ class UndeployBaremetalNode(ProvisionStateWithWait):
 
     log = logging.getLogger(__name__ + ".UndeployBaremetalNode")
     PROVISION_STATE = 'deleted'
+
+
+class UnrescueBaremetalNode(ProvisionStateWithWait):
+    """Set provision state of baremetal node to 'unrescue'"""
+
+    log = logging.getLogger(__name__ + ".UnrescueBaremetalNode")
+    PROVISION_STATE = 'unrescue'
 
 
 class UnsetBaremetalNode(command.Command):
