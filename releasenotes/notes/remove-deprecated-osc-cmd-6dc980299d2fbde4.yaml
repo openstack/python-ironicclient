@@ -1,0 +1,24 @@
+---
+upgrade:
+  - |
+    The following previously deprecated commands were removed:
+
+    * ``openstack baremetal delete``
+    * ``openstack baremetal list``
+    * ``openstack baremetal show``
+    * ``openstack baremetal set``
+    * ``openstack baremetal unset``
+
+    The equivalent commands are:
+
+    * ``openstack baremetal node delete``
+    * ``openstack baremetal node list``
+    * ``openstack baremetal node show``
+    * ``openstack baremetal node set``
+    * ``openstack baremetal node unset``
+
+    The support of creating a single node by ``openstack baremetal create``
+    is removed, the equivalent command is ``openstack baremetal node create``.
+    The only valid usage of ``openstack baremetal create`` now is to create
+    various resources (chassis, node, port, portgroup, etc.) from resource
+    file(s).

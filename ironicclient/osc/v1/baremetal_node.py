@@ -470,18 +470,6 @@ class DeleteBaremetalNode(command.Command):
             raise exc.ClientException("\n".join(failures))
 
 
-class DeleteBaremetal(DeleteBaremetalNode):
-    """Unregister a baremetal node. DEPRECATED"""
-
-    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
-    log = logging.getLogger(__name__ + ".DeleteBaremetal")
-
-    def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node delete'.")
-        super(DeleteBaremetal, self).take_action(parsed_args)
-
-
 class DeployBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'deploy'"""
 
@@ -654,18 +642,6 @@ class ListBaremetalNode(command.Lister):
         return (labels,
                 (oscutils.get_item_properties(s, columns, formatters={
                     'Properties': oscutils.format_dict},) for s in data))
-
-
-class ListBaremetal(ListBaremetalNode):
-    """List baremetal nodes. DEPRECATED"""
-
-    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
-    log = logging.getLogger(__name__ + ".ListBaremetal")
-
-    def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node list'.")
-        return super(ListBaremetal, self).take_action(parsed_args)
 
 
 class MaintenanceSetBaremetalNode(command.Command):
@@ -1157,18 +1133,6 @@ class SetBaremetalNode(command.Command):
             self.log.warning("Please specify what to set.")
 
 
-class SetBaremetal(SetBaremetalNode):
-    """Set baremetal properties. DEPRECATED"""
-
-    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
-    log = logging.getLogger(__name__ + ".SetBaremetal")
-
-    def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node set'.")
-        return super(SetBaremetal, self).take_action(parsed_args)
-
-
 class ShowBaremetalNode(command.ShowOne):
     """Show baremetal node details"""
 
@@ -1221,18 +1185,6 @@ class ShowBaremetalNode(command.ShowOne):
             node.setdefault('chassis_uuid', '')
 
         return self.dict2columns(node)
-
-
-class ShowBaremetal(ShowBaremetalNode):
-    """Show baremetal node details. DEPRECATED"""
-
-    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
-    log = logging.getLogger(__name__ + ".ShowBaremetal")
-
-    def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node show'.")
-        return super(ShowBaremetal, self).take_action(parsed_args)
 
 
 class UndeployBaremetalNode(ProvisionStateWithWait):
@@ -1446,18 +1398,6 @@ class UnsetBaremetalNode(command.Command):
             baremetal_client.node.update(parsed_args.node, properties)
         elif not parsed_args.target_raid_config:
             self.log.warning("Please specify what to unset.")
-
-
-class UnsetBaremetal(UnsetBaremetalNode):
-    """Unset baremetal properties. DEPRECATED"""
-
-    # TODO(thrash): Remove after 11-July-2017 during the 'Queens' cycle.
-    log = logging.getLogger(__name__ + ".UnsetBaremetal")
-
-    def take_action(self, parsed_args):
-        self.log.warning("This command is deprecated. Instead, use "
-                         "'openstack baremetal node unset'.")
-        super(UnsetBaremetal, self).take_action(parsed_args)
 
 
 class ValidateBaremetalNode(command.Lister):
