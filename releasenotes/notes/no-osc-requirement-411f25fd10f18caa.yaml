@@ -1,0 +1,15 @@
+---
+upgrade:
+  - |
+    ``python-ironicclient`` package no longer has
+    the ``python-openstackclient`` package (OSC) as a requirement.
+
+    Users installing only the ``python-ironicclient`` package will not
+    automatically get access to ``openstack baremetal ...`` OSC commands.
+    To have them available, the ``python-openstackclient`` package must
+    be installed separately, or, when installing ``python-ironicclient``
+    via ``pip``, the new ``cli`` extra can be used to also install OSC:
+
+    .. code-block:: shell
+
+       pip install python-ironicclient[cli]
