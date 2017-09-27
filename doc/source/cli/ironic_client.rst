@@ -1,6 +1,6 @@
-==========================================
-Ironic Client Command-Line Interface (CLI)
-==========================================
+=======================================
+``ironic`` Command-Line Interface (CLI)
+=======================================
 
 .. program:: ironic
 .. highlight:: bash
@@ -85,9 +85,9 @@ Get a list of available drivers::
 
     $ ironic driver-list
 
-Enroll a node with "fake" deploy driver and "ipmitool" power driver::
+Enroll a node with the ``ipmi`` driver, specifying the IPMI address::
 
-    $ ironic node-create -d fake_ipmitool -i ipmi_address=1.2.3.4
+    $ ironic node-create -d ipmi -i ipmi_address=1.2.3.4
 
 Get a list of nodes::
 

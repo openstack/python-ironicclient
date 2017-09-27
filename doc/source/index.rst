@@ -2,9 +2,10 @@
 Python Bindings to the OpenStack Ironic API
 ===========================================
 
-This is a client for OpenStack `Ironic`_ API. There's a Python API
-(the `ironicclient` modules), and a command-line interface (installed as
-`ironic`).
+This is a client for the OpenStack `Ironic`_ API. It provides:
+
+* a Python API: the ``ironicclient`` module, and
+* two command-line interfaces: ``openstack baremetal`` and ``ironic``.
 
 Contents
 ========
@@ -16,7 +17,7 @@ Contents
    cli/index
    user/create_command
    contributor/index
-   Release Notes <http://docs.openstack.org/releasenotes/python-ironicclient/>
+   Release Notes <https://docs.openstack.org/releasenotes/python-ironicclient/>
 
 Indices and tables
 ==================
