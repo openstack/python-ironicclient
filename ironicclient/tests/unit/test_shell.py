@@ -249,10 +249,10 @@ class ShellTest(utils.BaseTestCase):
 
     def test_ironic_api_version(self):
         err = self.shell('--ironic-api-version 1.2 help')[1]
-        self.assertFalse(err)
+        self.assertIn('The "ironic" CLI is deprecated', err)
 
         err = self.shell('--ironic-api-version latest help')[1]
-        self.assertFalse(err)
+        self.assertIn('The "ironic" CLI is deprecated', err)
 
         self.assertRaises(exc.CommandError,
                           self.shell, '--ironic-api-version 1.2.1 help')
@@ -264,6 +264,7 @@ class ShellTest(utils.BaseTestCase):
     def test_warning_on_no_version(self):
         err = self.shell('help')[1]
         self.assertIn('You are using the default API version', err)
+        self.assertIn('The "ironic" CLI is deprecated', err)
 
 
 class TestCase(testtools.TestCase):

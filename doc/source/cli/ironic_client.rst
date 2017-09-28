@@ -18,6 +18,12 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
+.. WARNING::
+
+    The :program:`ironic` command-line interface is deprecated; no new features
+    will be added. This CLI will be removed in the S* release. The `openstack
+    baremetal <osc_plugin_cli>`_ command-line interface should be used instead.
+
 The :program:`ironic` command-line interface (CLI) interacts with the
 OpenStack Bare Metal Service (Ironic).
 

@@ -5,7 +5,8 @@ Python Bindings to the OpenStack Ironic API
 This is a client for the OpenStack `Ironic`_ API. It provides:
 
 * a Python API: the ``ironicclient`` module, and
-* two command-line interfaces: ``openstack baremetal`` and ``ironic``.
+* two command-line interfaces: ``openstack baremetal`` and ``ironic``
+  (deprecated, please use ``openstack baremetal`` instead).
 
 Contents
 ========
