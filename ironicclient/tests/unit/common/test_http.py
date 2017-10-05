@@ -382,9 +382,10 @@ class HttpClientTest(utils.BaseTestCase):
         client = http.HTTPClient('http://localhost/')
         kwargs = {'headers': {'foo-header': 'bar-header'},
                   'body': '{"password": "foo"}'}
-        client.log_curl_request('foo', 'http://127.0.0.1', kwargs)
+        client.log_curl_request('foo', '/v1/nodes', kwargs)
         expected_log = ("curl -i -X foo -H 'foo-header: bar-header' "
-                        "-d '{\"password\": \"***\"}' http://127.0.0.1")
+                        "-d '{\"password\": \"***\"}' "
+                        "http://localhost/v1/nodes")
         mock_log.assert_called_once_with(expected_log)
 
     @mock.patch.object(http.LOG, 'debug', autospec=True)

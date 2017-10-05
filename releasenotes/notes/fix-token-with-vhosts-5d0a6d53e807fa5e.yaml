@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixed a bug where ironicclient instantiated with keystone token and
+    ironic API endpoint could not access ironic API that has a virtual host
+    in its endpoint (like "http://hostname/baremetal").
+    For more details see `bug 1721599 <https://launchpad.net/bugs/1721599>`_.
