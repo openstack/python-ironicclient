@@ -64,7 +64,7 @@ SUPPORTED_ENDPOINT_SCHEME = ('http', 'https')
 
 def _trim_endpoint_api_version(url):
     """Trim API version and trailing slash from endpoint."""
-    return url.rstrip('/').rstrip(API_VERSION)
+    return url.rstrip('/').rstrip(API_VERSION).rstrip('/')
 
 
 def _extract_error_json(body):
@@ -274,7 +274,7 @@ class HTTPClient(VersionNegotiationMixin):
             body = strutils.mask_password(kwargs['body'])
             curl.append('-d \'%s\'' % body)
 
-        curl.append(urlparse.urljoin(self.endpoint_trimmed, url))
+        curl.append(self._make_connection_url(url))
         LOG.debug(' '.join(curl))
 
     @staticmethod
@@ -292,7 +292,10 @@ class HTTPClient(VersionNegotiationMixin):
         LOG.debug('\n'.join(dump))
 
     def _make_connection_url(self, url):
-        return urlparse.urljoin(self.endpoint_trimmed, url)
+        # NOTE(pas-ha) we already stripped trailing / from endpoint_trimmed
+        if not url.startswith('/'):
+            url = '/' + url
+        return self.endpoint_trimmed + url
 
     def _parse_version_headers(self, resp):
         return self._generic_parse_version_headers(resp.headers.get)
