@@ -1,6 +1,6 @@
-=============================================
-OpenStack Client Command-Line Interface (CLI)
-=============================================
+====================================================
+``openstack baremetal`` Command-Line Interface (CLI)
+====================================================
 
 .. program:: openstack baremetal
 .. highlight:: bash
@@ -19,9 +19,16 @@ Description
 The OpenStack Client plugin interacts with the Bare Metal service
 through the ``openstack baremetal`` command line interface (CLI).
 
-To use ``openstack`` CLI, the OpenStackClient should be installed::
+To use the ``openstack`` CLI, the OpenStackClient (python-openstackclient)
+package  must be installed. There are two ways to do this:
 
-    # pip install python-openstackclient
+* along with this python-ironicclient package::
+
+  $ pip install python-ironicclient[cli]
+
+* directly::
+
+  $ pip install python-openstackclient
 
 To use the CLI, you must provide your OpenStack username, password,
 project, and auth endpoint. You can use configuration options
@@ -66,9 +73,9 @@ Get a list of available drivers::
 
     $ openstack baremetal driver list
 
-Enroll a node with "agent_ipmitool" driver::
+Enroll a node with the ``ipmi`` driver::
 
-    $ openstack baremetal node create --driver agent_ipmitool --driver-info ipmi_address=1.2.3.4
+    $ openstack baremetal node create --driver ipmi --driver-info ipmi_address=1.2.3.4
 
 Get a list of nodes::
 

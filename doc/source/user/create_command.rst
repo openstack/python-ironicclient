@@ -5,7 +5,19 @@ Creating the Bare Metal service resources from file
 It is possible to create a set of resources using their descriptions in JSON
 or YAML format. It can be done in one of three ways:
 
-1. Using ironic CLI's ``ironic create`` command::
+1. Using OpenStackClient bare metal plugin CLI's command ``openstack baremetal
+   create``::
+
+    $ openstack -h baremetal create
+    usage: openstack baremetal create [-h] <file> [<file> ...]
+
+    Create resources from files
+
+    positional arguments:
+      <file>      File (.yaml or .json) containing descriptions of the
+                  resources to create. Can be specified multiple times.
+
+2. Using ironic CLI's ``ironic create`` command::
 
     $ ironic help create
     usage: ironic create <file> [<file> ...]
@@ -20,41 +32,10 @@ or YAML format. It can be done in one of three ways:
       <file>  File (.yaml or .json) containing descriptions of the resources
               to create. Can be specified multiple times.
 
-2. Using openstackclient plugin command ``openstack baremetal create``::
-
-    $ openstack -h baremetal create
-    usage: openstack [-h] [-f {json,shell,table,value,yaml}] [-c COLUMN]
-                     [--max-width <integer>] [--noindent] [--prefix PREFIX]
-                     [--chassis-uuid <chassis>] [--driver-info <key=value>]
-                     [--property <key=value>] [--extra <key=value>]
-                     [--uuid <uuid>] [--name <name>]
-                     [--network-interface <network_interface>]
-                     [--resource-class <resource_class>] [--driver <driver>]
-                     [<file> [<file> ...]]
-
-    Create resources from files or Register a new node (DEPRECATED). Create
-    resources from files (by only specifying the files) or register a new
-    node by specifying one or more optional arguments (DEPRECATED, use
-    'openstack baremetal node create' instead).
-
-    positional arguments:
-      <file>                File (.yaml or .json) containing descriptions of
-                            the resources to create. Can be specified
-                            multiple times. If you want to create resources,
-                            only specify the files. Do not specify any of
-                            the optional arguments.
-
-   .. note::
-       If the ``--driver`` argument is passed in, the behaviour of the command
-       is the same as ``openstack baremetal node create``, and positional
-       arguments are ignored. If it is not provided, the command does resource
-       creation from file(s), and only positional arguments will be taken into
-       account.
-
 3. Programmatically using the Python API:
 
-    .. autofunction:: ironicclient.v1.create_resources.create_resources
-       :noindex:
+   .. autofunction:: ironicclient.v1.create_resources.create_resources
+      :noindex:
 
 File containing Resource Descriptions
 =====================================
