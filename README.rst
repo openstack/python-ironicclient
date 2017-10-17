@@ -14,7 +14,8 @@ This is a client for the OpenStack `Ironic
 <https://wiki.openstack.org/wiki/Ironic>`_ API. It provides:
 
 * a Python API: the ``ironicclient`` module, and
-* two command-line interfaces: ``openstack baremetal`` and ``ironic``.
+* two command-line interfaces: ``openstack baremetal`` and ``ironic``
+  (deprecated, please use ``openstack baremetal``).
 
 Development takes place via the usual OpenStack processes as outlined in the
 `developer guide <https://docs.openstack.org/infra/manual/developers.html>`_.
@@ -74,8 +75,11 @@ the subcommands available, run::
 
     $ openstack help baremetal
 
-``ironic`` CLI
---------------
+``ironic`` CLI (deprecated)
+---------------------------
+
+This is deprecated and will be removed in the S* release. Please use the
+``openstack baremetal`` CLI instead.
 
 This package will install the ``ironic`` command line interface that you
 can use to interact with the ``ironic`` API.

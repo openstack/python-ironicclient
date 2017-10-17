@@ -333,6 +333,10 @@ class IronicShell(object):
             return (api_major_version, os_ironic_api_version)
 
     def main(self, argv):
+        # TODO(rloo): delete the ironic CLI in the S* cycle.
+        print('The "ironic" CLI is deprecated and will be removed in the '
+              'S* release. Please use the "openstack baremetal" CLI instead.',
+              file=sys.stderr)
         # Parse args once to find version
         parser = self.get_base_parser()
         (options, args) = parser.parse_known_args(argv)

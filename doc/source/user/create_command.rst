@@ -17,9 +17,12 @@ or YAML format. It can be done in one of three ways:
       <file>      File (.yaml or .json) containing descriptions of the
                   resources to create. Can be specified multiple times.
 
-2. Using ironic CLI's ``ironic create`` command::
+2. Using ironic CLI's ``ironic create`` command (deprecated, please use
+   ``openstack baremetal create`` instead)::
 
     $ ironic help create
+    The "ironic" CLI is deprecated and will be removed in the S* release.
+    Please use the "openstack baremetal" CLI instead.
     usage: ironic create <file> [<file> ...]
 
     Create baremetal resources (chassis, nodes, port groups and ports). The
