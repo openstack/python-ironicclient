@@ -19,6 +19,7 @@ import sys
 
 AUTH_TOKEN = "foobar"
 AUTH_URL = "http://0.0.0.0"
+API_VERSION = '1.6'
 
 
 class FakeApp(object):
@@ -38,7 +39,7 @@ class FakeClientManager(object):
         self.interface = 'public'
         self._region_name = 'RegionOne'
         self.session = 'fake session'
-        self._api_version = {'baremetal': '1.6'}
+        self._api_version = {'baremetal': API_VERSION}
 
 
 class FakeResource(object):
