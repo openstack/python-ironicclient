@@ -21,14 +21,14 @@ function generate_testr_results {
         sudo /usr/os-testr-env/bin/subunit2html $BASE/logs/testrepository.subunit $BASE/logs/testr_results.html
         sudo gzip -9 $BASE/logs/testrepository.subunit
         sudo gzip -9 $BASE/logs/testr_results.html
-        sudo chown jenkins:jenkins $BASE/logs/testrepository.subunit.gz $BASE/logs/testr_results.html.gz
+        sudo chown $USER:$USER $BASE/logs/testrepository.subunit.gz $BASE/logs/testr_results.html.gz
         sudo chmod a+r $BASE/logs/testrepository.subunit.gz $BASE/logs/testr_results.html.gz
     fi
 }
 
 export IRONICCLIENT_DIR="$BASE/new/python-ironicclient"
 
-sudo chown -R jenkins:stack $IRONICCLIENT_DIR
+sudo chown -R $USER:stack $IRONICCLIENT_DIR
 
 cd $IRONICCLIENT_DIR
 
@@ -40,7 +40,7 @@ set +e
 source $BASE/new/devstack/openrc admin admin
 
 # Preserve env for OS_ credentials
-sudo -E -H -u jenkins ./tools/run_functional.sh
+sudo -E -H -u $USER ./tools/run_functional.sh
 EXIT_CODE=$?
 set -e
 
