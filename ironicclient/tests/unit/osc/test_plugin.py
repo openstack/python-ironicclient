@@ -24,6 +24,7 @@ from ironicclient.v1 import client
 class MakeClientTest(testtools.TestCase):
 
     @mock.patch.object(plugin.utils, 'env', lambda x: None)
+    @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=False)
     @mock.patch.object(plugin, 'OS_BAREMETAL_API_VERSION_SPECIFIED', new=True)
     @mock.patch.object(plugin.LOG, 'warning', autospec=True)
     @mock.patch.object(client, 'Client', autospec=True)
@@ -33,6 +34,7 @@ class MakeClientTest(testtools.TestCase):
             return_value='endpoint')
         plugin.make_client(instance)
         mock_client.assert_called_once_with(os_ironic_api_version='1.6',
+                                            allow_api_version_downgrade=False,
                                             session=instance.session,
                                             region_name=instance._region_name,
                                             endpoint='endpoint')
@@ -42,6 +44,7 @@ class MakeClientTest(testtools.TestCase):
             interface=instance.interface)
 
     @mock.patch.object(plugin.utils, 'env', lambda x: None)
+    @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=False)
     @mock.patch.object(plugin, 'OS_BAREMETAL_API_VERSION_SPECIFIED', new=False)
     @mock.patch.object(plugin.LOG, 'warning', autospec=True)
     @mock.patch.object(client, 'Client', autospec=True)
@@ -54,6 +57,7 @@ class MakeClientTest(testtools.TestCase):
         plugin.make_client(instance)
         mock_client.assert_called_once_with(
             os_ironic_api_version=http.DEFAULT_VER,
+            allow_api_version_downgrade=False,
             session=instance.session,
             region_name=instance._region_name,
             endpoint='endpoint')
@@ -62,7 +66,28 @@ class MakeClientTest(testtools.TestCase):
             'baremetal', region_name=instance._region_name,
             interface=instance.interface)
 
+    @mock.patch.object(plugin.utils, 'env', lambda x: None)
+    @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=True)
+    @mock.patch.object(plugin, 'OS_BAREMETAL_API_VERSION_SPECIFIED', new=True)
+    @mock.patch.object(plugin.LOG, 'warning', autospec=True)
+    @mock.patch.object(client, 'Client', autospec=True)
+    def test_make_client_latest(self, mock_client, mock_warning):
+        instance = fakes.FakeClientManager()
+        instance.get_endpoint_for_service_type = mock.Mock(
+            return_value='endpoint')
+        plugin.make_client(instance)
+        mock_client.assert_called_once_with(os_ironic_api_version='1.6',
+                                            allow_api_version_downgrade=True,
+                                            session=instance.session,
+                                            region_name=instance._region_name,
+                                            endpoint='endpoint')
+        self.assertFalse(mock_warning.called)
+        instance.get_endpoint_for_service_type.assert_called_once_with(
+            'baremetal', region_name=instance._region_name,
+            interface=instance.interface)
+
     @mock.patch.object(plugin.utils, 'env', lambda x: '1.29')
+    @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=False)
     @mock.patch.object(plugin, 'OS_BAREMETAL_API_VERSION_SPECIFIED', new=False)
     @mock.patch.object(plugin.LOG, 'warning', autospec=True)
     @mock.patch.object(client, 'Client', autospec=True)
@@ -122,6 +147,7 @@ class BuildOptionParserTest(testtools.TestCase):
 
 class ReplaceLatestVersionTest(testtools.TestCase):
 
+    @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=False)
     @mock.patch.object(plugin.utils, 'env', lambda x: None)
     def test___call___latest(self):
         parser = argparse.ArgumentParser()
@@ -132,7 +158,9 @@ class ReplaceLatestVersionTest(testtools.TestCase):
         self.assertEqual(plugin.LATEST_VERSION,
                          namespace.os_baremetal_api_version)
         self.assertTrue(plugin.OS_BAREMETAL_API_VERSION_SPECIFIED)
+        self.assertTrue(plugin.OS_BAREMETAL_API_LATEST)
 
+    @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=False)
     @mock.patch.object(plugin.utils, 'env', lambda x: None)
     def test___call___specific_version(self):
         parser = argparse.ArgumentParser()
@@ -142,3 +170,4 @@ class ReplaceLatestVersionTest(testtools.TestCase):
                                 namespace)
         self.assertEqual('1.4', namespace.os_baremetal_api_version)
         self.assertTrue(plugin.OS_BAREMETAL_API_VERSION_SPECIFIED)
+        self.assertFalse(plugin.OS_BAREMETAL_API_LATEST)

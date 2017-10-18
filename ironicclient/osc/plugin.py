@@ -42,6 +42,10 @@ MISSING_VERSION_WARNING = (
     "--os-baremetal-api-version argument with the desired version or using "
     "the OS_BAREMETAL_API_VERSION environment variable."
 )
+# NOTE(dtantsur): flag to indicate that the requested version was "latest".
+# Due to how OSC works we cannot just add "latest" to the list of supported
+# versions - it breaks the major version detection.
+OS_BAREMETAL_API_LATEST = False
 
 
 def make_client(instance):
@@ -50,15 +54,22 @@ def make_client(instance):
             utils.env('OS_BAREMETAL_API_VERSION')):
         LOG.warning(MISSING_VERSION_WARNING, http.DEFAULT_VER)
 
+    requested_api_version = instance._api_version[API_NAME]
+
     baremetal_client_class = utils.get_client_class(
         API_NAME,
-        instance._api_version[API_NAME],
+        requested_api_version,
         API_VERSIONS)
     LOG.debug('Instantiating baremetal client: %s', baremetal_client_class)
-    LOG.debug('Baremetal API version: %s', http.DEFAULT_VER)
+    LOG.debug('Baremetal API version: %s',
+              requested_api_version if not OS_BAREMETAL_API_LATEST
+              else "latest")
 
     client = baremetal_client_class(
-        os_ironic_api_version=instance._api_version[API_NAME],
+        os_ironic_api_version=requested_api_version,
+        # NOTE(dtantsur): enable re-negotiation of the latest version, if CLI
+        # latest is too high for the server we're talking to.
+        allow_api_version_downgrade=OS_BAREMETAL_API_LATEST,
         session=instance.session,
         region_name=instance._region_name,
         # NOTE(vdrok): This will be set as endpoint_override, and the Client
@@ -92,19 +103,29 @@ def build_option_parser(parser):
 
 
 def _get_environment_version(default):
+    global OS_BAREMETAL_API_LATEST
     env_value = utils.env('OS_BAREMETAL_API_VERSION')
     if not env_value:
-        return default
+        env_value = default
     if env_value == 'latest':
         env_value = LATEST_VERSION
+        OS_BAREMETAL_API_LATEST = True
     return env_value
 
 
 class ReplaceLatestVersion(argparse.Action):
-    """Replaces `latest` keyword by last known version."""
+    """Replaces `latest` keyword by last known version.
+
+    OSC cannot accept the literal "latest" as a supported API version as it
+    breaks the major version detection (OSC tries to load configuration options
+    from setuptools entrypoint openstack.baremetal.vlatest). This action
+    replaces "latest" with the latest known version, and sets the global
+    OS_BAREMETAL_API_LATEST flag to True.
+    """
     def __call__(self, parser, namespace, values, option_string=None):
-        global OS_BAREMETAL_API_VERSION_SPECIFIED
+        global OS_BAREMETAL_API_VERSION_SPECIFIED, OS_BAREMETAL_API_LATEST
         OS_BAREMETAL_API_VERSION_SPECIFIED = True
         if values == 'latest':
             values = LATEST_VERSION
+            OS_BAREMETAL_API_LATEST = True
         setattr(namespace, self.dest, values)

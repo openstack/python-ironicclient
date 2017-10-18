@@ -39,8 +39,14 @@ class Client(object):
 
     def __init__(self, endpoint=None, *args, **kwargs):
         """Initialize a new client for the Ironic v1 API."""
+        allow_downgrade = kwargs.pop('allow_api_version_downgrade', False)
         if kwargs.get('os_ironic_api_version'):
-            kwargs['api_version_select_state'] = "user"
+            if allow_downgrade:
+                # NOTE(dtantsur): here we allow the HTTP client to negotiate a
+                # lower version if the requested is too high
+                kwargs['api_version_select_state'] = "default"
+            else:
+                kwargs['api_version_select_state'] = "user"
         else:
             if not endpoint:
                 raise exc.EndpointException(

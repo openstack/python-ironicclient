@@ -35,6 +35,20 @@ class ClientTest(utils.BaseTestCase):
             os_ironic_api_version=os_ironic_api_version,
             api_version_select_state='user')
 
+    def test_client_user_api_version_with_downgrade(self, http_client_mock):
+        endpoint = 'http://ironic:6385'
+        token = 'safe_token'
+        os_ironic_api_version = '1.15'
+
+        client.Client(endpoint, token=token,
+                      os_ironic_api_version=os_ironic_api_version,
+                      allow_api_version_downgrade=True)
+
+        http_client_mock.assert_called_once_with(
+            endpoint, token=token,
+            os_ironic_api_version=os_ironic_api_version,
+            api_version_select_state='default')
+
     @mock.patch.object(filecache, 'retrieve_data', autospec=True)
     def test_client_cache_api_version(self, cache_mock, http_client_mock):
         endpoint = 'http://ironic:6385'
