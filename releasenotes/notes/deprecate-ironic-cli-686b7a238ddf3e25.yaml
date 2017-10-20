@@ -1,5 +1,6 @@
 ---
 deprecations:
   - |
-    The ``ironic`` CLI has been deprecated and will be removed in the
-    S* release.  Please use the ``openstack baremetal`` CLI instead.
+    The ``ironic`` command line interface (``ironic`` commands) is deprecated
+    and will be removed in the OpenStack S* release.  Please use the
+    ``openstack baremetal`` command line interface instead.

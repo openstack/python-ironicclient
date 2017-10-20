@@ -1,6 +1,7 @@
 ---
 fixes:
   - |
-    Fix issue where doing ``export OS_BAREMETAL_API_VERSION=latest`` would
-    cause the ``openstack baremetal`` commands to fail.  See `bug 1712935
-    <https://bugs.launchpad.net/ironic/+bug/1712935>`_.
+    ``openstack baremetal`` commands no longer fail when specifying ``latest``
+    as the API version (via ``--os-baremetal-api-version`` or
+    ``export OS_BAREMETAL_API_VERSION=latest``). For more details, see
+    `bug 1712935 <https://bugs.launchpad.net/ironic/+bug/1712935>`_.
