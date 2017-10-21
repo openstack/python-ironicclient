@@ -1,0 +1,3 @@
+---
+features:
+  - Adds missing ``wanboot`` value to the list of supported boot devices.

@@ -15,7 +15,7 @@
 
 HTTP_METHODS = ['POST', 'PUT', 'GET', 'DELETE', 'PATCH']
 
-BOOT_DEVICES = ['pxe', 'disk', 'cdrom', 'bios', 'safe']
+BOOT_DEVICES = ['pxe', 'disk', 'cdrom', 'bios', 'safe', 'wanboot']
 
 # Polling intervals in seconds.
 _LONG_ACTION_POLL_INTERVAL = 10
