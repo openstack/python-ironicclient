@@ -174,7 +174,8 @@ class ShellTest(utils.BaseTestCase):
             'os_cert': None, 'os_key': None,
             'max_retries': http.DEFAULT_MAX_RETRIES,
             'retry_interval': http.DEFAULT_RETRY_INTERVAL,
-            'os_ironic_api_version': None, 'timeout': 600, 'insecure': False
+            'os_ironic_api_version': ironic_shell.LATEST_VERSION,
+            'timeout': 600, 'insecure': False
         }
         mock_client.assert_called_once_with(1, **expected_kwargs)
         # Make sure we are actually prompted.
@@ -203,7 +204,8 @@ class ShellTest(utils.BaseTestCase):
             'os_endpoint_type': '', 'os_cacert': None, 'os_cert': None,
             'os_key': None, 'max_retries': http.DEFAULT_MAX_RETRIES,
             'retry_interval': http.DEFAULT_RETRY_INTERVAL,
-            'os_ironic_api_version': None, 'timeout': 600, 'insecure': False
+            'os_ironic_api_version': ironic_shell.LATEST_VERSION,
+            'timeout': 600, 'insecure': False
         }
         mock_client.assert_called_once_with(1, **expected_kwargs)
         self.assertFalse(mock_getpass.called)
@@ -254,17 +256,118 @@ class ShellTest(utils.BaseTestCase):
         err = self.shell('--ironic-api-version latest help')[1]
         self.assertIn('The "ironic" CLI is deprecated', err)
 
-        self.assertRaises(exc.CommandError,
-                          self.shell, '--ironic-api-version 1.2.1 help')
+        err = self.shell('--ironic-api-version 1 help')[1]
+        self.assertIn('The "ironic" CLI is deprecated', err)
 
     def test_invalid_ironic_api_version(self):
         self.assertRaises(exceptions.UnsupportedVersion,
                           self.shell, '--ironic-api-version 0.8 help')
+        self.assertRaises(exc.CommandError,
+                          self.shell, '--ironic-api-version 1.2.1 help')
 
-    def test_warning_on_no_version(self):
-        err = self.shell('help')[1]
-        self.assertIn('You are using the default API version', err)
-        self.assertIn('The "ironic" CLI is deprecated', err)
+    @mock.patch.object(client, 'get_client', autospec=True,
+                       side_effect=keystone_exc.ConnectFailure)
+    def test_api_version_in_env(self, mock_client):
+        env = dict(IRONIC_API_VERSION='1.10', **FAKE_ENV)
+        self.make_env(environ_dict=env)
+        # We will get a ConnectFailure because there is no keystone.
+        self.assertRaises(keystone_exc.ConnectFailure,
+                          self.shell, 'node-list')
+        expected_kwargs = {
+            'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
+            'os_tenant_id': '', 'os_tenant_name': '',
+            'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
+            'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
+            'os_auth_token': '', 'os_project_id': '',
+            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
+            'os_project_domain_id': '',
+            'os_project_domain_name': '', 'os_region_name': '',
+            'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
+            'os_cert': None, 'os_key': None,
+            'max_retries': http.DEFAULT_MAX_RETRIES,
+            'retry_interval': http.DEFAULT_RETRY_INTERVAL,
+            'os_ironic_api_version': '1.10',
+            'timeout': 600, 'insecure': False
+        }
+        mock_client.assert_called_once_with(1, **expected_kwargs)
+
+    @mock.patch.object(client, 'get_client', autospec=True,
+                       side_effect=keystone_exc.ConnectFailure)
+    def test_api_version_v1_in_env(self, mock_client):
+        env = dict(IRONIC_API_VERSION='1', **FAKE_ENV)
+        self.make_env(environ_dict=env)
+        # We will get a ConnectFailure because there is no keystone.
+        self.assertRaises(keystone_exc.ConnectFailure,
+                          self.shell, 'node-list')
+        expected_kwargs = {
+            'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
+            'os_tenant_id': '', 'os_tenant_name': '',
+            'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
+            'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
+            'os_auth_token': '', 'os_project_id': '',
+            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
+            'os_project_domain_id': '',
+            'os_project_domain_name': '', 'os_region_name': '',
+            'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
+            'os_cert': None, 'os_key': None,
+            'max_retries': http.DEFAULT_MAX_RETRIES,
+            'retry_interval': http.DEFAULT_RETRY_INTERVAL,
+            'os_ironic_api_version': ironic_shell.LATEST_VERSION,
+            'timeout': 600, 'insecure': False
+        }
+        mock_client.assert_called_once_with(1, **expected_kwargs)
+
+    @mock.patch.object(client, 'get_client', autospec=True,
+                       side_effect=keystone_exc.ConnectFailure)
+    def test_api_version_in_args(self, mock_client):
+        env = dict(IRONIC_API_VERSION='1.10', **FAKE_ENV)
+        self.make_env(environ_dict=env)
+        # We will get a ConnectFailure because there is no keystone.
+        self.assertRaises(keystone_exc.ConnectFailure,
+                          self.shell, '--ironic-api-version 1.11 node-list')
+        expected_kwargs = {
+            'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
+            'os_tenant_id': '', 'os_tenant_name': '',
+            'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
+            'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
+            'os_auth_token': '', 'os_project_id': '',
+            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
+            'os_project_domain_id': '',
+            'os_project_domain_name': '', 'os_region_name': '',
+            'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
+            'os_cert': None, 'os_key': None,
+            'max_retries': http.DEFAULT_MAX_RETRIES,
+            'retry_interval': http.DEFAULT_RETRY_INTERVAL,
+            'os_ironic_api_version': '1.11',
+            'timeout': 600, 'insecure': False
+        }
+        mock_client.assert_called_once_with(1, **expected_kwargs)
+
+    @mock.patch.object(client, 'get_client', autospec=True,
+                       side_effect=keystone_exc.ConnectFailure)
+    def test_api_version_v1_in_args(self, mock_client):
+        env = dict(IRONIC_API_VERSION='1.10', **FAKE_ENV)
+        self.make_env(environ_dict=env)
+        # We will get a ConnectFailure because there is no keystone.
+        self.assertRaises(keystone_exc.ConnectFailure,
+                          self.shell, '--ironic-api-version 1 node-list')
+        expected_kwargs = {
+            'ironic_url': '', 'os_auth_url': FAKE_ENV['OS_AUTH_URL'],
+            'os_tenant_id': '', 'os_tenant_name': '',
+            'os_username': FAKE_ENV['OS_USERNAME'], 'os_user_domain_id': '',
+            'os_user_domain_name': '', 'os_password': FAKE_ENV['OS_PASSWORD'],
+            'os_auth_token': '', 'os_project_id': '',
+            'os_project_name': FAKE_ENV['OS_PROJECT_NAME'],
+            'os_project_domain_id': '',
+            'os_project_domain_name': '', 'os_region_name': '',
+            'os_service_type': '', 'os_endpoint_type': '', 'os_cacert': None,
+            'os_cert': None, 'os_key': None,
+            'max_retries': http.DEFAULT_MAX_RETRIES,
+            'retry_interval': http.DEFAULT_RETRY_INTERVAL,
+            'os_ironic_api_version': ironic_shell.LATEST_VERSION,
+            'timeout': 600, 'insecure': False
+        }
+        mock_client.assert_called_once_with(1, **expected_kwargs)
 
 
 class TestCase(testtools.TestCase):

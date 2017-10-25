@@ -48,10 +48,10 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
             "uuid": {"type": "string"},
             "console_enabled": {"type": "boolean"},
             "target_provision_state": {"type": ["string", "null"]},
-            "raid_config": {"type": "string"},
+            "raid_config": {"type": "object"},
             "provision_updated_at": {"type": ["string", "null"]},
             "maintenance": {"type": "boolean"},
-            "target_raid_config": {"type": "string"},
+            "target_raid_config": {"type": "object"},
             "inspection_started_at": {"type": ["string", "null"]},
             "inspection_finished_at": {"type": ["string", "null"]},
             "power_state": {"type": ["string", "null"]},
@@ -65,8 +65,12 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
             "driver_internal_info": {"type": "object"},
             "chassis_uuid": {"type": ["string", "null"]},
             "instance_info": {"type": "object"}
-            }
-        }
+        },
+        "patternProperties": {
+            ".*_interface$": {"type": ["string", "null"]}
+        },
+        "additionalProperties": True
+    }
 
     def setUp(self):
         super(TestNodeJsonResponse, self).setUp()

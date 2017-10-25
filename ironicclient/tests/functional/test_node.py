@@ -161,18 +161,21 @@ class NodeSanityTestIronicClient(base.FunctionalTestBase):
         """Test steps:
 
         1) create node
-        2) check that provision state is 'available'
+        2) check that provision state is 'enroll'
         3) set new provision state to the node
         4) check that provision state has been updated successfully
         """
         node_show = self.show_node(self.node['uuid'])
 
-        self.assertEqual('available', node_show['provision_state'])
+        self.assertEqual('enroll', node_show['provision_state'])
 
-        self.set_node_provision_state(self.node['uuid'], 'active')
-        node_show = self.show_node(self.node['uuid'])
-
-        self.assertEqual('active', node_show['provision_state'])
+        for verb, target in [('manage', 'manageable'),
+                             ('provide', 'available'),
+                             ('active', 'active'),
+                             ('deleted', 'available')]:
+            self.set_node_provision_state(self.node['uuid'], verb)
+            node_show = self.show_node(self.node['uuid'])
+            self.assertEqual(target, node_show['provision_state'])
 
     def test_node_validate(self):
         """Test steps:

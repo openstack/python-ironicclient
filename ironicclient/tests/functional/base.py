@@ -216,7 +216,9 @@ class FunctionalTestBase(base.ClientTestBase):
 
         if utils.get_object(node_list, node_id):
             node_show = self.show_node(node_id)
-            if node_show['provision_state'] != 'available':
+            if node_show['provision_state'] not in ('available',
+                                                    'manageable',
+                                                    'enroll'):
                 self.ironic('node-set-provision-state',
                             params='{0} deleted'.format(node_id))
             if node_show['power_state'] not in ('None', 'off'):

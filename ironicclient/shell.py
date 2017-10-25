@@ -38,14 +38,8 @@ from ironicclient.common import utils
 from ironicclient import exc
 
 
-LATEST_API_VERSION = ('1', 'latest')
-MISSING_VERSION_WARNING = (
-    "You are using the default API version of the 'ironic' command. "
-    "This is currently API version %s. In the future, the default will be "
-    "the latest API version understood by both API and CLI. You can preserve "
-    "the current behavior by passing the --ironic-api-version argument with "
-    "the desired version or using the IRONIC_API_VERSION environment variable."
-)
+LAST_KNOWN_API_VERSION = 34
+LATEST_VERSION = '1.{}'.format(LAST_KNOWN_API_VERSION)
 
 
 class IronicShell(object):
@@ -161,12 +155,10 @@ class IronicShell(object):
 
         parser.add_argument('--ironic-api-version',
                             default=cliutils.env('IRONIC_API_VERSION',
-                                                 default=None),
-                            help=_('Accepts 1.x (where "x" is microversion) '
-                                   'or "latest". Defaults to '
-                                   'env[IRONIC_API_VERSION] or %s. Starting '
-                                   'with the Queens release this will '
-                                   'default to "latest".') % http.DEFAULT_VER)
+                                                 default="latest"),
+                            help=_('Accepts 1.x (where "x" is microversion), '
+                                   '1 or "latest". Defaults to '
+                                   'env[IRONIC_API_VERSION] or "latest".'))
 
         parser.add_argument('--ironic_api_version',
                             help=argparse.SUPPRESS)
@@ -300,34 +292,30 @@ class IronicShell(object):
         print(' '.join(commands | options))
 
     def _check_version(self, api_version):
-        if api_version == 'latest':
-            return LATEST_API_VERSION
-        else:
-            if api_version is None:
-                print(MISSING_VERSION_WARNING % http.DEFAULT_VER,
-                      file=sys.stderr)
-                api_version = '1'
+        """Validate the supplied API (micro)version.
 
+        :param api_version: API version as a string ("1", "1.x" or "latest")
+        :returns: tuple (major version, version string)
+        """
+        if api_version in ('1', 'latest'):
+            return (1, LATEST_VERSION)
+        else:
             try:
                 versions = tuple(int(i) for i in api_version.split('.'))
             except ValueError:
                 versions = ()
-            if len(versions) == 1:
-                # Default value of ironic_api_version is '1'.
-                # If user not specify the value of api version, not passing
-                # headers at all.
-                os_ironic_api_version = None
-            elif len(versions) == 2:
-                os_ironic_api_version = api_version
-                # In the case of '1.0'
-                if versions[1] == 0:
-                    os_ironic_api_version = None
-            else:
+
+            if not versions or len(versions) > 2:
                 msg = _("The requested API version %(ver)s is an unexpected "
                         "format. Acceptable formats are 'X', 'X.Y', or the "
-                        "literal string '%(latest)s'."
-                        ) % {'ver': api_version, 'latest': 'latest'}
+                        "literal string 'latest'."
+                        ) % {'ver': api_version}
                 raise exc.CommandError(msg)
+
+            if versions == (1, 0):
+                os_ironic_api_version = None
+            else:
+                os_ironic_api_version = api_version
 
             api_major_version = versions[0]
             return (api_major_version, os_ironic_api_version)
@@ -422,6 +410,11 @@ class IronicShell(object):
             kwargs[key] = getattr(args, key)
         kwargs['os_ironic_api_version'] = os_ironic_api_version
         client = ironicclient.client.get_client(api_major_version, **kwargs)
+        if options.ironic_api_version in ('1', 'latest'):
+            # Allow negotiating a lower version, if the latest version
+            # supported by the client is higher than the latest version
+            # supported by the server.
+            client.http_client.api_version_select_state = 'default'
 
         try:
             args.func(client, args)
