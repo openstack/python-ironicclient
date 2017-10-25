@@ -27,26 +27,6 @@ class BaremetalNodeTests(base.TestCase):
         super(BaremetalNodeTests, self).setUp()
         self.node = self.node_create()
 
-    def test_warning_version_not_specified(self):
-        """Test API version warning is printed when API version unspecified.
-
-        A warning will appear for any invocation of the baremetal OSC plugin
-        without --os-baremetal-api-version specified. It's tested with a simple
-        node list command here.
-        """
-        output = self.openstack('baremetal node list', merge_stderr=True)
-        self.assertIn('the default will be the latest API version', output)
-
-    def test_no_warning_version_specified(self):
-        """Test API version warning is not printed when API version specified.
-
-        This warning should not appear when a user specifies the ironic API
-        version to use.
-        """
-        output = self.openstack('baremetal --os-baremetal-api-version=1.9 node'
-                                ' list', merge_stderr=True)
-        self.assertNotIn('the default will be the latest API version', output)
-
     def test_create_name_uuid(self):
         """Check baremetal node create command with name and UUID.
 
@@ -64,9 +44,24 @@ class BaremetalNodeTests(base.TestCase):
         self.assertEqual(node_info['name'], name)
         self.assertEqual(node_info['driver'], 'fake')
         self.assertEqual(node_info['maintenance'], False)
+        self.assertEqual(node_info['provision_state'], 'enroll')
         node_list = self.node_list()
         self.assertIn(uuid, [x['UUID'] for x in node_list])
         self.assertIn(name, [x['Name'] for x in node_list])
+
+    def test_create_old_api_version(self):
+        """Check baremetal node create command with name and UUID.
+
+        Test steps:
+        1) Create baremetal node in setUp.
+        2) Create one more baremetal node explicitly with old API version
+        3) Check that node successfully created.
+        """
+        node_info = self.node_create(
+            params='--os-baremetal-api-version 1.5')
+        self.assertEqual(node_info['driver'], 'fake')
+        self.assertEqual(node_info['maintenance'], False)
+        self.assertEqual(node_info['provision_state'], 'available')
 
     @ddt.data('name', 'uuid')
     def test_delete(self, key):
