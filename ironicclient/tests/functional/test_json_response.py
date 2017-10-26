@@ -20,7 +20,7 @@ from tempest.lib.common.utils import data_utils
 from ironicclient.tests.functional import base
 
 
-def _is_valid_json(json_response, schema):
+def _validate_json(json_response, schema):
     """Verify JSON is valid.
 
     :param json_response: JSON response from CLI
@@ -28,12 +28,8 @@ def _is_valid_json(json_response, schema):
     :param schema: expected schema of response
     :type json_response: dictionary
     """
-    try:
-        json_response = json.loads(json_response)
-        jsonschema.validate(json_response, schema)
-    except jsonschema.ValidationError:
-        return False
-    return True
+    json_response = json.loads(json_response)
+    jsonschema.validate(json_response, schema)
 
 
 class TestNodeJsonResponse(base.FunctionalTestBase):
@@ -92,13 +88,13 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
         }
         response = self.ironic('node-list', flags='--json',
                                params='', parse=False)
-        self.assertTrue(_is_valid_json(response, schema))
+        _validate_json(response, schema)
 
     def test_node_show_json(self):
         """Test JSON response for node show."""
         response = self.ironic('node-show', flags='--json', params='{0}'
                                .format(self.node['uuid']), parse=False)
-        self.assertTrue(_is_valid_json(response, self.node_schema))
+        _validate_json(response, self.node_schema)
 
     def test_node_validate_json(self):
         """Test JSON response for node validation."""
@@ -114,7 +110,7 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
         response = self.ironic('node-validate', flags='--json',
                                params='{0}'.format(self.node['uuid']),
                                parse=False)
-        self.assertTrue(_is_valid_json(response, schema))
+        _validate_json(response, schema)
 
     def test_node_show_states_json(self):
         """Test JSON response for node show states."""
@@ -133,7 +129,7 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
         response = self.ironic('node-show-states', flags='--json',
                                params='{0}'.format(self.node['uuid']),
                                parse=False)
-        self.assertTrue(_is_valid_json(response, schema))
+        _validate_json(response, schema)
 
     def test_node_create_json(self):
         """Test JSON response for node creation."""
@@ -154,7 +150,7 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
                                params='-d fake -n {0}'.format(node_name),
                                parse=False)
         self.addCleanup(self.delete_node, node_name)
-        self.assertTrue(_is_valid_json(response, schema))
+        _validate_json(response, schema)
 
     def test_node_update_json(self):
         """Test JSON response for node update."""
@@ -163,7 +159,7 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
                                params='{0} add name={1}'
                                .format(self.node['uuid'], node_name),
                                parse=False)
-        self.assertTrue(_is_valid_json(response, self.node_schema))
+        _validate_json(response, self.node_schema)
 
 
 class TestDriverJsonResponse(base.FunctionalTestBase):
@@ -181,7 +177,7 @@ class TestDriverJsonResponse(base.FunctionalTestBase):
                     }}
         }
         response = self.ironic('driver-list', flags='--json', parse=False)
-        self.assertTrue(_is_valid_json(response, schema))
+        _validate_json(response, schema)
 
     def test_driver_show_json(self):
         """Test JSON response for driver show."""
@@ -198,7 +194,7 @@ class TestDriverJsonResponse(base.FunctionalTestBase):
         for driver in drivers_names:
             response = self.ironic('driver-show', flags='--json',
                                    params='{0}'.format(driver), parse=False)
-            self.assertTrue(_is_valid_json(response, schema))
+            _validate_json(response, schema)
 
     def test_driver_properties_json(self):
         """Test JSON response for driver properties."""
@@ -210,7 +206,7 @@ class TestDriverJsonResponse(base.FunctionalTestBase):
         for driver in drivers_names:
             response = self.ironic('driver-properties', flags='--json',
                                    params='{0}'.format(driver), parse=False)
-            self.assertTrue(_is_valid_json(response, schema))
+            _validate_json(response, schema)
 
 
 class TestChassisJsonResponse(base.FunctionalTestBase):
@@ -242,19 +238,19 @@ class TestChassisJsonResponse(base.FunctionalTestBase):
             }
         }
         response = self.ironic('chassis-list', flags='--json', parse=False)
-        self.assertTrue(_is_valid_json(response, schema))
+        _validate_json(response, schema)
 
     def test_chassis_show_json(self):
         """Test JSON response for chassis show."""
         response = self.ironic('chassis-show', flags='--json',
                                params='{0}'.format(self.chassis['uuid']),
                                parse=False)
-        self.assertTrue(_is_valid_json(response, self.chassis_schema))
+        _validate_json(response, self.chassis_schema)
 
     def test_chassis_create_json(self):
         """Test JSON response for chassis create."""
         response = self.ironic('chassis-create', flags='--json', parse=False)
-        self.assertTrue(_is_valid_json(response, self.chassis_schema))
+        _validate_json(response, self.chassis_schema)
 
     def test_chassis_update_json(self):
         """Test JSON response for chassis update."""
@@ -262,7 +258,7 @@ class TestChassisJsonResponse(base.FunctionalTestBase):
             'chassis-update', flags='--json', params='{0} {1} {2}'.format(
                 self.chassis['uuid'], 'add', 'description=test-chassis'),
             parse=False)
-        self.assertTrue(_is_valid_json(response, self.chassis_schema))
+        _validate_json(response, self.chassis_schema)
 
     def test_chassis_node_list_json(self):
         """Test JSON response for chassis-node-list command."""
@@ -284,4 +280,4 @@ class TestChassisJsonResponse(base.FunctionalTestBase):
         response = self.ironic('chassis-node-list', flags='--json',
                                params='{0}'.format(self.chassis['uuid']),
                                parse=False)
-        self.assertTrue(_is_valid_json(response, schema))
+        _validate_json(response, schema)
