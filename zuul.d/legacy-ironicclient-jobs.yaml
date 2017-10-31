@@ -1,0 +1,17 @@
+- job:
+    name: ironicclient-dsvm-functional
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/ironicclient-dsvm-functional/run.yaml
+    post-run: playbooks/legacy/ironicclient-dsvm-functional/post.yaml
+    timeout: 4800
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/ironic
+      - openstack/python-ironicclient
+
+- job:
+    name: ironicclient-tempest-dsvm-src
+    parent: legacy-ironic-dsvm-base
+    run: playbooks/legacy/ironicclient-tempest-dsvm-src/run.yaml
+    post-run: playbooks/legacy/ironicclient-tempest-dsvm-src/post.yaml
+    timeout: 10800
