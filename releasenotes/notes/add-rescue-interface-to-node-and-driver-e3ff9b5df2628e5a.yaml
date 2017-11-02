@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Adds support for rescue_interface for the commands below.
+    They are available starting with ironic API microversion 1.38.
+
+    * ``openstack baremetal node create``
+    * ``openstack baremetal node show``
+    * ``openstack baremetal node set``
+    * ``openstack baremetal node unset``
+    * ``openstack baremetal driver list``
+    * ``openstack baremetal driver show``

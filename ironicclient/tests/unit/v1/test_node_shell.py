@@ -55,6 +55,7 @@ class NodeShellTest(utils.BaseTestCase):
                'network_interface',
                'power_interface',
                'raid_interface',
+               'rescue_interface',
                'storage_interface',
                'vendor_interface',
                'power_state',

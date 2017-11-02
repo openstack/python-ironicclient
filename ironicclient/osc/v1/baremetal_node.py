@@ -398,6 +398,12 @@ class CreateBaremetalNode(command.ShowOne):
                    'only applicable when the specified --driver is a '
                    'hardware type.'))
         parser.add_argument(
+            '--rescue-interface',
+            metavar='<rescue_interface>',
+            help=_('Rescue interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
+        parser.add_argument(
             '--storage-interface',
             metavar='<storage_interface>',
             help=_('Storage interface used by the node\'s driver.'))
@@ -425,8 +431,8 @@ class CreateBaremetalNode(command.ShowOne):
                       'deploy_interface', 'inspect_interface',
                       'management_interface', 'network_interface',
                       'power_interface', 'raid_interface',
-                      'storage_interface', 'vendor_interface',
-                      'resource_class']
+                      'rescue_interface', 'storage_interface',
+                      'vendor_interface', 'resource_class']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'driver_info')
@@ -1021,6 +1027,11 @@ class SetBaremetalNode(command.Command):
             help=_('Set the RAID interface for the node'),
         )
         parser.add_argument(
+            '--rescue-interface',
+            metavar='<rescue_interface>',
+            help=_('Set the rescue interface for the node'),
+        )
+        parser.add_argument(
             '--storage-interface',
             metavar='<storage_interface>',
             help=_('Set the storage interface for the node'),
@@ -1147,6 +1158,11 @@ class SetBaremetalNode(command.Command):
                 "raid_interface=%s" % parsed_args.raid_interface]
             properties.extend(utils.args_array_to_patch(
                 'add', raid_interface))
+        if parsed_args.rescue_interface:
+            rescue_interface = [
+                "rescue_interface=%s" % parsed_args.rescue_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', rescue_interface))
         if parsed_args.storage_interface:
             storage_interface = [
                 "storage_interface=%s" % parsed_args.storage_interface]
@@ -1366,6 +1382,12 @@ class UnsetBaremetalNode(command.Command):
             help=_('Unset RAID interface on this baremetal node'),
         )
         parser.add_argument(
+            "--rescue-interface",
+            dest='rescue_interface',
+            action='store_true',
+            help=_('Unset rescue interface on this baremetal node'),
+        )
+        parser.add_argument(
             "--storage-interface",
             dest='storage_interface',
             action='store_true',
@@ -1443,6 +1465,9 @@ class UnsetBaremetalNode(command.Command):
         if parsed_args.raid_interface:
             properties.extend(utils.args_array_to_patch('remove',
                               ['raid_interface']))
+        if parsed_args.rescue_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['rescue_interface']))
         if parsed_args.storage_interface:
             properties.extend(utils.args_array_to_patch('remove',
                               ['storage_interface']))

@@ -72,6 +72,7 @@ baremetal_driver_default_management_if = 'management'
 baremetal_driver_default_network_if = 'network'
 baremetal_driver_default_power_if = 'power'
 baremetal_driver_default_raid_if = 'raid'
+baremetal_driver_default_rescue_if = 'rescue'
 baremetal_driver_default_storage_if = 'storage'
 baremetal_driver_default_vendor_if = 'vendor'
 baremetal_driver_enabled_boot_ifs = ['boot', 'boot2']
@@ -82,6 +83,7 @@ baremetal_driver_enabled_management_ifs = ['management', 'management2']
 baremetal_driver_enabled_network_ifs = ['network', 'network2']
 baremetal_driver_enabled_power_ifs = ['power', 'power2']
 baremetal_driver_enabled_raid_ifs = ['raid', 'raid2']
+baremetal_driver_enabled_rescue_ifs = ['rescue', 'rescue2']
 baremetal_driver_enabled_storage_ifs = ['storage', 'storage2']
 baremetal_driver_enabled_vendor_ifs = ['vendor', 'vendor2']
 
@@ -97,6 +99,7 @@ BAREMETAL_DRIVER = {
     'default_network_interface': baremetal_driver_default_network_if,
     'default_power_interface': baremetal_driver_default_power_if,
     'default_raid_interface': baremetal_driver_default_raid_if,
+    'default_rescue_interface': baremetal_driver_default_rescue_if,
     'default_storage_interface': baremetal_driver_default_storage_if,
     'default_vendor_interface': baremetal_driver_default_vendor_if,
     'enabled_boot_interfaces': baremetal_driver_enabled_boot_ifs,
@@ -107,6 +110,7 @@ BAREMETAL_DRIVER = {
     'enabled_network_interfaces': baremetal_driver_enabled_network_ifs,
     'enabled_power_interfaces': baremetal_driver_enabled_power_ifs,
     'enabled_raid_interfaces': baremetal_driver_enabled_raid_ifs,
+    'enabled_rescue_interfaces': baremetal_driver_enabled_rescue_ifs,
     'enabled_storage_interfaces': baremetal_driver_enabled_storage_ifs,
     'enabled_vendor_interfaces': baremetal_driver_enabled_vendor_ifs,
 }
