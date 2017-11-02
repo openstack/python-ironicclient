@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 CLIENT_CLASS = 'ironicclient.v1.client.Client'
 API_VERSION_OPTION = 'os_baremetal_api_version'
 API_NAME = 'baremetal'
-LAST_KNOWN_API_VERSION = 34
+LAST_KNOWN_API_VERSION = 35
 LATEST_VERSION = "1.{}".format(LAST_KNOWN_API_VERSION)
 API_VERSIONS = {
     '1.%d' % i: CLIENT_CLASS

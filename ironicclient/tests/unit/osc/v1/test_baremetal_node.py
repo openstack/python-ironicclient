@@ -1489,6 +1489,23 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.RebuildBaremetalNode(self.app, None)
 
+    def test_rebuild_baremetal_provision_state_active_and_configdrive(self):
+        arglist = ['node_uuid',
+                   '--config-drive', 'path/to/drive']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'rebuild'),
+            ('config_drive', 'path/to/drive'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'rebuild',
+            cleansteps=None, configdrive='path/to/drive')
+
     def test_rebuild_no_wait(self):
         arglist = ['node_uuid']
         verifylist = [
@@ -1499,6 +1516,10 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'rebuild',
+            cleansteps=None, configdrive=None)
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
