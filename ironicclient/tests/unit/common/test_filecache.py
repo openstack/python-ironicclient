@@ -29,6 +29,7 @@ class FileCacheTest(utils.BaseTestCase):
         result = filecache._build_key(None, None)
         self.assertEqual('None:None', result)
 
+    @mock.patch.object(filecache, 'CACHE', None)
     @mock.patch.object(os.environ, 'get', autospec=True)
     @mock.patch.object(os.path, 'exists', autospec=True)
     @mock.patch.object(os, 'makedirs', autospec=True)
@@ -38,12 +39,12 @@ class FileCacheTest(utils.BaseTestCase):
         cache_val = 6
         # If not present in the env, get will return the defaulted value
         mock_get.return_value = filecache.DEFAULT_EXPIRY
-        filecache.CACHE = None
         mock_exists.return_value = False
         cache_region = mock.Mock(spec=dogpile.cache.region.CacheRegion)
         cache_region.configure.return_value = cache_val
         mock_makeregion.return_value = cache_region
         self.assertEqual(cache_val, filecache._get_cache())
+        self.assertEqual(cache_val, filecache.CACHE)
         mock_exists.assert_called_once_with(filecache.CACHE_DIR)
         mock_makedirs.assert_called_once_with(filecache.CACHE_DIR)
         mock_get.assert_called_once_with(filecache.CACHE_EXPIRY_ENV_VAR,
@@ -53,6 +54,7 @@ class FileCacheTest(utils.BaseTestCase):
             arguments=mock.ANY,
             expiration_time=filecache.DEFAULT_EXPIRY)
 
+    @mock.patch.object(filecache, 'CACHE', None)
     @mock.patch.object(os.environ, 'get', autospec=True)
     @mock.patch.object(os.path, 'exists', autospec=True)
     @mock.patch.object(os, 'makedirs', autospec=True)
@@ -62,12 +64,12 @@ class FileCacheTest(utils.BaseTestCase):
         cache_val = 5643
         cache_expiry = '78'
         mock_get.return_value = cache_expiry
-        filecache.CACHE = None
         mock_exists.return_value = False
         cache_region = mock.Mock(spec=dogpile.cache.region.CacheRegion)
         cache_region.configure.return_value = cache_val
         mock_makeregion.return_value = cache_region
         self.assertEqual(cache_val, filecache._get_cache())
+        self.assertEqual(cache_val, filecache.CACHE)
         mock_get.assert_called_once_with(filecache.CACHE_EXPIRY_ENV_VAR,
                                          mock.ANY)
         cache_region.configure.assert_called_once_with(
@@ -75,6 +77,7 @@ class FileCacheTest(utils.BaseTestCase):
             arguments=mock.ANY,
             expiration_time=int(cache_expiry))
 
+    @mock.patch.object(filecache, 'CACHE', None)
     @mock.patch.object(filecache.LOG, 'warning', autospec=True)
     @mock.patch.object(os.environ, 'get', autospec=True)
     @mock.patch.object(os.path, 'exists', autospec=True)
@@ -86,12 +89,12 @@ class FileCacheTest(utils.BaseTestCase):
         cache_val = 5643
         cache_expiry = 'Rollenhagen'
         mock_get.return_value = cache_expiry
-        filecache.CACHE = None
         mock_exists.return_value = False
         cache_region = mock.Mock(spec=dogpile.cache.region.CacheRegion)
         cache_region.configure.return_value = cache_val
         mock_makeregion.return_value = cache_region
         self.assertEqual(cache_val, filecache._get_cache())
+        self.assertEqual(cache_val, filecache.CACHE)
         mock_get.assert_called_once_with(filecache.CACHE_EXPIRY_ENV_VAR,
                                          mock.ANY)
         cache_region.configure.assert_called_once_with(
@@ -103,13 +106,13 @@ class FileCacheTest(utils.BaseTestCase):
                     'env_var': filecache.CACHE_EXPIRY_ENV_VAR}
         mock_log.assert_called_once_with(mock.ANY, log_dict)
 
+    @mock.patch.object(filecache, 'CACHE', 5552368)
     @mock.patch.object(os.path, 'exists', autospec=True)
     @mock.patch.object(os, 'makedirs', autospec=True)
     def test__get_cache_dir_already_exists(self, mock_makedirs, mock_exists):
-        cache_val = 5552368
         mock_exists.return_value = True
-        filecache.CACHE = cache_val
-        self.assertEqual(cache_val, filecache._get_cache())
+        self.assertEqual(5552368, filecache._get_cache())
+        self.assertEqual(5552368, filecache.CACHE)
         self.assertEqual(0, mock_exists.call_count)
         self.assertEqual(0, mock_makedirs.call_count)
 
