@@ -27,6 +27,12 @@ from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
 from ironicclient.v1 import utils as v1_utils
 
+CONFIG_DRIVE_ARG_HELP = _(
+    "A gzipped, base64-encoded configuration drive string OR "
+    "the path to the configuration drive file OR the path to a "
+    "directory containing the config drive files. In case it's "
+    "a directory, a config drive will be generated from it.")
+
 
 class ProvisionStateBaremetalNode(command.Command):
     """Base provision state class"""
@@ -483,10 +489,7 @@ class DeployBaremetalNode(ProvisionStateWithWait):
             '--config-drive',
             metavar='<config-drive>',
             default=None,
-            help=_("A gzipped, base64-encoded configuration drive string OR "
-                   "the path to the configuration drive file OR the path to a "
-                   "directory containing the config drive files. In case it's "
-                   "a directory, a config drive will be generated from it. "))
+            help=CONFIG_DRIVE_ARG_HELP)
         return parser
 
 
@@ -897,6 +900,16 @@ class RebuildBaremetalNode(ProvisionStateWithWait):
 
     log = logging.getLogger(__name__ + ".RebuildBaremetalNode")
     PROVISION_STATE = 'rebuild'
+
+    def get_parser(self, prog_name):
+        parser = super(RebuildBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '--config-drive',
+            metavar='<config-drive>',
+            default=None,
+            help=CONFIG_DRIVE_ARG_HELP)
+        return parser
 
 
 class SetBaremetalNode(command.Command):
