@@ -2,12 +2,14 @@
 upgrade:
   - |
     The default API version for the bare metal OSC client (``openstack
-    baremetal`` commands) is now "latest", which is the maximum version
-    understood by both the client and the server.  This change makes the CLI
+    baremetal`` commands) changed from ``1.9`` to ``latest``. ``latest``
+    is the maximum version understood by both the client and the server.
+    This change makes the CLI
     automatically pull in new features and changes (including potentially
     breaking), when talking to new servers.
 
-    Scripts that rely on some specific API behavior should set the
+    Scripts that used the previous default API version, or that rely on
+    some specific API behavior, should set the
     ``OS_BAREMETAL_API_VERSION`` environment variable or use the
     ``--os-baremetal-api-version`` CLI argument.
 
@@ -22,5 +24,5 @@ fixes:
   - |
     Users of the ``openstack baremetal`` commands no longer have to specify
     an explicit API version to use the latest features. The default API version
-    is now "latest", which is the maximum version understood by both the client
-    and the server.
+    changed from ``1.9`` to ``latest``, which is the maximum version
+    understood by both the client and the server.

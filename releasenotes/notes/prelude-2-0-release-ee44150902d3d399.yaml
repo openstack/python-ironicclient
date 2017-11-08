@@ -3,10 +3,10 @@ prelude: |
     The 2.0 release has three major changes:
 
     * The default API version for the ``openstack baremetal`` and
-      ``ironic`` commands is ``latest``, the maximum version
-      understood by both the client and the server. This change makes
-      the CLI automatically pull in new features and changes
-      (including potentially breaking), from servers.
+      ``ironic`` commands changed from ``1.9`` to ``latest``. ``latest``
+      is the maximum version understood by both the client and the server.
+      This change makes the CLI automatically pull in new features
+      and changes (including potentially breaking), from servers.
 
     * The ``python-ironicclient`` package no longer includes the
       ``python-openstackclient`` (OSC) package as a requirement.

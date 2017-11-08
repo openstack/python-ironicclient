@@ -1,8 +1,9 @@
 ---
 fixes:
   - |
-    When using ``--os-baremetal-api-version=latest``, the resulting API version
+    When using ``--os-baremetal-api-version=latest`` (for ``openstack
+    baremetal`` CLI) or ``--ironic-api-version=latest`` (for ``ironic`` CLI),
+    the resulting API version
     is now the maximum API version supported by both the client and the server.
     Previously, the maximum API version supported by the client was used,
-    which prevented ``--os-baremetal-api-version=latest`` from working with
-    older servers.
+    which prevented ``latest`` from working with older servers.

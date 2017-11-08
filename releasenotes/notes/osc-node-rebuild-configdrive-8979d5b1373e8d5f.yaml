@@ -4,4 +4,4 @@ features:
     Adds the ability to specify a configuration drive when
     rebuilding a node, via the ``--config-drive`` option to the
     ``openstack baremetal node rebuild`` command. This is available starting
-    with ironic API version 1.35.
+    with Bare Metal API version 1.35.
