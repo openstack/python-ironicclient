@@ -539,6 +539,23 @@ class SessionClientTest(utils.BaseTestCase):
     def test_endpoint_override_not_valid(self):
         self._test_endpoint_override(True)
 
+    def test_make_simple_request(self):
+        session = mock.Mock(spec=['request'])
+
+        client = _session_client(session=session,
+                                 endpoint_override='http://127.0.0.1')
+        res = client._make_simple_request(session, 'GET', 'url')
+
+        session.request.assert_called_once_with(
+            'url', 'GET', raise_exc=False,
+            endpoint_filter={
+                'interface': 'publicURL',
+                'service_type': 'baremetal',
+                'region_name': ''
+            },
+            user_agent=http.USER_AGENT)
+        self.assertEqual(res, session.request.return_value)
+
 
 @mock.patch.object(time, 'sleep', lambda *_: None)
 class RetriesTestCase(utils.BaseTestCase):
