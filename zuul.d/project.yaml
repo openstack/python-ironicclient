@@ -2,29 +2,9 @@
     name: openstack/python-ironicclient
     check:
       jobs:
-        - ironicclient-tempest-dsvm-src:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-        - ironicclient-dsvm-functional:
-            irrelevant-files:
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^releasenotes/.*$
+        - ironicclient-dsvm-functional
+        - ironicclient-tempest-dsvm-src
     gate:
       jobs:
-        - ironicclient-tempest-dsvm-src:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-        - ironicclient-dsvm-functional:
-            irrelevant-files:
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^releasenotes/.*$
+        - ironicclient-dsvm-functional
+        - ironicclient-tempest-dsvm-src
