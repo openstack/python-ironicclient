@@ -1,17 +1,41 @@
 - job:
     name: ironicclient-dsvm-functional
     parent: legacy-dsvm-base
-    run: playbooks/legacy/ironicclient-dsvm-functional/run.yaml
-    post-run: playbooks/legacy/ironicclient-dsvm-functional/post.yaml
-    timeout: 4800
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^releasenotes/.*$
     required-projects:
       - openstack-infra/devstack-gate
       - openstack/ironic
       - openstack/python-ironicclient
+    run: playbooks/legacy/ironicclient-dsvm-functional/run.yaml
+    post-run: playbooks/legacy/ironicclient-dsvm-functional/post.yaml
+    timeout: 4800
 
 - job:
     name: ironicclient-tempest-dsvm-src
-    parent: legacy-ironic-dsvm-base
+    # NOTE: We do not use 'legacy-ironic-dsvm-base' as it is simpler and
+    # less confusing to define it all here and use 'legacy-dsvm-base'.
+    parent: legacy-dsvm-base
+    irrelevant-files:
+      - ^test-requirements.txt$
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^ironicclient/tests/.*$
+      - ^releasenotes/.*$
+      - ^setup.cfg$
+      - ^tools/.*$
+      - ^tox.ini$
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/ironic
+      - openstack/ironic-lib
+      - openstack/ironic-python-agent
+      - openstack/pyghmi
+      - openstack/python-ironicclient
+      - openstack/tempest
+      - openstack/virtualbmc
     run: playbooks/legacy/ironicclient-tempest-dsvm-src/run.yaml
     post-run: playbooks/legacy/ironicclient-tempest-dsvm-src/post.yaml
     timeout: 10800
