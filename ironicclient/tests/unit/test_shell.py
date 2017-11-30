@@ -382,17 +382,6 @@ class TestCase(testtools.TestCase):
             self.useFixture(
                 fixtures.EnvironmentVariable(key, fake_env.get(key)))
 
-    # required for testing with Python 2.6
-    def assertRegexpMatches(self, text, expected_regexp, msg=None):
-        """Fail the test unless the text matches the regular expression."""
-        if isinstance(expected_regexp, six.string_types):
-            expected_regexp = re.compile(expected_regexp)
-        if not expected_regexp.search(text):
-            msg = msg or "Regexp didn't match"
-            msg = '%s: %r not found in %r' % (
-                msg, expected_regexp.pattern, text)
-            raise self.failureException(msg)
-
     def register_keystone_v2_token_fixture(self, request_mocker):
         v2_token = ks_fixture.V2Token()
         service = v2_token.add_service('baremetal')
@@ -479,7 +468,7 @@ class ShellTestNoMox(TestCase):
         ]
 
         for r in required:
-            self.assertRegexpMatches(event_list_text, r)
+            self.assertRegex(event_list_text, r)
 
 
 class ShellTestNoMoxV3(ShellTestNoMox):
