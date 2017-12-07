@@ -142,7 +142,7 @@ def do_volume_target_list(cc, args):
     '-t', '--type',
     metavar="<volume type>",
     required=True,
-    help=_("Type of the volume target, e.g. 'iscsi', 'fibre_channel', 'rbd'."))
+    help=_("Type of the volume target, e.g. 'iscsi', 'fibre_channel'."))
 @cliutils.arg(
     '-p', '--properties',
     metavar="<key=value>",

@@ -44,8 +44,8 @@ class CreateBaremetalVolumeTarget(command.ShowOne):
             dest='volume_type',
             metavar="<volume type>",
             required=True,
-            help=_("Type of the volume target, e.g. 'iscsi', 'fibre_channel', "
-                   "'rbd'."))
+            help=_("Type of the volume target, e.g. 'iscsi', "
+                   "'fibre_channel'."))
         parser.add_argument(
             '--property',
             dest='properties',
@@ -295,8 +295,8 @@ class SetBaremetalVolumeTarget(command.Command):
             '--type',
             dest='volume_type',
             metavar="<volume type>",
-            help=_("Type of the volume target, e.g. 'iscsi', 'fibre_channel', "
-                   "'rbd'."))
+            help=_("Type of the volume target, e.g. 'iscsi', "
+                   "'fibre_channel'."))
         parser.add_argument(
             '--property',
             dest='properties',
