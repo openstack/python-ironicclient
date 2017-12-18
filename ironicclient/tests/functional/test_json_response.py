@@ -108,7 +108,7 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
                 "type": "object",
                 "properties": {
                     "interface": {"type": ["string", "null"]},
-                    "result": {"type": "boolean"},
+                    "result": {"type": ["boolean", "null"]},
                     "reason": {"type": ["string", "null"]}}}
         }
         response = self.ironic('node-validate', flags='--json',
