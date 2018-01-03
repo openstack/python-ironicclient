@@ -200,6 +200,29 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         mock_save_data.assert_called_once_with(host=host, port=port,
                                                data=max_ver)
 
+    @mock.patch.object(filecache, 'save_data', autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_make_simple_request',
+                       autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_user_latest(
+            self, mock_pvh, mock_msr, mock_save_data):
+        # have to retry with simple get
+        mock_pvh.side_effect = iter([(None, None), ('1.1', '1.99')])
+        mock_conn = mock.MagicMock()
+        self.test_object.api_version_select_state = 'user'
+        self.test_object.os_ironic_api_version = 'latest'
+        result = self.test_object.negotiate_version(mock_conn, None)
+        self.assertEqual(http.LATEST_VERSION, result)
+        self.assertEqual('negotiated',
+                         self.test_object.api_version_select_state)
+        self.assertEqual(http.LATEST_VERSION,
+                         self.test_object.os_ironic_api_version)
+
+        self.assertTrue(mock_msr.called)
+        self.assertEqual(2, mock_pvh.call_count)
+        self.assertEqual(1, mock_save_data.call_count)
+
     def test_get_server(self):
         host = 'ironic-host'
         port = '6385'

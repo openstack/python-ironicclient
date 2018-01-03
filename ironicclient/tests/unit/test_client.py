@@ -59,6 +59,9 @@ class ClientTest(utils.BaseTestCase):
             region_name=kwargs.get('os_region_name'))
         if 'os_ironic_api_version' in kwargs:
             self.assertEqual(0, mock_retrieve_data.call_count)
+            self.assertEqual(kwargs['os_ironic_api_version'],
+                             client.current_api_version)
+            self.assertFalse(client.is_api_version_negotiated)
         else:
             mock_retrieve_data.assert_called_once_with(
                 host='localhost',

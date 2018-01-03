@@ -44,7 +44,8 @@ from ironicclient import exc
 #             http://specs.openstack.org/openstack/ironic-specs/specs/kilo/api-microversions.html # noqa
 #             for full details.
 DEFAULT_VER = '1.9'
-
+LAST_KNOWN_API_VERSION = 35
+LATEST_VERSION = '1.{}'.format(LAST_KNOWN_API_VERSION)
 
 LOG = logging.getLogger(__name__)
 USER_AGENT = 'python-ironicclient'
@@ -98,6 +99,17 @@ class VersionNegotiationMixin(object):
         param conn: A connection object
         param resp: The response object from http request
         """
+        def _query_server(conn):
+            if (self.os_ironic_api_version and
+                    self.os_ironic_api_version != 'latest'):
+                base_version = ("/v%s" %
+                                str(self.os_ironic_api_version).split('.')[0])
+            else:
+                base_version = API_VERSION
+            return self._make_simple_request(conn, 'GET', base_version)
+
+        if not resp:
+            resp = _query_server(conn)
         if self.api_version_select_state not in API_VERSION_SELECTED_STATES:
             raise RuntimeError(
                 _('Error: self.api_version_select_state should be one of the '
@@ -110,22 +122,30 @@ class VersionNegotiationMixin(object):
         # the supported version range
         if not max_ver:
             LOG.debug('No version header in response, requesting from server')
-            if self.os_ironic_api_version:
-                base_version = ("/v%s" %
-                                str(self.os_ironic_api_version).split('.')[0])
-            else:
-                base_version = API_VERSION
-            resp = self._make_simple_request(conn, 'GET', base_version)
+            resp = _query_server(conn)
             min_ver, max_ver = self._parse_version_headers(resp)
+        # Reset the maximum version that we permit
+        if StrictVersion(max_ver) > StrictVersion(LATEST_VERSION):
+            LOG.debug("Remote API version %(max_ver)s is greater than the "
+                      "version supported by ironicclient. Maximum available "
+                      "version is %(client_ver)s",
+                      {'max_ver': max_ver,
+                       'client_ver': LATEST_VERSION})
+            max_ver = LATEST_VERSION
+
         # If the user requested an explicit version or we have negotiated a
         # version and still failing then error now.  The server could
         # support the version requested but the requested operation may not
         # be supported by the requested version.
-        if self.api_version_select_state == 'user':
+        # TODO(TheJulia): We should break this method into several parts,
+        # such as a sanity check/error method.
+        if (self.api_version_select_state == 'user' and
+                self.os_ironic_api_version != 'latest'):
             raise exc.UnsupportedVersion(textwrap.fill(
                 _("Requested API version %(req)s is not supported by the "
-                  "server or the requested operation is not supported by the "
-                  "requested version.  Supported version range is %(min)s to "
+                  "server, client, or the requested operation is not "
+                  "supported by the requested version."
+                  "Supported version range is %(min)s to "
                   "%(max)s")
                 % {'req': self.os_ironic_api_version,
                    'min': min_ver, 'max': max_ver}))
@@ -137,8 +157,11 @@ class VersionNegotiationMixin(object):
                 % {'req': self.os_ironic_api_version,
                    'min': min_ver, 'max': max_ver}))
 
-        negotiated_ver = str(min(StrictVersion(self.os_ironic_api_version),
-                                 StrictVersion(max_ver)))
+        if self.os_ironic_api_version == 'latest':
+            negotiated_ver = max_ver
+        else:
+            negotiated_ver = str(min(StrictVersion(self.os_ironic_api_version),
+                                     StrictVersion(max_ver)))
         if StrictVersion(negotiated_ver) < StrictVersion(min_ver):
             negotiated_ver = min_ver
         # server handles microversions, but doesn't support
@@ -310,6 +333,13 @@ class HTTPClient(VersionNegotiationMixin):
         Wrapper around request.Session.request to handle tasks such
         as setting headers and error handling.
         """
+        # NOTE(TheJulia): self.os_ironic_api_version is reset in
+        # the self.negotiate_version() call if negotiation occurs.
+        if (self.os_ironic_api_version and
+                self.api_version_select_state == 'user' and
+                self.os_ironic_api_version == 'latest'):
+            self.negotiate_version(self.session, None)
+
         # Copy the kwargs so we can reuse the original in case of redirects
         kwargs['headers'] = copy.deepcopy(kwargs.get('headers', {}))
         kwargs['headers'].setdefault('User-Agent', USER_AGENT)
@@ -517,6 +547,14 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
 
     @with_retries
     def _http_request(self, url, method, **kwargs):
+
+        # NOTE(TheJulia): self.os_ironic_api_version is reset in
+        # the self.negotiate_version() call if negotiation occurs.
+        if (self.os_ironic_api_version and
+                self.api_version_select_state == 'user' and
+                self.os_ironic_api_version == 'latest'):
+            self.negotiate_version(self.session, None)
+
         kwargs.setdefault('user_agent', USER_AGENT)
         kwargs.setdefault('auth', self.auth)
         if isinstance(self.endpoint_override, six.string_types):

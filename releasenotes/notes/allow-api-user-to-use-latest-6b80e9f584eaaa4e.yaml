@@ -1,0 +1,26 @@
+---
+features:
+  - |
+    Allows a python API user to pass ``latest`` to the client creation request
+    for the ``os_ironic_api_version`` parameter. The version utilized for REST
+    API requests will, as a result, be the highest available version
+    understood by both the ironicclient library and the server.
+  - |
+    Adds base client properties to provide insight to a python API user of
+    what the current REST API version that will be utilized, and if API
+    version negotiation has occured.
+    These new properties are ``client.current_api_version`` and
+    ``client.is_api_version_negotiated`` respectively.
+  - |
+    Adds additional base client method to allow a python API user to trigger
+    version negotiation and return the negotiated version. This new method is
+    ``client.negotiate_api_version()``.
+other:
+  - |
+    The maximum supported version supported for negotiation is now defined
+    in the ``common/http.py`` file. Any new feature added to the API client
+    library must increment this version.
+  - |
+    The maximum known version supported by the ``OpenStackClient`` plugin is
+    now defined by the maximum supported version for API negotiation as
+    defined in the ``common/http.py`` file.
