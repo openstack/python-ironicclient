@@ -58,6 +58,9 @@ class ClientTest(utils.BaseTestCase):
             interface=kwargs.get('os_endpoint_type') or 'publicURL',
             region_name=kwargs.get('os_region_name'))
         if 'os_ironic_api_version' in kwargs:
+            # NOTE(TheJulia): This does not test the negotiation logic
+            # as a request must be triggered in order for any verison
+            # negotiation actions to occur.
             self.assertEqual(0, mock_retrieve_data.call_count)
             self.assertEqual(kwargs['os_ironic_api_version'],
                              client.current_api_version)
@@ -132,6 +135,17 @@ class ClientTest(utils.BaseTestCase):
             'os_auth_url': 'http://localhost:35357/v2.0',
             'os_auth_token': '',
             'os_ironic_api_version': "latest",
+        }
+        self._test_get_client(**kwargs)
+
+    def test_get_client_with_api_version_list(self):
+        kwargs = {
+            'os_project_name': 'PROJECT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': 'http://localhost:35357/v2.0',
+            'os_auth_token': '',
+            'os_ironic_api_version': ['1.1', '1.99'],
         }
         self._test_get_client(**kwargs)
 

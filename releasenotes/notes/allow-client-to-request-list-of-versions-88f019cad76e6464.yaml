@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    The ``os_ironic_api_version`` parameter now accepts a list of REST
+    API micro-versions to attempt to negotiate with the remote server.
+    The highest available microversion in the list will be negotiated
+    for the remaining lifetime of the client session.

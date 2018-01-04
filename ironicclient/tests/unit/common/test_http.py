@@ -223,6 +223,101 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         self.assertEqual(2, mock_pvh.call_count)
         self.assertEqual(1, mock_save_data.call_count)
 
+    @mock.patch.object(filecache, 'save_data', autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_make_simple_request',
+                       autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_user_list(
+            self, mock_pvh, mock_msr, mock_save_data):
+        # have to retry with simple get
+        mock_pvh.side_effect = iter([(None, None), ('1.1', '1.26')])
+        mock_conn = mock.MagicMock()
+        self.test_object.api_version_select_state = 'user'
+        self.test_object.os_ironic_api_version = ['1.1', '1.6', '1.25',
+                                                  '1.26', '1.26.1', '1.27',
+                                                  '1.30']
+        result = self.test_object.negotiate_version(mock_conn, self.response)
+        self.assertEqual('1.26', result)
+        self.assertEqual('negotiated',
+                         self.test_object.api_version_select_state)
+        self.assertEqual('1.26',
+                         self.test_object.os_ironic_api_version)
+
+        self.assertTrue(mock_msr.called)
+        self.assertEqual(2, mock_pvh.call_count)
+        self.assertEqual(1, mock_save_data.call_count)
+
+    @mock.patch.object(filecache, 'save_data', autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_make_simple_request',
+                       autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_user_list_fails_nomatch(
+            self, mock_pvh, mock_msr, mock_save_data):
+        # have to retry with simple get
+        mock_pvh.side_effect = iter([(None, None), ('1.2', '1.26')])
+        mock_conn = mock.MagicMock()
+        self.test_object.api_version_select_state = 'user'
+        self.test_object.os_ironic_api_version = ['1.39', '1.1']
+        self.assertRaises(
+            exc.UnsupportedVersion,
+            self.test_object.negotiate_version,
+            mock_conn, self.response)
+        self.assertEqual('user',
+                         self.test_object.api_version_select_state)
+        self.assertEqual(['1.39', '1.1'],
+                         self.test_object.os_ironic_api_version)
+        self.assertEqual(2, mock_pvh.call_count)
+        self.assertEqual(0, mock_save_data.call_count)
+
+    @mock.patch.object(filecache, 'save_data', autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_make_simple_request',
+                       autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_user_list_single_value(
+            self, mock_pvh, mock_msr, mock_save_data):
+        # have to retry with simple get
+        mock_pvh.side_effect = iter([(None, None), ('1.1', '1.26')])
+        mock_conn = mock.MagicMock()
+        self.test_object.api_version_select_state = 'user'
+        # NOTE(TheJulia): Lets test this value explicitly because the
+        # minor number is actually the same.
+        self.test_object.os_ironic_api_version = ['1.01']
+        result = self.test_object.negotiate_version(mock_conn, None)
+        self.assertEqual('1.1', result)
+        self.assertEqual('negotiated',
+                         self.test_object.api_version_select_state)
+        self.assertEqual('1.1',
+                         self.test_object.os_ironic_api_version)
+        self.assertTrue(mock_msr.called)
+        self.assertEqual(2, mock_pvh.call_count)
+        self.assertEqual(1, mock_save_data.call_count)
+
+    @mock.patch.object(filecache, 'save_data', autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_make_simple_request',
+                       autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_server_user_list_fails_latest(
+            self, mock_pvh, mock_msr, mock_save_data):
+        # have to retry with simple get
+        mock_pvh.side_effect = iter([(None, None), ('1.1', '1.2')])
+        mock_conn = mock.MagicMock()
+        self.test_object.api_version_select_state = 'user'
+        self.test_object.os_ironic_api_version = ['1.01', 'latest']
+        self.assertRaises(
+            ValueError,
+            self.test_object.negotiate_version,
+            mock_conn, self.response)
+        self.assertEqual('user',
+                         self.test_object.api_version_select_state)
+        self.assertEqual(['1.01', 'latest'],
+                         self.test_object.os_ironic_api_version)
+        self.assertEqual(2, mock_pvh.call_count)
+        self.assertEqual(0, mock_save_data.call_count)
+
     def test_get_server(self):
         host = 'ironic-host'
         port = '6385'

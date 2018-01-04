@@ -101,6 +101,7 @@ class VersionNegotiationMixin(object):
         """
         def _query_server(conn):
             if (self.os_ironic_api_version and
+                    not isinstance(self.os_ironic_api_version, list) and
                     self.os_ironic_api_version != 'latest'):
                 base_version = ("/v%s" %
                                 str(self.os_ironic_api_version).split('.')[0])
@@ -140,7 +141,8 @@ class VersionNegotiationMixin(object):
         # TODO(TheJulia): We should break this method into several parts,
         # such as a sanity check/error method.
         if (self.api_version_select_state == 'user' and
-                self.os_ironic_api_version != 'latest'):
+                self.os_ironic_api_version != 'latest' and
+                not isinstance(self.os_ironic_api_version, list)):
             raise exc.UnsupportedVersion(textwrap.fill(
                 _("Requested API version %(req)s is not supported by the "
                   "server, client, or the requested operation is not "
@@ -157,11 +159,45 @@ class VersionNegotiationMixin(object):
                 % {'req': self.os_ironic_api_version,
                    'min': min_ver, 'max': max_ver}))
 
-        if self.os_ironic_api_version == 'latest':
-            negotiated_ver = max_ver
+        if isinstance(self.os_ironic_api_version, six.string_types):
+            if self.os_ironic_api_version == 'latest':
+                negotiated_ver = max_ver
+            else:
+                negotiated_ver = str(
+                    min(StrictVersion(self.os_ironic_api_version),
+                        StrictVersion(max_ver)))
+
+        elif isinstance(self.os_ironic_api_version, list):
+            if 'latest' in self.os_ironic_api_version:
+                raise ValueError(textwrap.fill(
+                    _("The 'latest' API version can not be requested "
+                      "in a list of versions. Please explicitly request "
+                      "'latest' or request only versios between "
+                      "%(min)s to %(max)s")
+                    % {'min': min_ver, 'max': max_ver}))
+
+            versions = []
+            for version in self.os_ironic_api_version:
+                if min_ver <= StrictVersion(version) <= max_ver:
+                    versions.append(StrictVersion(version))
+            if versions:
+                negotiated_ver = str(max(versions))
+            else:
+                raise exc.UnsupportedVersion(textwrap.fill(
+                    _("Requested API version specified and the requested "
+                      "operation was not supported by the client's "
+                      "requested API version %(req)s.  Supported "
+                      "version range is: %(min)s to %(max)s")
+                    % {'req': self.os_ironic_api_version,
+                       'min': min_ver, 'max': max_ver}))
+
         else:
-            negotiated_ver = str(min(StrictVersion(self.os_ironic_api_version),
-                                     StrictVersion(max_ver)))
+            raise ValueError(textwrap.fill(
+                _("Requested API version %(req)s type is unsupported. "
+                  "Valid types are Strings such as '1.1', 'latest' "
+                  "or a list of string values representing API versions.")
+                % {'req': self.os_ironic_api_version}))
+
         if StrictVersion(negotiated_ver) < StrictVersion(min_ver):
             negotiated_ver = min_ver
         # server handles microversions, but doesn't support
@@ -337,7 +373,8 @@ class HTTPClient(VersionNegotiationMixin):
         # the self.negotiate_version() call if negotiation occurs.
         if (self.os_ironic_api_version and
                 self.api_version_select_state == 'user' and
-                self.os_ironic_api_version == 'latest'):
+                (self.os_ironic_api_version == 'latest' or
+                 isinstance(self.os_ironic_api_version, list))):
             self.negotiate_version(self.session, None)
 
         # Copy the kwargs so we can reuse the original in case of redirects
@@ -552,7 +589,8 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         # the self.negotiate_version() call if negotiation occurs.
         if (self.os_ironic_api_version and
                 self.api_version_select_state == 'user' and
-                self.os_ironic_api_version == 'latest'):
+                (self.os_ironic_api_version == 'latest' or
+                 isinstance(self.os_ironic_api_version, list))):
             self.negotiate_version(self.session, None)
 
         kwargs.setdefault('user_agent', USER_AGENT)
