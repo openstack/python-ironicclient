@@ -45,9 +45,9 @@ class CreateBaremetalVolumeConnector(command.ShowOne):
             dest='type',
             metavar="<type>",
             required=True,
-            choices=('iqn', 'ip', 'mac', 'wwnn', 'wwpn'),
+            choices=('iqn', 'ip', 'mac', 'wwnn', 'wwpn', 'port', 'portgroup'),
             help=_("Type of the volume connector. Can be 'iqn', 'ip', 'mac', "
-                   "'wwnn', 'wwpn'."))
+                   "'wwnn', 'wwpn', 'port', 'portgroup'."))
         parser.add_argument(
             '--connector-id',
             dest='connector_id',
@@ -279,9 +279,9 @@ class SetBaremetalVolumeConnector(command.Command):
             '--type',
             dest='type',
             metavar="<type>",
-            choices=('iqn', 'ip', 'mac', 'wwnn', 'wwpn'),
+            choices=('iqn', 'ip', 'mac', 'wwnn', 'wwpn', 'port', 'portgroup'),
             help=_("Type of the volume connector. Can be 'iqn', 'ip', 'mac', "
-                   "'wwnn', 'wwpn'."))
+                   "'wwnn', 'wwpn', 'port', 'portgroup'."))
         parser.add_argument(
             '--connector-id',
             dest='connector_id',
