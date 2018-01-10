@@ -103,6 +103,7 @@ NODE_VENDOR_PASSTHRU_METHOD = {"heartbeat": {"attach": "false",
                                              "async": "true"}}
 
 VIFS = {'vifs': [{'id': 'aaa-aaa'}]}
+TRAITS = {'traits': ['CUSTOM_FOO', 'CUSTOM_BAR']}
 
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['uuid']
@@ -447,6 +448,32 @@ fake_responses = {
         'GET': (
             {},
             VIFS,
+        ),
+    },
+    '/v1/nodes/%s/traits' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            TRAITS,
+        ),
+        'PUT': (
+            {},
+            None,
+        ),
+        'DELETE': (
+            {},
+            None,
+        ),
+    },
+    '/v1/nodes/%s/traits/CUSTOM_FOO' % NODE1['uuid']:
+    {
+        'PUT': (
+            {},
+            None,
+        ),
+        'DELETE': (
+            {},
+            None,
         ),
     }
 }
@@ -1641,3 +1668,49 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(4, mock_get.call_count)
         mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
         self.assertEqual(3, mock_sleep.call_count)
+
+    def test_node_get_traits(self):
+        traits = self.mgr.get_traits(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/traits' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(TRAITS['traits'], traits)
+
+    def test_node_add_trait(self):
+        trait = 'CUSTOM_FOO'
+        resp = self.mgr.add_trait(NODE1['uuid'], trait)
+        expect = [
+            ('PUT', '/v1/nodes/%s/traits/%s' % (NODE1['uuid'], trait),
+                {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(resp)
+
+    def test_node_set_traits(self):
+        traits = ['CUSTOM_FOO', 'CUSTOM_BAR']
+        resp = self.mgr.set_traits(NODE1['uuid'], traits)
+        expect = [
+            ('PUT', '/v1/nodes/%s/traits' % NODE1['uuid'],
+                {}, {'traits': traits}),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(resp)
+
+    def test_node_remove_all_traits(self):
+        resp = self.mgr.remove_all_traits(NODE1['uuid'])
+        expect = [
+            ('DELETE', '/v1/nodes/%s/traits' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(resp)
+
+    def test_node_remove_trait(self):
+        trait = 'CUSTOM_FOO'
+        resp = self.mgr.remove_trait(NODE1['uuid'], trait)
+        expect = [
+            ('DELETE', '/v1/nodes/%s/traits/%s' % (NODE1['uuid'], trait),
+                {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(resp)

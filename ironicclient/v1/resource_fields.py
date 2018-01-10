@@ -87,6 +87,7 @@ class Resource(object):
         'target_power_state': 'Target Power State',
         'target_provision_state': 'Target Provision State',
         'target_raid_config': 'Target RAID configuration',
+        'traits': 'Traits',
         'type': 'Type',
         'updated_at': 'Updated At',
         'uuid': 'UUID',
@@ -210,6 +211,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'target_power_state',
      'target_provision_state',
      'target_raid_config',
+     'traits',
      'updated_at',
      'inspection_finished_at',
      'inspection_started_at',
@@ -239,6 +241,7 @@ NODE_DETAILED_RESOURCE = Resource(
         'properties',
         'raid_config',
         'target_raid_config',
+        'traits',
     ])
 NODE_RESOURCE = Resource(
     ['uuid',
@@ -317,6 +320,10 @@ PORTGROUP_RESOURCE = Resource(
 # VIFs
 VIF_RESOURCE = Resource(
     ['id'],
+)
+
+TRAIT_RESOURCE = Resource(
+    ['traits'],
 )
 
 # Drivers

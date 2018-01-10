@@ -553,6 +553,53 @@ class NodeManager(base.CreateManager):
         path = "%s/vendor_passthru/methods" % node_ident
         return self._get_as_dict(path)
 
+    def get_traits(self, node_ident):
+        """Get traits for a node.
+
+        :param node_ident: node UUID or name.
+        """
+        path = "%s/traits" % node_ident
+        return self._list_primitives(self._path(path), 'traits')
+
+    def add_trait(self, node_ident, trait):
+        """Add a trait to a node.
+
+        :param node_ident: node UUID or name.
+        :param trait: trait to add to the node.
+        """
+        path = "%s/traits/%s" % (node_ident, trait)
+        return self.update(path, None, http_method='PUT')
+
+    def set_traits(self, node_ident, traits):
+        """Set traits for a node.
+
+        Removes any existing traits and adds the traits passed in to this
+        method.
+
+        :param node_ident: node UUID or name.
+        :param traits: list of traits to add to the node.
+        """
+        path = "%s/traits" % node_ident
+        body = {'traits': traits}
+        return self.update(path, body, http_method='PUT')
+
+    def remove_trait(self, node_ident, trait):
+        """Remove a trait from a node.
+
+        :param node_ident: node UUID or name.
+        :param trait: trait to remove from the node.
+        """
+        path = "%s/traits/%s" % (node_ident, trait)
+        return self.delete(path)
+
+    def remove_all_traits(self, node_ident):
+        """Remove all traits from a node.
+
+        :param node_ident: node UUID or name.
+        """
+        path = "%s/traits" % node_ident
+        return self.delete(path)
+
     def wait_for_provision_state(self, node_ident, expected_state,
                                  timeout=0,
                                  poll_interval=_DEFAULT_POLL_INTERVAL,

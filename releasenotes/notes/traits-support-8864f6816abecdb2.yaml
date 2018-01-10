@@ -1,0 +1,20 @@
+---
+features:
+  - |
+    Adds support for reading and modifying traits for a node, including adding
+    traits to the detailed output of a node. This is available starting
+    with Bare Metal API version 1.37.
+
+    The new commands are:
+
+    * ``openstack baremetal node trait list <node>``
+    * ``openstack baremetal node add trait <node> <trait> [...]``
+    * ``openstack baremetal node remove trait <node> [<trait> [...]] [--all]``
+
+    It also adds the following methods to the Python SDK:
+
+    * ``NodeManager.get_traits``
+    * ``NodeManager.add_trait``
+    * ``NodeManager.set_traits``
+    * ``NodeManager.remove_trait``
+    * ``NodeManager.remove_all_traits``

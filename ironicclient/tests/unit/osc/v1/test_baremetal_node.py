@@ -591,7 +591,7 @@ class TestBaremetalList(TestBaremetal):
                    'Current RAID configuration', 'Reservation',
                    'Resource Class',
                    'Target Power State', 'Target Provision State',
-                   'Target RAID configuration',
+                   'Target RAID configuration', 'Traits',
                    'Updated At', 'Inspection Finished At',
                    'Inspection Started At', 'UUID', 'Name',
                    'Boot Interface', 'Console Interface',
@@ -617,6 +617,7 @@ class TestBaremetalList(TestBaremetal):
             baremetal_fakes.baremetal_power_state,
             '',
             baremetal_fakes.baremetal_provision_state,
+            '',
             '',
             '',
             '',
@@ -2663,3 +2664,186 @@ class TestBaremetalInject(TestBaremetal):
 
         self.baremetal_mock.node.inject_nmi.assert_called_once_with(
             'node_uuid')
+
+
+class TestListTraits(TestBaremetal):
+    def setUp(self):
+        super(TestListTraits, self).setUp()
+
+        self.baremetal_mock.node.get_traits.return_value = (
+            baremetal_fakes.TRAITS)
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ListTraitsBaremetalNode(self.app, None)
+
+    def test_baremetal_list_traits(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.get_traits.assert_called_once_with(
+            'node_uuid')
+
+
+class TestAddTrait(TestBaremetal):
+    def setUp(self):
+        super(TestAddTrait, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.AddTraitBaremetalNode(self.app, None)
+
+    def test_baremetal_add_trait(self):
+        arglist = ['node_uuid', 'CUSTOM_FOO']
+        verifylist = [('node', 'node_uuid'), ('traits', ['CUSTOM_FOO'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.add_trait.assert_called_once_with(
+            'node_uuid', 'CUSTOM_FOO')
+
+    def test_baremetal_add_traits_multiple(self):
+        arglist = ['node_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
+        verifylist = [('node', 'node_uuid'),
+                      ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        expected_calls = [
+            mock.call('node_uuid', 'CUSTOM_FOO'),
+            mock.call('node_uuid', 'CUSTOM_BAR'),
+        ]
+        self.assertEqual(expected_calls,
+                         self.baremetal_mock.node.add_trait.call_args_list)
+
+    def test_baremetal_add_traits_multiple_with_failure(self):
+        arglist = ['node_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
+        verifylist = [('node', 'node_uuid'),
+                      ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
+
+        self.baremetal_mock.node.add_trait.side_effect = [
+            '', exc.ClientException]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.assertRaises(exc.ClientException,
+                          self.cmd.take_action,
+                          parsed_args)
+
+        expected_calls = [
+            mock.call('node_uuid', 'CUSTOM_FOO'),
+            mock.call('node_uuid', 'CUSTOM_BAR'),
+        ]
+        self.assertEqual(expected_calls,
+                         self.baremetal_mock.node.add_trait.call_args_list)
+
+    def test_baremetal_add_traits_no_traits(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd,
+                          arglist,
+                          verifylist)
+
+
+class TestRemoveTrait(TestBaremetal):
+    def setUp(self):
+        super(TestRemoveTrait, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.RemoveTraitBaremetalNode(self.app, None)
+
+    def test_baremetal_remove_trait(self):
+        arglist = ['node_uuid', 'CUSTOM_FOO']
+        verifylist = [('node', 'node_uuid'), ('traits', ['CUSTOM_FOO'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.remove_trait.assert_called_once_with(
+            'node_uuid', 'CUSTOM_FOO')
+
+    def test_baremetal_remove_trait_multiple(self):
+        arglist = ['node_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
+        verifylist = [('node', 'node_uuid'),
+                      ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        expected_calls = [
+            mock.call('node_uuid', 'CUSTOM_FOO'),
+            mock.call('node_uuid', 'CUSTOM_BAR'),
+        ]
+        self.assertEqual(expected_calls,
+                         self.baremetal_mock.node.remove_trait.call_args_list)
+
+    def test_baremetal_remove_trait_multiple_with_failure(self):
+        arglist = ['node_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
+        verifylist = [('node', 'node_uuid'),
+                      ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
+
+        self.baremetal_mock.node.remove_trait.side_effect = [
+            '', exc.ClientException]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.assertRaises(exc.ClientException,
+                          self.cmd.take_action,
+                          parsed_args)
+
+        expected_calls = [
+            mock.call('node_uuid', 'CUSTOM_FOO'),
+            mock.call('node_uuid', 'CUSTOM_BAR'),
+        ]
+        self.assertEqual(expected_calls,
+                         self.baremetal_mock.node.remove_trait.call_args_list)
+
+    def test_baremetal_remove_trait_all(self):
+        arglist = ['node_uuid', '--all']
+        verifylist = [('node', 'node_uuid'), ('remove_all', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.remove_all_traits.assert_called_once_with(
+            'node_uuid')
+
+    def test_baremetal_remove_trait_traits_and_all(self):
+        arglist = ['node_uuid', 'CUSTOM_FOO', '--all']
+        verifylist = [('node', 'node_uuid'),
+                      ('traits', ['CUSTOM_FOO']),
+                      ('remove_all', True)]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd,
+                          arglist,
+                          verifylist)
+
+        self.baremetal_mock.node.remove_all_traits.assert_not_called()
+        self.baremetal_mock.node.remove_trait.assert_not_called()
+
+    def test_baremetal_remove_traits_no_traits_no_all(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd,
+                          arglist,
+                          verifylist)
+
+        self.baremetal_mock.node.remove_all_traits.assert_not_called()
+        self.baremetal_mock.node.remove_trait.assert_not_called()

@@ -65,6 +65,7 @@ class NodeShellTest(utils.BaseTestCase):
                'resource_class',
                'target_power_state',
                'target_provision_state',
+               'traits',
                'updated_at',
                'inspection_finished_at',
                'inspection_started_at',

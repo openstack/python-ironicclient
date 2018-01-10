@@ -137,6 +137,7 @@ PORTGROUP = {'uuid': baremetal_portgroup_uuid,
              }
 
 VIFS = {'vifs': [{'id': 'aaa-aa'}]}
+TRAITS = ['CUSTOM_FOO', 'CUSTOM_BAR']
 
 baremetal_volume_connector_uuid = 'vvv-cccccc-vvvv'
 baremetal_volume_connector_type = 'iqn'
