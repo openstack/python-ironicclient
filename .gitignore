@@ -16,6 +16,7 @@ releasenotes/build
 *.egg-info
 dist
 build
+.eggs
 eggs
 parts
 var
