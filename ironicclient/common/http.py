@@ -139,7 +139,7 @@ class VersionNegotiationMixin(object):
 
         negotiated_ver = str(min(StrictVersion(self.os_ironic_api_version),
                                  StrictVersion(max_ver)))
-        if negotiated_ver < min_ver:
+        if StrictVersion(negotiated_ver) < StrictVersion(min_ver):
             negotiated_ver = min_ver
         # server handles microversions, but doesn't support
         # the requested version, so try a negotiated version
