@@ -49,7 +49,7 @@ class Client(object):
                 if kwargs['os_ironic_api_version'] == 'latest':
                     raise ValueError(
                         "Invalid configuration defined. "
-                        "The os_ironic_api_versioncan not be set "
+                        "The os_ironic_api_version can not be set "
                         "to 'latest' while allow_api_version_downgrade "
                         "is set.")
                 # NOTE(dtantsur): here we allow the HTTP client to negotiate a
