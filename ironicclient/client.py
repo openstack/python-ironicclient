@@ -58,7 +58,8 @@ def get_client(api_version, os_auth_token=None, ironic_url=None,
     :param cert_file: path to cert file, deprecated in favour of os_cert
     :param os_key: path to key file
     :param key_file: path to key file, deprecated in favour of os_key
-    :param os_ironic_api_version: ironic API version to use
+    :param os_ironic_api_version: ironic API version to use or a list of
+        available API versions to attempt to negotiate.
     :param max_retries: Maximum number of retries in case of conflict error
     :param retry_interval: Amount of time (in seconds) between retries in case
         of conflict error
