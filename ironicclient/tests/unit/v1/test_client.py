@@ -49,6 +49,16 @@ class ClientTest(utils.BaseTestCase):
             os_ironic_api_version=os_ironic_api_version,
             api_version_select_state='default')
 
+    def test_client_user_api_version_latest_with_downgrade(self,
+                                                           http_client_mock):
+        endpoint = 'http://ironic:6385'
+        token = 'safe_token'
+        os_ironic_api_version = 'latest'
+
+        self.assertRaises(ValueError, client.Client, endpoint,
+                          token=token, allow_api_version_downgrade=True,
+                          os_ironic_api_version=os_ironic_api_version)
+
     @mock.patch.object(filecache, 'retrieve_data', autospec=True)
     def test_client_cache_api_version(self, cache_mock, http_client_mock):
         endpoint = 'http://ironic:6385'
@@ -93,3 +103,19 @@ class ClientTest(utils.BaseTestCase):
         self.assertIsInstance(cl.port, client.port.PortManager)
         self.assertIsInstance(cl.driver, client.driver.DriverManager)
         self.assertIsInstance(cl.chassis, client.chassis.ChassisManager)
+
+    def test_negotiate_api_version(self, http_client_mock):
+        endpoint = 'http://ironic:6385'
+        token = 'safe_token'
+        os_ironic_api_version = 'latest'
+        cl = client.Client(endpoint, token=token,
+                           os_ironic_api_version=os_ironic_api_version)
+
+        cl.negotiate_api_version()
+        http_client_mock.assert_called_once_with(
+            endpoint, api_version_select_state='user',
+            os_ironic_api_version='latest', token=token)
+        # TODO(TheJulia): We should verify that negotiate_version
+        # is being called in the client and returns a version,
+        # although mocking might need to be restrutured to
+        # properly achieve that.

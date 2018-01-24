@@ -41,7 +41,17 @@ class Client(object):
         """Initialize a new client for the Ironic v1 API."""
         allow_downgrade = kwargs.pop('allow_api_version_downgrade', False)
         if kwargs.get('os_ironic_api_version'):
+            # TODO(TheJulia): We should sanity check os_ironic_api_version
+            # against our maximum suported version, so the client fails
+            # immediately upon an unsupported version being provided.
+            # This logic should also likely live in common/http.py
             if allow_downgrade:
+                if kwargs['os_ironic_api_version'] == 'latest':
+                    raise ValueError(
+                        "Invalid configuration defined. "
+                        "The os_ironic_api_versioncan not be set "
+                        "to 'latest' while allow_api_version_downgrade "
+                        "is set.")
                 # NOTE(dtantsur): here we allow the HTTP client to negotiate a
                 # lower version if the requested is too high
                 kwargs['api_version_select_state'] = "default"
@@ -76,3 +86,26 @@ class Client(object):
             self.http_client)
         self.driver = driver.DriverManager(self.http_client)
         self.portgroup = portgroup.PortgroupManager(self.http_client)
+
+    @property
+    def current_api_version(self):
+        """Return the current API version in use.
+
+        This returns the version of the REST API that the API client
+        is presently set to request. This value may change as a result
+        of API version negotiation.
+        """
+        return self.http_client.os_ironic_api_version
+
+    @property
+    def is_api_version_negotiated(self):
+        """Returns True if microversion negotiation has occured."""
+        return self.http_client.api_version_select_state == 'negotiated'
+
+    def negotiate_api_version(self):
+        """Triggers negotiation with the remote API endpoint.
+
+        :returns: the negotiated API version.
+        """
+        return self.http_client.negotiate_version(
+            self.http_client.session, None)

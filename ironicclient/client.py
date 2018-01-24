@@ -66,6 +66,11 @@ def get_client(api_version, os_auth_token=None, ironic_url=None,
     :param ignored_kwargs: all the other params that are passed. Left for
         backwards compatibility. They are ignored.
     """
+    # TODO(TheJulia): At some point, we should consider possibly noting
+    # the "latest" flag for os_ironic_api_version to cause the client to
+    # auto-negotiate to the greatest available version, however we do not
+    # have the ability yet for a caller to cap the version, and will hold
+    # off doing so until then.
     os_service_type = os_service_type or 'baremetal'
     os_endpoint_type = os_endpoint_type or 'publicURL'
     project_id = (os_project_id or os_tenant_id)
