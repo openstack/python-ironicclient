@@ -1,5 +1,4 @@
 - project:
-    name: openstack/python-ironicclient
     check:
       jobs:
         - ironicclient-dsvm-functional
