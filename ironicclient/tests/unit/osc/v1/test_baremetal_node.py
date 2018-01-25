@@ -2682,10 +2682,12 @@ class TestListTraits(TestBaremetal):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        self.cmd.take_action(parsed_args)
+        columns, data = self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.get_traits.assert_called_once_with(
             'node_uuid')
+        self.assertEqual(('Traits',), columns)
+        self.assertEqual([[trait] for trait in baremetal_fakes.TRAITS], data)
 
 
 class TestAddTrait(TestBaremetal):
