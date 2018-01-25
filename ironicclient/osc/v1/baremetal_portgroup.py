@@ -379,7 +379,7 @@ class SetBaremetalPortGroup(command.Command):
                 'add', ["standalone_ports_supported=False"]))
         if parsed_args.mode:
             properties.extend(utils.args_array_to_patch(
-                'add', ["mode=%s" % parsed_args.mode]))
+                'add', ["mode=\"%s\"" % parsed_args.mode]))
 
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch(
