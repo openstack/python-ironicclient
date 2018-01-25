@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixes `bug 1745099
+    <https://bugs.launchpad.net/python-ironicclient/+bug/1745099>`_,
+    which prevented a port group's mode from being set to an integer value
+    via the ``openstack baremetal port group set`` command.
