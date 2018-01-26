@@ -5,6 +5,7 @@
         - ironicclient-dsvm-functional
         - ironicclient-tempest-dsvm-src
     gate:
+      queue: ironic
       jobs:
         - ironicclient-dsvm-functional
         - ironicclient-tempest-dsvm-src
