@@ -478,12 +478,13 @@ class NodeManager(base.CreateManager):
         return self.get(path)
 
     def set_provision_state(self, node_uuid, state, configdrive=None,
-                            cleansteps=None):
+                            cleansteps=None, rescuepassword=None):
         """Set the provision state for the node.
 
         :param node_uuid: The UUID or name of the node.
         :param state: The desired provision state. One of 'active', 'deleted',
-             'rebuild', 'inspect', 'provide', 'manage', 'clean', 'abort'.
+             'rebuild', 'inspect', 'provide', 'manage', 'clean', 'abort',
+             'rescue', 'unrescue'.
         :param configdrive: A gzipped, base64-encoded configuration drive
             string OR the path to the configuration drive file OR the path to
             a directory containing the config drive files. In case it's a
@@ -493,6 +494,10 @@ class NodeManager(base.CreateManager):
             dictionaries; each dictionary should have keys 'interface' and
             'step', and optional key 'args'. This must be specified (and is
             only valid) when setting provision-state to 'clean'.
+        :param rescuepassword: A string to be used as the login password
+            inside the rescue ramdisk once a node is rescued. This must be
+            specified (and is only valid) when setting provision-state to
+            'rescue'.
         :raises: InvalidAttribute if there was an error with the clean steps
         :returns: The status of the request
         """
@@ -509,6 +514,8 @@ class NodeManager(base.CreateManager):
             body['configdrive'] = configdrive
         elif cleansteps:
             body['clean_steps'] = cleansteps
+        elif rescuepassword:
+            body['rescue_password'] = rescuepassword
 
         return self.update(path, body, http_method='PUT')
 

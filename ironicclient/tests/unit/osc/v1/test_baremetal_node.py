@@ -55,7 +55,8 @@ class TestAdopt(TestBaremetal):
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'adopt', cleansteps=None, configdrive=None)
+            'node_uuid', 'adopt',
+            cleansteps=None, configdrive=None, rescuepassword=None)
 
     def test_adopt_no_wait(self):
         arglist = ['node_uuid']
@@ -1199,7 +1200,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'active',
-            cleansteps=None, configdrive='path/to/drive')
+            cleansteps=None, configdrive='path/to/drive', rescuepassword=None)
 
     def test_deploy_no_wait(self):
         arglist = ['node_uuid']
@@ -1379,6 +1380,80 @@ class TestCleanBaremetalProvisionState(TestBaremetal):
             poll_interval=10, timeout=0)
 
 
+class TestRescueBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestRescueBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.RescueBaremetalNode(self.app, None)
+
+    def test_rescue_baremetal_no_wait(self):
+        arglist = ['node_uuid',
+                   '--rescue-password', 'supersecret']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'rescue'),
+            ('rescue_password', 'supersecret'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'rescue', cleansteps=None, configdrive=None,
+            rescuepassword='supersecret')
+
+    def test_rescue_baremetal_provision_state_rescue_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15',
+                   '--rescue-password', 'supersecret']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'rescue'),
+            ('rescue_password', 'supersecret'),
+            ('wait_timeout', 15)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='rescue',
+            poll_interval=10, timeout=15)
+
+    def test_rescue_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait',
+                   '--rescue-password', 'supersecret']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'rescue'),
+            ('rescue_password', 'supersecret'),
+            ('wait_timeout', 0)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='rescue',
+            poll_interval=10, timeout=0)
+
+    def test_rescue_baremetal_no_rescue_password(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid'),
+                      ('provision_state', 'rescue')]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+
 class TestInspectBaremetalProvisionState(TestBaremetal):
     def setUp(self):
         super(TestInspectBaremetalProvisionState, self).setUp()
@@ -1515,7 +1590,8 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rebuild',
-            cleansteps=None, configdrive='path/to/drive')
+            cleansteps=None, configdrive='path/to/drive',
+            rescuepassword=None)
 
     def test_rebuild_no_wait(self):
         arglist = ['node_uuid']
@@ -1530,7 +1606,8 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rebuild',
-            cleansteps=None, configdrive=None)
+            cleansteps=None, configdrive=None,
+            rescuepassword=None)
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
@@ -1625,6 +1702,65 @@ class TestUndeployBaremetalProvisionState(TestBaremetal):
         test_node = self.baremetal_mock.node
         test_node.wait_for_provision_state.assert_called_once_with(
             'node_uuid', expected_state='available',
+            poll_interval=10, timeout=0)
+
+
+class TestUnrescueBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestUnrescueBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.UnrescueBaremetalNode(self.app, None)
+
+    def test_unrescue_no_wait(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'unrescue'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'unrescue', cleansteps=None, configdrive=None,
+            rescuepassword=None)
+
+    def test_unrescue_baremetal_provision_state_active_and_wait(self):
+        arglist = ['node_uuid',
+                   '--wait', '15']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'unrescue'),
+            ('wait_timeout', 15)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='active',
+            poll_interval=10, timeout=15)
+
+    def test_unrescue_baremetal_provision_state_default_wait(self):
+        arglist = ['node_uuid',
+                   '--wait']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'unrescue'),
+            ('wait_timeout', 0)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        test_node = self.baremetal_mock.node
+        test_node.wait_for_provision_state.assert_called_once_with(
+            'node_uuid', expected_state='active',
             poll_interval=10, timeout=0)
 
 
