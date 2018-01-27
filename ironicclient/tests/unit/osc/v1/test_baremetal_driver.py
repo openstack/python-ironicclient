@@ -96,6 +96,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
             'Default Network Interface',
             'Default Power Interface',
             'Default RAID Interface',
+            'Default Rescue Interface',
             'Default Storage Interface',
             'Default Vendor Interface',
             'Enabled Boot Interfaces',
@@ -106,6 +107,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
             'Enabled Network Interfaces',
             'Enabled Power Interfaces',
             'Enabled RAID Interfaces',
+            'Enabled Rescue Interfaces',
             'Enabled Storage Interfaces',
             'Enabled Vendor Interfaces'
         )
@@ -123,6 +125,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
             baremetal_fakes.baremetal_driver_default_network_if,
             baremetal_fakes.baremetal_driver_default_power_if,
             baremetal_fakes.baremetal_driver_default_raid_if,
+            baremetal_fakes.baremetal_driver_default_rescue_if,
             baremetal_fakes.baremetal_driver_default_storage_if,
             baremetal_fakes.baremetal_driver_default_vendor_if,
             ', '.join(baremetal_fakes.baremetal_driver_enabled_boot_ifs),
@@ -133,6 +136,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
             ', '.join(baremetal_fakes.baremetal_driver_enabled_network_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_enabled_power_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_enabled_raid_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_rescue_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_enabled_storage_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_enabled_vendor_ifs),
         ),)
@@ -361,13 +365,15 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
                    'default_deploy_interface', 'default_inspect_interface',
                    'default_management_interface', 'default_network_interface',
                    'default_power_interface', 'default_raid_interface',
-                   'default_storage_interface', 'default_vendor_interface',
+                   'default_rescue_interface', 'default_storage_interface',
+                   'default_vendor_interface',
                    'enabled_boot_interfaces', 'enabled_console_interfaces',
                    'enabled_deploy_interfaces', 'enabled_inspect_interfaces',
                    'enabled_management_interfaces',
                    'enabled_network_interfaces', 'enabled_power_interfaces',
-                   'enabled_raid_interfaces', 'enabled_storage_interfaces',
-                   'enabled_vendor_interfaces', 'hosts', 'name', 'type')
+                   'enabled_raid_interfaces', 'enabled_rescue_interfaces',
+                   'enabled_storage_interfaces', 'enabled_vendor_interfaces',
+                   'hosts', 'name', 'type')
         self.assertEqual(collist, columns)
 
         datalist = (
@@ -379,6 +385,7 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
             baremetal_fakes.baremetal_driver_default_network_if,
             baremetal_fakes.baremetal_driver_default_power_if,
             baremetal_fakes.baremetal_driver_default_raid_if,
+            baremetal_fakes.baremetal_driver_default_rescue_if,
             baremetal_fakes.baremetal_driver_default_storage_if,
             baremetal_fakes.baremetal_driver_default_vendor_if,
             ', '.join(baremetal_fakes.baremetal_driver_enabled_boot_ifs),
@@ -389,6 +396,7 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
             ', '.join(baremetal_fakes.baremetal_driver_enabled_network_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_enabled_power_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_enabled_raid_ifs),
+            ', '.join(baremetal_fakes.baremetal_driver_enabled_rescue_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_enabled_storage_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_enabled_vendor_ifs),
             ', '.join(baremetal_fakes.baremetal_driver_hosts),
