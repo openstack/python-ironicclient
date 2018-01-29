@@ -478,7 +478,7 @@ class NodeManager(base.CreateManager):
         return self.get(path)
 
     def set_provision_state(self, node_uuid, state, configdrive=None,
-                            cleansteps=None, rescuepassword=None):
+                            cleansteps=None, rescue_password=None):
         """Set the provision state for the node.
 
         :param node_uuid: The UUID or name of the node.
@@ -494,10 +494,9 @@ class NodeManager(base.CreateManager):
             dictionaries; each dictionary should have keys 'interface' and
             'step', and optional key 'args'. This must be specified (and is
             only valid) when setting provision-state to 'clean'.
-        :param rescuepassword: A string to be used as the login password
+        :param rescue_password: A string to be used as the login password
             inside the rescue ramdisk once a node is rescued. This must be
-            specified (and is only valid) when setting provision-state to
-            'rescue'.
+            specified (and is only valid) when setting 'state' to 'rescue'.
         :raises: InvalidAttribute if there was an error with the clean steps
         :returns: The status of the request
         """
@@ -514,8 +513,8 @@ class NodeManager(base.CreateManager):
             body['configdrive'] = configdrive
         elif cleansteps:
             body['clean_steps'] = cleansteps
-        elif rescuepassword:
-            body['rescue_password'] = rescuepassword
+        elif rescue_password:
+            body['rescue_password'] = rescue_password
 
         return self.update(path, body, http_method='PUT')
 

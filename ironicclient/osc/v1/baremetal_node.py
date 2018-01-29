@@ -74,7 +74,7 @@ class ProvisionStateBaremetalNode(command.Command):
             parsed_args.provision_state,
             configdrive=config_drive,
             cleansteps=clean_steps,
-            rescuepassword=rescue_password)
+            rescue_password=rescue_password)
 
 
 class ProvisionStateWithWait(ProvisionStateBaremetalNode):
@@ -949,7 +949,7 @@ class RescueBaremetalNode(ProvisionStateWithWait):
             required=True,
             default=None,
             help=("The password that will be used to login to the rescue "
-                  "ramdisk. The value should be a string."))
+                  "ramdisk. The value should be a non-empty string."))
         return parser
 
 

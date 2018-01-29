@@ -56,7 +56,7 @@ class TestAdopt(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'adopt',
-            cleansteps=None, configdrive=None, rescuepassword=None)
+            cleansteps=None, configdrive=None, rescue_password=None)
 
     def test_adopt_no_wait(self):
         arglist = ['node_uuid']
@@ -1207,7 +1207,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'active',
-            cleansteps=None, configdrive='path/to/drive', rescuepassword=None)
+            cleansteps=None, configdrive='path/to/drive', rescue_password=None)
 
     def test_deploy_no_wait(self):
         arglist = ['node_uuid']
@@ -1409,7 +1409,7 @@ class TestRescueBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rescue', cleansteps=None, configdrive=None,
-            rescuepassword='supersecret')
+            rescue_password='supersecret')
 
     def test_rescue_baremetal_provision_state_rescue_and_wait(self):
         arglist = ['node_uuid',
@@ -1598,7 +1598,7 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rebuild',
             cleansteps=None, configdrive='path/to/drive',
-            rescuepassword=None)
+            rescue_password=None)
 
     def test_rebuild_no_wait(self):
         arglist = ['node_uuid']
@@ -1614,7 +1614,7 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rebuild',
             cleansteps=None, configdrive=None,
-            rescuepassword=None)
+            rescue_password=None)
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
@@ -1732,7 +1732,7 @@ class TestUnrescueBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'unrescue', cleansteps=None, configdrive=None,
-            rescuepassword=None)
+            rescue_password=None)
 
     def test_unrescue_baremetal_provision_state_active_and_wait(self):
         arglist = ['node_uuid',

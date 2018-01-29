@@ -1352,12 +1352,12 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_rescuepassword(self):
-        rescuepassword = 'supersecret'
+    def test_node_set_provision_state_with_rescue_password(self):
+        rescue_password = 'supersecret'
         target_state = 'rescue'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
-                                     rescuepassword=rescuepassword)
-        body = {'target': target_state, 'rescue_password': rescuepassword}
+                                     rescue_password=rescue_password)
+        body = {'target': target_state, 'rescue_password': rescue_password}
         expect = [
             ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
         ]
