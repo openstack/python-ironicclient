@@ -15,7 +15,6 @@
 
 import copy
 from distutils.version import StrictVersion
-import functools
 import hashlib
 import logging
 import os
@@ -234,7 +233,7 @@ _RETRY_EXCEPTIONS = (exc.Conflict, exc.ServiceUnavailable,
 
 def with_retries(func):
     """Wrapper for _http_request adding support for retries."""
-    @functools.wraps(func)
+    @six.wraps(func)
     def wrapper(self, url, method, **kwargs):
         if self.conflict_max_retries is None:
             self.conflict_max_retries = DEFAULT_MAX_RETRIES

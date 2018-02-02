@@ -10,7 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import functools
 import json
 
 import jsonschema
@@ -114,7 +113,7 @@ def create_single_handler(resource_type):
     """
 
     def outer_wrapper(create_method):
-        @functools.wraps(create_method)
+        @six.wraps(create_method)
         def wrapper(client, **params):
             uuid = None
             error = None
