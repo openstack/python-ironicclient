@@ -292,9 +292,8 @@ def make_configdrive(path):
 
             # Compress file
             tmpfile.seek(0)
-            g = gzip.GzipFile(fileobj=tmpzipfile, mode='wb')
-            shutil.copyfileobj(tmpfile, g)
-            g.close()
+            with gzip.GzipFile(fileobj=tmpzipfile, mode='wb') as gz_file:
+                shutil.copyfileobj(tmpfile, gz_file)
 
             tmpzipfile.seek(0)
             return base64.encode_as_bytes(tmpzipfile.read())
