@@ -61,6 +61,13 @@ These Identity Service credentials can be used to authenticate::
      service. default: False (optional)
    * os_tenant_{name|id}: name or ID of tenant
 
+Also the following parameters are required when using the Identity API v3::
+
+    * os_user_domain_name: name of a domain the user belongs to,
+      usually 'default'
+    * os_project_domain_name: name of a domain the project belongs to,
+      usually 'default'
+
 To create a client, you can use the API like so::
 
    >>> from ironicclient import client
