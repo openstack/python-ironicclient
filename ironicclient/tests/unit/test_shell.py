@@ -407,9 +407,9 @@ class TestCase(testtools.TestCase):
         request_mocker.get(BASE_URL, json=ks_fixture.DiscoveryList(BASE_URL))
 
 
-class ShellTestNoMox(TestCase):
+class ShellTestKeystoneV2(TestCase):
     def setUp(self):
-        super(ShellTestNoMox, self).setUp()
+        super(ShellTestKeystoneV2, self).setUp()
         self.set_fake_env(FAKE_ENV_KEYSTONE_V2)
 
     def shell(self, argstr):
@@ -471,7 +471,7 @@ class ShellTestNoMox(TestCase):
             self.assertRegex(event_list_text, r)
 
 
-class ShellTestNoMoxV3(ShellTestNoMox):
+class ShellTestKeystoneV3(ShellTestKeystoneV2):
 
     def _set_fake_env(self):
         self.set_fake_env(FAKE_ENV_KEYSTONE_V3)
