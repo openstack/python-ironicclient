@@ -140,8 +140,7 @@ class VersionNegotiationMixin(object):
         # TODO(TheJulia): We should break this method into several parts,
         # such as a sanity check/error method.
         if (self.api_version_select_state == 'user' and
-                self.os_ironic_api_version != 'latest' and
-                not isinstance(self.os_ironic_api_version, list)):
+                not self._must_negotiate_version()):
             raise exc.UnsupportedVersion(textwrap.fill(
                 _("Requested API version %(req)s is not supported by the "
                   "server, client, or the requested operation is not "
@@ -226,6 +225,10 @@ class VersionNegotiationMixin(object):
         # NOTE(jlvillal): Declared for unit testing purposes
         raise NotImplementedError()
 
+    def _must_negotiate_version(self):
+        return (self.api_version_select_state == 'user' and
+                (self.os_ironic_api_version == 'latest' or
+                 isinstance(self.os_ironic_api_version, list)))
 
 _RETRY_EXCEPTIONS = (exc.Conflict, exc.ServiceUnavailable,
                      exc.ConnectionRefused, kexc.RetriableConnectionFailure)
@@ -370,10 +373,7 @@ class HTTPClient(VersionNegotiationMixin):
         """
         # NOTE(TheJulia): self.os_ironic_api_version is reset in
         # the self.negotiate_version() call if negotiation occurs.
-        if (self.os_ironic_api_version and
-                self.api_version_select_state == 'user' and
-                (self.os_ironic_api_version == 'latest' or
-                 isinstance(self.os_ironic_api_version, list))):
+        if self.os_ironic_api_version and self._must_negotiate_version():
             self.negotiate_version(self.session, None)
 
         # Copy the kwargs so we can reuse the original in case of redirects
@@ -586,10 +586,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
 
         # NOTE(TheJulia): self.os_ironic_api_version is reset in
         # the self.negotiate_version() call if negotiation occurs.
-        if (self.os_ironic_api_version and
-                self.api_version_select_state == 'user' and
-                (self.os_ironic_api_version == 'latest' or
-                 isinstance(self.os_ironic_api_version, list))):
+        if self.os_ironic_api_version and self._must_negotiate_version():
             self.negotiate_version(self.session, None)
 
         kwargs.setdefault('user_agent', USER_AGENT)
