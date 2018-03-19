@@ -96,11 +96,7 @@ Refer to the modules themselves, for more details.
 ironicclient Modules
 ====================
 
-.. toctree::
-    :maxdepth: 1
-
-    modules <api/autoindex>
-
+* :ref:`modindex`
 
 .. _ironicclient.v1.node: api/ironicclient.v1.node.html#ironicclient.v1.node.Node
 .. _ironicclient.v1.client.Client: api/ironicclient.v1.client.html#ironicclient.v1.client.Client

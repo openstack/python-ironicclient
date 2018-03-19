@@ -2,11 +2,20 @@
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc',
+extensions = ['sphinxcontrib.apidoc',
               'sphinx.ext.viewcode',
               'openstackdocstheme',
               'cliff.sphinxext',
               ]
+
+# sphinxcontrib.apidoc options
+apidoc_module_dir = '../../ironicclient'
+apidoc_output_dir = 'api'
+apidoc_excluded_paths = [
+    'tests/functional/*',
+    'tests']
+apidoc_separate_modules = True
+
 
 # openstackdocstheme options
 repository_name = 'openstack/python-ironicclient'
