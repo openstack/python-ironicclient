@@ -12,6 +12,13 @@ baremetal chassis
     :command: baremetal chassis *
 
 ================
+baremetal create
+================
+
+.. autoprogram-cliff:: openstack.baremetal.v1
+    :command: baremetal create
+
+================
 baremetal driver
 ================
 
