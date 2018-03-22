@@ -125,7 +125,7 @@ class ReplaceLatestVersion(argparse.Action):
         global OS_BAREMETAL_API_LATEST
         if values == 'latest':
             values = LATEST_VERSION
-            # The default value of "True" may have been overriden due to
+            # The default value of "True" may have been overridden due to
             # non-empty OS_BAREMETAL_API_VERSION env variable. If a user
             # explicitly requests "latest", we need to correct it.
             OS_BAREMETAL_API_LATEST = True
