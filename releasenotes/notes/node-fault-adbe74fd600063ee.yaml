@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Supports the node's ``fault`` field, introduced in the Bare Metal API
+    version 1.42, including displaying or querying nodes by this field.
