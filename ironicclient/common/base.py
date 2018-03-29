@@ -185,18 +185,24 @@ class Manager(object):
     def _list_primitives(self, url, response_key=None):
         return self.__list(url, response_key=response_key)
 
-    def _update(self, resource_id, patch, method='PATCH'):
+    def _update(self, resource_id, patch, method='PATCH',
+                os_ironic_api_version=None):
         """Update a resource.
 
         :param resource_id: Resource identifier.
         :param patch: New version of a given resource, a dictionary or None.
         :param method: Name of the method for the request.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
         """
 
         url = self._path(resource_id)
         kwargs = {}
         if patch is not None:
             kwargs['body'] = patch
+        if os_ironic_api_version is not None:
+            kwargs['headers'] = {'X-OpenStack-Ironic-API-Version':
+                                 os_ironic_api_version}
         resp, body = self.api.json_request(method, url, **kwargs)
         # PATCH/PUT requests may not return a body
         if body:

@@ -1298,6 +1298,17 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
+    def test_node_set_provision_state_microversion_override(self):
+        target_state = 'active'
+        self.mgr.set_provision_state(NODE1['uuid'], target_state,
+                                     os_ironic_api_version="1.35")
+        body = {'target': target_state}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'],
+             {'X-OpenStack-Ironic-API-Version': '1.35'}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
     def test_node_set_provision_state_with_configdrive(self):
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,

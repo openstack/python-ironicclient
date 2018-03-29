@@ -331,9 +331,11 @@ class NodeManager(base.CreateManager):
     def delete(self, node_id):
         return self._delete(resource_id=node_id)
 
-    def update(self, node_id, patch, http_method='PATCH'):
+    def update(self, node_id, patch, http_method='PATCH',
+               os_ironic_api_version=None):
         return self._update(resource_id=node_id, patch=patch,
-                            method=http_method)
+                            method=http_method,
+                            os_ironic_api_version=os_ironic_api_version)
 
     def vendor_passthru(self, node_id, method, args=None,
                         http_method=None):
@@ -478,7 +480,8 @@ class NodeManager(base.CreateManager):
         return self.get(path)
 
     def set_provision_state(self, node_uuid, state, configdrive=None,
-                            cleansteps=None, rescue_password=None):
+                            cleansteps=None, rescue_password=None,
+                            os_ironic_api_version=None):
         """Set the provision state for the node.
 
         :param node_uuid: The UUID or name of the node.
@@ -497,6 +500,8 @@ class NodeManager(base.CreateManager):
         :param rescue_password: A string to be used as the login password
             inside the rescue ramdisk once a node is rescued. This must be
             specified (and is only valid) when setting 'state' to 'rescue'.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
         :raises: InvalidAttribute if there was an error with the clean steps
         :returns: The status of the request
         """
@@ -516,7 +521,8 @@ class NodeManager(base.CreateManager):
         elif rescue_password:
             body['rescue_password'] = rescue_password
 
-        return self.update(path, body, http_method='PUT')
+        return self.update(path, body, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version)
 
     def states(self, node_uuid):
         path = "%s/states" % node_uuid
