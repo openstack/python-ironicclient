@@ -79,7 +79,7 @@ class FakeConnection(object):
 
 class FakeResponse(object):
     def __init__(self, headers, body=None, version=None, status=None,
-                 reason=None):
+                 reason=None, request_headers={}):
         """Fake object to help testing.
 
         :param headers: dict representing HTTP response headers
@@ -91,6 +91,8 @@ class FakeResponse(object):
         self.raw.version = version
         self.status_code = status
         self.reason = reason
+        self.request = mock.Mock()
+        self.request.headers = request_headers
 
     def getheaders(self):
         return copy.deepcopy(self.headers).items()
@@ -102,21 +104,26 @@ class FakeResponse(object):
         return self.body.read(amt)
 
     def __repr__(self):
-        return ("FakeResponse(%s, body=%s, version=%s, status=%s, reason=%s)" %
-                (self.headers, self.body, self.version, self.status,
-                 self.reason))
+        return ("FakeResponse(%s, body=%s, version=%s, status=%s, reason=%s, "
+                "request_headers=%s)" %
+                (self.headers, self.body, self.raw.version, self.status_code,
+                 self.reason, self.request.headers))
 
 
-def mockSessionResponse(headers, content=None, status_code=None, version=None):
+def mockSessionResponse(headers, content=None, status_code=None, version=None,
+                        request_headers={}):
     raw = mock.Mock()
     raw.version = version
+    request = mock.Mock()
+    request.headers = request_headers
     response = mock.Mock(spec=requests.Response,
                          headers=headers,
                          content=content,
                          status_code=status_code,
                          raw=raw,
                          reason='',
-                         encoding='UTF-8')
+                         encoding='UTF-8',
+                         request=request)
     response.text = content
 
     return response
