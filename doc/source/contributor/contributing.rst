@@ -30,26 +30,11 @@ signed OpenStack's contributor's agreement.
    * https://docs.openstack.org/infra/manual/developers.html
    * https://wiki.openstack.org/wiki/CLA
 
-LaunchPad Project
------------------
-
-Most of the tools used for OpenStack depend on a launchpad.net ID for
-authentication. After signing up for a launchpad account, join the
-"openstack" team to have access to the mailing list and receive
-notifications of important events.
-
-.. seealso::
-
-   * https://launchpad.net
-   * https://launchpad.net/python-ironicclient
-   * https://launchpad.net/~openstack
-
-
 Project Hosting Details
 -----------------------
 
 Bug tracker
-    https://launchpad.net/python-ironicclient
+    https://storyboard.openstack.org/#!/project/959
 
 Mailing list (prefix subjects with ``[ironic]`` for faster responses)
     http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev

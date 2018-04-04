@@ -124,5 +124,5 @@ Useful Links
 
 * Documentation: https://docs.openstack.org/python-ironicclient/latest/
 * Source: https://git.openstack.org/cgit/openstack/python-ironicclient
-* Bugs: https://bugs.launchpad.net/python-ironicclient
+* Bugs: https://storyboard.openstack.org/#!/project/959
 * Release notes: https://docs.openstack.org/releasenotes/python-ironicclient/
