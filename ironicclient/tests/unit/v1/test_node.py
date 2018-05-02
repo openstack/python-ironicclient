@@ -817,6 +817,16 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(2, len(nodes))
         self.assertEqual(nodes[0].extra, {})
 
+    def test_node_list_detail_microversion_override(self):
+        nodes = self.mgr.list(detail=True, os_ironic_api_version='1.30')
+        expect = [
+            ('GET', '/v1/nodes/detail',
+             {'X-OpenStack-Ironic-API-Version': '1.30'}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(2, len(nodes))
+        self.assertEqual(nodes[0].extra, {})
+
     def test_node_list_fields(self):
         nodes = self.mgr.list(fields=['uuid', 'extra'])
         expect = [
@@ -894,6 +904,19 @@ class NodeManagerTest(testtools.TestCase):
         node = self.mgr.update(node_id=NODE1['uuid'], patch=patch)
         expect = [
             ('PATCH', '/v1/nodes/%s' % NODE1['uuid'], {}, patch),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(NEW_DRIVER, node.driver)
+
+    def test_update_microversion_override(self):
+        patch = {'op': 'replace',
+                 'value': NEW_DRIVER,
+                 'path': '/driver'}
+        node = self.mgr.update(node_id=NODE1['uuid'], patch=patch,
+                               os_ironic_api_version='1.24')
+        expect = [
+            ('PATCH', '/v1/nodes/%s' % NODE1['uuid'],
+             {'X-OpenStack-Ironic-API-Version': '1.24'}, patch),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_DRIVER, node.driver)

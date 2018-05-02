@@ -67,11 +67,13 @@ class Manager(object):
 
         """
 
-    def _get(self, resource_id, fields=None):
+    def _get(self, resource_id, fields=None, os_ironic_api_version=None):
         """Retrieve a resource.
 
         :param resource_id: Identifier of the resource.
         :param fields: List of specific fields to be returned.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
         :raises exc.ValidationError: For invalid resource_id arg value.
         """
 
@@ -85,19 +87,25 @@ class Manager(object):
             resource_id += ','.join(fields)
 
         try:
-            return self._list(self._path(resource_id))[0]
+            return self._list(
+                self._path(resource_id),
+                os_ironic_api_version=os_ironic_api_version)[0]
         except IndexError:
             return None
 
-    def _get_as_dict(self, resource_id, fields=None):
+    def _get_as_dict(self, resource_id, fields=None,
+                     os_ironic_api_version=None):
         """Retrieve a resource as a dictionary
 
         :param resource_id: Identifier of the resource.
         :param fields: List of specific fields to be returned.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
         :returns: a dictionary representing the resource; may be empty
         """
 
-        resource = self._get(resource_id, fields=fields)
+        resource = self._get(resource_id, fields=fields,
+                             os_ironic_api_version=os_ironic_api_version)
         if resource:
             return resource.to_dict()
         else:
@@ -118,7 +126,7 @@ class Manager(object):
         return data
 
     def _list_pagination(self, url, response_key=None, obj_class=None,
-                         limit=None):
+                         limit=None, os_ironic_api_version=None):
         """Retrieve a list of items.
 
         The Ironic API is configured to return a maximum number of
@@ -134,19 +142,24 @@ class Manager(object):
         :param obj_class: class for constructing the returned objects.
         :param limit: maximum number of items to return. If None returns
             everything.
-
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
         """
         if obj_class is None:
             obj_class = self.resource_class
 
         if limit is not None:
             limit = int(limit)
+        kwargs = {}
+        if os_ironic_api_version is not None:
+            kwargs['headers'] = {'X-OpenStack-Ironic-API-Version':
+                                 os_ironic_api_version}
 
         object_list = []
         object_count = 0
         limit_reached = False
         while url:
-            resp, body = self.api.json_request('GET', url)
+            resp, body = self.api.json_request('GET', url, **kwargs)
             data = self._format_body_data(body, response_key)
             for obj in data:
                 object_list.append(obj_class(self, obj, loaded=True))
@@ -170,16 +183,26 @@ class Manager(object):
 
         return object_list
 
-    def __list(self, url, response_key=None, body=None):
-        resp, body = self.api.json_request('GET', url)
+    def __list(self, url, response_key=None, body=None,
+               os_ironic_api_version=None):
+        kwargs = {}
+
+        if os_ironic_api_version is not None:
+            kwargs['headers'] = {'X-OpenStack-Ironic-API-Version':
+                                 os_ironic_api_version}
+
+        resp, body = self.api.json_request('GET', url, **kwargs)
+
         data = self._format_body_data(body, response_key)
         return data
 
-    def _list(self, url, response_key=None, obj_class=None, body=None):
+    def _list(self, url, response_key=None, obj_class=None, body=None,
+              os_ironic_api_version=None):
         if obj_class is None:
             obj_class = self.resource_class
 
-        data = self.__list(url, response_key=response_key, body=body)
+        data = self.__list(url, response_key=response_key, body=body,
+                           os_ironic_api_version=os_ironic_api_version)
         return [obj_class(self, res, loaded=True) for res in data if res]
 
     def _list_primitives(self, url, response_key=None):

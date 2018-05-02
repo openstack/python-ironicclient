@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Adds support for ``NodeManager.set_provision_state``,
+    ``NodeManager.update``, ``NodeManager.get``, and ``NodeManager.list``
+    to accept an ``os_ironic_api_version`` keyword argument to override
+    the API version for that specific call to the REST API.
+
+    When overridden, the API version is not preserved, and if an unsupported
+    version is requested from the remote API, an ``UnsupportedVersion``
+    exception is raised.

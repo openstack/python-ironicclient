@@ -87,16 +87,16 @@ class TestableManager(base.CreateManager):
         return ('/v1/testableresources/%s' % id if id
                 else '/v1/testableresources')
 
-    def get(self, testable_resource_id, fields=None):
+    def get(self, testable_resource_id, fields=None, **kwargs):
         return self._get(resource_id=testable_resource_id,
-                         fields=fields)
+                         fields=fields, **kwargs)
 
-    def delete(self, testable_resource_id):
-        return self._delete(resource_id=testable_resource_id)
+    def delete(self, testable_resource_id, **kwargs):
+        return self._delete(resource_id=testable_resource_id, **kwargs)
 
-    def update(self, testable_resource_id, patch):
+    def update(self, testable_resource_id, patch, **kwargs):
         return self._update(resource_id=testable_resource_id,
-                            patch=patch)
+                            patch=patch, **kwargs)
 
 
 class ManagerTestCase(testtools.TestCase):
@@ -120,12 +120,13 @@ class ManagerTestCase(testtools.TestCase):
                                self.manager.create,
                                **INVALID_ATTRIBUTE_TESTABLE_RESOURCE)
 
-    def test__get(self):
+    def test__get_microversion_override(self):
         resource_id = TESTABLE_RESOURCE['uuid']
-        resource = self.manager._get(resource_id)
+        resource = self.manager._get(resource_id,
+                                     os_ironic_api_version='1.22')
         expect = [
             ('GET', '/v1/testableresources/%s' % resource_id,
-             {}, None),
+             {'X-OpenStack-Ironic-API-Version': '1.22'}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(resource_id, resource.uuid)
@@ -147,12 +148,24 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(TESTABLE_RESOURCE, resource)
 
+    def test__get_as_dict_microversion_override(self):
+        resource_id = TESTABLE_RESOURCE['uuid']
+        resource = self.manager._get_as_dict(resource_id,
+                                             os_ironic_api_version='1.21')
+        expect = [
+            ('GET', '/v1/testableresources/%s' % resource_id,
+             {'X-OpenStack-Ironic-API-Version': '1.21'}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(TESTABLE_RESOURCE, resource)
+
     @mock.patch.object(base.Manager, '_get', autospec=True)
     def test__get_as_dict_empty(self, mock_get):
         mock_get.return_value = None
         resource_id = TESTABLE_RESOURCE['uuid']
         resource = self.manager._get_as_dict(resource_id)
-        mock_get.assert_called_once_with(mock.ANY, resource_id, fields=None)
+        mock_get.assert_called_once_with(mock.ANY, resource_id, fields=None,
+                                         os_ironic_api_version=None)
         self.assertEqual({}, resource)
 
     def test_get(self):
@@ -160,6 +173,17 @@ class ManagerTestCase(testtools.TestCase):
         expect = [
             ('GET', '/v1/testableresources/%s' % TESTABLE_RESOURCE['uuid'],
              {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(TESTABLE_RESOURCE['uuid'], resource.uuid)
+        self.assertEqual(TESTABLE_RESOURCE['attribute1'], resource.attribute1)
+
+    def test_get_microversion_override(self):
+        resource = self.manager.get(TESTABLE_RESOURCE['uuid'],
+                                    os_ironic_api_version='1.10')
+        expect = [
+            ('GET', '/v1/testableresources/%s' % TESTABLE_RESOURCE['uuid'],
+             {'X-OpenStack-Ironic-API-Version': '1.10'}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(TESTABLE_RESOURCE['uuid'], resource.uuid)
@@ -176,6 +200,21 @@ class ManagerTestCase(testtools.TestCase):
         expect = [
             ('PATCH', '/v1/testableresources/%s' % TESTABLE_RESOURCE['uuid'],
              {}, patch),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(NEW_ATTRIBUTE_VALUE, resource.attribute1)
+
+    def test_update_microversion_override(self):
+        patch = {'op': 'replace',
+                 'value': NEW_ATTRIBUTE_VALUE,
+                 'path': '/attribute1'}
+        resource = self.manager.update(
+            testable_resource_id=TESTABLE_RESOURCE['uuid'],
+            patch=patch, os_ironic_api_version='1.9'
+        )
+        expect = [
+            ('PATCH', '/v1/testableresources/%s' % TESTABLE_RESOURCE['uuid'],
+             {'X-OpenStack-Ironic-API-Version': '1.9'}, patch),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_ATTRIBUTE_VALUE, resource.attribute1)
