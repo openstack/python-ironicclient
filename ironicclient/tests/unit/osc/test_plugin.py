@@ -34,7 +34,7 @@ class MakeClientTest(testtools.TestCase):
             allow_api_version_downgrade=False,
             session=instance.session,
             region_name=instance._region_name,
-            endpoint='endpoint')
+            endpoint_override='endpoint')
         instance.get_endpoint_for_service_type.assert_called_once_with(
             'baremetal', region_name=instance._region_name,
             interface=instance.interface)
@@ -54,7 +54,7 @@ class MakeClientTest(testtools.TestCase):
             allow_api_version_downgrade=True,
             session=instance.session,
             region_name=instance._region_name,
-            endpoint='endpoint')
+            endpoint_override='endpoint')
         instance.get_endpoint_for_service_type.assert_called_once_with(
             'baremetal', region_name=instance._region_name,
             interface=instance.interface)
@@ -72,7 +72,7 @@ class MakeClientTest(testtools.TestCase):
             allow_api_version_downgrade=True,
             session=instance.session,
             region_name=instance._region_name,
-            endpoint='endpoint')
+            endpoint_override='endpoint')
         instance.get_endpoint_for_service_type.assert_called_once_with(
             'baremetal', region_name=instance._region_name,
             interface=instance.interface)

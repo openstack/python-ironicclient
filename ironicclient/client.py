@@ -10,146 +10,120 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
+
 from keystoneauth1 import loading as kaloading
 from oslo_utils import importutils
 
 from ironicclient.common.i18n import _
 from ironicclient import exc
 
+LOG = logging.getLogger(__name__)
 
-def get_client(api_version, os_auth_token=None, ironic_url=None,
-               os_username=None, os_password=None, os_auth_url=None,
-               os_project_id=None, os_project_name=None, os_tenant_id=None,
-               os_tenant_name=None, os_region_name=None,
-               os_user_domain_id=None, os_user_domain_name=None,
-               os_project_domain_id=None, os_project_domain_name=None,
-               os_service_type=None, os_endpoint_type=None,
-               insecure=None, timeout=None, os_cacert=None, ca_file=None,
-               os_cert=None, cert_file=None, os_key=None, key_file=None,
-               os_ironic_api_version=None, max_retries=None,
-               retry_interval=None, session=None, **ignored_kwargs):
+
+# TODO(vdrok): remove in Stein
+def convert_keystoneauth_opts(kwargs):
+    old_to_new_names = {
+        ('os_auth_token',): 'token',
+        ('os_username',): 'username',
+        ('os_password',): 'password',
+        ('os_auth_url',): 'auth_url',
+        ('os_project_id',): 'project_id',
+        ('os_project_name',): 'project_name',
+        ('os_tenant_id',): 'tenant_id',
+        ('os_tenant_name',): 'tenant_name',
+        ('os_region_name',): 'region_name',
+        ('os_user_domain_id',): 'user_domain_id',
+        ('os_user_domain_name',): 'user_domain_name',
+        ('os_project_domain_id',): 'project_domain_id',
+        ('os_project_domain_name',): 'project_domain_name',
+        ('os_service_type',): 'service_type',
+        ('os_endpoint_type',): 'interface',
+        ('ironic_url',): 'endpoint',
+        ('os_cacert', 'ca_file'): 'cafile',
+        ('os_cert', 'cert_file'): 'certfile',
+        ('os_key', 'key_file'): 'keyfile'
+    }
+    for olds, new in old_to_new_names.items():
+        for old in olds:
+            if kwargs.get(old):
+                LOG.warning('The argument "%s" passed to get_client is '
+                            'deprecated and will be removed in Stein release, '
+                            'please use "%s" instead.', old, new)
+                kwargs.setdefault(new, kwargs[old])
+
+
+def get_client(api_version, auth_type=None, os_ironic_api_version=None,
+               max_retries=None, retry_interval=None, **kwargs):
     """Get an authenticated client, based on the credentials.
 
     :param api_version: the API version to use. Valid value: '1'.
-    :param os_auth_token: pre-existing token to re-use
-    :param ironic_url: ironic API endpoint
-    :param os_username: name of a user
-    :param os_password: user's password
-    :param os_auth_url: endpoint to authenticate against
-    :param os_tenant_name: name of a tenant (deprecated in favour of
-        os_project_name)
-    :param os_tenant_id: ID of a tenant (deprecated in favour of
-        os_project_id)
-    :param os_project_name: name of a project
-    :param os_project_id: ID of a project
-    :param os_region_name: name of a keystone region
-    :param os_user_domain_name: name of a domain the user belongs to
-    :param os_user_domain_id: ID of a domain the user belongs to
-    :param os_project_domain_name: name of a domain the project belongs to
-    :param os_project_domain_id: ID of a domain the project belongs to
-    :param os_service_type: the type of service to lookup the endpoint for
-    :param os_endpoint_type: the type (exposure) of the endpoint
-    :param insecure: allow insecure SSL (no cert verification)
-    :param timeout: allows customization of the timeout for client HTTP
-        requests
-    :param os_cacert: path to cacert file
-    :param ca_file: path to cacert file, deprecated in favour of os_cacert
-    :param os_cert: path to cert file
-    :param cert_file: path to cert file, deprecated in favour of os_cert
-    :param os_key: path to key file
-    :param key_file: path to key file, deprecated in favour of os_key
-    :param os_ironic_api_version: ironic API version to use or a list of
-        available API versions to attempt to negotiate.
+    :param auth_type: type of keystoneauth auth plugin loader to use.
+    :param os_ironic_api_version: ironic API version to use.
     :param max_retries: Maximum number of retries in case of conflict error
     :param retry_interval: Amount of time (in seconds) between retries in case
-        of conflict error
-    :param session: Keystone session to use
-    :param ignored_kwargs: all the other params that are passed. Left for
-        backwards compatibility. They are ignored.
+        of conflict error.
+    :param kwargs: all the other params that are passed to keystoneauth.
     """
     # TODO(TheJulia): At some point, we should consider possibly noting
     # the "latest" flag for os_ironic_api_version to cause the client to
     # auto-negotiate to the greatest available version, however we do not
     # have the ability yet for a caller to cap the version, and will hold
     # off doing so until then.
-    os_service_type = os_service_type or 'baremetal'
-    os_endpoint_type = os_endpoint_type or 'publicURL'
-    project_id = (os_project_id or os_tenant_id)
-    project_name = (os_project_name or os_tenant_name)
-    kwargs = {
+    convert_keystoneauth_opts(kwargs)
+    if auth_type is None:
+        if 'endpoint' in kwargs:
+            if 'token' in kwargs:
+                auth_type = 'admin_token'
+            else:
+                auth_type = 'none'
+        elif 'token' in kwargs and 'auth_url' in kwargs:
+            auth_type = 'token'
+        else:
+            auth_type = 'password'
+    session = kwargs.get('session')
+    if not session:
+        loader = kaloading.get_plugin_loader(auth_type)
+        loader_options = loader.get_options()
+        # option.name looks like 'project-name', while dest will be the actual
+        # argument name to which the value will be passed to (project_name)
+        auth_options = [o.dest for o in loader_options]
+        # Include deprecated names as well
+        auth_options.extend([d.dest for o in loader_options
+                             for d in o.deprecated])
+        auth_kwargs = {k: v for (k, v) in kwargs.items() if k in auth_options}
+        auth_plugin = loader.load_from_options(**auth_kwargs)
+        # Let keystoneauth do the necessary parameter conversions
+        session_loader = kaloading.session.Session()
+        session_opts = {k: v for (k, v) in kwargs.items() if k in
+                        [o.dest for o in session_loader.get_conf_options()]}
+        session = session_loader.load_from_options(auth=auth_plugin,
+                                                   **session_opts)
+
+    endpoint = kwargs.get('endpoint')
+    if not endpoint:
+        try:
+            # endpoint will be used to get hostname
+            # and port that will be used for API version caching.
+            endpoint = session.get_endpoint(
+                service_type=kwargs.get('service_type') or 'baremetal',
+                interface=kwargs.get('interface') or 'publicURL',
+                region_name=kwargs.get('region_name')
+            )
+        except Exception as e:
+            raise exc.AmbiguousAuthSystem(
+                _('Must provide Keystone credentials or user-defined '
+                  'endpoint, error was: %s') % e)
+
+    ironicclient_kwargs = {
         'os_ironic_api_version': os_ironic_api_version,
         'max_retries': max_retries,
         'retry_interval': retry_interval,
+        'session': session,
+        'endpoint_override': endpoint
     }
-    endpoint = ironic_url
-    cacert = os_cacert or ca_file
-    cert = os_cert or cert_file
-    key = os_key or key_file
-    if os_auth_token and endpoint:
-        kwargs.update({
-            'token': os_auth_token,
-            'insecure': insecure,
-            'ca_file': cacert,
-            'cert_file': cert,
-            'key_file': key,
-            'timeout': timeout,
-        })
-    elif os_auth_url:
-        auth_type = 'password'
-        auth_kwargs = {
-            'auth_url': os_auth_url,
-            'project_id': project_id,
-            'project_name': project_name,
-            'user_domain_id': os_user_domain_id,
-            'user_domain_name': os_user_domain_name,
-            'project_domain_id': os_project_domain_id,
-            'project_domain_name': os_project_domain_name,
-        }
-        if os_username and os_password:
-            auth_kwargs.update({
-                'username': os_username,
-                'password': os_password,
-            })
-        elif os_auth_token:
-            auth_type = 'token'
-            auth_kwargs.update({
-                'token': os_auth_token,
-            })
-        # Create new session only if it was not passed in
-        if not session:
-            loader = kaloading.get_plugin_loader(auth_type)
-            auth_plugin = loader.load_from_options(**auth_kwargs)
-            # Let keystoneauth do the necessary parameter conversions
-            session = kaloading.session.Session().load_from_options(
-                auth=auth_plugin, insecure=insecure, cacert=cacert,
-                cert=cert, key=key, timeout=timeout,
-            )
 
-    exception_msg = _('Must provide Keystone credentials or user-defined '
-                      'endpoint and token')
-    if not endpoint:
-        if session:
-            try:
-                # Pass the endpoint, it will be used to get hostname
-                # and port that will be used for API version caching. It will
-                # be also set as endpoint_override.
-                endpoint = session.get_endpoint(
-                    service_type=os_service_type,
-                    interface=os_endpoint_type,
-                    region_name=os_region_name
-                )
-            except Exception as e:
-                raise exc.AmbiguousAuthSystem(
-                    _('%(message)s, error was: %(error)s') %
-                    {'message': exception_msg, 'error': e})
-        else:
-            # Neither session, nor valid auth parameters provided
-            raise exc.AmbiguousAuthSystem(exception_msg)
-
-    # Always pass the session
-    kwargs['session'] = session
-
-    return Client(api_version, endpoint, **kwargs)
+    return Client(api_version, **ironicclient_kwargs)
 
 
 def Client(version, *args, **kwargs):

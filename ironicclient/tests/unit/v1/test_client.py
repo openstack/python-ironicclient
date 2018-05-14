@@ -31,7 +31,7 @@ class ClientTest(utils.BaseTestCase):
                       os_ironic_api_version=os_ironic_api_version)
 
         http_client_mock.assert_called_once_with(
-            endpoint, token=token,
+            endpoint_override=endpoint, token=token,
             os_ironic_api_version=os_ironic_api_version,
             api_version_select_state='user')
 
@@ -45,7 +45,7 @@ class ClientTest(utils.BaseTestCase):
                       allow_api_version_downgrade=True)
 
         http_client_mock.assert_called_once_with(
-            endpoint, token=token,
+            token=token, endpoint_override=endpoint,
             os_ironic_api_version=os_ironic_api_version,
             api_version_select_state='default')
 
@@ -70,7 +70,7 @@ class ClientTest(utils.BaseTestCase):
 
         cache_mock.assert_called_once_with(host='ironic', port='6385')
         http_client_mock.assert_called_once_with(
-            endpoint, token=token,
+            endpoint_override=endpoint, token=token,
             os_ironic_api_version=os_ironic_api_version,
             api_version_select_state='cached')
 
@@ -84,7 +84,7 @@ class ClientTest(utils.BaseTestCase):
 
         cache_mock.assert_called_once_with(host='ironic', port='6385')
         http_client_mock.assert_called_once_with(
-            endpoint, token=token,
+            endpoint_override=endpoint, token=token,
             os_ironic_api_version=client.DEFAULT_VER,
             api_version_select_state='default')
 
@@ -92,8 +92,7 @@ class ClientTest(utils.BaseTestCase):
         self.assertRaises(exc.EndpointException,
                           client.Client,
                           session='fake_session',
-                          insecure=True,
-                          endpoint_override='http://ironic:6385')
+                          insecure=True)
 
     def test_client_initialized_managers(self, http_client_mock):
         cl = client.Client('http://ironic:6385', token='safe_token',
@@ -113,7 +112,7 @@ class ClientTest(utils.BaseTestCase):
 
         cl.negotiate_api_version()
         http_client_mock.assert_called_once_with(
-            endpoint, api_version_select_state='user',
+            api_version_select_state='user', endpoint_override=endpoint,
             os_ironic_api_version='latest', token=token)
         # TODO(TheJulia): We should verify that negotiate_version
         # is being called in the client and returns a version,

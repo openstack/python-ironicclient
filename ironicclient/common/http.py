@@ -81,11 +81,11 @@ def _extract_error_json(body):
     return error_json
 
 
-def get_server(endpoint):
-    """Extract and return the server & port that we're connecting to."""
-    if endpoint is None:
+def get_server(url):
+    """Extract and return the server & port."""
+    if url is None:
         return None, None
-    parts = urlparse.urlparse(endpoint)
+    parts = urlparse.urlparse(url)
     return parts.hostname, str(parts.port)
 
 
@@ -205,7 +205,10 @@ class VersionNegotiationMixin(object):
         LOG.debug('Negotiated API version is %s', negotiated_ver)
 
         # Cache the negotiated version for this server
-        host, port = get_server(self.endpoint)
+        # TODO(vdrok): get rid of self.endpoint attribute in Stein
+        endpoint_override = (getattr(self, 'endpoint_override', None) or
+                             getattr(self, 'endpoint', None))
+        host, port = get_server(endpoint_override)
         filecache.save_data(host=host, port=port, data=negotiated_ver)
 
         return negotiated_ver
@@ -266,6 +269,8 @@ def with_retries(func):
 class HTTPClient(VersionNegotiationMixin):
 
     def __init__(self, endpoint, **kwargs):
+        LOG.warning('HTTPClient class is deprecated and will be removed '
+                    'in Stein release, please use SessionClient instead.')
         self.endpoint = endpoint
         self.endpoint_trimmed = _trim_endpoint_api_version(endpoint)
         self.auth_token = kwargs.get('token')
@@ -556,13 +561,19 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
                  api_version_select_state,
                  max_retries,
                  retry_interval,
-                 endpoint,
+                 endpoint=None,
                  **kwargs):
         self.os_ironic_api_version = os_ironic_api_version
         self.api_version_select_state = api_version_select_state
         self.conflict_max_retries = max_retries
         self.conflict_retry_interval = retry_interval
-        self.endpoint = endpoint
+        # TODO(vdrok): remove this conditional in Stein
+        if endpoint and not kwargs.get('endpoint_override'):
+            LOG.warning('Passing "endpoint" argument to SessionClient '
+                        'constructor is deprecated, such possibility will be '
+                        'removed in Stein. Please use "endpoint_override" '
+                        'instead.')
+            self.endpoint = endpoint
 
         super(SessionClient, self).__init__(**kwargs)
 
@@ -662,8 +673,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         return self._http_request(url, method, **kwargs)
 
 
-def _construct_http_client(endpoint=None,
-                           session=None,
+def _construct_http_client(session=None,
                            token=None,
                            auth_ref=None,
                            os_ironic_api_version=DEFAULT_VER,
@@ -679,8 +689,8 @@ def _construct_http_client(endpoint=None,
     if session:
         kwargs.setdefault('service_type', 'baremetal')
         kwargs.setdefault('user_agent', 'python-ironicclient')
-        kwargs.setdefault('interface', kwargs.pop('endpoint_type', None))
-        kwargs.setdefault('endpoint_override', endpoint)
+        kwargs.setdefault('interface', kwargs.pop('endpoint_type',
+                                                  'publicURL'))
 
         ignored = {'token': token,
                    'auth_ref': auth_ref,
@@ -702,10 +712,11 @@ def _construct_http_client(endpoint=None,
                              api_version_select_state=api_version_select_state,
                              max_retries=max_retries,
                              retry_interval=retry_interval,
-                             endpoint=endpoint,
                              **kwargs)
     else:
+        endpoint = None
         if kwargs:
+            endpoint = kwargs.pop('endpoint_override', None)
             LOG.warning('The following arguments are being ignored when '
                         'constructing the client: %s'), ', '.join(kwargs)
 
