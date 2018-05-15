@@ -69,16 +69,24 @@ def _trim_endpoint_api_version(url):
 
 def _extract_error_json(body):
     """Return  error_message from the HTTP response body."""
-    error_json = {}
     try:
         body_json = jsonutils.loads(body)
-        if 'error_message' in body_json:
-            raw_msg = body_json['error_message']
-            error_json = jsonutils.loads(raw_msg)
     except ValueError:
-        pass
+        return {}
 
-    return error_json
+    if 'error_message' not in body_json:
+        return {}
+
+    try:
+        error_json = jsonutils.loads(body_json['error_message'])
+    except ValueError:
+        return body_json
+
+    err_msg = (error_json.get('faultstring') or error_json.get('description'))
+    if err_msg:
+        body_json['error_message'] = err_msg
+
+    return body_json
 
 
 def get_server(url):
@@ -438,12 +446,8 @@ class HTTPClient(VersionNegotiationMixin):
 
         if resp.status_code >= http_client.BAD_REQUEST:
             error_json = _extract_error_json(body_str)
-            # NOTE(vdrok): exceptions from ironic controllers' _lookup methods
-            # are constructed directly by pecan instead of wsme, and contain
-            # only description field
             raise exc.from_response(
-                resp, (error_json.get('faultstring') or
-                       error_json.get('description')),
+                resp, error_json.get('error_message'),
                 error_json.get('debuginfo'), method, url)
         elif resp.status_code in (http_client.MOVED_PERMANENTLY,
                                   http_client.FOUND,
@@ -626,11 +630,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
             return self._http_request(url, method, **kwargs)
         if resp.status_code >= http_client.BAD_REQUEST:
             error_json = _extract_error_json(resp.content)
-            # NOTE(vdrok): exceptions from ironic controllers' _lookup methods
-            # are constructed directly by pecan instead of wsme, and contain
-            # only description field
-            raise exc.from_response(resp, (error_json.get('faultstring') or
-                                           error_json.get('description')),
+            raise exc.from_response(resp, error_json.get('error_message'),
                                     error_json.get('debuginfo'), method, url)
         elif resp.status_code in (http_client.MOVED_PERMANENTLY,
                                   http_client.FOUND, http_client.USE_PROXY):
