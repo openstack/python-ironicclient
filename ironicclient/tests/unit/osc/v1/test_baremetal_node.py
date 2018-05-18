@@ -385,6 +385,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('name', 'name')],
                                 {'name': 'name'})
 
+    def test_baremetal_create_with_bios_interface(self):
+        self.check_with_options(['--bios-interface', 'bios'],
+                                [('bios_interface', 'bios')],
+                                {'bios_interface': 'bios'})
+
     def test_baremetal_create_with_boot_interface(self):
         self.check_with_options(['--boot-interface', 'boot'],
                                 [('boot_interface', 'boot')],
@@ -599,12 +604,12 @@ class TestBaremetalList(TestBaremetal):
                    'Target Provision State', 'Target RAID configuration',
                    'Traits', 'Updated At', 'Inspection Finished At',
                    'Inspection Started At', 'UUID', 'Name',
-                   'Boot Interface', 'Console Interface',
-                   'Deploy Interface', 'Inspect Interface',
-                   'Management Interface', 'Network Interface',
-                   'Power Interface', 'RAID Interface',
-                   'Rescue Interface', 'Storage Interface',
-                   'Vendor Interface')
+                   'BIOS Interface', 'Boot Interface',
+                   'Console Interface', 'Deploy Interface',
+                   'Inspect Interface', 'Management Interface',
+                   'Network Interface', 'Power Interface',
+                   'RAID Interface', 'Rescue Interface',
+                   'Storage Interface', 'Vendor Interface')
         self.assertEqual(collist, columns)
         datalist = ((
             '',
@@ -637,6 +642,7 @@ class TestBaremetalList(TestBaremetal):
             '',
             baremetal_fakes.baremetal_uuid,
             baremetal_fakes.baremetal_name,
+            '',
             '',
             '',
             '',
@@ -2041,6 +2047,9 @@ class TestBaremetalSet(TestBaremetal):
               'value': 'xxxxx', 'op': 'add'}]
         )
 
+    def test_baremetal_set_bios_interface(self):
+        self._test_baremetal_set_hardware_interface('bios')
+
     def test_baremetal_set_boot_interface(self):
         self._test_baremetal_set_hardware_interface('boot')
 
@@ -2662,6 +2671,9 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/%s_interface' % interface, 'op': 'remove'}]
         )
 
+    def test_baremetal_unset_bios_interface(self):
+        self._test_baremetal_unset_hw_interface('bios')
+
     def test_baremetal_unset_boot_interface(self):
         self._test_baremetal_unset_hw_interface('boot')
 
@@ -3025,3 +3037,53 @@ class TestRemoveTrait(TestBaremetal):
 
         self.baremetal_mock.node.remove_all_traits.assert_not_called()
         self.baremetal_mock.node.remove_trait.assert_not_called()
+
+
+class TestListBIOSSetting(TestBaremetal):
+    def setUp(self):
+        super(TestListBIOSSetting, self).setUp()
+
+        self.baremetal_mock.node.list_bios_settings.return_value = (
+            baremetal_fakes.BIOS_SETTINGS)
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ListBIOSSettingBaremetalNode(self.app, None)
+
+    def test_baremetal_list_bios_setting(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        data = self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.list_bios_settings.assert_called_once_with(
+            'node_uuid')
+        expected_data = (('BIOS setting name', 'BIOS setting value'),
+                         [[s['name'], s['value']]
+                          for s in baremetal_fakes.BIOS_SETTINGS])
+        self.assertEqual(expected_data, data)
+
+
+class TestBIOSSettingShow(TestBaremetal):
+    def setUp(self):
+        super(TestBIOSSettingShow, self).setUp()
+
+        self.baremetal_mock.node.get_bios_setting.return_value = (
+            baremetal_fakes.BIOS_SETTINGS[0])
+
+        # Get the command object to test
+        self.cmd = baremetal_node.BIOSSettingShowBaremetalNode(self.app, None)
+
+    def test_baremetal_bios_setting_show(self):
+        arglist = ['node_uuid', 'bios_name_1']
+        verifylist = [('node', 'node_uuid'), ('setting_name', 'bios_name_1')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        columns, data = self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.get_bios_setting.assert_called_once_with(
+            'node_uuid', 'bios_name_1')
+        expected_data = ('bios_name_1', 'bios_value_1')
+        self.assertEqual(expected_data, tuple(data))

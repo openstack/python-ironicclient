@@ -351,6 +351,12 @@ class CreateBaremetalNode(command.ShowOne):
             metavar='<name>',
             help=_("Unique name for the node."))
         parser.add_argument(
+            '--bios-interface',
+            metavar='<bios_interface>',
+            help=_('BIOS interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
+        parser.add_argument(
             '--boot-interface',
             metavar='<boot_interface>',
             help=_('Boot interface used by the node\'s driver. This is '
@@ -427,12 +433,13 @@ class CreateBaremetalNode(command.ShowOne):
 
         field_list = ['chassis_uuid', 'driver', 'driver_info',
                       'properties', 'extra', 'uuid', 'name',
-                      'boot_interface', 'console_interface',
-                      'deploy_interface', 'inspect_interface',
-                      'management_interface', 'network_interface',
-                      'power_interface', 'raid_interface',
-                      'rescue_interface', 'storage_interface',
-                      'vendor_interface', 'resource_class']
+                      'bios_interface', 'boot_interface',
+                      'console_interface', 'deploy_interface',
+                      'inspect_interface', 'management_interface',
+                      'network_interface', 'power_interface',
+                      'raid_interface', 'rescue_interface',
+                      'storage_interface', 'vendor_interface',
+                      'resource_class']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'driver_info')
@@ -994,6 +1001,11 @@ class SetBaremetalNode(command.Command):
             help=_("Set the driver for the node"),
         )
         parser.add_argument(
+            '--bios-interface',
+            metavar='<bios_interface>',
+            help=_('Set the BIOS interface for the node'),
+        )
+        parser.add_argument(
             '--boot-interface',
             metavar='<boot_interface>',
             help=_('Set the boot interface for the node'),
@@ -1125,6 +1137,11 @@ class SetBaremetalNode(command.Command):
             driver = ["driver=%s" % parsed_args.driver]
             properties.extend(utils.args_array_to_patch(
                 'add', driver))
+        if parsed_args.bios_interface:
+            bios_interface = [
+                "bios_interface=%s" % parsed_args.bios_interface]
+            properties.extend(utils.args_array_to_patch(
+                'add', bios_interface))
         if parsed_args.boot_interface:
             boot_interface = [
                 "boot_interface=%s" % parsed_args.boot_interface]
@@ -1341,6 +1358,12 @@ class UnsetBaremetalNode(command.Command):
             help=_('Unset chassis UUID on this baremetal node'),
         )
         parser.add_argument(
+            "--bios-interface",
+            dest='bios_interface',
+            action='store_true',
+            help=_('Unset BIOS interface on this baremetal node'),
+        )
+        parser.add_argument(
             "--boot-interface",
             dest='boot_interface',
             action='store_true',
@@ -1448,6 +1471,9 @@ class UnsetBaremetalNode(command.Command):
         if parsed_args.chassis_uuid:
             properties.extend(utils.args_array_to_patch('remove',
                               ['chassis_uuid']))
+        if parsed_args.bios_interface:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['bios_interface']))
         if parsed_args.boot_interface:
             properties.extend(utils.args_array_to_patch('remove',
                               ['boot_interface']))
@@ -1747,3 +1773,59 @@ class RemoveTraitBaremetalNode(command.Command):
 
         if failures:
             raise exc.ClientException("\n".join(failures))
+
+
+class ListBIOSSettingBaremetalNode(command.Lister):
+    """List a node's BIOS settings."""
+
+    log = logging.getLogger(__name__ + ".ListBIOSSettingBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(ListBIOSSettingBaremetalNode, self).get_parser(
+            prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node")
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        labels = res_fields.BIOS_RESOURCE.labels
+        baremetal_client = self.app.client_manager.baremetal
+        settings = baremetal_client.node.list_bios_settings(parsed_args.node)
+        return (labels, [[s['name'], s['value']] for s in settings])
+
+
+class BIOSSettingShowBaremetalNode(command.ShowOne):
+    """Show a specific BIOS setting for a node."""
+
+    log = logging.getLogger(__name__ + ".BIOSSettingShowBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(BIOSSettingShowBaremetalNode, self).get_parser(
+            prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node")
+        )
+        parser.add_argument(
+            'setting_name',
+            metavar='<setting name>',
+            help=_("Setting name to show")
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        setting = baremetal_client.node.get_bios_setting(
+            parsed_args.node, parsed_args.setting_name)
+        setting.pop("links", None)
+        return self.dict2columns(setting)

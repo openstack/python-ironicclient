@@ -47,12 +47,13 @@ class NodeManager(base.CreateManager):
     resource_class = Node
     _creation_attributes = ['chassis_uuid', 'driver', 'driver_info',
                             'extra', 'uuid', 'properties', 'name',
-                            'boot_interface', 'console_interface',
-                            'deploy_interface', 'inspect_interface',
-                            'management_interface', 'network_interface',
-                            'power_interface', 'raid_interface',
-                            'rescue_interface', 'storage_interface',
-                            'vendor_interface', 'resource_class']
+                            'bios_interface', 'boot_interface',
+                            'console_interface', 'deploy_interface',
+                            'inspect_interface', 'management_interface',
+                            'network_interface', 'power_interface',
+                            'raid_interface', 'rescue_interface',
+                            'storage_interface', 'vendor_interface',
+                            'resource_class']
     _resource_name = 'nodes'
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
@@ -610,6 +611,23 @@ class NodeManager(base.CreateManager):
         """
         path = "%s/traits" % node_ident
         return self.delete(path)
+
+    def get_bios_setting(self, node_ident, name):
+        """Get a BIOS setting from a node.
+
+        :param node_ident: node UUID or name.
+        :param name: BIOS setting name to get from the node.
+        """
+        path = "%s/bios/%s" % (node_ident, name)
+        return self._get_as_dict(path).get(name)
+
+    def list_bios_settings(self, node_ident):
+        """List all BIOS settings from a node.
+
+        :param node_ident: node UUID or name.
+        """
+        path = "%s/bios" % node_ident
+        return self._list_primitives(self._path(path), 'bios')
 
     def wait_for_provision_state(self, node_ident, expected_state,
                                  timeout=0,

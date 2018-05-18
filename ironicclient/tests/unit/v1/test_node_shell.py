@@ -48,6 +48,7 @@ class NodeShellTest(utils.BaseTestCase):
                'maintenance_reason',
                'fault',
                'name',
+               'bios_interface',
                'boot_interface',
                'console_interface',
                'deploy_interface',

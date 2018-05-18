@@ -34,11 +34,14 @@ class Resource(object):
         'address': 'Address',
         'async': 'Async',
         'attach': 'Response is attachment',
+        'bios_name': 'BIOS setting name',
+        'bios_value': 'BIOS setting value',
         'boot_index': 'Boot Index',
         'chassis_uuid': 'Chassis UUID',
         'clean_step': 'Clean Step',
         'console_enabled': 'Console Enabled',
         'created_at': 'Created At',
+        'default_bios_interface': 'Default BIOS Interface',
         'default_boot_interface': 'Default Boot Interface',
         'default_console_interface': 'Default Console Interface',
         'default_deploy_interface': 'Default Deploy Interface',
@@ -54,6 +57,7 @@ class Resource(object):
         'driver': 'Driver',
         'driver_info': 'Driver Info',
         'driver_internal_info': 'Driver Internal Info',
+        'enabled_bios_interfaces': 'Enabled BIOS Interfaces',
         'enabled_boot_interfaces': 'Enabled Boot Interfaces',
         'enabled_console_interfaces': 'Enabled Console Interfaces',
         'enabled_deploy_interfaces': 'Enabled Deploy Interfaces',
@@ -99,6 +103,7 @@ class Resource(object):
         'local_link_connection': 'Local Link Connection',
         'pxe_enabled': 'PXE boot enabled',
         'portgroup_uuid': 'Portgroup UUID',
+        'bios_interface': 'BIOS Interface',
         'boot_interface': 'Boot Interface',
         'console_interface': 'Console Interface',
         'deploy_interface': 'Deploy Interface',
@@ -222,6 +227,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'inspection_started_at',
      'uuid',
      'name',
+     'bios_interface',
      'boot_interface',
      'console_interface',
      'deploy_interface',
@@ -332,11 +338,16 @@ TRAIT_RESOURCE = Resource(
     ['traits'],
 )
 
+BIOS_RESOURCE = Resource(
+    ['bios_name', 'bios_value'],
+)
+
 # Drivers
 DRIVER_DETAILED_RESOURCE = Resource(
     ['name',
      'type',
      'hosts',
+     'default_bios_interface',
      'default_boot_interface',
      'default_console_interface',
      'default_deploy_interface',
@@ -348,6 +359,7 @@ DRIVER_DETAILED_RESOURCE = Resource(
      'default_rescue_interface',
      'default_storage_interface',
      'default_vendor_interface',
+     'enabled_bios_interfaces',
      'enabled_boot_interfaces',
      'enabled_console_interfaces',
      'enabled_deploy_interfaces',

@@ -1,0 +1,19 @@
+---
+features:
+  - |
+    Adds two new commands.
+
+    * ``openstack baremetal node bios setting list <node_ident>``
+    * ``openstack baremetal node bios setting show <node_ident> <setting_name>``
+
+    The first command returns a list of BIOS settings for a given node,
+    the second command returns a specified BIOS setting from the given node.
+
+    Also adds support of bios_interface for the commands below.
+
+    * ``openstack baremetal node create``
+    * ``openstack baremetal node show``
+    * ``openstack baremetal node set``
+    * ``openstack baremetal node unset``
+    * ``openstack baremetal driver list``
+    * ``openstack baremetal driver show``
