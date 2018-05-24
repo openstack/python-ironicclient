@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    Waiting for a provision state to be reached (via CLI ``--wait`` argument or
+    the ``wait_for_provision_state`` function) no longer aborts when the node's
+    ``last_error`` field gets populated. It can cause a normal deployment to
+    abort if a heartbeat from the ramdisk fails because of locking - see
+    `story 2002094 <https://storyboard.openstack.org/#!/story/2002094>`_.
