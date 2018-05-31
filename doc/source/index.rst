@@ -18,6 +18,7 @@ Contents
    cli/index
    user/create_command
    contributor/index
+   reference/index
    Release Notes <https://docs.openstack.org/releasenotes/python-ironicclient/>
 
 Indices and tables

@@ -10,7 +10,7 @@ extensions = ['sphinxcontrib.apidoc',
 
 # sphinxcontrib.apidoc options
 apidoc_module_dir = '../../ironicclient'
-apidoc_output_dir = 'api'
+apidoc_output_dir = 'reference/api'
 apidoc_excluded_paths = [
     'tests/functional/*',
     'tests']
