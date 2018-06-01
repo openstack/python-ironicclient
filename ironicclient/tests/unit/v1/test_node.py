@@ -1578,7 +1578,9 @@ class NodeManagerTest(testtools.TestCase):
     def test_wait_for_provision_state(self, mock_get, mock_sleep):
         mock_get.side_effect = [
             self._fake_node_for_wait('deploying', target='active'),
-            self._fake_node_for_wait('deploying', target='active'),
+            # Sometimes non-fatal errors can be recorded in last_error
+            self._fake_node_for_wait('deploying', target='active',
+                                     error='Node locked'),
             self._fake_node_for_wait('active')
         ]
 

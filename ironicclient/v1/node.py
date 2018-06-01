@@ -653,7 +653,7 @@ class NodeManager(base.CreateManager):
                 return
 
             # Note that if expected_state == 'error' we still succeed
-            if (node.last_error or node.provision_state == 'error' or
+            if (node.provision_state == 'error' or
                     node.provision_state.endswith(' failed')):
                 raise exc.StateTransitionFailed(
                     _('Node %(node)s failed to reach state %(state)s. '
