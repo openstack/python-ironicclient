@@ -103,8 +103,8 @@ class VersionNegotiationMixin(object):
 
         Assumption: Called after receiving a 406 error when doing a request.
 
-        param conn: A connection object
-        param resp: The response object from http request
+        :param conn: A connection object
+        :param resp: The response object from http request
         """
         def _query_server(conn):
             if (self.os_ironic_api_version and
@@ -115,6 +115,31 @@ class VersionNegotiationMixin(object):
             else:
                 base_version = API_VERSION
             return self._make_simple_request(conn, 'GET', base_version)
+
+        version_overridden = False
+
+        if (resp and hasattr(resp, 'request') and
+                hasattr(resp.request, 'headers')):
+            orig_hdr = resp.request.headers
+            # Get the version of the client's last request and fallback
+            # to the default for things like unit tests to not cause
+            # migraines.
+            req_api_ver = orig_hdr.get('X-OpenStack-Ironic-API-Version',
+                                       self.os_ironic_api_version)
+        else:
+            req_api_ver = self.os_ironic_api_version
+        if (resp and req_api_ver != self.os_ironic_api_version and
+                self.api_version_select_state == 'negotiated'):
+            # If we have a non-standard api version on the request,
+            # but we think we've negotiated, then the call was overriden.
+            # We should report the error with the called version
+            requested_version = req_api_ver
+            # And then we shouldn't save the newly negotiated
+            # version of this negotiation because we have been
+            # overridden a request.
+            version_overridden = True
+        else:
+            requested_version = self.os_ironic_api_version
 
         if not resp:
             resp = _query_server(conn)
@@ -147,34 +172,36 @@ class VersionNegotiationMixin(object):
         # be supported by the requested version.
         # TODO(TheJulia): We should break this method into several parts,
         # such as a sanity check/error method.
-        if (self.api_version_select_state == 'user' and
-                not self._must_negotiate_version()):
+        if ((self.api_version_select_state == 'user' and
+                not self._must_negotiate_version()) or
+                (self.api_version_select_state == 'negotiated' and
+                    version_overridden)):
             raise exc.UnsupportedVersion(textwrap.fill(
                 _("Requested API version %(req)s is not supported by the "
                   "server, client, or the requested operation is not "
-                  "supported by the requested version."
+                  "supported by the requested version. "
                   "Supported version range is %(min)s to "
                   "%(max)s")
-                % {'req': self.os_ironic_api_version,
+                % {'req': requested_version,
                    'min': min_ver, 'max': max_ver}))
-        if self.api_version_select_state == 'negotiated':
+        if (self.api_version_select_state == 'negotiated'):
             raise exc.UnsupportedVersion(textwrap.fill(
-                _("No API version was specified and the requested operation "
+                _("No API version was specified or the requested operation "
                   "was not supported by the client's negotiated API version "
                   "%(req)s.  Supported version range is: %(min)s to %(max)s")
-                % {'req': self.os_ironic_api_version,
+                % {'req': requested_version,
                    'min': min_ver, 'max': max_ver}))
 
-        if isinstance(self.os_ironic_api_version, six.string_types):
-            if self.os_ironic_api_version == 'latest':
+        if isinstance(requested_version, six.string_types):
+            if requested_version == 'latest':
                 negotiated_ver = max_ver
             else:
                 negotiated_ver = str(
-                    min(StrictVersion(self.os_ironic_api_version),
+                    min(StrictVersion(requested_version),
                         StrictVersion(max_ver)))
 
-        elif isinstance(self.os_ironic_api_version, list):
-            if 'latest' in self.os_ironic_api_version:
+        elif isinstance(requested_version, list):
+            if 'latest' in requested_version:
                 raise ValueError(textwrap.fill(
                     _("The 'latest' API version can not be requested "
                       "in a list of versions. Please explicitly request "
@@ -183,7 +210,7 @@ class VersionNegotiationMixin(object):
                     % {'min': min_ver, 'max': max_ver}))
 
             versions = []
-            for version in self.os_ironic_api_version:
+            for version in requested_version:
                 if min_ver <= StrictVersion(version) <= max_ver:
                     versions.append(StrictVersion(version))
             if versions:
@@ -194,7 +221,7 @@ class VersionNegotiationMixin(object):
                       "operation was not supported by the client's "
                       "requested API version %(req)s.  Supported "
                       "version range is: %(min)s to %(max)s")
-                    % {'req': self.os_ironic_api_version,
+                    % {'req': requested_version,
                        'min': min_ver, 'max': max_ver}))
 
         else:
@@ -202,7 +229,7 @@ class VersionNegotiationMixin(object):
                 _("Requested API version %(req)s type is unsupported. "
                   "Valid types are Strings such as '1.1', 'latest' "
                   "or a list of string values representing API versions.")
-                % {'req': self.os_ironic_api_version}))
+                % {'req': requested_version}))
 
         if StrictVersion(negotiated_ver) < StrictVersion(min_ver):
             negotiated_ver = min_ver
@@ -388,7 +415,6 @@ class HTTPClient(VersionNegotiationMixin):
         # the self.negotiate_version() call if negotiation occurs.
         if self.os_ironic_api_version and self._must_negotiate_version():
             self.negotiate_version(self.session, None)
-
         # Copy the kwargs so we can reuse the original in case of redirects
         kwargs['headers'] = copy.deepcopy(kwargs.get('headers', {}))
         kwargs['headers'].setdefault('User-Agent', USER_AGENT)

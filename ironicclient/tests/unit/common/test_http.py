@@ -318,6 +318,29 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         self.assertEqual(2, mock_pvh.call_count)
         self.assertEqual(0, mock_save_data.call_count)
 
+    @mock.patch.object(filecache, 'save_data', autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_make_simple_request',
+                       autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
+                       autospec=True)
+    def test_negotiate_version_explicit_version_request(
+            self, mock_pvh, mock_msr, mock_save_data):
+        mock_pvh.side_effect = iter([(None, None), ('1.1', '1.99')])
+        mock_conn = mock.MagicMock()
+        self.test_object.api_version_select_state = 'negotiated'
+        self.test_object.os_ironic_api_version = '1.30'
+        req_header = {'X-OpenStack-Ironic-API-Version': '1.29'}
+        response = utils.FakeResponse(
+            {}, status=http_client.NOT_ACCEPTABLE,
+            request_headers=req_header)
+        self.assertRaisesRegexp(exc.UnsupportedVersion,
+                                ".*is not supported by the server.*",
+                                self.test_object.negotiate_version,
+                                mock_conn, response)
+        self.assertTrue(mock_msr.called)
+        self.assertEqual(2, mock_pvh.call_count)
+        self.assertFalse(mock_save_data.called)
+
     def test_get_server(self):
         host = 'ironic-host'
         port = '6385'
@@ -516,6 +539,24 @@ class HttpClientTest(utils.BaseTestCase):
 
         self.assertEqual(http_client.OK, response.status_code)
         self.assertEqual(1, mock_negotiate.call_count)
+
+    @mock.patch.object(requests.Session, 'request', autospec=True)
+    @mock.patch.object(http.VersionNegotiationMixin, 'negotiate_version',
+                       autospec=False)
+    def test__http_request_explicit_version(self, mock_negotiate,
+                                            mock_session):
+        headers = {'User-Agent': 'python-ironicclient',
+                   'X-OpenStack-Ironic-API-Version': '1.28'}
+        kwargs = {'os_ironic_api_version': '1.30',
+                  'api_version_select_state': 'negotiated'}
+        mock_session.return_value = utils.mockSessionResponse(
+            {}, status_code=http_client.NO_CONTENT, version=1)
+        client = http.HTTPClient('http://localhost/', **kwargs)
+        response, body_iter = client._http_request('/v1/resources', 'GET',
+                                                   headers=headers)
+        mock_session.assert_called_once_with(mock.ANY, 'GET',
+                                             'http://localhost/v1/resources',
+                                             headers=headers)
 
     @mock.patch.object(http.LOG, 'debug', autospec=True)
     def test_log_curl_request_mask_password(self, mock_log):
