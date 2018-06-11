@@ -42,7 +42,7 @@ class BaremetalNodeCreateNegativeTests(base.TestCase):
         ('--resource-class', '', 'expected one argument'))
     @ddt.unpack
     def test_baremetal_node_create(self, argument, value, ex_text):
-        base_cmd = 'baremetal node create --driver fake'
+        base_cmd = 'baremetal node create --driver %s' % self.driver_name
         command = self.construct_cmd(base_cmd, argument, value)
         six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
                               self.openstack, command)

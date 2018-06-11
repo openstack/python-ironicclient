@@ -18,8 +18,6 @@ from ironicclient.tests.functional.osc.v1 import base
 class BaremetalDriverTests(base.TestCase):
     """Functional tests for baremetal driver commands."""
 
-    driver_name = 'fake'
-
     def test_show(self):
         """Show specified driver.
 

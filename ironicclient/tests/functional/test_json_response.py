@@ -150,9 +150,10 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
             }
         }
         node_name = 'nodejson'
-        response = self.ironic('node-create', flags='--json',
-                               params='-d fake -n {0}'.format(node_name),
-                               parse=False)
+        response = self.ironic(
+            'node-create', flags='--json',
+            params='-d fake-hardware -n {0}'.format(node_name),
+            parse=False)
         self.addCleanup(self.delete_node, node_name)
         _validate_json(response, schema)
 

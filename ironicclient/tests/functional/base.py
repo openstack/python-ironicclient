@@ -231,7 +231,7 @@ class FunctionalTestBase(base.ClientTestBase):
                 self.fail('Ironic node {0} has not been deleted!'
                           .format(node_id))
 
-    def create_node(self, driver='fake', params=''):
+    def create_node(self, driver='fake-hardware', params=''):
         node = self.ironic('node-create',
                            params='--driver {0} {1}'.format(driver, params))
 

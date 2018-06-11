@@ -50,7 +50,7 @@ class DriverSanityTestIronicClient(base.FunctionalTestBase):
         1) get list of drivers
         2) check that list of drivers is not empty
         """
-        driver = 'fake'
+        driver = 'fake-hardware'
         available_drivers = self.get_drivers_names()
         self.assertGreater(len(available_drivers), 0)
         self.assertIn(driver, available_drivers)

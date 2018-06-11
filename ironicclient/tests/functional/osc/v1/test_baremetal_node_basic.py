@@ -42,7 +42,7 @@ class BaremetalNodeTests(base.TestCase):
                                      params='--uuid {0}'.format(uuid))
         self.assertEqual(node_info['uuid'], uuid)
         self.assertEqual(node_info['name'], name)
-        self.assertEqual(node_info['driver'], 'fake')
+        self.assertEqual(node_info['driver'], self.driver_name)
         self.assertEqual(node_info['maintenance'], False)
         self.assertEqual(node_info['provision_state'], 'enroll')
         node_list = self.node_list()
@@ -59,7 +59,7 @@ class BaremetalNodeTests(base.TestCase):
         """
         node_info = self.node_create(
             params='--os-baremetal-api-version 1.5')
-        self.assertEqual(node_info['driver'], 'fake')
+        self.assertEqual(node_info['driver'], self.driver_name)
         self.assertEqual(node_info['maintenance'], False)
         self.assertEqual(node_info['provision_state'], 'available')
 

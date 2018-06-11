@@ -20,6 +20,8 @@ from ironicclient.tests.functional import base
 
 class TestCase(base.FunctionalTestBase):
 
+    driver_name = 'fake-hardware'
+
     def openstack(self, *args, **kwargs):
         return self._ironic(cmd='openstack', *args, **kwargs)
 
@@ -51,7 +53,7 @@ class TestCase(base.FunctionalTestBase):
         for key, value in expected.items():
             self.assertEqual(value, actual[key])
 
-    def node_create(self, driver='fake', name=None, params=''):
+    def node_create(self, driver=driver_name, name=None, params=''):
         """Create baremetal node and add cleanup.
 
         :param String driver: Driver for a new node
