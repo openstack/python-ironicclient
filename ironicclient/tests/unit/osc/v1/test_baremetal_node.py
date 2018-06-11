@@ -592,13 +592,12 @@ class TestBaremetalList(TestBaremetal):
                    'Console Enabled', 'Driver', 'Driver Info',
                    'Driver Internal Info', 'Extra', 'Instance Info',
                    'Instance UUID', 'Last Error', 'Maintenance',
-                   'Maintenance Reason', 'Power State', 'Properties',
-                   'Provisioning State', 'Provision Updated At',
-                   'Current RAID configuration', 'Reservation',
-                   'Resource Class',
-                   'Target Power State', 'Target Provision State',
-                   'Target RAID configuration', 'Traits',
-                   'Updated At', 'Inspection Finished At',
+                   'Maintenance Reason', 'Fault',
+                   'Power State', 'Properties', 'Provisioning State',
+                   'Provision Updated At', 'Current RAID configuration',
+                   'Reservation', 'Resource Class', 'Target Power State',
+                   'Target Provision State', 'Target RAID configuration',
+                   'Traits', 'Updated At', 'Inspection Finished At',
                    'Inspection Started At', 'UUID', 'Name',
                    'Boot Interface', 'Console Interface',
                    'Deploy Interface', 'Inspect Interface',
@@ -620,6 +619,7 @@ class TestBaremetalList(TestBaremetal):
             baremetal_fakes.baremetal_instance_uuid,
             '',
             baremetal_fakes.baremetal_maintenance,
+            '',
             '',
             baremetal_fakes.baremetal_power_state,
             '',
@@ -712,6 +712,33 @@ class TestBaremetalList(TestBaremetal):
         self.assertRaises(oscutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
+
+    def test_baremetal_list_fault(self):
+        arglist = [
+            '--maintenance',
+            '--fault', 'power failure',
+        ]
+        verifylist = [
+            ('maintenance', True),
+            ('fault', 'power failure'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'maintenance': True,
+            'fault': 'power failure'
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
 
     def test_baremetal_list_associated(self):
         arglist = [

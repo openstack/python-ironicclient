@@ -555,6 +555,11 @@ class ListBaremetalNode(command.Lister):
             default=None,
             help=_("Limit list to nodes not in maintenance mode"),
         )
+        parser.add_argument(
+            '--fault',
+            dest='fault',
+            metavar='<fault>',
+            help=_("List nodes in specified fault."))
         associated_group = parser.add_mutually_exclusive_group()
         associated_group.add_argument(
             '--associated',
@@ -625,6 +630,8 @@ class ListBaremetalNode(command.Lister):
             params['associated'] = False
         if parsed_args.maintenance is not None:
             params['maintenance'] = parsed_args.maintenance
+        if parsed_args.fault is not None:
+            params['fault'] = parsed_args.fault
         if parsed_args.provision_state:
             params['provision_state'] = parsed_args.provision_state
         if parsed_args.driver:

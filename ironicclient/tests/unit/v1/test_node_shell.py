@@ -46,6 +46,7 @@ class NodeShellTest(utils.BaseTestCase):
                'last_error',
                'maintenance',
                'maintenance_reason',
+               'fault',
                'name',
                'boot_interface',
                'console_interface',
