@@ -64,6 +64,7 @@ BAREMETAL_PORT = {
 baremetal_driver_hosts = ['fake-host1', 'fake-host2']
 baremetal_driver_name = 'fakedrivername'
 baremetal_driver_type = 'classic'
+baremetal_driver_default_bios_if = 'bios'
 baremetal_driver_default_boot_if = 'boot'
 baremetal_driver_default_console_if = 'console'
 baremetal_driver_default_deploy_if = 'deploy'
@@ -75,6 +76,7 @@ baremetal_driver_default_raid_if = 'raid'
 baremetal_driver_default_rescue_if = 'rescue'
 baremetal_driver_default_storage_if = 'storage'
 baremetal_driver_default_vendor_if = 'vendor'
+baremetal_driver_enabled_bios_ifs = ['bios', 'bios2']
 baremetal_driver_enabled_boot_ifs = ['boot', 'boot2']
 baremetal_driver_enabled_console_ifs = ['console', 'console2']
 baremetal_driver_enabled_deploy_ifs = ['deploy', 'deploy2']
@@ -91,6 +93,7 @@ BAREMETAL_DRIVER = {
     'hosts': baremetal_driver_hosts,
     'name': baremetal_driver_name,
     'type': baremetal_driver_type,
+    'default_bios_interface': baremetal_driver_default_bios_if,
     'default_boot_interface': baremetal_driver_default_boot_if,
     'default_console_interface': baremetal_driver_default_console_if,
     'default_deploy_interface': baremetal_driver_default_deploy_if,
@@ -102,6 +105,7 @@ BAREMETAL_DRIVER = {
     'default_rescue_interface': baremetal_driver_default_rescue_if,
     'default_storage_interface': baremetal_driver_default_storage_if,
     'default_vendor_interface': baremetal_driver_default_vendor_if,
+    'enabled_bios_interfaces': baremetal_driver_enabled_bios_ifs,
     'enabled_boot_interfaces': baremetal_driver_enabled_boot_ifs,
     'enabled_console_interfaces': baremetal_driver_enabled_console_ifs,
     'enabled_deploy_interfaces': baremetal_driver_enabled_deploy_ifs,
@@ -142,6 +146,8 @@ PORTGROUP = {'uuid': baremetal_portgroup_uuid,
 
 VIFS = {'vifs': [{'id': 'aaa-aa'}]}
 TRAITS = ['CUSTOM_FOO', 'CUSTOM_BAR']
+BIOS_SETTINGS = [{'name': 'bios_name_1', 'value': 'bios_value_1', 'links': []},
+                 {'name': 'bios_name_2', 'value': 'bios_value_2', 'links': []}]
 
 baremetal_volume_connector_uuid = 'vvv-cccccc-vvvv'
 baremetal_volume_connector_type = 'iqn'
