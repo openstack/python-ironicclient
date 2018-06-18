@@ -52,10 +52,8 @@ class FunctionalTestBase(base.ClientTestBase):
                     setattr(self, domain_attr, config[domain_attr])
         else:
             self.ironic_url = config['ironic_url']
-            self.os_auth_token = config['os_auth_token']
             client = base.CLIClient(cli_dir=cli_dir,
-                                    ironic_url=self.ironic_url,
-                                    os_auth_token=self.os_auth_token)
+                                    ironic_url=self.ironic_url)
         return client
 
     def _get_config(self):
@@ -86,7 +84,7 @@ class FunctionalTestBase(base.ClientTestBase):
                                           'os_project_domain_id',
                                           'os_identity_api_version']
         else:
-            conf_settings += ['os_auth_token', 'ironic_url']
+            conf_settings += ['ironic_url']
 
         cli_flags = {}
         missing = []
@@ -119,10 +117,9 @@ class FunctionalTestBase(base.ClientTestBase):
         :param params: optional positional args to use
         :type params: string
         """
-        flags = ('--os_auth_token %(token)s --ironic_url %(url)s %(flags)s'
+        flags = ('--os-endpoint %(url)s %(flags)s'
                  %
-                 {'token': self.os_auth_token,
-                  'url': self.ironic_url,
+                 {'url': self.ironic_url,
                   'flags': flags})
         return base.execute(cmd, action, flags, params,
                             cli_dir=self.client.cli_dir)
@@ -144,12 +141,15 @@ class FunctionalTestBase(base.ClientTestBase):
         """
         if cmd == 'openstack':
             config = self._get_config()
-            id_api_version = config['os_identity_api_version']
-            flags += ' --os-identity-api-version {0}'.format(id_api_version)
+            id_api_version = config.get('os_identity_api_version')
+            if id_api_version:
+                flags += ' --os-identity-api-version {}'.format(id_api_version)
         else:
             flags += ' --os-endpoint-type publicURL'
 
-        if hasattr(self, 'os_auth_token'):
+        if hasattr(self, 'ironic_url'):
+            if cmd == 'openstack':
+                flags += ' --os-auth-type none'
             return self._cmd_no_auth(cmd, action, flags, params)
         else:
             for keystone_object in 'user', 'project':
