@@ -59,7 +59,7 @@ class NodeManager(base.CreateManager):
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
              detail=False, sort_key=None, sort_dir=None, fields=None,
              provision_state=None, driver=None, resource_class=None,
-             chassis=None, fault=None):
+             chassis=None, fault=None, os_ironic_api_version=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -108,6 +108,8 @@ class NodeManager(base.CreateManager):
 
         :param fault: Optional. String value to get only nodes with
                       specified fault.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
 
         :returns: A list of nodes.
 
@@ -143,10 +145,12 @@ class NodeManager(base.CreateManager):
             path += '?' + '&'.join(filters)
 
         if limit is None:
-            return self._list(self._path(path), "nodes")
+            return self._list(self._path(path), "nodes",
+                              os_ironic_api_version=os_ironic_api_version)
         else:
-            return self._list_pagination(self._path(path), "nodes",
-                                         limit=limit)
+            return self._list_pagination(
+                self._path(path), "nodes", limit=limit,
+                os_ironic_api_version=os_ironic_api_version)
 
     def list_ports(self, node_id, marker=None, limit=None, sort_key=None,
                    sort_dir=None, detail=False, fields=None):
@@ -315,8 +319,9 @@ class NodeManager(base.CreateManager):
                 self._path(path), response_key="targets", limit=limit,
                 obj_class=volume_target.VolumeTarget)
 
-    def get(self, node_id, fields=None):
-        return self._get(resource_id=node_id, fields=fields)
+    def get(self, node_id, fields=None, os_ironic_api_version=None):
+        return self._get(resource_id=node_id, fields=fields,
+                         os_ironic_api_version=os_ironic_api_version)
 
     def get_by_instance_uuid(self, instance_uuid, fields=None):
         path = '?instance_uuid=%s' % instance_uuid
