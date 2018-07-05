@@ -2084,6 +2084,61 @@ class TestBaremetalSet(TestBaremetal):
     def test_baremetal_set_vendor_interface(self):
         self._test_baremetal_set_hardware_interface('vendor')
 
+    def _test_baremetal_reset_hardware_interface(self, interface):
+        arglist = [
+            'node_uuid',
+            '--reset-%s-interface' % interface,
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('reset_%s_interface' % interface, True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/%s_interface' % interface, 'op': 'remove'}]
+        )
+
+    def test_baremetal_reset_bios_interface(self):
+        self._test_baremetal_reset_hardware_interface('bios')
+
+    def test_baremetal_reset_boot_interface(self):
+        self._test_baremetal_reset_hardware_interface('boot')
+
+    def test_baremetal_reset_console_interface(self):
+        self._test_baremetal_reset_hardware_interface('console')
+
+    def test_baremetal_reset_deploy_interface(self):
+        self._test_baremetal_reset_hardware_interface('deploy')
+
+    def test_baremetal_reset_inspect_interface(self):
+        self._test_baremetal_reset_hardware_interface('inspect')
+
+    def test_baremetal_reset_management_interface(self):
+        self._test_baremetal_reset_hardware_interface('management')
+
+    def test_baremetal_reset_network_interface(self):
+        self._test_baremetal_reset_hardware_interface('network')
+
+    def test_baremetal_reset_power_interface(self):
+        self._test_baremetal_reset_hardware_interface('power')
+
+    def test_baremetal_reset_raid_interface(self):
+        self._test_baremetal_reset_hardware_interface('raid')
+
+    def test_baremetal_reset_rescue_interface(self):
+        self._test_baremetal_reset_hardware_interface('rescue')
+
+    def test_baremetal_reset_storage_interface(self):
+        self._test_baremetal_reset_hardware_interface('storage')
+
+    def test_baremetal_reset_vendor_interface(self):
+        self._test_baremetal_reset_hardware_interface('vendor')
+
     def test_baremetal_set_resource_class(self):
         arglist = [
             'node_uuid',

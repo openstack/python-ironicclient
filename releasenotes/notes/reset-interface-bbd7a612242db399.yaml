@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Adds new family of arguments to the ``openstack baremetal node set``
+    command: ``--reset-XXX-interface``, where ``XXX`` is a name of a hardware
+    interface. This argument resets the node's ``XXX_interface`` field to its
+    calculated default (based on the node's hardware type and the
+    configuration).

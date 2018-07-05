@@ -34,6 +34,11 @@ CONFIG_DRIVE_ARG_HELP = _(
     "a directory, a config drive will be generated from it.")
 
 
+SUPPORTED_INTERFACES = ['bios', 'boot', 'console', 'deploy', 'inspect',
+                        'management', 'network', 'power', 'raid', 'rescue',
+                        'storage', 'vendor']
+
+
 class ProvisionStateBaremetalNode(command.Command):
     """Base provision state class"""
 
@@ -433,13 +438,8 @@ class CreateBaremetalNode(command.ShowOne):
 
         field_list = ['chassis_uuid', 'driver', 'driver_info',
                       'properties', 'extra', 'uuid', 'name',
-                      'bios_interface', 'boot_interface',
-                      'console_interface', 'deploy_interface',
-                      'inspect_interface', 'management_interface',
-                      'network_interface', 'power_interface',
-                      'raid_interface', 'rescue_interface',
-                      'storage_interface', 'vendor_interface',
-                      'resource_class']
+                      'resource_class'] + ['%s_interface' % iface
+                                           for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'driver_info')
@@ -972,6 +972,19 @@ class SetBaremetalNode(command.Command):
 
     log = logging.getLogger(__name__ + ".SetBaremetalNode")
 
+    def _add_interface_args(self, parser, iface, set_help, reset_help):
+        grp = parser.add_mutually_exclusive_group()
+        grp.add_argument(
+            '--%s-interface' % iface,
+            metavar='<%s_interface>' % iface,
+            help=set_help
+        )
+        grp.add_argument(
+            '--reset-%s-interface' % iface,
+            action='store_true',
+            help=reset_help
+        )
+
     def get_parser(self, prog_name):
         parser = super(SetBaremetalNode, self).get_parser(prog_name)
 
@@ -1000,65 +1013,77 @@ class SetBaremetalNode(command.Command):
             metavar="<driver>",
             help=_("Set the driver for the node"),
         )
-        parser.add_argument(
-            '--bios-interface',
-            metavar='<bios_interface>',
-            help=_('Set the BIOS interface for the node'),
+        self._add_interface_args(
+            parser, 'bios',
+            set_help=_('Set the BIOS interface for the node'),
+            reset_help=_('Reset the BIOS interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--boot-interface',
-            metavar='<boot_interface>',
-            help=_('Set the boot interface for the node'),
+        self._add_interface_args(
+            parser, 'boot',
+            set_help=_('Set the boot interface for the node'),
+            reset_help=_('Reset the boot interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--console-interface',
-            metavar='<console_interface>',
-            help=_('Set the console interface for the node'),
+        self._add_interface_args(
+            parser, 'console',
+            set_help=_('Set the console interface for the node'),
+            reset_help=_('Reset the console interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--deploy-interface',
-            metavar='<deploy_interface>',
-            help=_('Set the deploy interface for the node'),
+        self._add_interface_args(
+            parser, 'deploy',
+            set_help=_('Set the deploy interface for the node'),
+            reset_help=_('Reset the deploy interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--inspect-interface',
-            metavar='<inspect_interface>',
-            help=_('Set the inspect interface for the node'),
+        self._add_interface_args(
+            parser, 'inspect',
+            set_help=_('Set the inspect interface for the node'),
+            reset_help=_('Reset the inspect interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--management-interface',
-            metavar='<management_interface>',
-            help=_('Set the management interface for the node'),
+        self._add_interface_args(
+            parser, 'management',
+            set_help=_('Set the management interface for the node'),
+            reset_help=_('Reset the management interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--network-interface',
-            metavar='<network_interface>',
-            help=_('Set the network interface for the node'),
+        self._add_interface_args(
+            parser, 'network',
+            set_help=_('Set the network interface for the node'),
+            reset_help=_('Reset the network interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--power-interface',
-            metavar='<power_interface>',
-            help=_('Set the power interface for the node'),
+        self._add_interface_args(
+            parser, 'power',
+            set_help=_('Set the power interface for the node'),
+            reset_help=_('Reset the power interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--raid-interface',
-            metavar='<raid_interface>',
-            help=_('Set the RAID interface for the node'),
+        self._add_interface_args(
+            parser, 'raid',
+            set_help=_('Set the RAID interface for the node'),
+            reset_help=_('Reset the RAID interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--rescue-interface',
-            metavar='<rescue_interface>',
-            help=_('Set the rescue interface for the node'),
+        self._add_interface_args(
+            parser, 'rescue',
+            set_help=_('Set the rescue interface for the node'),
+            reset_help=_('Reset the rescue interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--storage-interface',
-            metavar='<storage_interface>',
-            help=_('Set the storage interface for the node'),
+        self._add_interface_args(
+            parser, 'storage',
+            set_help=_('Set the storage interface for the node'),
+            reset_help=_('Reset the storage interface to its hardware type '
+                         'default'),
         )
-        parser.add_argument(
-            '--vendor-interface',
-            metavar='<vendor_interface>',
-            help=_('Set the vendor interface for the node'),
+        self._add_interface_args(
+            parser, 'vendor',
+            set_help=_('Set the vendor interface for the node'),
+            reset_help=_('Reset the vendor interface to its hardware type '
+                         'default'),
         )
         parser.add_argument(
             '--resource-class',
@@ -1137,66 +1162,18 @@ class SetBaremetalNode(command.Command):
             driver = ["driver=%s" % parsed_args.driver]
             properties.extend(utils.args_array_to_patch(
                 'add', driver))
-        if parsed_args.bios_interface:
-            bios_interface = [
-                "bios_interface=%s" % parsed_args.bios_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', bios_interface))
-        if parsed_args.boot_interface:
-            boot_interface = [
-                "boot_interface=%s" % parsed_args.boot_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', boot_interface))
-        if parsed_args.console_interface:
-            console_interface = [
-                "console_interface=%s" % parsed_args.console_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', console_interface))
-        if parsed_args.deploy_interface:
-            deploy_interface = [
-                "deploy_interface=%s" % parsed_args.deploy_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', deploy_interface))
-        if parsed_args.inspect_interface:
-            inspect_interface = [
-                "inspect_interface=%s" % parsed_args.inspect_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', inspect_interface))
-        if parsed_args.management_interface:
-            management_interface = [
-                "management_interface=%s" % parsed_args.management_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', management_interface))
-        if parsed_args.network_interface:
-            network_interface = [
-                "network_interface=%s" % parsed_args.network_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', network_interface))
-        if parsed_args.power_interface:
-            power_interface = [
-                "power_interface=%s" % parsed_args.power_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', power_interface))
-        if parsed_args.raid_interface:
-            raid_interface = [
-                "raid_interface=%s" % parsed_args.raid_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', raid_interface))
-        if parsed_args.rescue_interface:
-            rescue_interface = [
-                "rescue_interface=%s" % parsed_args.rescue_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', rescue_interface))
-        if parsed_args.storage_interface:
-            storage_interface = [
-                "storage_interface=%s" % parsed_args.storage_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', storage_interface))
-        if parsed_args.vendor_interface:
-            vendor_interface = [
-                "vendor_interface=%s" % parsed_args.vendor_interface]
-            properties.extend(utils.args_array_to_patch(
-                'add', vendor_interface))
+
+        for iface in SUPPORTED_INTERFACES:
+            field = '%s_interface' % iface
+            if getattr(parsed_args, field):
+                properties.extend(utils.args_array_to_patch(
+                    'add',
+                    ["%s_interface=%s" % (iface,
+                                          getattr(parsed_args, field))]))
+            elif getattr(parsed_args, 'reset_%s_interface' % iface):
+                properties.extend(utils.args_array_to_patch(
+                    'remove', ['%s_interface' % iface]))
+
         if parsed_args.resource_class:
             resource_class = [
                 "resource_class=%s" % parsed_args.resource_class]
