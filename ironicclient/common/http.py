@@ -131,7 +131,7 @@ class VersionNegotiationMixin(object):
         if (resp and req_api_ver != self.os_ironic_api_version and
                 self.api_version_select_state == 'negotiated'):
             # If we have a non-standard api version on the request,
-            # but we think we've negotiated, then the call was overriden.
+            # but we think we've negotiated, then the call was overridden.
             # We should report the error with the called version
             requested_version = req_api_ver
             # And then we shouldn't save the newly negotiated
