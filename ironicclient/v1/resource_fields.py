@@ -53,6 +53,7 @@ class Resource(object):
         'default_rescue_interface': 'Default Rescue Interface',
         'default_storage_interface': 'Default Storage Interface',
         'default_vendor_interface': 'Default Vendor Interface',
+        'deploy_step': 'Deploy Step',
         'description': 'Description',
         'driver': 'Driver',
         'driver_info': 'Driver Info',
@@ -201,6 +202,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'created_at',
      'clean_step',
      'console_enabled',
+     'deploy_step',
      'driver',
      'driver_info',
      'driver_internal_info',
@@ -246,6 +248,7 @@ NODE_DETAILED_RESOURCE = Resource(
         # internal to ironic. See bug #1443003 for more details.
         'chassis_uuid',
         'clean_step',
+        'deploy_step',
         'driver_info',
         'driver_internal_info',
         'extra',

@@ -37,6 +37,7 @@ class NodeShellTest(utils.BaseTestCase):
                'clean_step',
                'created_at',
                'console_enabled',
+               'deploy_step',
                'driver',
                'driver_info',
                'driver_internal_info',
