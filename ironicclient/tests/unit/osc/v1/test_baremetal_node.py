@@ -594,7 +594,7 @@ class TestBaremetalList(TestBaremetal):
         )
 
         collist = ('Chassis UUID', 'Created At', 'Clean Step',
-                   'Console Enabled', 'Driver', 'Driver Info',
+                   'Console Enabled', 'Deploy Step', 'Driver', 'Driver Info',
                    'Driver Internal Info', 'Extra', 'Instance Info',
                    'Instance UUID', 'Last Error', 'Maintenance',
                    'Maintenance Reason', 'Fault',
@@ -612,6 +612,7 @@ class TestBaremetalList(TestBaremetal):
                    'Storage Interface', 'Vendor Interface')
         self.assertEqual(collist, columns)
         datalist = ((
+            '',
             '',
             '',
             '',

@@ -38,7 +38,7 @@ from ironicclient.common import utils
 from ironicclient import exc
 
 
-LAST_KNOWN_API_VERSION = 34
+LAST_KNOWN_API_VERSION = http.LAST_KNOWN_API_VERSION
 LATEST_VERSION = '1.{}'.format(LAST_KNOWN_API_VERSION)
 
 

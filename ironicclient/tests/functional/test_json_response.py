@@ -45,6 +45,7 @@ class TestNodeJsonResponse(base.FunctionalTestBase):
             "maintenance_reason": {"type": ["string", "null"]},
             "provision_state": {"type": "string"},
             "clean_step": {"type": "object"},
+            "deploy_step": {"type": "object"},
             "uuid": {"type": "string"},
             "console_enabled": {"type": "boolean"},
             "target_provision_state": {"type": ["string", "null"]},

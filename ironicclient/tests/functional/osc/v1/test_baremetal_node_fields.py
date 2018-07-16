@@ -82,6 +82,7 @@ class TestNodeShowFields(base.TestCase):
         rows = ['console_enabled',
                 'clean_step',
                 'created_at',
+                'deploy_step',
                 'driver',
                 'driver_info',
                 'driver_internal_info',

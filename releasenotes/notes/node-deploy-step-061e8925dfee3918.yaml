@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Adds support for a node's ``deploy_step`` (read-only) field.
+    The deploy step indicates which step is being performed
+    during the deployment/provisioning of a node.
+    It is available starting with Bare Metal API version 1.44.
+    For more details, see
+    `story 1753128 <https://storyboard.openstack.org/#!/story/1753128>`_.
