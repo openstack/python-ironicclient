@@ -44,8 +44,10 @@ class FakeAPI(object):
         self.responses = responses
         self.calls = []
 
-    def _request(self, method, url, headers=None, body=None):
+    def _request(self, method, url, headers=None, body=None, params=None):
         call = (method, url, headers or {}, body)
+        if params:
+            call += (params,)
         self.calls.append(call)
         return self.responses[url][method]
 

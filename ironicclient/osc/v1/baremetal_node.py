@@ -1086,6 +1086,12 @@ class SetBaremetalNode(command.Command):
                          'default'),
         )
         parser.add_argument(
+            '--reset-interfaces',
+            action='store_true', default=None,
+            help=_('Reset all interfaces not specified explicitly to their '
+                   'default implementations. Only valid with --driver.'),
+        )
+        parser.add_argument(
             '--resource-class',
             metavar='<resource_class>',
             help=_('Set the resource class for the node'),
@@ -1162,6 +1168,9 @@ class SetBaremetalNode(command.Command):
             driver = ["driver=%s" % parsed_args.driver]
             properties.extend(utils.args_array_to_patch(
                 'add', driver))
+        if parsed_args.reset_interfaces and not parsed_args.driver:
+            raise exc.CommandError(
+                _("--reset-interfaces can only be specified with --driver"))
 
         for iface in SUPPORTED_INTERFACES:
             field = '%s_interface' % iface
@@ -1193,7 +1202,9 @@ class SetBaremetalNode(command.Command):
                 'add', ['instance_info/' + x for x
                         in parsed_args.instance_info]))
         if properties:
-            baremetal_client.node.update(parsed_args.node, properties)
+            baremetal_client.node.update(
+                parsed_args.node, properties,
+                reset_interfaces=parsed_args.reset_interfaces)
         elif not parsed_args.target_raid_config:
             self.log.warning("Please specify what to set.")
 

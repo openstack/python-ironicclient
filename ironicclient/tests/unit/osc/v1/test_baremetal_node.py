@@ -1920,7 +1920,8 @@ class TestBaremetalSet(TestBaremetal):
             'node_uuid',
             [{'path': '/properties/path/to/property',
               'value': 'value',
-              'op': 'add'}])
+              'op': 'add'}],
+            reset_interfaces=None)
 
     def test_baremetal_set_multiple_properties(self):
         arglist = [
@@ -1948,7 +1949,8 @@ class TestBaremetalSet(TestBaremetal):
               'op': 'add'},
              {'path': '/properties/other/path',
               'value': 'value2',
-              'op': 'add'}]
+              'op': 'add'}],
+            reset_interfaces=None,
         )
 
     def test_baremetal_set_instance_uuid(self):
@@ -1967,7 +1969,8 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/instance_uuid', 'value': 'xxxxx', 'op': 'add'}]
+            [{'path': '/instance_uuid', 'value': 'xxxxx', 'op': 'add'}],
+            reset_interfaces=None,
         )
 
     def test_baremetal_set_name(self):
@@ -1986,7 +1989,8 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/name', 'value': 'xxxxx', 'op': 'add'}]
+            [{'path': '/name', 'value': 'xxxxx', 'op': 'add'}],
+            reset_interfaces=None,
         )
 
     def test_baremetal_set_chassis(self):
@@ -2006,7 +2010,8 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/chassis_uuid', 'value': chassis, 'op': 'add'}]
+            [{'path': '/chassis_uuid', 'value': chassis, 'op': 'add'}],
+            reset_interfaces=None,
         )
 
     def test_baremetal_set_driver(self):
@@ -2025,8 +2030,47 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/driver', 'value': 'xxxxx', 'op': 'add'}]
+            [{'path': '/driver', 'value': 'xxxxx', 'op': 'add'}],
+            reset_interfaces=None,
         )
+
+    def test_baremetal_set_driver_reset_interfaces(self):
+        arglist = [
+            'node_uuid',
+            '--driver', 'xxxxx',
+            '--reset-interfaces',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('driver', 'xxxxx'),
+            ('reset_interfaces', True),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/driver', 'value': 'xxxxx', 'op': 'add'}],
+            reset_interfaces=True,
+        )
+
+    def test_reset_interfaces_without_driver(self):
+        arglist = [
+            'node_uuid',
+            '--reset-interfaces',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('reset_interfaces', True),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.assertRaises(exc.CommandError,
+                          self.cmd.take_action, parsed_args)
+        self.assertFalse(self.baremetal_mock.node.update.called)
 
     def _test_baremetal_set_hardware_interface(self, interface):
         arglist = [
@@ -2045,7 +2089,8 @@ class TestBaremetalSet(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/%s_interface' % interface,
-              'value': 'xxxxx', 'op': 'add'}]
+              'value': 'xxxxx', 'op': 'add'}],
+            reset_interfaces=None,
         )
 
     def test_baremetal_set_bios_interface(self):
@@ -2100,7 +2145,8 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/%s_interface' % interface, 'op': 'remove'}]
+            [{'path': '/%s_interface' % interface, 'op': 'remove'}],
+            reset_interfaces=None,
         )
 
     def test_baremetal_reset_bios_interface(self):
@@ -2155,7 +2201,8 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/resource_class', 'value': 'foo', 'op': 'add'}]
+            [{'path': '/resource_class', 'value': 'foo', 'op': 'add'}],
+            reset_interfaces=None,
         )
 
     def test_baremetal_set_extra(self):
@@ -2174,7 +2221,8 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}]
+            [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}],
+            reset_interfaces=None,
         )
 
     def test_baremetal_set_driver_info(self):
@@ -2193,7 +2241,8 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/driver_info/foo', 'value': 'bar', 'op': 'add'}]
+            [{'path': '/driver_info/foo', 'value': 'bar', 'op': 'add'}],
+            reset_interfaces=None,
         )
 
     def test_baremetal_set_instance_info(self):
@@ -2212,7 +2261,8 @@ class TestBaremetalSet(TestBaremetal):
 
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/instance_info/foo', 'value': 'bar', 'op': 'add'}]
+            [{'path': '/instance_info/foo', 'value': 'bar', 'op': 'add'}],
+            reset_interfaces=None,
         )
 
     @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
@@ -2264,7 +2314,8 @@ class TestBaremetalSet(TestBaremetal):
             assert_called_once_with('node_uuid', expected_target_raid_config)
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/name', 'value': 'xxxxx', 'op': 'add'}])
+            [{'path': '/name', 'value': 'xxxxx', 'op': 'add'}],
+            reset_interfaces=None)
 
     @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)

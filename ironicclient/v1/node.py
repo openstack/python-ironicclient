@@ -343,10 +343,14 @@ class NodeManager(base.CreateManager):
         return self._delete(resource_id=node_id)
 
     def update(self, node_id, patch, http_method='PATCH',
-               os_ironic_api_version=None):
+               os_ironic_api_version=None, reset_interfaces=None):
+        params = {}
+        if reset_interfaces is not None:
+            params['reset_interfaces'] = reset_interfaces
         return self._update(resource_id=node_id, patch=patch,
                             method=http_method,
-                            os_ironic_api_version=os_ironic_api_version)
+                            os_ironic_api_version=os_ironic_api_version,
+                            params=params)
 
     def vendor_passthru(self, node_id, method, args=None,
                         http_method=None):

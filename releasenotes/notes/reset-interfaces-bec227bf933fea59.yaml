@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds the new argument ``--reset-interfaces`` to the
+    ``openstack baremetal node set`` command. It can be used together with
+    ``--driver`` to reset all interfaces to their defaults.

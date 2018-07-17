@@ -209,7 +209,7 @@ class Manager(object):
         return self.__list(url, response_key=response_key)
 
     def _update(self, resource_id, patch, method='PATCH',
-                os_ironic_api_version=None):
+                os_ironic_api_version=None, params=None):
         """Update a resource.
 
         :param resource_id: Resource identifier.
@@ -217,6 +217,7 @@ class Manager(object):
         :param method: Name of the method for the request.
         :param os_ironic_api_version: String version (e.g. "1.35") to use for
             the request.  If not specified, the client's default is used.
+        :param params: query parameters to pass.
         """
 
         url = self._path(resource_id)
@@ -226,6 +227,8 @@ class Manager(object):
         if os_ironic_api_version is not None:
             kwargs['headers'] = {'X-OpenStack-Ironic-API-Version':
                                  os_ironic_api_version}
+        if params:
+            kwargs['params'] = params
         resp, body = self.api.json_request(method, url, **kwargs)
         # PATCH/PUT requests may not return a body
         if body:
