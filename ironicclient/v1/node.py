@@ -53,13 +53,14 @@ class NodeManager(base.CreateManager):
                             'network_interface', 'power_interface',
                             'raid_interface', 'rescue_interface',
                             'storage_interface', 'vendor_interface',
-                            'resource_class']
+                            'resource_class', 'conductor_group']
     _resource_name = 'nodes'
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,
              detail=False, sort_key=None, sort_dir=None, fields=None,
              provision_state=None, driver=None, resource_class=None,
-             chassis=None, fault=None, os_ironic_api_version=None):
+             chassis=None, fault=None, os_ironic_api_version=None,
+             conductor_group=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -111,6 +112,9 @@ class NodeManager(base.CreateManager):
         :param os_ironic_api_version: String version (e.g. "1.35") to use for
             the request.  If not specified, the client's default is used.
 
+        :param conductor_group: Optional. String value to get only nodes
+                                with the given conductor group set.
+
         :returns: A list of nodes.
 
         """
@@ -137,6 +141,8 @@ class NodeManager(base.CreateManager):
             filters.append('resource_class=%s' % resource_class)
         if chassis is not None:
             filters.append('chassis_uuid=%s' % chassis)
+        if conductor_group is not None:
+            filters.append('conductor_group=%s' % conductor_group)
 
         path = ''
         if detail:

@@ -41,7 +41,8 @@ NODE1 = {'uuid': '66666666-7777-8888-9999-000000000000',
          'properties': {'num_cpu': 4},
          'name': 'fake-node-1',
          'resource_class': 'foo',
-         'extra': {}}
+         'extra': {},
+         'conductor_group': 'in-the-closet-to-the-left'}
 NODE2 = {'uuid': '66666666-7777-8888-9999-111111111111',
          'instance_uuid': '66666666-7777-8888-9999-222222222222',
          'chassis_uuid': 'aaaaaaaa-1111-bbbb-2222-cccccccccccc',
@@ -194,6 +195,13 @@ fake_responses = {
         )
     },
     '/v1/nodes/?resource_class=foo':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1]},
+        )
+    },
+    '/v1/nodes/?conductor_group=foo':
     {
         'GET': (
             {},
@@ -775,6 +783,15 @@ class NodeManagerTest(testtools.TestCase):
         nodes = self.mgr.list(resource_class="foo")
         expect = [
             ('GET', '/v1/nodes/?resource_class=foo', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_conductor_group(self):
+        nodes = self.mgr.list(conductor_group='foo')
+        expect = [
+            ('GET', '/v1/nodes/?conductor_group=foo', {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))

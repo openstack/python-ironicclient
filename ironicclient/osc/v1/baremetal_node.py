@@ -428,6 +428,10 @@ class CreateBaremetalNode(command.ShowOne):
             '--resource-class',
             metavar='<resource_class>',
             help=_('Resource class for mapping nodes to Nova flavors'))
+        parser.add_argument(
+            '--conductor-group',
+            metavar='<conductor_group>',
+            help=_('Conductor group the node will belong to'))
 
         return parser
 
@@ -437,7 +441,7 @@ class CreateBaremetalNode(command.ShowOne):
         baremetal_client = self.app.client_manager.baremetal
 
         field_list = ['chassis_uuid', 'driver', 'driver_info',
-                      'properties', 'extra', 'uuid', 'name',
+                      'properties', 'extra', 'uuid', 'name', 'conductor_group',
                       'resource_class'] + ['%s_interface' % iface
                                            for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
@@ -594,6 +598,11 @@ class ListBaremetalNode(command.Lister):
             metavar='<resource class>',
             help=_("Limit list to nodes with resource class <resource class>"))
         parser.add_argument(
+            '--conductor-group',
+            metavar='<conductor_group>',
+            help=_("Limit list to nodes with conductor group <conductor "
+                   "group>"))
+        parser.add_argument(
             '--chassis',
             dest='chassis',
             metavar='<chassis UUID>',
@@ -635,18 +644,13 @@ class ListBaremetalNode(command.Lister):
             params['associated'] = True
         if parsed_args.unassociated:
             params['associated'] = False
-        if parsed_args.maintenance is not None:
-            params['maintenance'] = parsed_args.maintenance
-        if parsed_args.fault is not None:
-            params['fault'] = parsed_args.fault
-        if parsed_args.provision_state:
-            params['provision_state'] = parsed_args.provision_state
-        if parsed_args.driver:
-            params['driver'] = parsed_args.driver
-        if parsed_args.resource_class:
-            params['resource_class'] = parsed_args.resource_class
-        if parsed_args.chassis:
-            params['chassis'] = parsed_args.chassis
+        for field in ['maintenance', 'fault', 'conductor_group']:
+            if getattr(parsed_args, field) is not None:
+                params[field] = getattr(parsed_args, field)
+        for field in ['provision_state', 'driver', 'resource_class',
+                      'chassis']:
+            if getattr(parsed_args, field):
+                params[field] = getattr(parsed_args, field)
         if parsed_args.long:
             params['detail'] = parsed_args.long
             columns = res_fields.NODE_DETAILED_RESOURCE.fields
@@ -1097,6 +1101,11 @@ class SetBaremetalNode(command.Command):
             help=_('Set the resource class for the node'),
         )
         parser.add_argument(
+            '--conductor-group',
+            metavar='<conductor_group>',
+            help=_('Set the conductor group for the node'),
+        )
+        parser.add_argument(
             '--target-raid-config',
             metavar='<target_raid_config>',
             help=_('Set the target RAID configuration (JSON) for the node. '
@@ -1152,22 +1161,13 @@ class SetBaremetalNode(command.Command):
                                                          raid_config)
 
         properties = []
-        if parsed_args.instance_uuid:
-            instance_uuid = ["instance_uuid=%s" % parsed_args.instance_uuid]
-            properties.extend(utils.args_array_to_patch(
-                'add', instance_uuid))
-        if parsed_args.name:
-            name = ["name=%s" % parsed_args.name]
-            properties.extend(utils.args_array_to_patch(
-                'add', name))
-        if parsed_args.chassis_uuid:
-            chassis_uuid = ["chassis_uuid=%s" % parsed_args.chassis_uuid]
-            properties.extend(utils.args_array_to_patch(
-                'add', chassis_uuid))
-        if parsed_args.driver:
-            driver = ["driver=%s" % parsed_args.driver]
-            properties.extend(utils.args_array_to_patch(
-                'add', driver))
+        for field in ['instance_uuid', 'name', 'chassis_uuid', 'driver',
+                      'resource_class', 'conductor_group']:
+            value = getattr(parsed_args, field)
+            if value:
+                properties.extend(utils.args_array_to_patch(
+                    'add', ["%s=%s" % (field, value)]))
+
         if parsed_args.reset_interfaces and not parsed_args.driver:
             raise exc.CommandError(
                 _("--reset-interfaces can only be specified with --driver"))
@@ -1183,11 +1183,6 @@ class SetBaremetalNode(command.Command):
                 properties.extend(utils.args_array_to_patch(
                     'remove', ['%s_interface' % iface]))
 
-        if parsed_args.resource_class:
-            resource_class = [
-                "resource_class=%s" % parsed_args.resource_class]
-            properties.extend(utils.args_array_to_patch(
-                'add', resource_class))
         if parsed_args.property:
             properties.extend(utils.args_array_to_patch(
                 'add', ['properties/' + x for x in parsed_args.property]))
@@ -1417,6 +1412,12 @@ class UnsetBaremetalNode(command.Command):
             action='store_true',
             help=_('Unset vendor interface on this baremetal node'),
         )
+        parser.add_argument(
+            "--conductor-group",
+            action="store_true",
+            help=_('Unset conductor group for this baremetal node (the '
+                   'default group will be used)'),
+        )
 
         return parser
 
@@ -1432,15 +1433,16 @@ class UnsetBaremetalNode(command.Command):
             baremetal_client.node.set_target_raid_config(parsed_args.node, {})
 
         properties = []
-        if parsed_args.instance_uuid:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['instance_uuid']))
-        if parsed_args.name:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['name']))
-        if parsed_args.resource_class:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['resource_class']))
+        for field in ['instance_uuid', 'name', 'chassis_uuid',
+                      'resource_class', 'conductor_group',
+                      'bios_interface', 'boot_interface', 'console_interface',
+                      'deploy_interface', 'inspect_interface',
+                      'management_interface', 'network_interface',
+                      'power_interface', 'raid_interface', 'rescue_interface',
+                      'storage_interface', 'vendor_interface']:
+            if getattr(parsed_args, field):
+                properties.extend(utils.args_array_to_patch('remove', [field]))
+
         if parsed_args.property:
             properties.extend(utils.args_array_to_patch('remove',
                               ['properties/' + x
@@ -1456,45 +1458,6 @@ class UnsetBaremetalNode(command.Command):
             properties.extend(utils.args_array_to_patch('remove',
                               ['instance_info/' + x for x
                                in parsed_args.instance_info]))
-        if parsed_args.chassis_uuid:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['chassis_uuid']))
-        if parsed_args.bios_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['bios_interface']))
-        if parsed_args.boot_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['boot_interface']))
-        if parsed_args.console_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['console_interface']))
-        if parsed_args.deploy_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['deploy_interface']))
-        if parsed_args.inspect_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['inspect_interface']))
-        if parsed_args.management_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['management_interface']))
-        if parsed_args.network_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['network_interface']))
-        if parsed_args.power_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['power_interface']))
-        if parsed_args.raid_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['raid_interface']))
-        if parsed_args.rescue_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['rescue_interface']))
-        if parsed_args.storage_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['storage_interface']))
-        if parsed_args.vendor_interface:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['vendor_interface']))
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
         elif not parsed_args.target_raid_config:

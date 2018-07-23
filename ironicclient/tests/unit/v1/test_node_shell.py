@@ -36,6 +36,7 @@ class NodeShellTest(utils.BaseTestCase):
         exp = ['chassis_uuid',
                'clean_step',
                'created_at',
+               'conductor_group',
                'console_enabled',
                'deploy_step',
                'driver',

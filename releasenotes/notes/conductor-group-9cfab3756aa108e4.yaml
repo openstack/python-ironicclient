@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Adds support for the ``--conductor-group`` argument to the following
+    CLI commands:
+
+    * ``openstack baremetal node create``
+    * ``openstack baremetal node set``
+    * ``openstack baremetal node unset``
+    * ``openstack baremetal node list``
+
+    This feature requires bare metal API 1.46.

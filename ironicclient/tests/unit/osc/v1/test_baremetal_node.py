@@ -450,6 +450,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('resource_class', 'foo')],
                                 {'resource_class': 'foo'})
 
+    def test_baremetal_create_with_conductor_group(self):
+        self.check_with_options(['--conductor-group', 'conductor_group'],
+                                [('conductor_group', 'conductor_group')],
+                                {'conductor_group': 'conductor_group'})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -594,10 +599,10 @@ class TestBaremetalList(TestBaremetal):
         )
 
         collist = ('Chassis UUID', 'Created At', 'Clean Step',
-                   'Console Enabled', 'Deploy Step', 'Driver', 'Driver Info',
-                   'Driver Internal Info', 'Extra', 'Instance Info',
-                   'Instance UUID', 'Last Error', 'Maintenance',
-                   'Maintenance Reason', 'Fault',
+                   'Conductor Group', 'Console Enabled', 'Deploy Step',
+                   'Driver', 'Driver Info', 'Driver Internal Info', 'Extra',
+                   'Instance Info', 'Instance UUID', 'Last Error',
+                   'Maintenance', 'Maintenance Reason', 'Fault',
                    'Power State', 'Properties', 'Provisioning State',
                    'Provision Updated At', 'Current RAID configuration',
                    'Reservation', 'Resource Class', 'Target Power State',
@@ -612,6 +617,7 @@ class TestBaremetalList(TestBaremetal):
                    'Storage Interface', 'Vendor Interface')
         self.assertEqual(collist, columns)
         datalist = ((
+            '',
             '',
             '',
             '',
@@ -895,6 +901,56 @@ class TestBaremetalList(TestBaremetal):
             'marker': None,
             'limit': None,
             'chassis': chassis_uuid
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_conductor_group(self):
+        conductor_group = 'in-the-closet-to-the-left'
+        arglist = [
+            '--conductor-group', conductor_group,
+        ]
+        verifylist = [
+            ('conductor_group', conductor_group),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'conductor_group': conductor_group
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_empty_conductor_group(self):
+        conductor_group = ''
+        arglist = [
+            '--conductor-group', conductor_group,
+        ]
+        verifylist = [
+            ('conductor_group', conductor_group),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'conductor_group': conductor_group
         }
 
         self.baremetal_mock.node.list.assert_called_with(
@@ -2205,6 +2261,26 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
+    def test_baremetal_set_conductor_group(self):
+        arglist = [
+            'node_uuid',
+            '--conductor-group', 'foo',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('conductor_group', 'foo')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/conductor_group', 'value': 'foo', 'op': 'add'}],
+            reset_interfaces=None,
+        )
+
     def test_baremetal_set_extra(self):
         arglist = [
             'node_uuid',
@@ -2636,6 +2712,25 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/resource_class', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_conductor_group(self):
+        arglist = [
+            'node_uuid',
+            '--conductor-group',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('conductor_group', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/conductor_group', 'op': 'remove'}]
         )
 
     def test_baremetal_unset_extra(self):
