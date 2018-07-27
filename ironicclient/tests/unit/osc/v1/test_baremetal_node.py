@@ -287,7 +287,7 @@ class TestBaremetalCreate(TestBaremetal):
             baremetal_fakes.baremetal_uuid,
         )
         self.actual_kwargs = {
-            'driver': 'fake_driver',
+            'driver': 'fake_driver'
         }
 
     def check_with_options(self, addl_arglist, addl_verifylist, addl_kwargs):
@@ -455,6 +455,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('conductor_group', 'conductor_group')],
                                 {'conductor_group': 'conductor_group'})
 
+    def test_baremetal_create_with_automated_clean(self):
+        self.check_with_options(['--automated-clean'],
+                                [('automated_clean', True)],
+                                {'automated_clean': True})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -598,14 +603,15 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-        collist = ('Chassis UUID', 'Created At', 'Clean Step',
-                   'Conductor Group', 'Console Enabled', 'Deploy Step',
-                   'Driver', 'Driver Info', 'Driver Internal Info', 'Extra',
-                   'Instance Info', 'Instance UUID', 'Last Error',
-                   'Maintenance', 'Maintenance Reason', 'Fault',
-                   'Power State', 'Properties', 'Provisioning State',
-                   'Provision Updated At', 'Current RAID configuration',
-                   'Reservation', 'Resource Class', 'Target Power State',
+        collist = ('Automated clean', 'Chassis UUID', 'Created At',
+                   'Clean Step', 'Conductor Group', 'Console Enabled',
+                   'Deploy Step', 'Driver', 'Driver Info',
+                   'Driver Internal Info', 'Extra', 'Instance Info',
+                   'Instance UUID', 'Last Error', 'Maintenance',
+                   'Maintenance Reason', 'Fault', 'Power State', 'Properties',
+                   'Provisioning State', 'Provision Updated At',
+                   'Current RAID configuration', 'Reservation',
+                   'Resource Class', 'Target Power State',
                    'Target Provision State', 'Target RAID configuration',
                    'Traits', 'Updated At', 'Inspection Finished At',
                    'Inspection Started At', 'UUID', 'Name',
@@ -617,6 +623,7 @@ class TestBaremetalList(TestBaremetal):
                    'Storage Interface', 'Vendor Interface')
         self.assertEqual(collist, columns)
         datalist = ((
+            '',
             '',
             '',
             '',
@@ -2281,6 +2288,26 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
+    def test_baremetal_set_automated_clean(self):
+        arglist = [
+            'node_uuid',
+            '--automated-clean'
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('automated_clean', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/automated_clean', 'value': 'True', 'op': 'add'}],
+            reset_interfaces=None,
+        )
+
     def test_baremetal_set_extra(self):
         arglist = [
             'node_uuid',
@@ -2731,6 +2758,25 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/conductor_group', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_automated_clean(self):
+        arglist = [
+            'node_uuid',
+            '--automated-clean',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('automated_clean', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/automated_clean', 'op': 'remove'}]
         )
 
     def test_baremetal_unset_extra(self):

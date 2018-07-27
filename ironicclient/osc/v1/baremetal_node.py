@@ -432,6 +432,11 @@ class CreateBaremetalNode(command.ShowOne):
             '--conductor-group',
             metavar='<conductor_group>',
             help=_('Conductor group the node will belong to'))
+        parser.add_argument(
+            '--automated-clean',
+            action='store_true',
+            default=None,
+            help=_('Enable automated cleaning for the node'))
 
         return parser
 
@@ -440,8 +445,9 @@ class CreateBaremetalNode(command.ShowOne):
 
         baremetal_client = self.app.client_manager.baremetal
 
-        field_list = ['chassis_uuid', 'driver', 'driver_info',
-                      'properties', 'extra', 'uuid', 'name', 'conductor_group',
+        field_list = ['automated_clean', 'chassis_uuid', 'driver',
+                      'driver_info', 'properties', 'extra', 'uuid', 'name',
+                      'conductor_group',
                       'resource_class'] + ['%s_interface' % iface
                                            for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
@@ -1106,6 +1112,11 @@ class SetBaremetalNode(command.Command):
             help=_('Set the conductor group for the node'),
         )
         parser.add_argument(
+            '--automated-clean',
+            action='store_true',
+            help=_('Enable automated cleaning for the node'),
+        )
+        parser.add_argument(
             '--target-raid-config',
             metavar='<target_raid_config>',
             help=_('Set the target RAID configuration (JSON) for the node. '
@@ -1161,8 +1172,9 @@ class SetBaremetalNode(command.Command):
                                                          raid_config)
 
         properties = []
-        for field in ['instance_uuid', 'name', 'chassis_uuid', 'driver',
-                      'resource_class', 'conductor_group']:
+        for field in ['automated_clean', 'instance_uuid', 'name',
+                      'chassis_uuid', 'driver', 'resource_class',
+                      'conductor_group']:
             value = getattr(parsed_args, field)
             if value:
                 properties.extend(utils.args_array_to_patch(
@@ -1418,6 +1430,12 @@ class UnsetBaremetalNode(command.Command):
             help=_('Unset conductor group for this baremetal node (the '
                    'default group will be used)'),
         )
+        parser.add_argument(
+            "--automated-clean",
+            action="store_true",
+            help=_('Unset automated clean option on this baremetal node '
+                   '(the value from configuration will be used)'),
+        )
 
         return parser
 
@@ -1434,7 +1452,7 @@ class UnsetBaremetalNode(command.Command):
 
         properties = []
         for field in ['instance_uuid', 'name', 'chassis_uuid',
-                      'resource_class', 'conductor_group',
+                      'resource_class', 'conductor_group', 'automated_clean',
                       'bios_interface', 'boot_interface', 'console_interface',
                       'deploy_interface', 'inspect_interface',
                       'management_interface', 'network_interface',

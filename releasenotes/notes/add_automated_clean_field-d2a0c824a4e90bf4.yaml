@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds the ability to set the ``automated_clean`` field (available starting
+    with API version 1.47) on the baremetal node, to enable the automated
+    cleaning feature at the node level.
