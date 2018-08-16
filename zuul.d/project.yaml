@@ -1,10 +1,21 @@
 - project:
+    templates:
+      - openstack-python35-jobs
+      - openstack-python-jobs
+      - publish-openstack-sphinx-docs
+      - check-requirements
+      - release-notes-jobs
+      - openstackclient-plugin-jobs
     name: openstack/python-ironicclient
     check:
       jobs:
         - ironicclient-dsvm-functional
         - ironicclient-tempest-dsvm-src
+        - openstack-tox-cover
     gate:
       jobs:
         - ironicclient-dsvm-functional
         - ironicclient-tempest-dsvm-src
+    post:
+      jobs:
+        - openstack-tox-cover
