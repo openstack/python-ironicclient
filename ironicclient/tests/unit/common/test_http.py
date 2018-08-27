@@ -333,10 +333,10 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         response = utils.FakeResponse(
             {}, status=http_client.NOT_ACCEPTABLE,
             request_headers=req_header)
-        self.assertRaisesRegexp(exc.UnsupportedVersion,
-                                ".*is not supported by the server.*",
-                                self.test_object.negotiate_version,
-                                mock_conn, response)
+        self.assertRaisesRegex(exc.UnsupportedVersion,
+                               ".*is not supported by the server.*",
+                               self.test_object.negotiate_version,
+                               mock_conn, response)
         self.assertTrue(mock_msr.called)
         self.assertEqual(2, mock_pvh.call_count)
         self.assertFalse(mock_save_data.called)
