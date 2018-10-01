@@ -1,17 +1,18 @@
-========================
+==================================
+Python bindings for the Ironic API
+==================================
+
 Team and repository tags
-========================
+------------------------
 
 .. image:: https://governance.openstack.org/tc/badges/python-ironicclient.svg
     :target: https://governance.openstack.org/tc/reference/tags/index.html
 
-.. Change things from this point on
+Overview
+--------
 
-Python bindings for the Ironic API
-==================================
-
-This is a client for the OpenStack `Ironic
-<https://wiki.openstack.org/wiki/Ironic>`_ API. It provides:
+This is a client for the OpenStack `Bare Metal API
+<https://developer.openstack.org/api-ref/baremetal/>`_. It provides:
 
 * a Python API: the ``ironicclient`` module, and
 * two command-line interfaces: ``openstack baremetal`` and ``ironic``
@@ -27,6 +28,14 @@ like the rest of OpenStack.
 
 .. contents:: Contents:
    :local:
+
+Useful Links
+------------
+
+* Documentation: https://docs.openstack.org/python-ironicclient/latest/
+* Source: https://git.openstack.org/cgit/openstack/python-ironicclient
+* Bugs: https://storyboard.openstack.org/#!/project/959
+* Release notes: https://docs.openstack.org/releasenotes/python-ironicclient/
 
 Python API
 ----------
@@ -118,11 +127,3 @@ For more information about the ``ironic`` command and the subcommands
 available, run::
 
     $ ironic help
-
-Useful Links
-------------
-
-* Documentation: https://docs.openstack.org/python-ironicclient/latest/
-* Source: https://git.openstack.org/cgit/openstack/python-ironicclient
-* Bugs: https://storyboard.openstack.org/#!/project/959
-* Release notes: https://docs.openstack.org/releasenotes/python-ironicclient/
