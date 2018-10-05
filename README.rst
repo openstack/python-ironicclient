@@ -29,8 +29,8 @@ like the rest of OpenStack.
 .. contents:: Contents:
    :local:
 
-Useful Links
-------------
+Project resources
+-----------------
 
 * Documentation: https://docs.openstack.org/python-ironicclient/latest/
 * Source: https://git.openstack.org/cgit/openstack/python-ironicclient
