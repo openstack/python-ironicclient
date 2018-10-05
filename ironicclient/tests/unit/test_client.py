@@ -64,7 +64,7 @@ class ClientTest(utils.BaseTestCase):
                 region_name=kwargs.get('region_name'))
         if 'os_ironic_api_version' in kwargs:
             # NOTE(TheJulia): This does not test the negotiation logic
-            # as a request must be triggered in order for any verison
+            # as a request must be triggered in order for any version
             # negotiation actions to occur.
             self.assertEqual(0, mock_retrieve_data.call_count)
             self.assertEqual(kwargs['os_ironic_api_version'],
