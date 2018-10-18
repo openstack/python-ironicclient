@@ -744,7 +744,7 @@ def _construct_http_client(session=None,
         if kwargs:
             endpoint = kwargs.pop('endpoint_override', None)
             LOG.warning('The following arguments are being ignored when '
-                        'constructing the client: %s'), ', '.join(kwargs)
+                        'constructing the client: %s', ', '.join(kwargs))
 
         return HTTPClient(endpoint=endpoint,
                           token=token,
