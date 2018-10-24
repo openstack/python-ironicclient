@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adds the ability to set and unset the ``protected`` and
+    ``protected_reason`` fields introduced in API 1.48. Setting ``protected``
+    allows protecting a deployed node from undeploying, rebuilding and
+    deleting.

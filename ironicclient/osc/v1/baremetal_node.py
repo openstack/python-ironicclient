@@ -1117,6 +1117,16 @@ class SetBaremetalNode(command.Command):
             help=_('Enable automated cleaning for the node'),
         )
         parser.add_argument(
+            '--protected',
+            action='store_true',
+            help=_('Mark the node as protected'),
+        )
+        parser.add_argument(
+            '--protected-reason',
+            metavar='<protected_reason>',
+            help=_('Set the reason of marking the node as protected'),
+        )
+        parser.add_argument(
             '--target-raid-config',
             metavar='<target_raid_config>',
             help=_('Set the target RAID configuration (JSON) for the node. '
@@ -1174,7 +1184,7 @@ class SetBaremetalNode(command.Command):
         properties = []
         for field in ['automated_clean', 'instance_uuid', 'name',
                       'chassis_uuid', 'driver', 'resource_class',
-                      'conductor_group']:
+                      'conductor_group', 'protected', 'protected_reason']:
             value = getattr(parsed_args, field)
             if value:
                 properties.extend(utils.args_array_to_patch(
@@ -1436,6 +1446,17 @@ class UnsetBaremetalNode(command.Command):
             help=_('Unset automated clean option on this baremetal node '
                    '(the value from configuration will be used)'),
         )
+        parser.add_argument(
+            "--protected",
+            action="store_true",
+            help=_('Unset the protected flag on the node'),
+        )
+        parser.add_argument(
+            "--protected-reason",
+            action="store_true",
+            help=_('Unset the protected reason (gets unset automatically when '
+                   'protected is unset)'),
+        )
 
         return parser
 
@@ -1457,7 +1478,8 @@ class UnsetBaremetalNode(command.Command):
                       'deploy_interface', 'inspect_interface',
                       'management_interface', 'network_interface',
                       'power_interface', 'raid_interface', 'rescue_interface',
-                      'storage_interface', 'vendor_interface']:
+                      'storage_interface', 'vendor_interface',
+                      'protected', 'protected_reason']:
             if getattr(parsed_args, field):
                 properties.extend(utils.args_array_to_patch('remove', [field]))
 

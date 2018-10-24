@@ -65,6 +65,8 @@ class NodeShellTest(utils.BaseTestCase):
                'vendor_interface',
                'power_state',
                'properties',
+               'protected',
+               'protected_reason',
                'provision_state',
                'provision_updated_at',
                'reservation',

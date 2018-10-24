@@ -636,6 +636,8 @@ class TestBaremetalList(TestBaremetal):
             'Power Interface',
             'Power State',
             'Properties',
+            'Protected',
+            'Protected Reason',
             'Provision Updated At',
             'Provisioning State',
             'RAID Interface',
@@ -2303,6 +2305,49 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
+    def test_baremetal_set_protected(self):
+        arglist = [
+            'node_uuid',
+            '--protected'
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('protected', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/protected', 'value': 'True', 'op': 'add'}],
+            reset_interfaces=None,
+        )
+
+    def test_baremetal_set_protected_with_reason(self):
+        arglist = [
+            'node_uuid',
+            '--protected',
+            '--protected-reason', 'reason!'
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('protected', True),
+            ('protected_reason', 'reason!')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/protected', 'value': 'True', 'op': 'add'},
+             {'path': '/protected_reason', 'value': 'reason!', 'op': 'add'}],
+            reset_interfaces=None,
+        )
+
     def test_baremetal_set_extra(self):
         arglist = [
             'node_uuid',
@@ -2772,6 +2817,44 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/automated_clean', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_protected(self):
+        arglist = [
+            'node_uuid',
+            '--protected',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('protected', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/protected', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_protected_reason(self):
+        arglist = [
+            'node_uuid',
+            '--protected-reason',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('protected_reason', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/protected_reason', 'op': 'remove'}]
         )
 
     def test_baremetal_unset_extra(self):
