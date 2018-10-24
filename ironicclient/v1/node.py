@@ -53,7 +53,8 @@ class NodeManager(base.CreateManager):
                             'network_interface', 'power_interface',
                             'raid_interface', 'rescue_interface',
                             'storage_interface', 'vendor_interface',
-                            'resource_class', 'conductor_group']
+                            'resource_class', 'conductor_group',
+                            'automated_clean']
     _resource_name = 'nodes'
 
     def list(self, associated=None, maintenance=None, marker=None, limit=None,

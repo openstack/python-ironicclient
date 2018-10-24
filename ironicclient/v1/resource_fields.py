@@ -33,6 +33,7 @@ class Resource(object):
     FIELDS = {
         'address': 'Address',
         'async': 'Async',
+        'automated_clean': 'Automated clean',
         'attach': 'Response is attachment',
         'bios_name': 'BIOS setting name',
         'bios_value': 'BIOS setting value',
@@ -199,7 +200,8 @@ CHASSIS_RESOURCE = Resource(
 
 # Nodes
 NODE_DETAILED_RESOURCE = Resource(
-    ['chassis_uuid',
+    ['automated_clean',
+     'chassis_uuid',
      'created_at',
      'clean_step',
      'conductor_group',
