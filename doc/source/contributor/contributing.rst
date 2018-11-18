@@ -37,7 +37,7 @@ Bug tracker
     https://storyboard.openstack.org/#!/project/959
 
 Mailing list (prefix subjects with ``[ironic]`` for faster responses)
-    http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev
+    http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-discuss
 
 Code Hosting
     https://git.openstack.org/cgit/openstack/python-ironicclient
