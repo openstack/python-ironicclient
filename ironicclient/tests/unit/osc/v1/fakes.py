@@ -180,6 +180,17 @@ VOLUME_TARGET = {
     'properties': baremetal_volume_target_properties,
 }
 
+baremetal_hostname = 'compute1.localdomain'
+baremetal_conductor_group = 'foo'
+baremetal_alive = True
+baremetal_drivers = ['fake-hardware']
+CONDUCTOR = {
+    'hostname': baremetal_hostname,
+    'conductor_group': baremetal_conductor_group,
+    'alive': baremetal_alive,
+    'drivers': baremetal_drivers,
+}
+
 
 class TestBaremetal(utils.TestCommand):
 

@@ -323,3 +323,28 @@ class TestCase(base.FunctionalTestBase):
         output = self.openstack('baremetal driver list {0} {1}'
                                 .format(opts, params))
         return json.loads(output)
+
+    def conductor_show(self, hostname, fields=None, params=''):
+        """Show specified baremetal conductors.
+
+        :param String hostname: hostname of the conductor
+        :param List fields: List of fields to show
+        :param List params: Additional kwargs
+        :return: JSON object of driver
+        """
+        opts = self.get_opts(fields=fields)
+        output = self.openstack('baremetal conductor show {0} {1} {2}'
+                                .format(opts, hostname, params))
+        return json.loads(output)
+
+    def conductor_list(self, fields=None, params=''):
+        """List baremetal conductors.
+
+        :param List fields: List of fields to show
+        :param String params: Additional kwargs
+        :return: list of JSON driver objects
+        """
+        opts = self.get_opts(fields=fields)
+        output = self.openstack('baremetal conductor list {0} {1}'
+                                .format(opts, params))
+        return json.loads(output)

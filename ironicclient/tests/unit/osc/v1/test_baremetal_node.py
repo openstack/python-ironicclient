@@ -610,6 +610,7 @@ class TestBaremetalList(TestBaremetal):
             'Boot Interface',
             'Chassis UUID',
             'Clean Step',
+            'Conductor',
             'Conductor Group',
             'Console Enabled',
             'Console Interface',
@@ -955,6 +956,31 @@ class TestBaremetalList(TestBaremetal):
             'marker': None,
             'limit': None,
             'conductor_group': conductor_group
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_by_conductor(self):
+        conductor = 'fake-conductor'
+        arglist = [
+            '--conductor', conductor,
+        ]
+        verifylist = [
+            ('conductor', conductor),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'conductor': conductor
         }
 
         self.baremetal_mock.node.list.assert_called_with(

@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds the ability to list and show conductors known by the Bare Metal
+    service, as well as showing the ``conductor`` field on the node,
+    introduced in API 1.49.

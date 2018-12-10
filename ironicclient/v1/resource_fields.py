@@ -32,6 +32,7 @@ class Resource(object):
 
     FIELDS = {
         'address': 'Address',
+        'alive': 'Alive',
         'async': 'Async',
         'automated_clean': 'Automated Clean',
         'attach': 'Response is attachment',
@@ -40,6 +41,7 @@ class Resource(object):
         'boot_index': 'Boot Index',
         'chassis_uuid': 'Chassis UUID',
         'clean_step': 'Clean Step',
+        'conductor': 'Conductor',
         'conductor_group': 'Conductor Group',
         'console_enabled': 'Console Enabled',
         'created_at': 'Created At',
@@ -60,6 +62,7 @@ class Resource(object):
         'driver': 'Driver',
         'driver_info': 'Driver Info',
         'driver_internal_info': 'Driver Internal Info',
+        'drivers': 'Drivers',
         'enabled_bios_interfaces': 'Enabled BIOS Interfaces',
         'enabled_boot_interfaces': 'Enabled Boot Interfaces',
         'enabled_console_interfaces': 'Enabled Console Interfaces',
@@ -73,6 +76,7 @@ class Resource(object):
         'enabled_storage_interfaces': 'Enabled Storage Interfaces',
         'enabled_vendor_interfaces': 'Enabled Vendor Interfaces',
         'extra': 'Extra',
+        'hostname': 'Hostname',
         'hosts': 'Active host(s)',
         'http_methods': 'Supported HTTP methods',
         'inspection_finished_at': 'Inspection Finished At',
@@ -210,6 +214,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'boot_interface',
      'chassis_uuid',
      'clean_step',
+     'conductor',
      'conductor_group',
      'console_enabled',
      'console_interface',
@@ -449,4 +454,25 @@ VOLUME_TARGET_RESOURCE = Resource(
      'volume_id',
      ],
     sort_excluded=['node_uuid']
+)
+
+# Conductors
+CONDUCTOR_DETAILED_RESOURCE = Resource(
+    ['hostname',
+     'conductor_group',
+     'alive',
+     'drivers',
+     'created_at',
+     'updated_at',
+     ],
+    sort_excluded=[
+        'alive',
+        'drivers',
+    ])
+CONDUCTOR_RESOURCE = Resource(
+    ['hostname',
+     'conductor_group',
+     'alive',
+     ],
+    sort_excluded=['alive']
 )

@@ -37,6 +37,7 @@ class NodeShellTest(utils.BaseTestCase):
                'chassis_uuid',
                'clean_step',
                'created_at',
+               'conductor',
                'conductor_group',
                'console_enabled',
                'deploy_step',

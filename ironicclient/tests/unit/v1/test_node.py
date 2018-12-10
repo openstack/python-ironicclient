@@ -215,6 +215,13 @@ fake_responses = {
             {"nodes": [NODE2]},
         )
     },
+    '/v1/nodes/?conductor=fake-conductor':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]},
+        )
+    },
     '/v1/nodes/detail?instance_uuid=%s' % NODE2['instance_uuid']:
     {
         'GET': (
@@ -820,6 +827,15 @@ class NodeManagerTest(testtools.TestCase):
         nodes = self.mgr.list(associated=True, maintenance=True)
         expect = [
             ('GET', '/v1/nodes/?associated=True&maintenance=True', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_with_conductor(self):
+        nodes = self.mgr.list(conductor='fake-conductor')
+        expect = [
+            ('GET', '/v1/nodes/?conductor=fake-conductor', {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))

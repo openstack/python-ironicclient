@@ -609,6 +609,10 @@ class ListBaremetalNode(command.Lister):
             help=_("Limit list to nodes with conductor group <conductor "
                    "group>"))
         parser.add_argument(
+            '--conductor',
+            metavar='<conductor>',
+            help=_("Limit list to nodes with conductor <conductor>"))
+        parser.add_argument(
             '--chassis',
             dest='chassis',
             metavar='<chassis UUID>',
@@ -654,7 +658,7 @@ class ListBaremetalNode(command.Lister):
             if getattr(parsed_args, field) is not None:
                 params[field] = getattr(parsed_args, field)
         for field in ['provision_state', 'driver', 'resource_class',
-                      'chassis']:
+                      'chassis', 'conductor']:
             if getattr(parsed_args, field):
                 params[field] = getattr(parsed_args, field)
         if parsed_args.long:
