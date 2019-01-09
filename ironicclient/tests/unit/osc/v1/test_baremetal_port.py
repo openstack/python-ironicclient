@@ -66,7 +66,7 @@ class TestCreateBaremetalPort(TestBaremetalPort):
         # Set expected values
         args = {
             'address': baremetal_fakes.baremetal_port_address,
-            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'node_uuid': baremetal_fakes.baremetal_uuid
         }
 
         self.baremetal_mock.port.create.assert_called_once_with(**args)
@@ -249,9 +249,27 @@ class TestCreateBaremetalPort(TestBaremetalPort):
         args = {
             'address': baremetal_fakes.baremetal_port_address,
             'node_uuid': baremetal_fakes.baremetal_uuid,
-            'physical_network': baremetal_fakes.baremetal_port_physical_network
+            'physical_network':
+                baremetal_fakes.baremetal_port_physical_network
         }
 
+        self.baremetal_mock.port.create.assert_called_once_with(**args)
+
+    def test_baremetal_port_create_smartnic(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--is-smartnic']
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_port_address),
+            ('is_smartnic', True)]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+        args = {
+            'address': baremetal_fakes.baremetal_port_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'is_smartnic': True}
         self.baremetal_mock.port.create.assert_called_once_with(**args)
 
 
@@ -396,6 +414,18 @@ class TestBaremetalPortUnset(TestBaremetalPort):
         self.baremetal_mock.port.update.assert_called_once_with(
             'port',
             [{'path': '/physical_network', 'op': 'remove'}])
+
+    def test_baremetal_port_unset_is_smartnic(self):
+        arglist = ['port', '--is-smartnic']
+        verifylist = [('port', 'port'),
+                      ('is_smartnic', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port',
+            [{'path': '/is_smartnic', 'op': 'add', 'value': 'False'}])
 
 
 class TestBaremetalPortSet(TestBaremetalPort):
@@ -548,6 +578,22 @@ class TestBaremetalPortSet(TestBaremetalPort):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
         self.cmd.take_action(parsed_args)
         self.assertFalse(self.baremetal_mock.port.update.called)
+
+    def test_baremetal_port_set_is_smartnic(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--is-smartnic']
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('is_smartnic', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/is_smartnic', 'value': 'True',
+              'op': 'add'}])
 
 
 class TestBaremetalPortDelete(TestBaremetalPort):
@@ -704,7 +750,7 @@ class TestBaremetalPortList(TestBaremetalPort):
         collist = ('UUID', 'Address', 'Created At', 'Extra', 'Node UUID',
                    'Local Link Connection', 'Portgroup UUID',
                    'PXE boot enabled', 'Physical Network', 'Updated At',
-                   'Internal Info')
+                   'Internal Info', 'Is Smart NIC port')
         self.assertEqual(collist, columns)
 
         datalist = ((
@@ -713,6 +759,7 @@ class TestBaremetalPortList(TestBaremetalPort):
             '',
             oscutils.format_dict(baremetal_fakes.baremetal_port_extra),
             baremetal_fakes.baremetal_uuid,
+            '',
             '',
             '',
             '',

@@ -129,6 +129,7 @@ class Resource(object):
         'physical_network': 'Physical Network',
         'id': 'ID',
         'connector_id': 'Connector ID',
+        'is_smartnic': 'Is Smart NIC port',
     }
 
     def __init__(self, field_ids, sort_excluded=None, override_labels=None):
@@ -305,6 +306,7 @@ PORT_DETAILED_RESOURCE = Resource(
      'physical_network',
      'updated_at',
      'internal_info',
+     'is_smartnic',
      ],
     sort_excluded=[
         'extra',

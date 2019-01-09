@@ -98,6 +98,12 @@ class CreateBaremetalPort(command.ShowOne):
             help=_("Name of the physical network to which this port is "
                    "connected."))
 
+        parser.add_argument(
+            '--is-smartnic',
+            dest='is_smartnic',
+            action='store_true',
+            help=_("Indicates whether this Port is a Smart NIC port"))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -123,6 +129,8 @@ class CreateBaremetalPort(command.ShowOne):
                       if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'extra')
         fields = utils.args_array_to_dict(fields, 'local_link_connection')
+        if parsed_args.is_smartnic:
+            fields['is_smartnic'] = parsed_args.is_smartnic
         port = baremetal_client.port.create(**fields)
 
         data = dict([(f, getattr(port, f, '')) for f in
@@ -215,6 +223,12 @@ class UnsetBaremetalPort(command.Command):
             dest='physical_network',
             help=_("Unset the physical network on this baremetal port."))
 
+        parser.add_argument(
+            '--is-smartnic',
+            dest='is_smartnic',
+            action='store_true',
+            help=_("Set Port as not Smart NIC port"))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -232,6 +246,9 @@ class UnsetBaremetalPort(command.Command):
         if parsed_args.physical_network:
             properties.extend(utils.args_array_to_patch('remove',
                               ['physical_network']))
+        if parsed_args.is_smartnic:
+            properties.extend(utils.args_array_to_patch(
+                'add', ["is_smartnic=False"]))
 
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
@@ -309,6 +326,12 @@ class SetBaremetalPort(command.Command):
             help=_("Set the name of the physical network to which this port "
                    "is connected."))
 
+        parser.add_argument(
+            '--is-smartnic',
+            dest='is_smartnic',
+            action='store_true',
+            help=_("Set port to be Smart NIC port"))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -342,6 +365,9 @@ class SetBaremetalPort(command.Command):
                                 parsed_args.physical_network]
             properties.extend(utils.args_array_to_patch('add',
                                                         physical_network))
+        if parsed_args.is_smartnic:
+            is_smartnic = ["is_smartnic=%s" % parsed_args.is_smartnic]
+            properties.extend(utils.args_array_to_patch('add', is_smartnic))
 
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
