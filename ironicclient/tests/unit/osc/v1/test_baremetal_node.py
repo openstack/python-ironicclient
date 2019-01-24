@@ -465,6 +465,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('owner', 'owner 1')],
                                 {'owner': 'owner 1'})
 
+    def test_baremetal_create_with_description(self):
+        self.check_with_options(['--description', 'there is no spoon'],
+                                [('description', 'there is no spoon')],
+                                {'description': 'there is no spoon'})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -623,6 +628,7 @@ class TestBaremetalList(TestBaremetal):
             'Current RAID configuration',
             'Deploy Interface',
             'Deploy Step',
+            'Description',
             'Driver',
             'Driver Info',
             'Driver Internal Info',
@@ -1006,11 +1012,35 @@ class TestBaremetalList(TestBaremetal):
         # DisplayCommandBase.take_action() returns two tuples
         self.cmd.take_action(parsed_args)
 
-        # Set excepted values
         kwargs = {
             'marker': None,
             'limit': None,
-            'owner': owner
+            'owner': owner,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_has_description(self):
+        description = 'there is no spoon'
+        arglist = [
+            '--description-contains', description,
+        ]
+        verifylist = [
+            ('description_contains', description),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'description_contains': description
         }
 
         self.baremetal_mock.node.list.assert_called_with(
@@ -2575,6 +2605,7 @@ class TestBaremetalSet(TestBaremetal):
             ('node', 'node_uuid'),
             ('owner', 'owner 1')
         ]
+
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         self.cmd.take_action(parsed_args)
@@ -2583,6 +2614,28 @@ class TestBaremetalSet(TestBaremetal):
             'node_uuid',
             [{'path': '/owner',
               'value': 'owner 1',
+              'op': 'add'}],
+            reset_interfaces=None,
+        )
+
+    def test_baremetal_set_description(self):
+        arglist = [
+            'node_uuid',
+            '--description', 'there is no spoon',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('description', 'there is no spoon')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/description',
+              'value': 'there is no spoon',
               'op': 'add'}],
             reset_interfaces=None,
         )
@@ -3127,6 +3180,25 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/owner', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_description(self):
+        arglist = [
+            'node_uuid',
+            '--description',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('description', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/description', 'op': 'remove'}]
         )
 
 

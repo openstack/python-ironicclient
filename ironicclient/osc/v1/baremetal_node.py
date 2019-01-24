@@ -441,6 +441,10 @@ class CreateBaremetalNode(command.ShowOne):
             '--owner',
             metavar='<owner>',
             help=_('Owner of the node.'))
+        parser.add_argument(
+            '--description',
+            metavar='<description>',
+            help=_("Description for the node."))
 
         return parser
 
@@ -451,7 +455,7 @@ class CreateBaremetalNode(command.ShowOne):
 
         field_list = ['automated_clean', 'chassis_uuid', 'driver',
                       'driver_info', 'properties', 'extra', 'uuid', 'name',
-                      'conductor_group', 'owner',
+                      'conductor_group', 'owner', 'description',
                       'resource_class'] + ['%s_interface' % iface
                                            for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
@@ -626,6 +630,11 @@ class ListBaremetalNode(command.Lister):
             metavar='<owner>',
             help=_("Limit list to nodes with owner "
                    "<owner>"))
+        parser.add_argument(
+            '--description-contains',
+            metavar='<description_contains>',
+            help=_("Limit list to nodes with description contains "
+                   "<description_contains>"))
         display_group = parser.add_mutually_exclusive_group(required=False)
         display_group.add_argument(
             '--long',
@@ -667,7 +676,8 @@ class ListBaremetalNode(command.Lister):
             if getattr(parsed_args, field) is not None:
                 params[field] = getattr(parsed_args, field)
         for field in ['provision_state', 'driver', 'resource_class',
-                      'chassis', 'conductor', 'owner']:
+                      'chassis', 'conductor', 'owner',
+                      'description_contains']:
             if getattr(parsed_args, field):
                 params[field] = getattr(parsed_args, field)
         if parsed_args.long:
@@ -1179,6 +1189,11 @@ class SetBaremetalNode(command.Command):
             "--owner",
             metavar='<owner>',
             help=_('Set the owner for the node')),
+        parser.add_argument(
+            "--description",
+            metavar='<description>',
+            help=_('Set the description for the node'),
+        )
 
         return parser
 
@@ -1202,7 +1217,7 @@ class SetBaremetalNode(command.Command):
         for field in ['automated_clean', 'instance_uuid', 'name',
                       'chassis_uuid', 'driver', 'resource_class',
                       'conductor_group', 'protected', 'protected_reason',
-                      'owner']:
+                      'owner', 'description']:
             value = getattr(parsed_args, field)
             if value:
                 properties.extend(utils.args_array_to_patch(
@@ -1480,6 +1495,11 @@ class UnsetBaremetalNode(command.Command):
             action="store_true",
             help=_('Unset the owner field of the node'),
         )
+        parser.add_argument(
+            "--description",
+            action="store_true",
+            help=_('Unset the description field of the node'),
+        )
 
         return parser
 
@@ -1502,7 +1522,8 @@ class UnsetBaremetalNode(command.Command):
                       'management_interface', 'network_interface',
                       'power_interface', 'raid_interface', 'rescue_interface',
                       'storage_interface', 'vendor_interface',
-                      'protected', 'protected_reason', 'owner']:
+                      'protected', 'protected_reason', 'owner',
+                      'description']:
             if getattr(parsed_args, field):
                 properties.extend(utils.args_array_to_patch('remove', [field]))
 

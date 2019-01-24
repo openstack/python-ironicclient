@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adds ``description`` field support, which is introduced in ironic API
+    1.51. This field is used to store informational text about the node.
+    User can also do queries for nodes where their ``description`` field
+    contains specified substring.

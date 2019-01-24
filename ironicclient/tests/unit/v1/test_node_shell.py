@@ -41,6 +41,7 @@ class NodeShellTest(utils.BaseTestCase):
                'conductor_group',
                'console_enabled',
                'deploy_step',
+               'description',
                'driver',
                'driver_info',
                'driver_internal_info',

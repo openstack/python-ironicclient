@@ -223,6 +223,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'raid_config',
      'deploy_interface',
      'deploy_step',
+     'description',
      'driver',
      'driver_info',
      'driver_internal_info',
