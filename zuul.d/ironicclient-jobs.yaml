@@ -1,0 +1,48 @@
+- job:
+    name: ironicclient-functional
+    parent: devstack-minimal
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^ironicclient/locale/.*$
+      - ^ironicclient/tests/.*$
+      - ^releasenotes/.*$
+      - ^setup.cfg$
+      - ^tools/.*$
+      - ^tox.ini$
+    required-projects:
+      - openstack/ironic
+      - openstack/python-ironicclient
+      - openstack/keystone
+      - openstack/tempest
+    timeout: 4800
+    post-run: playbooks/functional/run.yaml
+    vars:
+      tox_environment:
+        PYTHONUNBUFFERED: 'true'
+      tox_envlist: functional
+      devstack_plugins:
+        ironic: git://git.openstack.org/openstack/ironic
+      devstack_localrc:
+        USE_PYTHON3: False
+        EBTABLES_RACE_FIX: True
+        IRONIC_ENABLED_NETWORK_INTERFACES: noop
+        IRONIC_DHCP_PROVIDER: none
+        IRONIC_DEPLOY_DRIVER: fake
+        INSTALL_TEMPEST: False
+      devstack_services:
+        key: True
+        mysql: True
+        rabbit: True
+
+
+- job:
+    name: ironicclient-tempest
+    parent: ironic-base
+    required-projects:
+      - openstack/python-ironicclient
+    timeout: 10800
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: True
+        EBTABLES_RACE_FIX: True

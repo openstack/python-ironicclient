@@ -12,10 +12,10 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - ironicclient-dsvm-functional
-        - ironicclient-tempest-dsvm-src
+        - ironicclient-functional
+        - ironicclient-tempest
     gate:
       queue: ironic
       jobs:
-        - ironicclient-dsvm-functional
-        - ironicclient-tempest-dsvm-src
+        - ironicclient-functional
+        - ironicclient-tempest
