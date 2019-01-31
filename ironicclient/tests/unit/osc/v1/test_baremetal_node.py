@@ -460,6 +460,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('automated_clean', True)],
                                 {'automated_clean': True})
 
+    def test_baremetal_create_with_owner(self):
+        self.check_with_options(['--owner', 'owner 1'],
+                                [('owner', 'owner 1')],
+                                {'owner': 'owner 1'})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -634,6 +639,7 @@ class TestBaremetalList(TestBaremetal):
             'Management Interface',
             'Name',
             'Network Interface',
+            'Owner',
             'Power Interface',
             'Power State',
             'Properties',
@@ -981,6 +987,30 @@ class TestBaremetalList(TestBaremetal):
             'marker': None,
             'limit': None,
             'conductor': conductor
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_by_owner(self):
+        owner = 'owner 1'
+        arglist = [
+            '--owner', owner,
+        ]
+        verifylist = [
+            ('owner', owner),
+        ]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set excepted values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'owner': owner
         }
 
         self.baremetal_mock.node.list.assert_called_with(
@@ -2536,6 +2566,27 @@ class TestBaremetalSet(TestBaremetal):
             self.baremetal_mock.node.set_target_raid_config.called)
         self.assertFalse(self.baremetal_mock.node.update.called)
 
+    def test_baremetal_set_owner(self):
+        arglist = [
+            'node_uuid',
+            '--owner', 'owner 1',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('owner', 'owner 1')
+        ]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/owner',
+              'value': 'owner 1',
+              'op': 'add'}],
+            reset_interfaces=None,
+        )
+
 
 class TestBaremetalShow(TestBaremetal):
     def setUp(self):
@@ -3058,6 +3109,25 @@ class TestBaremetalUnset(TestBaremetal):
 
     def test_baremetal_unset_vendor_interface(self):
         self._test_baremetal_unset_hw_interface('vendor')
+
+    def test_baremetal_unset_owner(self):
+        arglist = [
+            'node_uuid',
+            '--owner',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('owner', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/owner', 'op': 'remove'}]
+        )
 
 
 class TestValidate(TestBaremetal):

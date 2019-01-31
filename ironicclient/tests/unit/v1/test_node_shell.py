@@ -59,6 +59,7 @@ class NodeShellTest(utils.BaseTestCase):
                'inspect_interface',
                'management_interface',
                'network_interface',
+               'owner',
                'power_interface',
                'raid_interface',
                'rescue_interface',

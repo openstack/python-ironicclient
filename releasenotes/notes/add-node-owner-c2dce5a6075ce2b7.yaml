@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Adds support to display and update the ``owner`` field of nodes,
+    which is introduced in API 1.50.
