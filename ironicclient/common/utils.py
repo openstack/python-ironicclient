@@ -24,6 +24,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 from oslo_serialization import base64
 from oslo_utils import strutils
@@ -390,3 +391,23 @@ def handle_json_or_file_arg(json_arg):
         raise exc.InvalidAttribute(err)
 
     return json_arg
+
+
+def poll(timeout, poll_interval, poll_delay_function, timeout_message):
+    if not isinstance(timeout, (int, float)) or timeout < 0:
+        raise ValueError(_('Timeout must be a non-negative number'))
+
+    threshold = time.time() + timeout
+    poll_delay_function = (time.sleep if poll_delay_function is None
+                           else poll_delay_function)
+    if not callable(poll_delay_function):
+        raise TypeError(_('poll_delay_function must be callable'))
+
+    count = 0
+    while not timeout or time.time() < threshold:
+        yield count
+
+        poll_delay_function(poll_interval)
+        count += 1
+
+    raise exc.StateTransitionTimeout(timeout_message)

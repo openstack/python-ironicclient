@@ -191,6 +191,16 @@ CONDUCTOR = {
     'drivers': baremetal_drivers,
 }
 
+baremetal_allocation_state = 'active'
+baremetal_resource_class = 'baremetal'
+ALLOCATION = {
+    'resource_class': baremetal_resource_class,
+    'uuid': baremetal_uuid,
+    'name': baremetal_name,
+    'state': baremetal_allocation_state,
+    'node_uuid': baremetal_uuid,
+}
+
 
 class TestBaremetal(utils.TestCommand):
 

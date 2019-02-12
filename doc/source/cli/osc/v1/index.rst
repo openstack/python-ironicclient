@@ -4,6 +4,13 @@ Command Reference
 List of released CLI commands available in openstack client. These commands
 can be referenced by doing ``openstack help baremetal``.
 
+====================
+baremetal allocation
+====================
+
+.. autoprogram-cliff:: openstack.baremetal.v1
+    :command: baremetal allocation *
+
 =================
 baremetal chassis
 =================

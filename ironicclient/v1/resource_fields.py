@@ -33,12 +33,14 @@ class Resource(object):
     FIELDS = {
         'address': 'Address',
         'alive': 'Alive',
+        'allocation_uuid': 'Allocation UUID',
         'async': 'Async',
         'automated_clean': 'Automated Clean',
         'attach': 'Response is attachment',
         'bios_name': 'BIOS setting name',
         'bios_value': 'BIOS setting value',
         'boot_index': 'Boot Index',
+        'candidate_nodes': 'Candidate Nodes',
         'chassis_uuid': 'Chassis UUID',
         'clean_step': 'Clean Step',
         'conductor': 'Conductor',
@@ -101,6 +103,7 @@ class Resource(object):
         'raid_config': 'Current RAID configuration',
         'reservation': 'Reservation',
         'resource_class': 'Resource Class',
+        'state': 'State',
         'target_power_state': 'Target Power State',
         'target_provision_state': 'Target Provision State',
         'target_raid_config': 'Target RAID configuration',
@@ -210,7 +213,8 @@ CHASSIS_RESOURCE = Resource(
 # corresponding headings, so some items (like raid_config) may seem out of
 # order here.
 NODE_DETAILED_RESOURCE = Resource(
-    ['automated_clean',
+    ['allocation_uuid',
+     'automated_clean',
      'bios_interface',
      'boot_interface',
      'chassis_uuid',
@@ -261,6 +265,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'vendor_interface',
      ],
     sort_excluded=[
+        'allocation_uuid',
         # The server cannot sort on "chassis_uuid" because it isn't a column in
         # the "nodes" database table. "chassis_id" is stored, but it is
         # internal to ironic. See bug #1443003 for more details.
@@ -477,4 +482,31 @@ CONDUCTOR_RESOURCE = Resource(
      'alive',
      ],
     sort_excluded=['alive']
+)
+
+# Allocations
+ALLOCATION_DETAILED_RESOURCE = Resource(
+    ['uuid',
+     'name',
+     'state',
+     'node_uuid',
+     'last_error',
+     'resource_class',
+     'traits',
+     'candidate_nodes',
+     'extra',
+     'created_at',
+     'updated_at',
+     ],
+    sort_excluded=[
+        'candidate_nodes',
+        'traits',
+    ])
+ALLOCATION_RESOURCE = Resource(
+    ['uuid',
+     'name',
+     'resource_class',
+     'state',
+     'node_uuid',
+     ],
 )

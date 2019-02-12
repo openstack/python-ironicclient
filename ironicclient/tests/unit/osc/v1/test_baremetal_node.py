@@ -610,6 +610,7 @@ class TestBaremetalList(TestBaremetal):
 
         # NOTE(dtantsur): please keep this list sorted for sanity reasons
         collist = [
+            'Allocation UUID',
             'Automated Clean',
             'BIOS Interface',
             'Boot Interface',
