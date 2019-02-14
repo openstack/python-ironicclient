@@ -14,6 +14,8 @@
 #   under the License.
 #
 
+import json
+
 import mock
 from osc_lib.tests import utils
 
@@ -199,6 +201,22 @@ ALLOCATION = {
     'name': baremetal_name,
     'state': baremetal_allocation_state,
     'node_uuid': baremetal_uuid,
+}
+
+baremetal_deploy_template_uuid = 'ddd-tttttt-dddd'
+baremetal_deploy_template_name = 'DeployTemplate-name'
+baremetal_deploy_template_steps = json.dumps([{
+    'interface': 'raid',
+    'step': 'create_configuration',
+    'args': {},
+    'priority': 10
+}])
+baremetal_deploy_template_extra = {'key1': 'value1', 'key2': 'value2'}
+DEPLOY_TEMPLATE = {
+    'uuid': baremetal_deploy_template_uuid,
+    'name': baremetal_deploy_template_name,
+    'steps': baremetal_deploy_template_steps,
+    'extra': baremetal_deploy_template_extra,
 }
 
 

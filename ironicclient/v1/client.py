@@ -23,6 +23,7 @@ from ironicclient import exc
 from ironicclient.v1 import allocation
 from ironicclient.v1 import chassis
 from ironicclient.v1 import conductor
+from ironicclient.v1 import deploy_template
 from ironicclient.v1 import driver
 from ironicclient.v1 import events
 from ironicclient.v1 import node
@@ -103,6 +104,8 @@ class Client(object):
         self.conductor = conductor.ConductorManager(self.http_client)
         self.events = events.EventManager(self.http_client)
         self.allocation = allocation.AllocationManager(self.http_client)
+        self.deploy_template = deploy_template.DeployTemplateManager(
+            self.http_client)
 
     @property
     def current_api_version(self):

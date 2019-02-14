@@ -401,3 +401,60 @@ class TestCase(base.FunctionalTestBase):
         except exceptions.CommandFailed:
             if not ignore_exceptions:
                 raise
+
+    def deploy_template_create(self, name, params=''):
+        """Create baremetal deploy template and add cleanup.
+
+        :param String name: deploy template name
+        :param String params: additional parameters
+        :return: JSON object of created deploy template
+        """
+        opts = self.get_opts()
+        template = self.openstack('baremetal deploy template create {0} {1} '
+                                  '{2}'.format(opts, name, params))
+        template = json.loads(template)
+        if not template:
+            self.fail('Baremetal deploy template has not been created!')
+        self.addCleanup(self.deploy_template_delete, template['uuid'], True)
+        return template
+
+    def deploy_template_list(self, fields=None, params=''):
+        """List baremetal deploy templates.
+
+        :param List fields: List of fields to show
+        :param String params: Additional kwargs
+        :return: list of JSON deploy template objects
+        """
+        opts = self.get_opts(fields=fields)
+        output = self.openstack('baremetal deploy template list {0} {1}'
+                                .format(opts, params))
+        return json.loads(output)
+
+    def deploy_template_show(self, identifier, fields=None, params=''):
+        """Show specified baremetal deploy template.
+
+        :param String identifier: Name or UUID of the deploy template
+        :param List fields: List of fields to show
+        :param List params: Additional kwargs
+        :return: JSON object of deploy template
+        """
+        opts = self.get_opts(fields)
+        output = self.openstack('baremetal deploy template show {0} {1} {2}'
+                                .format(opts, identifier, params))
+        return json.loads(output)
+
+    def deploy_template_delete(self, identifier, ignore_exceptions=False):
+        """Try to delete baremetal deploy template by UUID.
+
+        :param String identifier: Name or UUID of the deploy template
+        :param Bool ignore_exceptions: Ignore exception (needed for cleanUp)
+        :return: raw values output
+        :raise: CommandFailed exception when command fails to delete a deploy
+            template
+        """
+        try:
+            return self.openstack('baremetal deploy template delete {0}'
+                                  .format(identifier))
+        except exceptions.CommandFailed:
+            if not ignore_exceptions:
+                raise

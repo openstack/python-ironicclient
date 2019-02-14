@@ -443,7 +443,7 @@ class ListBaremetalPort(command.Lister):
             type=int,
             help=_('Maximum number of ports to return per request, '
                    '0 for no limit. Default is the maximum number used '
-                   'by the Ironic API Service.')
+                   'by the Baremetal API Service.')
         )
         parser.add_argument(
             '--marker',

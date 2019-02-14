@@ -104,6 +104,7 @@ class Resource(object):
         'reservation': 'Reservation',
         'resource_class': 'Resource Class',
         'state': 'State',
+        'steps': 'Steps',
         'target_power_state': 'Target Power State',
         'target_provision_state': 'Target Provision State',
         'target_raid_config': 'Target RAID configuration',
@@ -511,5 +512,23 @@ ALLOCATION_RESOURCE = Resource(
      'resource_class',
      'state',
      'node_uuid',
+     ],
+)
+
+# Deploy templates
+DEPLOY_TEMPLATE_DETAILED_RESOURCE = Resource(
+    ['uuid',
+     'name',
+     'steps',
+     'extra',
+     'created_at',
+     'updated_at',
+     ],
+    sort_excluded=['extra', 'steps']
+)
+
+DEPLOY_TEMPLATE_RESOURCE = Resource(
+    ['uuid',
+     'name',
      ],
 )

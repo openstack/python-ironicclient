@@ -66,10 +66,7 @@ class ProvisionStateBaremetalNode(command.Command):
         baremetal_client = self.app.client_manager.baremetal
 
         clean_steps = getattr(parsed_args, 'clean_steps', None)
-        if clean_steps == '-':
-            clean_steps = utils.get_from_stdin('clean steps')
-        if clean_steps:
-            clean_steps = utils.handle_json_or_file_arg(clean_steps)
+        clean_steps = utils.handle_json_arg(clean_steps, 'clean steps')
 
         config_drive = getattr(parsed_args, 'config_drive', None)
         rescue_password = getattr(parsed_args, 'rescue_password', None)
@@ -1207,9 +1204,8 @@ class SetBaremetalNode(command.Command):
         #             also being modified.
         if parsed_args.target_raid_config:
             raid_config = parsed_args.target_raid_config
-            if raid_config == '-':
-                raid_config = utils.get_from_stdin('target_raid_config')
-            raid_config = utils.handle_json_or_file_arg(raid_config)
+            raid_config = utils.handle_json_arg(raid_config,
+                                                'target_raid_config')
             baremetal_client.node.set_target_raid_config(parsed_args.node,
                                                          raid_config)
 

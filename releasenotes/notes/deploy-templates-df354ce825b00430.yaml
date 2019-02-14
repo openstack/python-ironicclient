@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Adds Python API and CLI for the deploy templates API introduced in API
+    version 1.55. The following new commands are available:
+
+    * ``openstack baremetal deploy template create``
+    * ``openstack baremetal deploy template delete``
+    * ``openstack baremetal deploy template list``
+    * ``openstack baremetal deploy template set``
+    * ``openstack baremetal deploy template show``
