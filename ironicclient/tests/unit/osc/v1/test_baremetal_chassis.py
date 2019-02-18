@@ -145,7 +145,7 @@ class TestChassisDelete(TestChassis):
 
         # Set expected values
         args = [uuid1, uuid2]
-        self.baremetal_mock.chassis.delete.has_calls(
+        self.baremetal_mock.chassis.delete.assert_has_calls(
             [mock.call(x) for x in args]
         )
         self.assertEqual(2, self.baremetal_mock.chassis.delete.call_count)
@@ -167,7 +167,7 @@ class TestChassisDelete(TestChassis):
 
         # Set expected values
         args = [uuid1, uuid2]
-        self.baremetal_mock.chassis.delete.has_calls(
+        self.baremetal_mock.chassis.delete.assert_has_calls(
             [mock.call(x) for x in args]
         )
         self.assertEqual(2, self.baremetal_mock.chassis.delete.call_count)

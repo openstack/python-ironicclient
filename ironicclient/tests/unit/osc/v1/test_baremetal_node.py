@@ -505,7 +505,7 @@ class TestBaremetalDelete(TestBaremetal):
 
         # Set expected values
         args = ['xxx-xxxxxx-xxxx', 'fakename']
-        self.baremetal_mock.node.delete.has_calls(
+        self.baremetal_mock.node.delete.assert_has_calls(
             [mock.call(x) for x in args]
         )
         self.assertEqual(2, self.baremetal_mock.node.delete.call_count)
@@ -524,7 +524,7 @@ class TestBaremetalDelete(TestBaremetal):
 
         # Set expected values
         args = ['xxx-xxxxxx-xxxx', 'badname']
-        self.baremetal_mock.node.delete.has_calls(
+        self.baremetal_mock.node.delete.assert_has_calls(
             [mock.call(x) for x in args]
         )
         self.assertEqual(2, self.baremetal_mock.node.delete.call_count)

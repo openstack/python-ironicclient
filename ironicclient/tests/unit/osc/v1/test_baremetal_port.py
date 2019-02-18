@@ -580,7 +580,7 @@ class TestBaremetalPortDelete(TestBaremetalPort):
         self.cmd.take_action(parsed_args)
 
         args = ['zzz-zzzzzz-zzzz', 'fakename']
-        self.baremetal_mock.port.delete.has_calls(
+        self.baremetal_mock.port.delete.assert_has_calls(
             [mock.call(x) for x in args])
         self.assertEqual(2, self.baremetal_mock.port.delete.call_count)
 
@@ -595,7 +595,7 @@ class TestBaremetalPortDelete(TestBaremetalPort):
                           parsed_args)
 
         args = ['zzz-zzzzzz-zzzz', 'badname']
-        self.baremetal_mock.port.delete.has_calls(
+        self.baremetal_mock.port.delete.assert_has_calls(
             [mock.call(x) for x in args])
         self.assertEqual(2, self.baremetal_mock.port.delete.call_count)
 
