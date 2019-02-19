@@ -641,7 +641,7 @@ class TestDeleteBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
         self.cmd.take_action(parsed_args)
 
-        self.baremetal_mock.volume_target.delete.has_calls(
+        self.baremetal_mock.volume_target.delete.assert_has_calls(
             [mock.call(baremetal_fakes.baremetal_volume_target_uuid),
              mock.call(fake_volume_target_uuid2)])
         self.assertEqual(
@@ -685,7 +685,7 @@ class TestDeleteBaremetalVolumeTarget(TestBaremetalVolumeTarget):
                           self.cmd.take_action,
                           parsed_args)
 
-        self.baremetal_mock.volume_target.delete.has_calls(
+        self.baremetal_mock.volume_target.delete.assert_has_calls(
             [mock.call(baremetal_fakes.baremetal_volume_target_uuid),
              mock.call(fake_volume_target_uuid2)])
         self.assertEqual(

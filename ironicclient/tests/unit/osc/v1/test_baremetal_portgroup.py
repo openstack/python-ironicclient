@@ -472,7 +472,7 @@ class TestBaremetalPortGroupDelete(TestBaremetalPortGroup):
 
         args = [baremetal_fakes.baremetal_portgroup_uuid,
                 baremetal_fakes.baremetal_portgroup_name]
-        self.baremetal_mock.portgroup.delete.has_calls(
+        self.baremetal_mock.portgroup.delete.assert_has_calls(
             [mock.call(x) for x in args])
         self.assertEqual(2, self.baremetal_mock.portgroup.delete.call_count)
 

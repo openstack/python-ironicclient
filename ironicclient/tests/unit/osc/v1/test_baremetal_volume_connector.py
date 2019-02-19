@@ -569,7 +569,7 @@ class TestDeleteBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
         self.cmd.take_action(parsed_args)
 
-        self.baremetal_mock.volume_connector.delete.has_calls(
+        self.baremetal_mock.volume_connector.delete.assert_has_calls(
             [mock.call(baremetal_fakes.baremetal_volume_connector_uuid),
              mock.call(fake_volume_connector_uuid2)])
         self.assertEqual(
@@ -613,7 +613,7 @@ class TestDeleteBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                           self.cmd.take_action,
                           parsed_args)
 
-        self.baremetal_mock.volume_connector.delete.has_calls(
+        self.baremetal_mock.volume_connector.delete.assert_has_calls(
             [mock.call(baremetal_fakes.baremetal_volume_connector_uuid),
              mock.call(fake_volume_connector_uuid2)])
         self.assertEqual(
