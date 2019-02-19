@@ -1,5 +1,5 @@
 ---
 prelude: >
     Support Smart NIC ports. Adding local link connection attributes
-    'port_id' and 'hostname' when creating port with port argument
+    ``port_id`` and ``hostname`` when creating port with port argument
     ``--is-smartnic`` means that it's a Smart NIC port.

@@ -65,8 +65,8 @@ class CreateBaremetalPort(command.ShowOne):
             help=_("Key/value metadata describing Local link connection "
                    "information. Valid keys are 'switch_info', 'switch_id', "
                    "'port_id' and 'hostname'. The keys 'switch_id' and "
-                   "'port_id' are required. In case of Smart NIC port, "
-                   "the keys 'port_id' and 'hostname' are required. "
+                   "'port_id' are required. In case of a Smart NIC port, "
+                   "the required keys are 'port_id' and 'hostname'. "
                    "Argument can be specified multiple times.")
         )
         parser.add_argument(
@@ -302,8 +302,8 @@ class SetBaremetalPort(command.Command):
             help=_("Key/value metadata describing local link connection "
                    "information. Valid keys are 'switch_info', 'switch_id', "
                    "'port_id' and 'hostname'. The keys 'switch_id' and "
-                   "'port_id' are required. In case of Smart NIC port, "
-                   "the keys 'port_id' and 'hostname' are required. "
+                   "'port_id' are required. In case of a Smart NIC port, "
+                   "the required keys are 'port_id' and 'hostname'. "
                    "Argument can be specified multiple times.")
         )
         pxe_enabled_group = parser.add_mutually_exclusive_group(required=False)
