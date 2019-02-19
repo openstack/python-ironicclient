@@ -29,6 +29,7 @@ PORT = {'uuid': '11111111-2222-3333-4444-555555555555',
         'local_link_connection': {},
         'portgroup_uuid': '55555555-4444-3333-2222-111111111111',
         'physical_network': 'physnet1',
+        'is_smartnic': False,
         'extra': {}}
 
 PORT2 = {'uuid': '55555555-4444-3333-2222-111111111111',
@@ -38,6 +39,7 @@ PORT2 = {'uuid': '55555555-4444-3333-2222-111111111111',
          'local_link_connection': {},
          'portgroup_uuid': '55555555-4444-3333-2222-111111111111',
          'physical_network': 'physnet2',
+         'is_smartnic': True,
          'extra': {}}
 
 CREATE_PORT = copy.deepcopy(PORT)
@@ -303,6 +305,7 @@ class PortManagerTest(testtools.TestCase):
                          port.local_link_connection)
         self.assertEqual(PORT['portgroup_uuid'], port.portgroup_uuid)
         self.assertEqual(PORT['physical_network'], port.physical_network)
+        self.assertEqual(PORT['is_smartnic'], port.is_smartnic)
 
     def test_ports_show_by_address(self):
         port = self.mgr.get_by_address(PORT['address'])
@@ -319,6 +322,7 @@ class PortManagerTest(testtools.TestCase):
                          port.local_link_connection)
         self.assertEqual(PORT['portgroup_uuid'], port.portgroup_uuid)
         self.assertEqual(PORT['physical_network'], port.physical_network)
+        self.assertEqual(PORT['is_smartnic'], port.is_smartnic)
 
     def test_port_show_fields(self):
         port = self.mgr.get(PORT['uuid'], fields=['uuid', 'address'])

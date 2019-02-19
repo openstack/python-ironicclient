@@ -33,7 +33,7 @@ class PortShellTest(utils.BaseTestCase):
             p_shell._print_port_show(port)
         exp = ['address', 'created_at', 'extra', 'node_uuid',
                'physical_network', 'updated_at', 'uuid', 'pxe_enabled',
-               'local_link_connection', 'internal_info',
+               'local_link_connection', 'internal_info', 'is_smartnic',
                'portgroup_uuid']
         act = actual.keys()
         self.assertEqual(sorted(exp), sorted(act))
