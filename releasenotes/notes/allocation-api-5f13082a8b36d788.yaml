@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Adds Python API and CLI for the allocation API introduced in API version
+    1.52. Adds new commands:
+
+    * ``openstack baremetal allocation create``
+    * ``openstack baremetal allocation delete``
+    * ``openstack baremetal allocation get``
+    * ``openstack baremetal allocation list``

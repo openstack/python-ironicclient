@@ -20,6 +20,7 @@ from ironicclient.common import http
 from ironicclient.common.http import DEFAULT_VER
 from ironicclient.common.i18n import _
 from ironicclient import exc
+from ironicclient.v1 import allocation
 from ironicclient.v1 import chassis
 from ironicclient.v1 import conductor
 from ironicclient.v1 import driver
@@ -101,6 +102,7 @@ class Client(object):
         self.portgroup = portgroup.PortgroupManager(self.http_client)
         self.conductor = conductor.ConductorManager(self.http_client)
         self.events = events.EventManager(self.http_client)
+        self.allocation = allocation.AllocationManager(self.http_client)
 
     @property
     def current_api_version(self):

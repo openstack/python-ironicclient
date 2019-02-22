@@ -33,7 +33,8 @@ class NodeShellTest(utils.BaseTestCase):
         with mock.patch.object(cliutils, 'print_dict', fake_print_dict):
             node = object()
             n_shell._print_node_show(node)
-        exp = ['automated_clean',
+        exp = ['allocation_uuid',
+               'automated_clean',
                'chassis_uuid',
                'clean_step',
                'created_at',

@@ -348,3 +348,56 @@ class TestCase(base.FunctionalTestBase):
         output = self.openstack('baremetal conductor list {0} {1}'
                                 .format(opts, params))
         return json.loads(output)
+
+    def allocation_create(self, resource_class='allocation-test', params=''):
+        opts = self.get_opts()
+        output = self.openstack('baremetal allocation create {0} '
+                                '--resource-class {1} {2}'
+                                .format(opts, resource_class, params))
+        allocation = json.loads(output)
+        self.addCleanup(self.allocation_delete, allocation['uuid'], True)
+        if not output:
+            self.fail('Baremetal allocation has not been created!')
+
+        return allocation
+
+    def allocation_list(self, fields=None, params=''):
+        """List baremetal allocations.
+
+        :param List fields: List of fields to show
+        :param String params: Additional kwargs
+        :return: list of JSON allocation objects
+        """
+        opts = self.get_opts(fields=fields)
+        output = self.openstack('baremetal allocation list {0} {1}'
+                                .format(opts, params))
+        return json.loads(output)
+
+    def allocation_show(self, identifier, fields=None, params=''):
+        """Show specified baremetal allocation.
+
+        :param String identifier: Name or UUID of the allocation
+        :param List fields: List of fields to show
+        :param List params: Additional kwargs
+        :return: JSON object of allocation
+        """
+        opts = self.get_opts(fields)
+        output = self.openstack('baremetal allocation show {0} {1} {2}'
+                                .format(opts, identifier, params))
+        return json.loads(output)
+
+    def allocation_delete(self, identifier, ignore_exceptions=False):
+        """Try to delete baremetal allocation by name or UUID.
+
+        :param String identifier: Name or UUID of the allocation
+        :param Bool ignore_exceptions: Ignore exception (needed for cleanUp)
+        :return: raw values output
+        :raise: CommandFailed exception when command fails to delete
+            an allocation
+        """
+        try:
+            return self.openstack('baremetal allocation delete {0}'
+                                  .format(identifier))
+        except exceptions.CommandFailed:
+            if not ignore_exceptions:
+                raise

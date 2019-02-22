@@ -14,7 +14,6 @@
 
 import logging
 import os
-import time
 
 from oslo_utils import strutils
 
@@ -682,19 +681,16 @@ class NodeManager(base.CreateManager):
         :raises: StateTransitionFailed if node reached an error state
         :raises: StateTransitionTimeout on timeout
         """
-        if not isinstance(timeout, (int, float)) or timeout < 0:
-            raise ValueError(_('Timeout must be a non-negative number'))
-
-        threshold = time.time() + timeout
         expected_state = expected_state.lower()
-        poll_delay_function = (time.sleep if poll_delay_function is None
-                               else poll_delay_function)
-        if not callable(poll_delay_function):
-            raise TypeError(_('poll_delay_function must be callable'))
+        timeout_msg = _('Node %(node)s failed to reach state %(state)s in '
+                        '%(timeout)s seconds') % {'node': node_ident,
+                                                  'state': expected_state,
+                                                  'timeout': timeout}
 
         # TODO(dtantsur): use version negotiation to request API 1.8 and use
         # the "fields" argument to reduce amount of data sent.
-        while not timeout or time.time() < threshold:
+        for _count in utils.poll(timeout, poll_interval, poll_delay_function,
+                                 timeout_msg):
             node = self.get(node_ident)
             if node.provision_state == expected_state:
                 LOG.debug('Node %(node)s reached provision state %(state)s',
@@ -721,10 +717,3 @@ class NodeManager(base.CreateManager):
                       '%(state)s, the current state is %(actual)s',
                       {'node': node_ident, 'state': expected_state,
                        'actual': node.provision_state})
-            poll_delay_function(poll_interval)
-
-        raise exc.StateTransitionTimeout(
-            _('Node %(node)s failed to reach state %(state)s in '
-              '%(timeout)s seconds') % {'node': node_ident,
-                                        'state': expected_state,
-                                        'timeout': timeout})
