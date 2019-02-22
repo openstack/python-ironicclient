@@ -153,7 +153,7 @@ class ListBaremetalAllocation(command.Lister):
         parser.add_argument(
             '--marker',
             metavar='<allocation>',
-            help=_('Port group UUID (for example, of the last allocation in '
+            help=_('Allocation UUID (for example, of the last allocation in '
                    'the list from a previous request). Returns the list of '
                    'allocations after this UUID.'))
         parser.add_argument(
