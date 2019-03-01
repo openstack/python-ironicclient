@@ -100,14 +100,22 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
         session = session_loader.load_from_options(auth=auth_plugin,
                                                    **session_opts)
 
+    # Make sure we also pass the endpoint interface to the HTTP client.
+    # NOTE(gyee): we are supposed to be using valid_interfaces as interface
+    # is deprecated.
+    interface = kwargs.get('interface')
+
     endpoint = kwargs.get('endpoint')
     if not endpoint:
         try:
             # endpoint will be used to get hostname
             # and port that will be used for API version caching.
+            # NOTE(gyee): KSA defaults interface to 'public' if it is
+            # empty or None so there's no need to set it to publicURL
+            # explicitly.
             endpoint = session.get_endpoint(
                 service_type=kwargs.get('service_type') or 'baremetal',
-                interface=kwargs.get('interface') or 'publicURL',
+                interface=interface,
                 region_name=kwargs.get('region_name')
             )
         except Exception as e:
@@ -120,7 +128,8 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
         'max_retries': max_retries,
         'retry_interval': retry_interval,
         'session': session,
-        'endpoint_override': endpoint
+        'endpoint_override': endpoint,
+        'interface': interface
     }
 
     return Client(api_version, **ironicclient_kwargs)
