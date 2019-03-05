@@ -16,6 +16,7 @@
 
 import argparse
 import itertools
+import json
 import logging
 
 from osc_lib.command import command
@@ -30,8 +31,10 @@ from ironicclient.v1 import utils as v1_utils
 CONFIG_DRIVE_ARG_HELP = _(
     "A gzipped, base64-encoded configuration drive string OR "
     "the path to the configuration drive file OR the path to a "
-    "directory containing the config drive files. In case it's "
-    "a directory, a config drive will be generated from it.")
+    "directory containing the config drive files OR a JSON object to build "
+    "config drive from. In case it's a directory, a config drive will be "
+    "generated from it. In case it's a JSON object, a config drive will "
+    "be generated on the server side.")
 
 
 SUPPORTED_INTERFACES = ['bios', 'boot', 'console', 'deploy', 'inspect',
@@ -69,6 +72,15 @@ class ProvisionStateBaremetalNode(command.Command):
         clean_steps = utils.handle_json_arg(clean_steps, 'clean steps')
 
         config_drive = getattr(parsed_args, 'config_drive', None)
+        if config_drive:
+            try:
+                config_drive_dict = json.loads(config_drive)
+            except (ValueError, TypeError):
+                pass
+            else:
+                if isinstance(config_drive_dict, dict):
+                    config_drive = config_drive_dict
+
         rescue_password = getattr(parsed_args, 'rescue_password', None)
 
         baremetal_client.node.set_provision_state(

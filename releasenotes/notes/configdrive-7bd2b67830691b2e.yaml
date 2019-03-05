@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Supports passing a JSON object to ``--config-drive`` to build the config
+    drive on the server side (requires API version 1.56).

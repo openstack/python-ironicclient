@@ -515,9 +515,11 @@ class NodeManager(base.CreateManager):
              'rescue', 'unrescue'.
         :param configdrive: A gzipped, base64-encoded configuration drive
             string OR the path to the configuration drive file OR the path to
-            a directory containing the config drive files. In case it's a
-            directory, a config drive will be generated from it. This is only
-            valid when setting state to 'active'.
+            a directory containing the config drive files OR a dictionary to
+            build config drive from. In case it's a directory, a config drive
+            will be generated from it. In case it's a dictionary, a config
+            drive will be generated on the server side (requires API version
+            1.56). This is only valid when setting state to 'active'.
         :param cleansteps: The clean steps as a list of clean-step
             dictionaries; each dictionary should have keys 'interface' and
             'step', and optional key 'args'. This must be specified (and is
@@ -534,11 +536,12 @@ class NodeManager(base.CreateManager):
         path = "%s/states/provision" % node_uuid
         body = {'target': state}
         if configdrive:
-            if os.path.isfile(configdrive):
-                with open(configdrive, 'rb') as f:
-                    configdrive = f.read()
-            if os.path.isdir(configdrive):
-                configdrive = utils.make_configdrive(configdrive)
+            if not isinstance(configdrive, dict):
+                if os.path.isfile(configdrive):
+                    with open(configdrive, 'rb') as f:
+                        configdrive = f.read()
+                if os.path.isdir(configdrive):
+                    configdrive = utils.make_configdrive(configdrive)
 
             body['configdrive'] = configdrive
         elif cleansteps:

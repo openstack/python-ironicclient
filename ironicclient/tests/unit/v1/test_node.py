@@ -1388,6 +1388,16 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
+    def test_node_set_provision_state_with_configdrive_as_dict(self):
+        target_state = 'active'
+        self.mgr.set_provision_state(NODE1['uuid'], target_state,
+                                     configdrive={'user_data': ''})
+        body = {'target': target_state, 'configdrive': {'user_data': ''}}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
     def test_node_set_provision_state_with_configdrive_file(self):
         target_state = 'active'
         file_content = b'foo bar cat meow dog bark'
