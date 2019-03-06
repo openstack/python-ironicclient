@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    The ``interface`` argument was being ignored so that the HTTP client was
+    always using the public endpoint for Ironic. This fixes it so that the
+    ``interface`` argument is taken into consideration. See
+    `story 2005118 <https://storyboard.openstack.org/#!/story/2005118>`_.

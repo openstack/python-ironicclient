@@ -32,7 +32,8 @@ class ClientTest(utils.BaseTestCase):
     @mock.patch.object(kaloading, 'get_plugin_loader', autospec=True)
     def _test_get_client(self, mock_ks_loader, mock_ks_session,
                          mock_retrieve_data, warn_mock, version=None,
-                         auth='password', warn_mock_call_count=0, **kwargs):
+                         auth='password', warn_mock_call_count=0,
+                         expected_interface=None, **kwargs):
         session = mock_ks_session.return_value.load_from_options.return_value
         session.get_endpoint.return_value = 'http://localhost:6385/v1/f14b4123'
 
@@ -60,7 +61,7 @@ class ClientTest(utils.BaseTestCase):
         if not {'endpoint', 'ironic_url'}.intersection(kwargs):
             session.get_endpoint.assert_called_once_with(
                 service_type=kwargs.get('service_type') or 'baremetal',
-                interface=kwargs.get('interface') or 'publicURL',
+                interface=expected_interface,
                 region_name=kwargs.get('region_name'))
         if 'os_ironic_api_version' in kwargs:
             # NOTE(TheJulia): This does not test the negotiation logic
@@ -76,6 +77,15 @@ class ClientTest(utils.BaseTestCase):
                 port='6385')
             self.assertEqual(version or v1.DEFAULT_VER,
                              client.http_client.os_ironic_api_version)
+
+        # make sure the interface is conveyed to the client
+        if expected_interface is not None:
+            self.assertEqual(expected_interface,
+                             client.http_client.interface)
+        if kwargs.get('os_endpoint_type'):
+            self.assertEqual(kwargs['os_endpoint_type'],
+                             client.http_client.interface)
+
         return client
 
     def test_get_client_only_ironic_url(self):
@@ -127,6 +137,32 @@ class ClientTest(utils.BaseTestCase):
             'os_endpoint_type': ''
         }
         self._test_get_client(warn_mock_call_count=4, **kwargs)
+
+    def test_get_client_and_endpoint_type(self):
+        kwargs = {
+            'os_project_name': 'PROJECT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': 'http://localhost:35357/v2.0',
+            'os_auth_token': '',
+            'os_service_type': '',
+            'os_endpoint_type': 'adminURL'
+        }
+        self._test_get_client(warn_mock_call_count=5,
+                              expected_interface='adminURL', **kwargs)
+
+    def test_get_client_and_interface(self):
+        kwargs = {
+            'os_project_name': 'PROJECT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': 'http://localhost:35357/v2.0',
+            'os_auth_token': '',
+            'os_service_type': '',
+            'interface': 'internal'
+        }
+        self._test_get_client(warn_mock_call_count=4,
+                              expected_interface='internal', **kwargs)
 
     def test_get_client_with_region_no_auth_token(self):
         kwargs = {
@@ -214,7 +250,7 @@ class ClientTest(utils.BaseTestCase):
         }
         iroclient.get_client('1', **kwargs)
         session.get_endpoint.assert_called_once_with(service_type='baremetal',
-                                                     interface='publicURL',
+                                                     interface=None,
                                                      region_name=None)
 
     def test_get_client_incorrect_session_passed(self):
@@ -229,7 +265,7 @@ class ClientTest(utils.BaseTestCase):
     @mock.patch.object(kaloading.session, 'Session', autospec=True)
     def _test_loader_arguments_passed_correctly(
             self, mock_ks_session, passed_kwargs, expected_kwargs,
-            loader_class):
+            loader_class, expected_interface=None):
         session = mock_ks_session.return_value.load_from_options.return_value
         session.get_endpoint.return_value = 'http://localhost:6385/v1/f14b4123'
 
@@ -246,9 +282,8 @@ class ClientTest(utils.BaseTestCase):
             auth=mock.ANY, **session_opts)
         if 'ironic_url' not in passed_kwargs:
             service_type = passed_kwargs.get('service_type') or 'baremetal'
-            interface = passed_kwargs.get('interface') or 'publicURL'
             session.get_endpoint.assert_called_once_with(
-                service_type=service_type, interface=interface,
+                service_type=service_type, interface=expected_interface,
                 region_name=passed_kwargs.get('region_name'))
 
     def test_loader_arguments_admin_token(self):
@@ -280,6 +315,24 @@ class ClientTest(utils.BaseTestCase):
         self._test_loader_arguments_passed_correctly(
             passed_kwargs=passed_kwargs, expected_kwargs=expected_kwargs,
             loader_class=identity.Token
+        )
+
+    def test_loader_arguments_interface(self):
+        passed_kwargs = {
+            'os_auth_url': 'http://localhost:35357/v3',
+            'os_region_name': 'REGIONONE',
+            'os_auth_token': 'USER_AUTH_TOKEN',
+            'os_project_name': 'admin',
+            'interface': 'internal'
+        }
+        expected_kwargs = {
+            'auth_url': 'http://localhost:35357/v3',
+            'project_name': 'admin',
+            'token': 'USER_AUTH_TOKEN'
+        }
+        self._test_loader_arguments_passed_correctly(
+            passed_kwargs=passed_kwargs, expected_kwargs=expected_kwargs,
+            loader_class=identity.Token, expected_interface='internal'
         )
 
     def test_loader_arguments_password_tenant_name(self):
@@ -344,7 +397,8 @@ class ClientTest(utils.BaseTestCase):
                     'max_retries': None,
                     'retry_interval': None,
                     'session': session,
-                    'endpoint_override': 'http://ironic.example.org:6385/'}
+                    'endpoint_override': 'http://ironic.example.org:6385/',
+                    'interface': None}
         )
         self.assertFalse(session.get_endpoint.called)
 
@@ -368,7 +422,8 @@ class ClientTest(utils.BaseTestCase):
                     'max_retries': None,
                     'retry_interval': None,
                     'session': session,
-                    'endpoint_override': session.get_endpoint.return_value}
+                    'endpoint_override': session.get_endpoint.return_value,
+                    'interface': None}
         )
 
     @mock.patch.object(iroclient, 'Client', autospec=True)
@@ -385,7 +440,8 @@ class ClientTest(utils.BaseTestCase):
                     'max_retries': None,
                     'retry_interval': None,
                     'session': session,
-                    'endpoint_override': session.get_endpoint.return_value}
+                    'endpoint_override': session.get_endpoint.return_value,
+                    'interface': None}
         )
         self.assertFalse(mock_ks_session.called)
 
