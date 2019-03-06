@@ -164,6 +164,36 @@ class ClientTest(utils.BaseTestCase):
         self._test_get_client(warn_mock_call_count=4,
                               expected_interface='internal', **kwargs)
 
+    def test_get_client_and_valid_interfaces(self):
+        kwargs = {
+            'os_project_name': 'PROJECT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': 'http://localhost:35357/v2.0',
+            'os_auth_token': '',
+            'os_service_type': '',
+            'valid_interfaces': ['internal', 'public']
+        }
+        self._test_get_client(warn_mock_call_count=4,
+                              expected_interface=['internal', 'public'],
+                              **kwargs)
+
+    def test_get_client_and_interface_and_valid_interfaces(self):
+        """Ensure 'valid_interfaces' takes precedence over 'interface'."""
+        kwargs = {
+            'os_project_name': 'PROJECT_NAME',
+            'os_username': 'USERNAME',
+            'os_password': 'PASSWORD',
+            'os_auth_url': 'http://localhost:35357/v2.0',
+            'os_auth_token': '',
+            'os_service_type': '',
+            'interface': ['ignored'],
+            'valid_interfaces': ['internal', 'public']
+        }
+        self._test_get_client(warn_mock_call_count=4,
+                              expected_interface=['internal', 'public'],
+                              **kwargs)
+
     def test_get_client_with_region_no_auth_token(self):
         kwargs = {
             'os_project_name': 'PROJECT_NAME',

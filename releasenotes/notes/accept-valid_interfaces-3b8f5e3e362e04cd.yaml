@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    The consumer of ironicclient may be deriving their ``get_client`` kwargs
+    from config inherited from ksa, where the ``interface`` option has been
+    deprecated in favor of ``valid_interfaces``. To accomodate this, we now
+    accept ``valid_interfaces`` as a kwarg, giving it precedence over
+    ``interface``. However, we still accept ``interface``, as the consumer may
+    be deriving kwargs from a non-conf source (such as an already-created ksa
+    Adapter where ``valid_interfaces`` has already been translated to
+    ``interfaces``.
