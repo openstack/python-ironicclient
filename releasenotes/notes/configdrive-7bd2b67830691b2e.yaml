@@ -5,5 +5,5 @@ features:
     drive on the server side (requires API version 1.56) to the following
     commands:
 
-        openstack baremetal node deploy <node> --config-drive '{...}'
-        openstack baremetal node rebuild <node> --config-drive '{...}'
+    * ``openstack baremetal node deploy <node> --config-drive '{...}'``
+    * ``openstack baremetal node rebuild <node> --config-drive '{...}'``

@@ -8,4 +8,4 @@ features:
     ``interface``. However, we still accept ``interface``, as the consumer may
     be deriving kwargs from a non-conf source (such as an already-created ksa
     Adapter where ``valid_interfaces`` has already been translated to
-    ``interfaces``.
+    ``interfaces``).

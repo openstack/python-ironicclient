@@ -1,12 +1,8 @@
 ---
 features:
   - |
-    Added ``Event`` resource , used to notify Ironic of external events.
-
-    .. Note:: Events are not intended for end-user usage. (Internal use only.)
-  - |
-    Added the ``client.events.create`` Python SDK method to support publishing
-    events to Ironic using the /v1/events API endpoint.
-    (available starting with API version 1.54).
+    Adds the ``Event`` resource and the ``client.events.create`` Python SDK
+    method to support publishing events to the Bare Metal service using
+    the /v1/events API endpoint (introduced in API version 1.54).
 
     .. Note:: Events are not intended for end-user usage. (Internal use only.)

@@ -1,5 +1,11 @@
 ---
 features:
   - |
-    Adds support for creating Smart NIC ports by adding is-smartnic port
-    attribute to port command.
+    Adds support for Smart NIC ports by adding the ``--is-smartnic``
+    argument to the following CLI commands:
+
+    * ``openstack baremetal port create``
+    * ``openstack baremetal port set``
+    * ``openstack baremetal port unset``
+
+    This was introduced in API version 1.53.
