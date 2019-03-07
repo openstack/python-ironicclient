@@ -101,9 +101,11 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
                                                    **session_opts)
 
     # Make sure we also pass the endpoint interface to the HTTP client.
-    # NOTE(gyee): we are supposed to be using valid_interfaces as interface
-    # is deprecated.
-    interface = kwargs.get('interface')
+    # NOTE(gyee/efried): 'interface' in ksa config is deprecated in favor of
+    # 'valid_interfaces'. So, since the caller may be deriving kwargs from
+    # conf, accept 'valid_interfaces' first. But keep support for 'interface',
+    # in case the caller is deriving kwargs from, say, an existing Adapter.
+    interface = kwargs.get('valid_interfaces', kwargs.get('interface'))
 
     endpoint = kwargs.get('endpoint')
     if not endpoint:
