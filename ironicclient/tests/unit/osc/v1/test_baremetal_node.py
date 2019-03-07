@@ -1390,6 +1390,25 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
             'node_uuid', 'active',
             cleansteps=None, configdrive='path/to/drive', rescue_password=None)
 
+    def test_deploy_baremetal_provision_state_active_and_configdrive_dict(
+            self):
+        arglist = ['node_uuid',
+                   '--config-drive', '{"meta_data": {}}']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'active'),
+            ('config_drive', '{"meta_data": {}}'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'active',
+            cleansteps=None, configdrive={'meta_data': {}},
+            rescue_password=None)
+
     def test_deploy_no_wait(self):
         arglist = ['node_uuid']
         verifylist = [
