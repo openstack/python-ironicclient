@@ -2,4 +2,8 @@
 features:
   - |
     Supports passing a JSON object to ``--config-drive`` to build the config
-    drive on the server side (requires API version 1.56).
+    drive on the server side (requires API version 1.56) to the following
+    commands:
+
+        openstack baremetal node deploy <node> --config-drive '{...}'
+        openstack baremetal node rebuild <node> --config-drive '{...}'
