@@ -28,7 +28,9 @@ class BaremetalNodeNegativeTests(base.TestCase):
         self.node = self.node_create()
 
     @ddt.data(
-        ('', '', 'error: argument --driver is required'),
+        ('', '',
+         'error: argument --driver is required' if six.PY2
+         else 'error: the following arguments are required: --driver'),
         ('--driver', 'wrongdriver',
          'No valid host was found. Reason: No conductor service '
          'registered which supports driver wrongdriver.')
@@ -45,6 +47,8 @@ class BaremetalNodeNegativeTests(base.TestCase):
         """Test for baremetal node delete without node specified."""
         command = 'baremetal node delete'
         ex_text = 'error: too few arguments'
+        if six.PY3:
+            ex_text = ''
         six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
                               self.openstack, command)
 
@@ -56,7 +60,9 @@ class BaremetalNodeNegativeTests(base.TestCase):
                               self.openstack, command)
 
     @ddt.data(
-        ('--property', '', 'error: too few arguments'),
+        ('--property', '',
+         'error: too few arguments' if six.PY2
+         else 'error: the following arguments are required: <node>'),
         ('--property', 'prop', 'Attributes must be a list of PATH=VALUE')
     )
     @ddt.unpack
@@ -69,7 +75,9 @@ class BaremetalNodeNegativeTests(base.TestCase):
                               self.openstack, command)
 
     @ddt.data(
-        ('--property', '', 'error: too few arguments'),
+        ('--property', '',
+         'error: too few arguments' if six.PY2
+         else 'error: the following arguments are required: <node>'),
         ('--property', 'prop', "Reason: can't remove non-existent object")
     )
     @ddt.unpack

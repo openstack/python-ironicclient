@@ -13,9 +13,13 @@
     check:
       jobs:
         - ironicclient-functional
+        - ironicclient-functional-python2
         - ironicclient-tempest
+        - ironicclient-tempest-python2
     gate:
       queue: ironic
       jobs:
         - ironicclient-functional
+        - ironicclient-functional-python2
         - ironicclient-tempest
+        - ironicclient-tempest-python2
