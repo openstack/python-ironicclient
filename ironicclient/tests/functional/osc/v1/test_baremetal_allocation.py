@@ -140,7 +140,7 @@ class BaremetalAllocationTests(base.TestCase):
         ('--trait', 'foo',
          'A custom trait must start with the prefix CUSTOM_'),
         ('--candidate-node', '', 'expected one argument'),
-        ('--candidate-node', 'banana?', 'Expected a logical name or UUID'),
+        ('--candidate-node', 'banana?', 'Nodes cannot be found'),
         ('--wait', 'meow', 'invalid int value'))
     @ddt.unpack
     def test_create_negative(self, argument, value, ex_text):
@@ -156,5 +156,5 @@ class BaremetalAllocationTests(base.TestCase):
         """Check errors on missing resource class."""
         base_cmd = 'baremetal allocation create'
         self.assertRaisesRegex(exceptions.CommandFailed,
-                               '--resource-class is required',
+                               '--resource-class',
                                self.openstack, base_cmd)

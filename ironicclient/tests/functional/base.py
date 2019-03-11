@@ -37,7 +37,8 @@ class FunctionalTestBase(base.ClientTestBase):
     def _get_clients(self):
         # NOTE(aarefiev): {toxinidir} is a current working directory, so
         # the tox env path is {toxinidir}/.tox
-        cli_dir = os.path.join(os.path.abspath('.'), '.tox/functional/bin')
+        venv_name = os.environ.get('OS_TESTENV_NAME', 'functional')
+        cli_dir = os.path.join(os.path.abspath('.'), '.tox/%s/bin' % venv_name)
 
         config = self._get_config()
         if config.get('os_auth_url'):

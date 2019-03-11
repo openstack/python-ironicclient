@@ -132,7 +132,7 @@ class ChassisNegativeTestsIronicClient(base.FunctionalTestBase):
         1) check that chassis-delete command without arguments
         triggers an exception
         """
-        ex_text = r'chassis-delete: error: too few arguments'
+        ex_text = r'chassis-delete: error:'
 
         six.assertRaisesRegex(self, exceptions.CommandFailed,
                               ex_text,
@@ -159,7 +159,7 @@ class ChassisNegativeTestsIronicClient(base.FunctionalTestBase):
         1) check that chassis-show command without arguments
         triggers an exception
         """
-        ex_text = r'chassis-show: error: too few arguments'
+        ex_text = r'chassis-show: error:'
 
         six.assertRaisesRegex(self, exceptions.CommandFailed,
                               ex_text,
@@ -187,7 +187,7 @@ class ChassisNegativeTestsIronicClient(base.FunctionalTestBase):
         2) check that chassis-update command without arguments
         triggers an exception
         """
-        ex_text = r'chassis-update: error: too few arguments'
+        ex_text = r'chassis-update: error:'
 
         six.assertRaisesRegex(self, exceptions.CommandFailed,
                               ex_text,
@@ -203,7 +203,7 @@ class ChassisNegativeTestsIronicClient(base.FunctionalTestBase):
         triggers an exception
         """
         uuid = data_utils.rand_uuid()
-        ex_text = r'chassis-update: error: too few arguments'
+        ex_text = r'chassis-update: error:'
 
         six.assertRaisesRegex(self,
                               exceptions.CommandFailed,

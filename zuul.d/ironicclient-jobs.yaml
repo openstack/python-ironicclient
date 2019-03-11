@@ -20,11 +20,11 @@
     vars:
       tox_environment:
         PYTHONUNBUFFERED: 'true'
-      tox_envlist: functional
+      tox_envlist: functionalpy3
       devstack_plugins:
         ironic: git://git.openstack.org/openstack/ironic
       devstack_localrc:
-        USE_PYTHON3: False
+        USE_PYTHON3: True
         EBTABLES_RACE_FIX: True
         IRONIC_ENABLED_NETWORK_INTERFACES: noop
         IRONIC_DHCP_PROVIDER: none
@@ -35,6 +35,14 @@
         mysql: True
         rabbit: True
 
+- job:
+    name: ironicclient-functional-python2
+    parent: ironicclient-functional
+    post-run: playbooks/functional/run.yaml
+    vars:
+      tox_envlist: functional
+      devstack_localrc:
+        USE_PYTHON3: False
 
 - job:
     name: ironicclient-tempest
@@ -46,3 +54,10 @@
       devstack_localrc:
         USE_PYTHON3: True
         EBTABLES_RACE_FIX: True
+
+- job:
+    name: ironicclient-tempest-python2
+    parent: ironicclient-tempest
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
