@@ -741,6 +741,7 @@ class SessionClientTest(utils.BaseTestCase):
                 'service_type': 'baremetal',
                 'region_name': ''
             },
+            endpoint_override='http://127.0.0.1',
             user_agent=http.USER_AGENT)
         self.assertEqual(res, session.request.return_value)
 
