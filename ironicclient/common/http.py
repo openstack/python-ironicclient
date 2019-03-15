@@ -620,7 +620,8 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         # NOTE: conn is self.session for this class
         return conn.request(url, method, raise_exc=False,
                             user_agent=USER_AGENT,
-                            endpoint_filter=endpoint_filter)
+                            endpoint_filter=endpoint_filter,
+                            endpoint_override=self.endpoint_override)
 
     @with_retries
     def _http_request(self, url, method, **kwargs):

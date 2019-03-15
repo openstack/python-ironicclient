@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixes an issue where an endpoint_override was not considered when
+    performing version negotiation, which would can result in the client
+    attempting to base version negotiation off of an entry in the service
+    catalog as opposed to an endpoint_override.
