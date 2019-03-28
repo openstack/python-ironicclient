@@ -30,7 +30,7 @@ class AllocationManager(base.CreateManager):
     resource_class = Allocation
     _resource_name = 'allocations'
     _creation_attributes = ['extra', 'name', 'resource_class', 'uuid',
-                            'traits', 'candidate_nodes']
+                            'traits', 'candidate_nodes', 'node']
 
     def list(self, resource_class=None, state=None, node=None, limit=None,
              marker=None, sort_key=None, sort_dir=None, fields=None):

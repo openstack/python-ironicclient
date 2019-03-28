@@ -34,7 +34,6 @@ class CreateBaremetalAllocation(command.ShowOne):
         parser.add_argument(
             '--resource-class',
             dest='resource_class',
-            required=True,
             help=_('Resource class to request.'))
         parser.add_argument(
             '--trait',
@@ -75,6 +74,11 @@ class CreateBaremetalAllocation(command.ShowOne):
                    "is returned if allocation fails and --wait is used. "
                    "Optionally takes a timeout value (in seconds). The "
                    "default value is 0, meaning it will wait indefinitely."))
+        parser.add_argument(
+            '--node',
+            help=_("Backfill this allocation from the provided node that has "
+                   "already been deployed. Bypasses the normal allocation "
+                   "process."))
 
         return parser
 
@@ -82,8 +86,12 @@ class CreateBaremetalAllocation(command.ShowOne):
         self.log.debug("take_action(%s)", parsed_args)
         baremetal_client = self.app.client_manager.baremetal
 
+        if not parsed_args.node and not parsed_args.resource_class:
+            raise exc.ClientException(
+                _('--resource-class is required except when --node is used'))
+
         field_list = ['name', 'uuid', 'extra', 'resource_class', 'traits',
-                      'candidate_nodes']
+                      'candidate_nodes', 'node']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
 
