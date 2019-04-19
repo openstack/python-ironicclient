@@ -22,7 +22,7 @@
         PYTHONUNBUFFERED: 'true'
       tox_envlist: functionalpy3
       devstack_plugins:
-        ironic: https://git.openstack.org/openstack/ironic
+        ironic: https://opendev.org/openstack/ironic
       devstack_localrc:
         USE_PYTHON3: True
         EBTABLES_RACE_FIX: True
