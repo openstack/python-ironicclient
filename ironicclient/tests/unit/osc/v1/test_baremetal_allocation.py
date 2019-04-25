@@ -490,3 +490,130 @@ class TestBaremetalAllocationDelete(TestBaremetalAllocation):
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
+
+
+class TestBaremetalAllocationSet(TestBaremetalAllocation):
+    def setUp(self):
+        super(TestBaremetalAllocationSet, self).setUp()
+
+        self.baremetal_mock.allocation.update.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None,
+                copy.deepcopy(baremetal_fakes.ALLOCATION),
+                loaded=True))
+
+        self.cmd = baremetal_allocation.SetBaremetalAllocation(
+            self.app, None)
+
+    def test_baremetal_allocation_set_name(self):
+        new_name = 'foo'
+        arglist = [
+            baremetal_fakes.baremetal_uuid,
+            '--name', new_name]
+        verifylist = [
+            ('allocation', baremetal_fakes.baremetal_uuid),
+            ('name', new_name)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.allocation.update.assert_called_once_with(
+            baremetal_fakes.baremetal_uuid,
+            [{'path': '/name', 'value': new_name, 'op': 'add'}])
+
+    def test_baremetal_allocation_set_extra(self):
+        extra_value = 'foo=bar'
+        arglist = [
+            baremetal_fakes.baremetal_uuid,
+            '--extra', extra_value]
+        verifylist = [
+            ('allocation', baremetal_fakes.baremetal_uuid),
+            ('extra', [extra_value])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.allocation.update.assert_called_once_with(
+            baremetal_fakes.baremetal_uuid,
+            [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}])
+
+    def test_baremetal_allocation_set_no_options(self):
+        arglist = []
+        verifylist = []
+        self.assertRaises(osctestutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+
+class TestBaremetalAllocationUnset(TestBaremetalAllocation):
+    def setUp(self):
+        super(TestBaremetalAllocationUnset, self).setUp()
+
+        self.baremetal_mock.allocation.update.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None,
+                copy.deepcopy(baremetal_fakes.ALLOCATION),
+                loaded=True))
+
+        self.cmd = baremetal_allocation.UnsetBaremetalAllocation(
+            self.app, None)
+
+    def test_baremetal_allocation_unset_name(self):
+        arglist = [
+            baremetal_fakes.baremetal_uuid, '--name']
+        verifylist = [('allocation',
+                       baremetal_fakes.baremetal_uuid),
+                      ('name', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.allocation.update.assert_called_once_with(
+            baremetal_fakes.baremetal_uuid,
+            [{'path': '/name', 'op': 'remove'}])
+
+    def test_baremetal_allocation_unset_extra(self):
+        arglist = [
+            baremetal_fakes.baremetal_uuid, '--extra', 'key1']
+        verifylist = [('allocation',
+                       baremetal_fakes.baremetal_uuid),
+                      ('extra', ['key1'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.allocation.update.assert_called_once_with(
+            baremetal_fakes.baremetal_uuid,
+            [{'path': '/extra/key1', 'op': 'remove'}])
+
+    def test_baremetal_allocation_unset_multiple_extras(self):
+        arglist = [
+            baremetal_fakes.baremetal_uuid,
+            '--extra', 'key1', '--extra', 'key2']
+        verifylist = [('allocation',
+                       baremetal_fakes.baremetal_uuid),
+                      ('extra', ['key1', 'key2'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.allocation.update.assert_called_once_with(
+            baremetal_fakes.baremetal_uuid,
+            [{'path': '/extra/key1', 'op': 'remove'},
+             {'path': '/extra/key2', 'op': 'remove'}])
+
+    def test_baremetal_allocation_unset_no_options(self):
+        arglist = []
+        verifylist = []
+        self.assertRaises(osctestutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_allocation_unset_no_property(self):
+        uuid = baremetal_fakes.baremetal_uuid
+        arglist = [uuid]
+        verifylist = [('allocation', uuid)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+        self.assertFalse(self.baremetal_mock.allocation.update.called)

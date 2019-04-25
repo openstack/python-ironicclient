@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Adds support for the allocation update API introduced in API
+    version 1.57. Adds new commands:
+
+    * ``openstack baremetal allocation set``
+    * ``openstack baremetal allocation unset``

@@ -158,3 +158,32 @@ class BaremetalAllocationTests(base.TestCase):
         self.assertRaisesRegex(exceptions.CommandFailed,
                                '--resource-class',
                                self.openstack, base_cmd)
+
+    def test_set_unset(self):
+        """Check baremetal allocation set and unset commands.
+
+        Test steps:
+        1) Create baremetal allocation in setUp.
+        2) Set extra data for allocation.
+        3) Check that baremetal allocation extra data was set.
+        4) Unset extra data for allocation.
+        5) Check that baremetal allocation  extra data was unset.
+        """
+        name = data_utils.rand_name('baremetal-allocation')
+        allocation = self.allocation_create(params='--name {}'.format(name))
+        extra_key = 'ext'
+        extra_value = 'testdata'
+        self.openstack(
+            'baremetal allocation set --extra {0}={1} {2}'
+            .format(extra_key, extra_value, allocation['uuid']))
+
+        show_prop = self.allocation_show(allocation['uuid'],
+                                         fields=['extra'])
+        self.assertEqual(extra_value, show_prop['extra'][extra_key])
+
+        self.openstack('baremetal allocation unset --extra {0} {1}'
+                       .format(extra_key, allocation['uuid']))
+
+        show_prop = self.allocation_show(allocation['uuid'],
+                                         fields=['extra'])
+        self.assertNotIn(extra_key, show_prop['extra'])

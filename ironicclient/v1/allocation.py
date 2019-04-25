@@ -139,3 +139,11 @@ class AllocationManager(base.CreateManager):
                       'active, the current state is %(actual)s',
                       {'allocation': allocation_id,
                        'actual': allocation.state})
+
+    def update(self, allocation_id, patch):
+        """Updates the Allocation. Only 'name' and 'extra' field are allowed.
+
+        :param allocation_id: The UUID or name of an allocation.
+        :param patch: a json PATCH document to apply to this allocation.
+        """
+        return self._update(resource_id=allocation_id, patch=patch)
