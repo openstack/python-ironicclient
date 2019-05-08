@@ -59,7 +59,7 @@ environment variable. (It defaults to the first in the list returned.)
 Ironic CLI supports bash completion. The command-line tool can automatically
 fill partially typed commands. To use this feature, source the below file
 (available at
-https://git.openstack.org/cgit/openstack/python-ironicclient/tree/tools/ironic.bash_completion)
+https://opendev.org/openstack/python-ironicclient/src/branch/master/tools/ironic.bash_completion)
 to your terminal and then bash completion should work::
 
     $ . ironic.bash_completion

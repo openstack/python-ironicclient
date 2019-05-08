@@ -46,8 +46,8 @@ or set the corresponding environment variables::
 
 This CLI is provided by python-openstackclient and osc-lib projects:
 
-* https://git.openstack.org/openstack/python-openstackclient
-* https://git.openstack.org/openstack/osc-lib
+* https://opendev.org/openstack/python-openstackclient
+* https://opendev.org/openstack/osc-lib
 
 
 Getting help

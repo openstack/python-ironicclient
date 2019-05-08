@@ -40,7 +40,7 @@ Mailing list (prefix subjects with ``[ironic]`` for faster responses)
     http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-discuss
 
 Code Hosting
-    https://git.openstack.org/cgit/openstack/python-ironicclient
+    https://opendev.org/openstack/python-ironicclient
 
 Code Review
     https://review.openstack.org/#/q/status:open+project:openstack/python-ironicclient,n,z

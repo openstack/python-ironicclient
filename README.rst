@@ -20,8 +20,8 @@ This is a client for the OpenStack `Bare Metal API
 
 Development takes place via the usual OpenStack processes as outlined in the
 `developer guide <https://docs.openstack.org/infra/manual/developers.html>`_.
-The master repository is on `git.openstack.org
-<https://git.openstack.org/cgit/openstack/python-ironicclient>`_.
+The master repository is on `opendev.org
+<https://opendev.org/openstack/python-ironicclient/>`_.
 
 ``python-ironicclient`` is licensed under the Apache License, Version 2.0,
 like the rest of OpenStack.
@@ -33,7 +33,7 @@ Project resources
 -----------------
 
 * Documentation: https://docs.openstack.org/python-ironicclient/latest/
-* Source: https://git.openstack.org/cgit/openstack/python-ironicclient
+* Source: https://opendev.org/openstack/python-ironicclient
 * Bugs: https://storyboard.openstack.org/#!/project/959
 * Release notes: https://docs.openstack.org/releasenotes/python-ironicclient/
 
