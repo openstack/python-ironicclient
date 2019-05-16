@@ -93,14 +93,14 @@ class ClientTest(utils.BaseTestCase):
         client = self._test_get_client(auth='none',
                                        warn_mock_call_count=1, **kwargs)
         self.assertIsInstance(client.http_client, http.SessionClient)
-        self.assertEqual('http://localhost:6385/v1',
+        self.assertEqual('http://localhost:6385',
                          client.http_client.endpoint_override)
 
     def test_get_client_only_endpoint(self):
         kwargs = {'endpoint': 'http://localhost:6385/v1'}
         client = self._test_get_client(auth='none', **kwargs)
         self.assertIsInstance(client.http_client, http.SessionClient)
-        self.assertEqual('http://localhost:6385/v1',
+        self.assertEqual('http://localhost:6385',
                          client.http_client.endpoint_override)
 
     def test_get_client_with_auth_token_ironic_url(self):
@@ -113,7 +113,7 @@ class ClientTest(utils.BaseTestCase):
                                        warn_mock_call_count=2, **kwargs)
 
         self.assertIsInstance(client.http_client, http.SessionClient)
-        self.assertEqual('http://localhost:6385/v1',
+        self.assertEqual('http://localhost:6385',
                          client.http_client.endpoint_override)
 
     def test_get_client_no_auth_token(self):

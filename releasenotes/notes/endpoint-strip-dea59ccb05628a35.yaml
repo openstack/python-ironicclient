@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Prevent trying to access endpoints with ``/v1/v1`` when using endpoint
+    overrides containing ``/v1``.

@@ -18,6 +18,7 @@ from distutils.version import StrictVersion
 import hashlib
 import logging
 import os
+import re
 import socket
 import ssl
 import textwrap
@@ -50,7 +51,8 @@ LOG = logging.getLogger(__name__)
 USER_AGENT = 'python-ironicclient'
 CHUNKSIZE = 1024 * 64  # 64kB
 
-API_VERSION = '/v1'
+_MAJOR_VERSION = 1
+API_VERSION = '/v%d' % _MAJOR_VERSION
 API_VERSION_SELECTED_STATES = ('user', 'negotiated', 'cached', 'default')
 
 
@@ -61,10 +63,12 @@ SENSITIVE_HEADERS = ('X-Auth-Token',)
 
 SUPPORTED_ENDPOINT_SCHEME = ('http', 'https')
 
+_API_VERSION_RE = re.compile(r'/+(v%d)?/*$' % _MAJOR_VERSION)
+
 
 def _trim_endpoint_api_version(url):
     """Trim API version and trailing slash from endpoint."""
-    return url.rstrip('/').rstrip(API_VERSION).rstrip('/')
+    return re.sub(_API_VERSION_RE, '', url)
 
 
 def _extract_error_json(body):
@@ -604,6 +608,9 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
                         'removed in Stein. Please use "endpoint_override" '
                         'instead.')
             self.endpoint = endpoint
+        if isinstance(kwargs.get('endpoint_override'), six.string_types):
+            kwargs['endpoint_override'] = _trim_endpoint_api_version(
+                kwargs['endpoint_override'])
 
         super(SessionClient, self).__init__(**kwargs)
 
@@ -634,10 +641,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         kwargs.setdefault('user_agent', USER_AGENT)
         kwargs.setdefault('auth', self.auth)
         if isinstance(self.endpoint_override, six.string_types):
-            kwargs.setdefault(
-                'endpoint_override',
-                _trim_endpoint_api_version(self.endpoint_override)
-            )
+            kwargs.setdefault('endpoint_override', self.endpoint_override)
 
         if getattr(self, 'os_ironic_api_version', None):
             kwargs['headers'].setdefault('X-OpenStack-Ironic-API-Version',
