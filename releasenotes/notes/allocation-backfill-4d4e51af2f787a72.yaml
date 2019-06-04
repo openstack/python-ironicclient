@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Adds the ``--node`` argument to ``baremetal allocation create`` to support
+    allocation backfilling.
