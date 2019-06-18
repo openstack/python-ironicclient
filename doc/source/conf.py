@@ -19,8 +19,7 @@ apidoc_separate_modules = True
 
 # openstackdocstheme options
 repository_name = 'openstack/python-ironicclient'
-bug_project = 'python-ironicclient'
-bug_tag = ''
+use_storyboard = True
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
@@ -36,7 +35,6 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'python-ironicclient'
 copyright = u'OpenStack Foundation'
 
 # A list of ignored prefixes for module index sorting.
@@ -66,11 +64,10 @@ exclude_patterns = ['api/ironicclient.tests.functional.*']
 #html_static_path = ['_static']
 html_theme = 'openstackdocs'
 
-html_last_updated_fmt = '%Y-%m-%d %H:%M'
-
 # Output file base name for HTML help builder.
-htmlhelp_basename = '%sdoc' % project
+htmlhelp_basename = 'python-ironicclientdoc'
 
+latex_use_xindy = False
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass
@@ -78,8 +75,8 @@ htmlhelp_basename = '%sdoc' % project
 latex_documents = [
     (
         'index',
-        '%s.tex' % project,
-        u'%s Documentation' % project,
+        'doc-python-ironicclient.tex',
+        u'Python Ironic Client Documentation',
         u'OpenStack LLC',
         'manual'
     ),
