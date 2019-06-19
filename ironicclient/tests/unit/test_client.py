@@ -490,18 +490,3 @@ class ClientTest(utils.BaseTestCase):
                     'interface': None}
         )
         self.assertFalse(mock_ks_session.called)
-
-    def test_safe_header_with_auth_token(self):
-        (name, value) = ('X-Auth-Token', u'3b640e2e64d946ac8f55615aff221dc1')
-        expected_header = (u'X-Auth-Token',
-                           '{SHA1}6de9fb3b0b89099030a54abfeb468e7b1b1f0f2b')
-        client = http.HTTPClient('http://localhost/')
-        header_redact = client._process_header(name, value)
-        self.assertEqual(expected_header, header_redact)
-
-    def test_safe_header_with_no_auth_token(self):
-        name, value = ('Accept', 'application/json')
-        header = ('Accept', 'application/json')
-        client = http.HTTPClient('http://localhost/')
-        header_redact = client._process_header(name, value)
-        self.assertEqual(header, header_redact)
