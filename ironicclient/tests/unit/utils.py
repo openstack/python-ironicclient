@@ -40,11 +40,16 @@ class BaseTestCase(testtools.TestCase):
 
 
 class FakeAPI(object):
-    def __init__(self, responses):
+    def __init__(self, responses, path_prefix=None):
         self.responses = responses
         self.calls = []
+        self.path_prefix = path_prefix or ''
+        self.endpoint_trimmed = 'http://127.0.0.1:6385' + self.path_prefix
 
     def _request(self, method, url, headers=None, body=None, params=None):
+        # url should always just be a path here, e.g. /v1/nodes
+        url = self.path_prefix + url
+
         call = (method, url, headers or {}, body)
         if params:
             call += (params,)
@@ -62,7 +67,7 @@ class FakeAPI(object):
 
 
 class FakeConnection(object):
-    def __init__(self, response=None):
+    def __init__(self, response=None, path_prefix=None):
         self._response = response
         self._last_request = None
 
@@ -135,6 +140,7 @@ def mockSession(headers, content=None, status_code=None, version=None):
     session = mock.Mock(spec=requests.Session,
                         verify=False,
                         cert=('test_cert', 'test_key'))
+    session.get_endpoint = mock.Mock(return_value='https://test')
     response = mockSessionResponse(headers, content, status_code, version)
     session.request = mock.Mock(return_value=response)
 

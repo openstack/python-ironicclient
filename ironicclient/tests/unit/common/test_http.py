@@ -642,7 +642,8 @@ class SessionClientTest(utils.BaseTestCase):
 
     @mock.patch.object(http.LOG, 'warning', autospec=True)
     def test_session_client_endpoint_deprecation(self, log_mock):
-        http.SessionClient(os_ironic_api_version=1, session=mock.Mock(),
+        http.SessionClient(os_ironic_api_version=1,
+                           session=utils.mockSession({}),
                            api_version_select_state='user', max_retries=5,
                            retry_interval=5, endpoint='abc')
         self.assertIn('deprecated', log_mock.call_args[0][0])
@@ -728,7 +729,7 @@ class SessionClientTest(utils.BaseTestCase):
         self._test_endpoint_override(True)
 
     def test_make_simple_request(self):
-        session = mock.Mock(spec=['request'])
+        session = utils.mockSession({})
 
         client = _session_client(session=session,
                                  endpoint_override='http://127.0.0.1')
@@ -890,7 +891,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'Content-Type': 'application/json'},
             b"OK",
             http_client.OK)
-        fake_session = mock.Mock(spec=requests.Session)
+        fake_session = utils.mockSession({})
         fake_session.request.side_effect = iter((fake_resp, ok_resp))
 
         client = _session_client(session=fake_session)
@@ -908,7 +909,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'Content-Type': 'application/json'},
             b"OK",
             http_client.OK)
-        fake_session = mock.Mock(spec=requests.Session)
+        fake_session = utils.mockSession({})
         fake_session.request.side_effect = iter((fake_resp, ok_resp))
 
         client = _session_client(session=fake_session)
@@ -920,7 +921,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'Content-Type': 'application/json'},
             b"OK",
             http_client.OK)
-        fake_session = mock.Mock(spec=requests.Session)
+        fake_session = utils.mockSession({})
         fake_session.request.side_effect = iter((exc.ConnectionRefused(),
                                                  ok_resp))
 
@@ -933,7 +934,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'Content-Type': 'application/json'},
             b"OK",
             http_client.OK)
-        fake_session = mock.Mock(spec=requests.Session)
+        fake_session = utils.mockSession({})
         fake_session.request.side_effect = iter(
             (kexc.RetriableConnectionFailure(), ok_resp))
 
@@ -948,7 +949,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'Content-Type': 'application/json'},
             error_body,
             http_client.CONFLICT)
-        fake_session = mock.Mock(spec=requests.Session)
+        fake_session = utils.mockSession({})
         fake_session.request.return_value = fake_resp
 
         client = _session_client(session=fake_session)
@@ -965,7 +966,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'Content-Type': 'application/json'},
             error_body,
             http_client.CONFLICT)
-        fake_session = mock.Mock(spec=requests.Session)
+        fake_session = utils.mockSession({})
         fake_session.request.return_value = fake_resp
 
         client = _session_client(session=fake_session)
@@ -983,7 +984,7 @@ class RetriesTestCase(utils.BaseTestCase):
             {'Content-Type': 'application/json'},
             error_body,
             http_client.CONFLICT)
-        fake_session = mock.Mock(spec=requests.Session)
+        fake_session = utils.mockSession({})
         fake_session.request.return_value = fake_resp
 
         client = _session_client(session=fake_session)

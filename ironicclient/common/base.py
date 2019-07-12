@@ -155,6 +155,20 @@ class Manager(object):
             kwargs['headers'] = {'X-OpenStack-Ironic-API-Version':
                                  os_ironic_api_version}
 
+        # NOTE(jroll)
+        # endpoint_trimmed is what is prepended if we only pass a path
+        # to json_request. This might be something like
+        # https://example.com:4443/baremetal
+        # The code below which parses the 'next' URL keeps any path prefix
+        # we're using, so it ends up calling json_request() with e.g.
+        # /baremetal/v1/nodes. When this is appended to endpoint_trimmed,
+        # we end up with a full URL of e.g.
+        # https://example.com:4443/baremetal/baremetal/v1/nodes.
+        # Parse out the prefix from the base endpoint here, so we can strip
+        # it below and make sure we're passing a correct path.
+        endpoint_parts = urlparse.urlparse(self.api.endpoint_trimmed)
+        url_path_prefix = endpoint_parts[2]
+
         object_list = []
         object_count = 0
         limit_reached = False
@@ -179,6 +193,9 @@ class Manager(object):
                 # the scheme and netloc
                 url_parts = list(urlparse.urlparse(url))
                 url_parts[0] = url_parts[1] = ''
+                if url_path_prefix:
+                    url_parts[2] = url_parts[2].replace(
+                        url_path_prefix, '', 1)
                 url = urlparse.urlunparse(url_parts)
 
         return object_list

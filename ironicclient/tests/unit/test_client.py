@@ -58,11 +58,19 @@ class ClientTest(utils.BaseTestCase):
                         [o.dest for o in session_loader_options]}
         mock_ks_session.return_value.load_from_options.assert_called_once_with(
             auth='auth', **session_opts)
+        get_endpoint_call = mock.call(
+            service_type=kwargs.get('service_type') or 'baremetal',
+            interface=expected_interface,
+            region_name=kwargs.get('region_name'))
         if not {'endpoint', 'ironic_url'}.intersection(kwargs):
-            session.get_endpoint.assert_called_once_with(
-                service_type=kwargs.get('service_type') or 'baremetal',
-                interface=expected_interface,
-                region_name=kwargs.get('region_name'))
+            calls = [get_endpoint_call,
+                     mock.call(interface=client.http_client.interface,
+                               service_type=client.http_client.service_type,
+                               region_name=client.http_client.region_name)]
+            self.assertEqual(calls, session.get_endpoint.call_args_list)
+        else:
+            self.assertEqual([get_endpoint_call],
+                             session.get_endpoint.call_args_list)
         if 'os_ironic_api_version' in kwargs:
             # NOTE(TheJulia): This does not test the negotiation logic
             # as a request must be triggered in order for any version
@@ -279,9 +287,10 @@ class ClientTest(utils.BaseTestCase):
             'session': session,
         }
         iroclient.get_client('1', **kwargs)
-        session.get_endpoint.assert_called_once_with(service_type='baremetal',
-                                                     interface=None,
-                                                     region_name=None)
+        endpoint_calls = 2 * [mock.call(service_type='baremetal',
+                                        interface=None,
+                                        region_name=None)]
+        self.assertEqual(endpoint_calls, session.get_endpoint.call_args_list)
 
     def test_get_client_incorrect_session_passed(self):
         session = mock.Mock()
@@ -302,7 +311,7 @@ class ClientTest(utils.BaseTestCase):
         with mock.patch.object(loader_class, '__init__',
                                autospec=True) as init_mock:
             init_mock.return_value = None
-            iroclient.get_client('1', **passed_kwargs)
+            client = iroclient.get_client('1', **passed_kwargs)
             iroclient.convert_keystoneauth_opts(passed_kwargs)
 
         init_mock.assert_called_once_with(mock.ANY, **expected_kwargs)
@@ -312,9 +321,16 @@ class ClientTest(utils.BaseTestCase):
             auth=mock.ANY, **session_opts)
         if 'ironic_url' not in passed_kwargs:
             service_type = passed_kwargs.get('service_type') or 'baremetal'
-            session.get_endpoint.assert_called_once_with(
-                service_type=service_type, interface=expected_interface,
-                region_name=passed_kwargs.get('region_name'))
+            endpoint_calls = [
+                mock.call(service_type=service_type,
+                          interface=expected_interface,
+                          region_name=passed_kwargs.get('region_name')),
+                mock.call(service_type=client.http_client.service_type,
+                          interface=client.http_client.interface,
+                          region_name=client.http_client.region_name)
+            ]
+            self.assertEqual(endpoint_calls,
+                             session.get_endpoint.call_args_list)
 
     def test_loader_arguments_admin_token(self):
         passed_kwargs = {

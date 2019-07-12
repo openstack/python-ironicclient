@@ -575,6 +575,24 @@ fake_responses_pagination = {
     },
 }
 
+fake_responses_pagination_path_prefix = {
+    '/baremetal/v1/nodes':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1],
+             "next": "http://127.0.0.1:6385/baremetal/v1/nodes/?limit=1"}
+        ),
+    },
+    '/baremetal/v1/nodes/?limit=1':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]}
+        ),
+    },
+}
+
 fake_responses_sorting = {
     '/v1/nodes/?sort_key=updated_at':
     {
@@ -695,6 +713,18 @@ class NodeManagerTest(testtools.TestCase):
         expect = [
             ('GET', '/v1/nodes', {}, None),
             ('GET', '/v1/nodes/?limit=1', {}, None)
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(2, len(nodes))
+
+    def test_node_list_pagination_no_limit_path_prefix(self):
+        self.api = utils.FakeAPI(fake_responses_pagination_path_prefix,
+                                 path_prefix='/baremetal')
+        self.mgr = node.NodeManager(self.api)
+        nodes = self.mgr.list(limit=0)
+        expect = [
+            ('GET', '/baremetal/v1/nodes', {}, None),
+            ('GET', '/baremetal/v1/nodes/?limit=1', {}, None)
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(nodes))
