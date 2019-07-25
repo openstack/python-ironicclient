@@ -12,7 +12,7 @@ Overview
 --------
 
 This is a client for the OpenStack `Bare Metal API
-<https://developer.openstack.org/api-ref/baremetal/>`_. It provides:
+<https://docs.openstack.org/api-ref/baremetal/>`_. It provides:
 
 * a Python API: the ``ironicclient`` module, and
 * two command-line interfaces: ``openstack baremetal`` and ``ironic``
