@@ -118,7 +118,11 @@ class VersionNegotiationMixin(object):
                                 str(self.os_ironic_api_version).split('.')[0])
             else:
                 base_version = API_VERSION
-            return self._make_simple_request(conn, 'GET', base_version)
+            # Raise exception on client or server error.
+            resp = self._make_simple_request(conn, 'GET', base_version)
+            if not resp.ok:
+                raise exc.from_response(resp, method='GET', url=base_version)
+            return resp
 
         version_overridden = False
 
