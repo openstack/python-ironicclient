@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    Fixes an issue where some failure modes of communication with the Ironic
+    API could result in an exception that circumvents the client's retry
+    mechanisms. In particular this includes HTTP 503 service unavailable which
+    is seen when Ironic operates behind a load balancer, and no backend is
+    available to handle the request.
