@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    The long deprecated ``ironic`` command has been removed.
+    The ``openstack baremetal`` command must now be used.
+    Please update any scripts that you may be using with ironic.

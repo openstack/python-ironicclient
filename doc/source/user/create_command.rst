@@ -3,7 +3,7 @@ Creating the Bare Metal service resources from file
 ===================================================
 
 It is possible to create a set of resources using their descriptions in JSON
-or YAML format. It can be done in one of three ways:
+or YAML format. It can be done in one of two ways:
 
 1. Using OpenStackClient bare metal plugin CLI's command ``openstack baremetal
    create``::
@@ -17,25 +17,7 @@ or YAML format. It can be done in one of three ways:
       <file>      File (.yaml or .json) containing descriptions of the
                   resources to create. Can be specified multiple times.
 
-2. Using ironic CLI's ``ironic create`` command (deprecated, please use
-   ``openstack baremetal create`` instead)::
-
-    $ ironic help create
-    The "ironic" CLI is deprecated and will be removed in the S* release.
-    Please use the "openstack baremetal" CLI instead.
-    usage: ironic create <file> [<file> ...]
-
-    Create baremetal resources (chassis, nodes, port groups and ports). The
-    resources may be described in one or more JSON or YAML files. If any file
-    cannot be validated, no resources are created. An attempt is made to
-    create all the resources; those that could not be created are skipped
-    (with a corresponding error message).
-
-    Positional arguments:
-      <file>  File (.yaml or .json) containing descriptions of the resources
-              to create. Can be specified multiple times.
-
-3. Programmatically using the Python API:
+2. Programmatically using the Python API:
 
    .. autofunction:: ironicclient.v1.create_resources.create_resources
       :noindex:

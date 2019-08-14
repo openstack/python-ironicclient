@@ -15,8 +15,7 @@ This is a client for the OpenStack `Bare Metal API
 <https://docs.openstack.org/api-ref/baremetal/>`_. It provides:
 
 * a Python API: the ``ironicclient`` module, and
-* two command-line interfaces: ``openstack baremetal`` and ``ironic``
-  (deprecated, please use ``openstack baremetal``).
+* a command-line interfaces: ``openstack baremetal``
 
 Development takes place via the usual OpenStack processes as outlined in the
 `developer guide <https://docs.openstack.org/infra/manual/developers.html>`_.
@@ -83,47 +82,3 @@ For more information about the ``openstack baremetal`` command and
 the subcommands available, run::
 
     $ openstack help baremetal
-
-``ironic`` CLI (deprecated)
----------------------------
-
-This is deprecated and will be removed in the S* release. Please use the
-``openstack baremetal`` CLI instead.
-
-This package will install the ``ironic`` command line interface that you
-can use to interact with the ``ironic`` API.
-
-In order to use the ``ironic`` CLI you'll need to provide your OpenStack
-tenant, username, password and authentication endpoint. You can do this with
-the ``--os-tenant-name``, ``--os-username``, ``--os-password`` and
-``--os-auth-url`` parameters, though it may be easier to set them
-as environment variables::
-
-    $ export OS_PROJECT_NAME=project
-    $ export OS_USERNAME=user
-    $ export OS_PASSWORD=pass
-    $ export OS_AUTH_URL=http://auth.example.com:5000/v2.0
-
-To use a specific Ironic API endpoint::
-
-    $ export IRONIC_URL=http://ironic.example.com:6385
-
-An example of creating a basic node with the ``ipmi`` driver::
-
-    $ ironic node-create -d ipmi
-
-An example of creating a port on a node::
-
-    $ ironic port-create -a AA:BB:CC:DD:EE:FF -n nodeUUID
-
-An example of updating driver properties for a node::
-
-    $ ironic node-update nodeUUID add driver_info/ipmi_address=<IPaddress>
-    $ ironic node-update nodeUUID add driver_info/ipmi_username=<username>
-    $ ironic node-update nodeUUID add driver_info/ipmi_password=<password>
-
-
-For more information about the ``ironic`` command and the subcommands
-available, run::
-
-    $ ironic help

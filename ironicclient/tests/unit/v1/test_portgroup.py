@@ -15,13 +15,10 @@
 
 import copy
 
-import mock
 import testtools
 
-from ironicclient.common.apiclient import exceptions
 from ironicclient.tests.unit import utils
 import ironicclient.v1.portgroup
-import ironicclient.v1.portgroup_shell as pg_shell
 
 PORTGROUP = {'uuid': '11111111-2222-3333-4444-555555555555',
              'name': 'Portgroup-name',
@@ -277,25 +274,6 @@ class PortgroupManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(portgroup)
-
-        expected_resp = ({}, PORTGROUP,)
-        self.assertEqual(
-            expected_resp,
-            self.api.responses['/v1/portgroups/%s'
-                               % PORTGROUP['uuid']]['GET'])
-
-    def test_do_portgroup_delete_multiple_with_exception(self):
-        client_mock = mock.MagicMock()
-        client_mock.portgroup.delete.side_effect = (
-            [exceptions.ClientException, None])
-        args = mock.MagicMock()
-        args.portgroup = ['pg_uuid1', 'pg_uuid2']
-
-        self.assertRaises(exceptions.ClientException,
-                          pg_shell.do_portgroup_delete,
-                          client_mock, args)
-        client_mock.portgroup.delete.assert_has_calls(
-            [mock.call('pg_uuid1'), mock.call('pg_uuid2')])
 
         expected_resp = ({}, PORTGROUP,)
         self.assertEqual(
