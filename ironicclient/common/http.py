@@ -614,20 +614,25 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
 
         super(SessionClient, self).__init__(**kwargs)
 
+        endpoint_filter = self._get_endpoint_filter()
+        endpoint = self.session.get_endpoint(**endpoint_filter)
+        self.endpoint_trimmed = _trim_endpoint_api_version(endpoint)
+
     def _parse_version_headers(self, resp):
         return self._generic_parse_version_headers(resp.headers.get)
 
-    def _make_simple_request(self, conn, method, url):
-        endpoint_filter = {
+    def _get_endpoint_filter(self):
+        return {
             'interface': self.interface,
             'service_type': self.service_type,
             'region_name': self.region_name
         }
 
+    def _make_simple_request(self, conn, method, url):
         # NOTE: conn is self.session for this class
         return conn.request(url, method, raise_exc=False,
                             user_agent=USER_AGENT,
-                            endpoint_filter=endpoint_filter,
+                            endpoint_filter=self._get_endpoint_filter(),
                             endpoint_override=self.endpoint_override)
 
     @with_retries
