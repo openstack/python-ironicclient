@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes an issue where automatic pagination was broken when ironic is
+    deployed at a subpath (e.g. http://localhost/ironic).
