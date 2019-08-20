@@ -13,9 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
 from distutils.version import StrictVersion
-import hashlib
 import logging
 import os
 import re
@@ -27,8 +25,6 @@ import time
 from keystoneauth1 import adapter
 from keystoneauth1 import exceptions as kexc
 from oslo_serialization import jsonutils
-from oslo_utils import strutils
-import requests
 import six
 from six.moves import http_client
 import six.moves.urllib.parse as urlparse
@@ -305,224 +301,6 @@ def with_retries(func):
     return wrapper
 
 
-class HTTPClient(VersionNegotiationMixin):
-
-    def __init__(self, endpoint, **kwargs):
-        LOG.warning('HTTPClient class is deprecated and will be removed '
-                    'in Stein release, please use SessionClient instead.')
-        self.endpoint = endpoint
-        self.endpoint_trimmed = _trim_endpoint_api_version(endpoint)
-        self.auth_token = kwargs.get('token')
-        self.auth_ref = kwargs.get('auth_ref')
-        self.os_ironic_api_version = kwargs.get('os_ironic_api_version',
-                                                DEFAULT_VER)
-        self.api_version_select_state = kwargs.get(
-            'api_version_select_state', 'default')
-        self.conflict_max_retries = kwargs.pop('max_retries',
-                                               DEFAULT_MAX_RETRIES)
-        self.conflict_retry_interval = kwargs.pop('retry_interval',
-                                                  DEFAULT_RETRY_INTERVAL)
-        self.session = requests.Session()
-
-        parts = urlparse.urlparse(endpoint)
-        if parts.scheme not in SUPPORTED_ENDPOINT_SCHEME:
-            msg = _('Unsupported scheme: %s') % parts.scheme
-            raise exc.EndpointException(msg)
-
-        if parts.scheme == 'https':
-            if kwargs.get('insecure') is True:
-                self.session.verify = False
-            elif kwargs.get('ca_file'):
-                self.session.verify = kwargs['ca_file']
-            self.session.cert = (kwargs.get('cert_file'),
-                                 kwargs.get('key_file'))
-
-    def _process_header(self, name, value):
-        """Redacts any sensitive header
-
-        Redact a header that contains sensitive information, by returning an
-        updated header with the sha1 hash of that value. The redacted value is
-        prefixed by '{SHA1}' because that's the convention used within
-        OpenStack.
-
-        :returns: A tuple of (name, value)
-                  name: the safe encoding format of name
-                  value: the redacted value if name is x-auth-token,
-                         or the safe encoding format of name
-
-        """
-        if name in SENSITIVE_HEADERS:
-            v = value.encode('utf-8')
-            h = hashlib.sha1(v)
-            d = h.hexdigest()
-            return (name, "{SHA1}%s" % d)
-        else:
-            return (name, value)
-
-    def log_curl_request(self, method, url, kwargs):
-        curl = ['curl -i -X %s' % method]
-
-        for (key, value) in kwargs['headers'].items():
-            header = '-H \'%s: %s\'' % self._process_header(key, value)
-            curl.append(header)
-
-        if not self.session.verify:
-            curl.append('-k')
-        elif isinstance(self.session.verify, six.string_types):
-            curl.append('--cacert %s' % self.session.verify)
-
-        if self.session.cert:
-            curl.append('--cert %s' % self.session.cert[0])
-            curl.append('--key %s' % self.session.cert[1])
-
-        if 'body' in kwargs:
-            body = strutils.mask_password(kwargs['body'])
-            curl.append('-d \'%s\'' % body)
-
-        curl.append(self._make_connection_url(url))
-        LOG.debug(' '.join(curl))
-
-    @staticmethod
-    def log_http_response(resp, body=None):
-        # NOTE(aarefiev): resp.raw is urllib3 response object, it's used
-        # only to get 'version', response from request with 'stream = True'
-        # should be used for raw reading.
-        status = (resp.raw.version / 10.0, resp.status_code, resp.reason)
-        dump = ['\nHTTP/%.1f %s %s' % status]
-        dump.extend(['%s: %s' % (k, v) for k, v in resp.headers.items()])
-        dump.append('')
-        if body:
-            body = strutils.mask_password(body)
-            dump.extend([body, ''])
-        LOG.debug('\n'.join(dump))
-
-    def _make_connection_url(self, url):
-        # NOTE(pas-ha) we already stripped trailing / from endpoint_trimmed
-        if not url.startswith('/'):
-            url = '/' + url
-        return self.endpoint_trimmed + url
-
-    def _parse_version_headers(self, resp):
-        return self._generic_parse_version_headers(resp.headers.get)
-
-    def _make_simple_request(self, conn, method, url):
-        return conn.request(method, self._make_connection_url(url))
-
-    @with_retries
-    def _http_request(self, url, method, **kwargs):
-        """Send an http request with the specified characteristics.
-
-        Wrapper around request.Session.request to handle tasks such
-        as setting headers and error handling.
-        """
-        # NOTE(TheJulia): self.os_ironic_api_version is reset in
-        # the self.negotiate_version() call if negotiation occurs.
-        if self.os_ironic_api_version and self._must_negotiate_version():
-            self.negotiate_version(self.session, None)
-        # Copy the kwargs so we can reuse the original in case of redirects
-        kwargs['headers'] = copy.deepcopy(kwargs.get('headers', {}))
-        kwargs['headers'].setdefault('User-Agent', USER_AGENT)
-        if self.os_ironic_api_version:
-            kwargs['headers'].setdefault('X-OpenStack-Ironic-API-Version',
-                                         self.os_ironic_api_version)
-        if self.auth_token:
-            kwargs['headers'].setdefault('X-Auth-Token', self.auth_token)
-
-        self.log_curl_request(method, url, kwargs)
-
-        # NOTE(aarefiev): This is for backwards compatibility, request
-        # expected body in 'data' field, previously we used httplib,
-        # which expected 'body' field.
-        body = kwargs.pop('body', None)
-        if body:
-            kwargs['data'] = body
-
-        conn_url = self._make_connection_url(url)
-        try:
-            resp = self.session.request(method,
-                                        conn_url,
-                                        **kwargs)
-
-            # TODO(deva): implement graceful client downgrade when connecting
-            # to servers that did not support microversions. Details here:
-            # https://specs.openstack.org/openstack/ironic-specs/specs/kilo-implemented/api-microversions.html#use-case-3b-new-client-communicating-with-a-old-ironic-user-specified  # noqa
-
-            if resp.status_code == http_client.NOT_ACCEPTABLE:
-                negotiated_ver = self.negotiate_version(self.session, resp)
-                kwargs['headers']['X-OpenStack-Ironic-API-Version'] = (
-                    negotiated_ver)
-                return self._http_request(url, method, **kwargs)
-
-        except requests.exceptions.RequestException as e:
-            message = (_("Error has occurred while handling "
-                       "request for %(url)s: %(e)s") %
-                       dict(url=conn_url, e=e))
-            # NOTE(aarefiev): not valid request(invalid url, missing schema,
-            # and so on), retrying is not needed.
-            if isinstance(e, ValueError):
-                raise exc.ValidationError(message)
-
-            raise exc.ConnectionRefused(message)
-
-        body_str = None
-        if resp.headers.get('Content-Type') == 'application/octet-stream':
-            body_iter = resp.iter_content(chunk_size=CHUNKSIZE)
-            self.log_http_response(resp)
-        else:
-            # Read body into string if it isn't obviously image data
-            body_str = resp.text
-            self.log_http_response(resp, body_str)
-            body_iter = six.StringIO(body_str)
-
-        if resp.status_code >= http_client.BAD_REQUEST:
-            error_json = _extract_error_json(body_str)
-            raise exc.from_response(
-                resp, error_json.get('error_message'),
-                error_json.get('debuginfo'), method, url)
-        elif resp.status_code in (http_client.MOVED_PERMANENTLY,
-                                  http_client.FOUND,
-                                  http_client.USE_PROXY):
-            # Redirected. Reissue the request to the new location.
-            return self._http_request(resp['location'], method, **kwargs)
-        elif resp.status_code == http_client.MULTIPLE_CHOICES:
-            raise exc.from_response(resp, method=method, url=url)
-
-        return resp, body_iter
-
-    def json_request(self, method, url, **kwargs):
-        kwargs.setdefault('headers', {})
-        kwargs['headers'].setdefault('Content-Type', 'application/json')
-        kwargs['headers'].setdefault('Accept', 'application/json')
-
-        if 'body' in kwargs:
-            kwargs['body'] = jsonutils.dump_as_bytes(kwargs['body'])
-
-        resp, body_iter = self._http_request(url, method, **kwargs)
-        content_type = resp.headers.get('Content-Type')
-
-        if (resp.status_code in (http_client.NO_CONTENT,
-                                 http_client.RESET_CONTENT)
-                or content_type is None):
-            return resp, list()
-
-        if 'application/json' in content_type:
-            body = ''.join([chunk for chunk in body_iter])
-            try:
-                body = jsonutils.loads(body)
-            except ValueError:
-                LOG.error('Could not decode response body as JSON')
-        else:
-            body = None
-
-        return resp, body
-
-    def raw_request(self, method, url, **kwargs):
-        kwargs.setdefault('headers', {})
-        kwargs['headers'].setdefault('Content-Type',
-                                     'application/octet-stream')
-        return self._http_request(url, method, **kwargs)
-
-
 class VerifiedHTTPSConnection(six.moves.http_client.HTTPSConnection):
     """httplib-compatible connection using client-side SSL authentication
 
@@ -722,49 +500,30 @@ def _construct_http_client(session=None,
                            key_file=None,
                            insecure=None,
                            **kwargs):
-    if session:
-        kwargs.setdefault('service_type', 'baremetal')
-        kwargs.setdefault('user_agent', 'python-ironicclient')
-        kwargs.setdefault('interface', kwargs.pop('endpoint_type',
-                                                  'publicURL'))
 
-        ignored = {'token': token,
-                   'auth_ref': auth_ref,
-                   'timeout': timeout != 600,
-                   'ca_file': ca_file,
-                   'cert_file': cert_file,
-                   'key_file': key_file,
-                   'insecure': insecure}
+    kwargs.setdefault('service_type', 'baremetal')
+    kwargs.setdefault('user_agent', 'python-ironicclient')
+    kwargs.setdefault('interface', kwargs.pop('endpoint_type',
+                                              'publicURL'))
 
-        dvars = [k for k, v in ignored.items() if v]
+    ignored = {'token': token,
+               'auth_ref': auth_ref,
+               'timeout': timeout != 600,
+               'ca_file': ca_file,
+               'cert_file': cert_file,
+               'key_file': key_file,
+               'insecure': insecure}
 
-        if dvars:
-            LOG.warning('The following arguments are ignored when using '
-                        'the session to construct a client: %s',
-                        ', '.join(dvars))
+    dvars = [k for k, v in ignored.items() if v]
 
-        return SessionClient(session=session,
-                             os_ironic_api_version=os_ironic_api_version,
-                             api_version_select_state=api_version_select_state,
-                             max_retries=max_retries,
-                             retry_interval=retry_interval,
-                             **kwargs)
-    else:
-        endpoint = None
-        if kwargs:
-            endpoint = kwargs.pop('endpoint_override', None)
-            LOG.warning('The following arguments are being ignored when '
-                        'constructing the client: %s', ', '.join(kwargs))
+    if dvars:
+        LOG.warning('The following arguments are ignored when using '
+                    'the session to construct a client: %s',
+                    ', '.join(dvars))
 
-        return HTTPClient(endpoint=endpoint,
-                          token=token,
-                          auth_ref=auth_ref,
-                          os_ironic_api_version=os_ironic_api_version,
-                          api_version_select_state=api_version_select_state,
-                          max_retries=max_retries,
-                          retry_interval=retry_interval,
-                          timeout=timeout,
-                          ca_file=ca_file,
-                          cert_file=cert_file,
-                          key_file=key_file,
-                          insecure=insecure)
+    return SessionClient(session=session,
+                         os_ironic_api_version=os_ironic_api_version,
+                         api_version_select_state=api_version_select_state,
+                         max_retries=max_retries,
+                         retry_interval=retry_interval,
+                         **kwargs)

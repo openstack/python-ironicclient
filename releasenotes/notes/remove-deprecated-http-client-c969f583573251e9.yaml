@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Removes deprecated ``common.http.HTTPClient`` class.
+    The ``common.http.SessionClient`` class should be used instead.
