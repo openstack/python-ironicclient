@@ -38,8 +38,6 @@ LOG = logging.getLogger(__name__)
 class Client(object):
     """Client for the Ironic v1 API.
 
-    :param string endpoint: A user-supplied endpoint URL for the ironic
-                            service. DEPRECATED, use endpoint_override instead.
     :param string endpoint_override: A user-supplied endpoint URL for the
                                      ironic service.
     :param function token: Provides token for authentication.
@@ -47,17 +45,12 @@ class Client(object):
                             http requests. (optional)
     """
 
-    def __init__(self, endpoint=None, endpoint_override=None, *args, **kwargs):
+    def __init__(self, endpoint_override=None, *args, **kwargs):
         """Initialize a new client for the Ironic v1 API."""
         allow_downgrade = kwargs.pop('allow_api_version_downgrade', False)
-        if endpoint_override is None and endpoint is not None:
-            LOG.warning('Passing "endpoint" parameter to Client constructor '
-                        'is deprecated, and it will be removed in Stein '
-                        'release. Please use "endpoint_override" instead.')
-            endpoint_override = endpoint
         if kwargs.get('os_ironic_api_version'):
             # TODO(TheJulia): We should sanity check os_ironic_api_version
-            # against our maximum suported version, so the client fails
+            # against our maximum supported version, so the client fails
             # immediately upon an unsupported version being provided.
             # This logic should also likely live in common/http.py
             if allow_downgrade:

@@ -17,7 +17,6 @@ import time
 
 import mock
 from oslo_serialization import jsonutils
-import six
 from six.moves import http_client
 
 from keystoneauth1 import exceptions as kexc
@@ -56,8 +55,8 @@ def _session_client(**kwargs):
                               interface='publicURL',
                               service_type='baremetal',
                               region_name='',
-                              endpoint='http://%s:%s' % (DEFAULT_HOST,
-                                                         DEFAULT_PORT),
+                              endpoint_override='http://%s:%s' % (
+                                  DEFAULT_HOST, DEFAULT_PORT),
                               **kwargs)
 
 
@@ -68,7 +67,7 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         self.test_object = http.VersionNegotiationMixin()
         self.test_object.os_ironic_api_version = '1.6'
         self.test_object.api_version_select_state = 'default'
-        self.test_object.endpoint = "http://localhost:1234"
+        self.test_object.endpoint_override = "http://localhost:1234"
         self.mock_mcu = mock.MagicMock()
         self.test_object._make_connection_url = self.mock_mcu
         self.response = utils.FakeResponse(
@@ -111,7 +110,7 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         result = self.test_object.negotiate_version(mock_conn, self.response)
         self.assertEqual(latest_ver, result)
         self.assertEqual(1, mock_pvh.call_count)
-        host, port = http.get_server(self.test_object.endpoint)
+        host, port = http.get_server(self.test_object.endpoint_override)
         mock_save_data.assert_called_once_with(host=host, port=port,
                                                data=latest_ver)
 
@@ -195,7 +194,7 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         result = self.test_object.negotiate_version(mock_conn, self.response)
         self.assertEqual(max_ver, result)
         self.assertEqual(1, mock_pvh.call_count)
-        host, port = http.get_server(self.test_object.endpoint)
+        host, port = http.get_server(self.test_object.endpoint_override)
         mock_save_data.assert_called_once_with(host=host, port=port,
                                                data=max_ver)
 
@@ -343,20 +342,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     def test_get_server(self):
         host = 'ironic-host'
         port = '6385'
-        endpoint = 'http://%s:%s/ironic/v1/' % (host, port)
-        self.assertEqual((host, port), http.get_server(endpoint))
+        endpoint_override = 'http://%s:%s/ironic/v1/' % (host, port)
+        self.assertEqual((host, port), http.get_server(endpoint_override))
 
 
 class SessionClientTest(utils.BaseTestCase):
-
-    @mock.patch.object(http.LOG, 'warning', autospec=True)
-    def test_session_client_endpoint_deprecation(self, log_mock):
-        http.SessionClient(os_ironic_api_version=1,
-                           session=utils.mockSession({}),
-                           api_version_select_state='user', max_retries=5,
-                           retry_interval=5, endpoint='abc')
-        self.assertIn('deprecated', log_mock.call_args[0][0])
-
     def test_server_exception_empty_body(self):
         error_body = _get_error_body()
 
@@ -396,52 +386,10 @@ class SessionClientTest(utils.BaseTestCase):
         result = client._parse_version_headers(fake_session.request())
         self.assertEqual(expected_result, result)
 
-    def _test_endpoint_override(self, endpoint):
-        fake_session = utils.mockSession({'content-type': 'application/json'},
-                                         status_code=http_client.NO_CONTENT)
-        request_mock = mock.Mock()
-        fake_session.request = request_mock
-        request_mock.return_value = utils.mockSessionResponse(
-            headers={'content-type': 'application/json'},
-            status_code=http_client.NO_CONTENT)
-        client = _session_client(session=fake_session,
-                                 endpoint_override=endpoint)
-        client.json_request('DELETE', '/v1/nodes/aa/maintenance')
-        expected_args_dict = {
-            'headers': {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-OpenStack-Ironic-API-Version': '1.6'
-            },
-            'auth': None, 'user_agent': 'python-ironicclient',
-            'endpoint_filter': {
-                'interface': 'publicURL',
-                'service_type': 'baremetal',
-                'region_name': ''
-            }
-        }
-        if isinstance(endpoint, six.string_types):
-            trimmed = http._trim_endpoint_api_version(endpoint)
-            expected_args_dict['endpoint_override'] = trimmed
-        request_mock.assert_called_once_with(
-            '/v1/nodes/aa/maintenance', 'DELETE', raise_exc=False,
-            **expected_args_dict
-        )
-
-    def test_endpoint_override(self):
-        self._test_endpoint_override('http://1.0.0.1:6385')
-
-    def test_endpoint_override_with_version(self):
-        self._test_endpoint_override('http://1.0.0.1:6385/v1')
-
-    def test_endpoint_override_not_valid(self):
-        self._test_endpoint_override(True)
-
     def test_make_simple_request(self):
         session = utils.mockSession({})
 
-        client = _session_client(session=session,
-                                 endpoint_override='http://127.0.0.1')
+        client = _session_client(session=session)
         res = client._make_simple_request(session, 'GET', 'url')
 
         session.request.assert_called_once_with(
@@ -451,7 +399,7 @@ class SessionClientTest(utils.BaseTestCase):
                 'service_type': 'baremetal',
                 'region_name': ''
             },
-            endpoint_override='http://127.0.0.1',
+            endpoint_override='http://localhost:1234',
             user_agent=http.USER_AGENT)
         self.assertEqual(res, session.request.return_value)
 

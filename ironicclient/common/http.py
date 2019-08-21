@@ -240,9 +240,7 @@ class VersionNegotiationMixin(object):
         LOG.debug('Negotiated API version is %s', negotiated_ver)
 
         # Cache the negotiated version for this server
-        # TODO(vdrok): get rid of self.endpoint attribute in Stein
-        endpoint_override = (getattr(self, 'endpoint_override', None) or
-                             getattr(self, 'endpoint', None))
+        endpoint_override = getattr(self, 'endpoint_override', None)
         host, port = get_server(endpoint_override)
         filecache.save_data(host=host, port=port, data=negotiated_ver)
 
@@ -373,19 +371,11 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
                  api_version_select_state,
                  max_retries,
                  retry_interval,
-                 endpoint=None,
                  **kwargs):
         self.os_ironic_api_version = os_ironic_api_version
         self.api_version_select_state = api_version_select_state
         self.conflict_max_retries = max_retries
         self.conflict_retry_interval = retry_interval
-        # TODO(vdrok): remove this conditional in Stein
-        if endpoint and not kwargs.get('endpoint_override'):
-            LOG.warning('Passing "endpoint" argument to SessionClient '
-                        'constructor is deprecated, such possibility will be '
-                        'removed in Stein. Please use "endpoint_override" '
-                        'instead.')
-            self.endpoint = endpoint
         if isinstance(kwargs.get('endpoint_override'), six.string_types):
             kwargs['endpoint_override'] = _trim_endpoint_api_version(
                 kwargs['endpoint_override'])

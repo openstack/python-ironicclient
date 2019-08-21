@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Removes deprecated argument ``endpoint`` from the
+    v1.client.Client constructor.
+    Please use the standard keystoneauth argument name
+    ``endpoint_override`` instead.
