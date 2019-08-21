@@ -21,38 +21,6 @@ from ironicclient import exc
 LOG = logging.getLogger(__name__)
 
 
-# TODO(vdrok): remove in Stein
-def convert_keystoneauth_opts(kwargs):
-    old_to_new_names = {
-        ('os_auth_token',): 'token',
-        ('os_username',): 'username',
-        ('os_password',): 'password',
-        ('os_auth_url',): 'auth_url',
-        ('os_project_id',): 'project_id',
-        ('os_project_name',): 'project_name',
-        ('os_tenant_id',): 'tenant_id',
-        ('os_tenant_name',): 'tenant_name',
-        ('os_region_name',): 'region_name',
-        ('os_user_domain_id',): 'user_domain_id',
-        ('os_user_domain_name',): 'user_domain_name',
-        ('os_project_domain_id',): 'project_domain_id',
-        ('os_project_domain_name',): 'project_domain_name',
-        ('os_service_type',): 'service_type',
-        ('os_endpoint_type',): 'interface',
-        ('ironic_url',): 'endpoint',
-        ('os_cacert', 'ca_file'): 'cafile',
-        ('os_cert', 'cert_file'): 'certfile',
-        ('os_key', 'key_file'): 'keyfile'
-    }
-    for olds, new in old_to_new_names.items():
-        for old in olds:
-            if kwargs.get(old):
-                LOG.warning('The argument "%s" passed to get_client is '
-                            'deprecated and will be removed in Stein release, '
-                            'please use "%s" instead.', old, new)
-                kwargs.setdefault(new, kwargs[old])
-
-
 def get_client(api_version, auth_type=None, os_ironic_api_version=None,
                max_retries=None, retry_interval=None, **kwargs):
     """Get an authenticated client, based on the credentials.
@@ -70,7 +38,6 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
     # auto-negotiate to the greatest available version, however we do not
     # have the ability yet for a caller to cap the version, and will hold
     # off doing so until then.
-    convert_keystoneauth_opts(kwargs)
     if auth_type is None:
         if 'endpoint' in kwargs:
             if 'token' in kwargs:
