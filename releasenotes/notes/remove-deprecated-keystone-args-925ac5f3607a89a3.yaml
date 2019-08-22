@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Removing deprecated keystone arguments in favor of standardized
+    argument naming.
