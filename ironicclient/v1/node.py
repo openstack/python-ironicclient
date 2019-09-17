@@ -60,7 +60,7 @@ class NodeManager(base.CreateManager):
              detail=False, sort_key=None, sort_dir=None, fields=None,
              provision_state=None, driver=None, resource_class=None,
              chassis=None, fault=None, os_ironic_api_version=None,
-             conductor_group=None, conductor=None):
+             conductor_group=None, conductor=None, owner=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -116,6 +116,8 @@ class NodeManager(base.CreateManager):
                                 with the given conductor group set.
         :param conductor: Optional. String value to get only nodes
                           mapped to the given conductor.
+        :param owner: Optional. String value to get only nodes
+                          mapped to a specific owner.
 
         :returns: A list of nodes.
 
@@ -147,6 +149,8 @@ class NodeManager(base.CreateManager):
             filters.append('conductor_group=%s' % conductor_group)
         if conductor is not None:
             filters.append('conductor=%s' % conductor)
+        if owner is not None:
+            filters.append('owner=%s' % owner)
 
         path = ''
         if detail:
