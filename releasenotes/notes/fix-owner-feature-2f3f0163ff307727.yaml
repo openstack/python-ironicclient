@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    ``openstack baremetal node list --owner`` was returning an error
+    instead of a list of nodes for the specified owner. It has been
+    fixed.
+
+    See `story 2006563
+    <https://storyboard.openstack.org/#!/story/2006563>`__ for details.
