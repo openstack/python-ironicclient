@@ -383,7 +383,11 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         super(SessionClient, self).__init__(**kwargs)
 
         endpoint_filter = self._get_endpoint_filter()
-        endpoint = self.session.get_endpoint(**endpoint_filter)
+        endpoint = self.get_endpoint(**endpoint_filter)
+        if endpoint is None:
+            raise exc.EndpointNotFound(
+                _('The Bare Metal API endpoint cannot be detected and was '
+                  'not provided explicitly'))
         self.endpoint_trimmed = _trim_endpoint_api_version(endpoint)
 
     def _parse_version_headers(self, resp):
