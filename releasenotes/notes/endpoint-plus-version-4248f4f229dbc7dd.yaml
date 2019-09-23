@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Removes the requirement on passing either ``endpoint_override`` or
+    ``os_ironic_api_version`` to ``get_client``. This is only required for
+    efficient caching of API versions and shouldn't be a hard requirement.
