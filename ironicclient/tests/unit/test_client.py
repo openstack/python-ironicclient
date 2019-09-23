@@ -57,14 +57,11 @@ class ClientTest(utils.BaseTestCase):
             interface=expected_interface,
             region_name=kwargs.get('region_name'))
         if not {'endpoint'}.intersection(kwargs):
-            calls = [get_endpoint_call,
-                     mock.call(interface=client.http_client.interface,
-                               service_type=client.http_client.service_type,
-                               region_name=client.http_client.region_name)]
-            self.assertEqual(calls, session.get_endpoint.call_args_list)
-        else:
             self.assertEqual([get_endpoint_call],
                              session.get_endpoint.call_args_list)
+        else:
+            # we use adaper.get_endpoint instead of session.get_endpoint
+            self.assertFalse(session.get_endpoint.called)
         if 'os_ironic_api_version' in kwargs:
             # NOTE(TheJulia): This does not test the negotiation logic
             # as a request must be triggered in order for any version
@@ -256,10 +253,9 @@ class ClientTest(utils.BaseTestCase):
             'session': session,
         }
         iroclient.get_client('1', **kwargs)
-        endpoint_calls = 2 * [mock.call(service_type='baremetal',
-                                        interface=None,
-                                        region_name=None)]
-        self.assertEqual(endpoint_calls, session.get_endpoint.call_args_list)
+        session.get_endpoint.assert_called_once_with(service_type='baremetal',
+                                                     interface=None,
+                                                     region_name=None)
 
     def test_get_client_incorrect_session_passed(self):
         session = mock.Mock()

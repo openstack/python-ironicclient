@@ -403,6 +403,13 @@ class SessionClientTest(utils.BaseTestCase):
             user_agent=http.USER_AGENT)
         self.assertEqual(res, session.request.return_value)
 
+    @mock.patch.object(http.SessionClient, 'get_endpoint', autospec=True)
+    def test_endpoint_not_found(self, mock_get_endpoint):
+        mock_get_endpoint.return_value = None
+
+        self.assertRaises(exc.EndpointNotFound, _session_client,
+                          session=utils.mockSession({}))
+
 
 @mock.patch.object(time, 'sleep', lambda *_: None)
 class RetriesTestCase(utils.BaseTestCase):

@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixes ``TypeError`` when the bare metal endpoint cannot be detected from
+    a session. A proper ``EndpointNotFound`` exception is raised now.
+  - |
+    Fixes using ``endpoint_override`` with the ``SessionClient``.
