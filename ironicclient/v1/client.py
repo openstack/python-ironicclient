@@ -18,8 +18,6 @@ import logging
 from ironicclient.common import filecache
 from ironicclient.common import http
 from ironicclient.common.http import DEFAULT_VER
-from ironicclient.common.i18n import _
-from ironicclient import exc
 from ironicclient.v1 import allocation
 from ironicclient.v1 import chassis
 from ironicclient.v1 import conductor
@@ -66,23 +64,26 @@ class Client(object):
             else:
                 kwargs['api_version_select_state'] = "user"
         else:
-            if not endpoint_override:
-                raise exc.EndpointException(
-                    _("Must provide 'endpoint_override' if "
-                      "'os_ironic_api_version' isn't specified"))
-
-            # If the user didn't specify a version, use a cached version if
-            # one has been stored
-            host, netport = http.get_server(endpoint_override)
-            saved_version = filecache.retrieve_data(host=host, port=netport)
-            if saved_version:
-                kwargs['api_version_select_state'] = "cached"
-                kwargs['os_ironic_api_version'] = saved_version
+            if endpoint_override:
+                # If the user didn't specify a version, use a cached version if
+                # one has been stored
+                host, netport = http.get_server(endpoint_override)
+                saved_version = filecache.retrieve_data(host=host,
+                                                        port=netport)
+                if saved_version:
+                    kwargs['api_version_select_state'] = "cached"
+                    kwargs['os_ironic_api_version'] = saved_version
+                else:
+                    kwargs['api_version_select_state'] = "default"
+                    kwargs['os_ironic_api_version'] = DEFAULT_VER
             else:
+                LOG.debug('Cannot use cached API version since endpoint '
+                          'override is not provided. Will negotiate again.')
                 kwargs['api_version_select_state'] = "default"
                 kwargs['os_ironic_api_version'] = DEFAULT_VER
 
-        kwargs['endpoint_override'] = endpoint_override
+        if endpoint_override:
+            kwargs['endpoint_override'] = endpoint_override
         self.http_client = http._construct_http_client(*args, **kwargs)
 
         self.chassis = chassis.ChassisManager(self.http_client)
