@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    An implicit dependency on ``oslo.config`` is now explicit.
