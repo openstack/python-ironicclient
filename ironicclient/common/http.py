@@ -481,7 +481,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         return self._http_request(url, method, **kwargs)
 
 
-def _construct_http_client(session=None,
+def _construct_http_client(session,
                            token=None,
                            auth_ref=None,
                            os_ironic_api_version=DEFAULT_VER,

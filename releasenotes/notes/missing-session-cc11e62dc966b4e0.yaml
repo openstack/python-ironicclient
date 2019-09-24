@@ -1,0 +1,10 @@
+---
+fixes:
+  - |
+    Fixes a confusing error message when a session is not provided for
+    ``ironicclient.v1.client.Client``.
+  - |
+    With the removal of the ``HTTPClient`` class in the release 3.0.0, it is
+    now mandatory to pass a session into ``ironicclient.v1.client.Client``.
+    The helper call ``ironicclient.client.get_client`` can also be used to
+    construct a session implicitly.
