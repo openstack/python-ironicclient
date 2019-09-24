@@ -40,9 +40,8 @@ class Client(object):
 
     :param string endpoint_override: A user-supplied endpoint URL for the
                                      ironic service.
-    :param function token: Provides token for authentication.
-    :param integer timeout: Allows customization of the timeout for client
-                            http requests. (optional)
+    :param session: A keystoneauth Session object (must be provided as
+        a keyword argument).
     """
 
     def __init__(self, endpoint_override=None, *args, **kwargs):
