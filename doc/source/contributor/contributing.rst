@@ -43,5 +43,5 @@ Code Hosting
     https://opendev.org/openstack/python-ironicclient
 
 Code Review
-    https://review.openstack.org/#/q/status:open+project:openstack/python-ironicclient,n,z
+    https://review.opendev.org/#/q/status:open+project:openstack/python-ironicclient,n,z
 
