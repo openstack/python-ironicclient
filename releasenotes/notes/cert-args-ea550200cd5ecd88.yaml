@@ -1,0 +1,4 @@
+fixes:
+  - |
+    Restore functionality when using the current release of keystoneauth by
+    using the correct key file arguments (cacert, cert, key).

@@ -442,8 +442,8 @@ class IronicShell(object):
         # named differently in keystoneauth, depending on whether they are
         # provided through CLI or loaded from conf options, here we unify them.
         for cli_ssl_opt, conf_ssl_opt in [
-                ('os_cacert', 'cafile'), ('os_cert', 'certfile'),
-                ('os_key', 'keyfile')]:
+                ('os_cacert', 'cacert'), ('os_cert', 'cert'),
+                ('os_key', 'key')]:
             value = getattr(args, cli_ssl_opt)
             if value not in (None, ''):
                 kwargs[conf_ssl_opt] = value
