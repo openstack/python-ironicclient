@@ -40,9 +40,9 @@ def convert_keystoneauth_opts(kwargs):
         ('os_service_type',): 'service_type',
         ('os_endpoint_type',): 'interface',
         ('ironic_url',): 'endpoint',
-        ('os_cacert', 'ca_file'): 'cafile',
-        ('os_cert', 'cert_file'): 'certfile',
-        ('os_key', 'key_file'): 'keyfile'
+        ('os_cacert', 'ca_file'): 'cacert',
+        ('os_cert', 'cert_file'): 'cert',
+        ('os_key', 'key_file'): 'key'
     }
     for olds, new in old_to_new_names.items():
         for old in olds:

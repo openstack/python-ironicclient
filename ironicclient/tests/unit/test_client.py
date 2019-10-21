@@ -42,7 +42,7 @@ class ClientTest(utils.BaseTestCase):
                 self.dest = name
 
         session_loader_options = [
-            Opt('insecure'), Opt('cafile'), Opt('certfile'), Opt('keyfile'),
+            Opt('insecure'), Opt('cacert'), Opt('cert'), Opt('key'),
             Opt('timeout')]
         mock_ks_session.return_value.get_conf_options.return_value = (
             session_loader_options)
