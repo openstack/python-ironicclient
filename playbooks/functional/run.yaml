@@ -44,12 +44,7 @@
           export IRONICCLIENT_TEST_CONFIG=$CONFIG_FILE
 
           cd $IRONICCLIENT_DIR
-          if [[ $USE_PYTHON3 == "True" ]]; then
-            echo 'Running Functional Tests under Python3'
-            tox -e functionalpy3
-          else
-            echo 'Running Functional Tests under Python2'
-            tox -e functional
-          fi
+          echo 'Running Functional Tests under Python3'
+          tox -e functionalpy3
         executable: /bin/bash
         chdir: '/opt/stack/python-ironicclient'
