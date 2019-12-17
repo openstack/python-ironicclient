@@ -3,7 +3,6 @@
       - check-requirements
       - openstack-cover-jobs
       - openstack-lower-constraints-jobs
-      - openstack-python-jobs
       - openstack-python3-ussuri-jobs
       - openstackclient-plugin-jobs
       - publish-openstack-docs-pti
@@ -11,13 +10,9 @@
     check:
       jobs:
         - ironicclient-functional
-        - ironicclient-functional-python2
         - ironicclient-tempest
-        - ironicclient-tempest-python2
     gate:
       queue: ironic
       jobs:
         - ironicclient-functional
-        - ironicclient-functional-python2
         - ironicclient-tempest
-        - ironicclient-tempest-python2

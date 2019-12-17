@@ -35,16 +35,6 @@
         mysql: True
         rabbit: True
 
-# NOTE(iurygregory): drop when the time comes
-- job:
-    name: ironicclient-functional-python2
-    parent: ironicclient-functional
-    post-run: playbooks/functional/run.yaml
-    vars:
-      tox_envlist: functional
-      devstack_localrc:
-        USE_PYTHON3: False
-
 - job:
     name: ironicclient-tempest
     parent: ironic-base
@@ -54,11 +44,3 @@
     vars:
       devstack_localrc:
         EBTABLES_RACE_FIX: True
-
-# NOTE(iurygregory): drop when the time comes
-- job:
-    name: ironicclient-tempest-python2
-    parent: ironicclient-tempest
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: False
