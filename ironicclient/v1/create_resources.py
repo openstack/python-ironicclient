@@ -10,10 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import functools
 import json
 
 import jsonschema
-import six
 import yaml
 
 from ironicclient import exc
@@ -61,14 +61,14 @@ def create_resources(client, filenames):
     if errors:
         raise exc.ClientException('While validating the resources file(s), the'
                                   ' following error(s) were encountered:\n%s' %
-                                  '\n'.join(six.text_type(e) for e in errors))
+                                  '\n'.join(str(e) for e in errors))
     for r in resources:
         errors.extend(create_chassis(client, r.get('chassis', [])))
         errors.extend(create_nodes(client, r.get('nodes', [])))
     if errors:
         raise exc.ClientException('During resources creation, the following '
                                   'error(s) were encountered:\n%s' %
-                                  '\n'.join(six.text_type(e) for e in errors))
+                                  '\n'.join(str(e) for e in errors))
 
 
 def load_from_file(filename):
@@ -113,7 +113,7 @@ def create_single_handler(resource_type):
     """
 
     def outer_wrapper(create_method):
-        @six.wraps(create_method)
+        @functools.wraps(create_method)
         def wrapper(client, **params):
             uuid = None
             error = None

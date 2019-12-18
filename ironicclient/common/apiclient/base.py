@@ -26,11 +26,10 @@ Base utilities to build API operation managers and objects on top of.
 
 import abc
 import copy
+from http import client as http_client
+from urllib import parse as urlparse
 
 from oslo_utils import strutils
-import six
-from six.moves import http_client
-from six.moves.urllib import parse
 
 from ironicclient.common.apiclient import exceptions
 from ironicclient.common.i18n import _
@@ -212,8 +211,7 @@ class BaseManager(HookableMixin):
         return self.client.delete(url)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class ManagerWithFind(BaseManager):
+class ManagerWithFind(BaseManager, metaclass=abc.ABCMeta):
     """Manager with additional `find()`/`findall()` methods."""
 
     @abc.abstractmethod
@@ -341,7 +339,7 @@ class CrudManager(BaseManager):
         return self._list(
             '%(base_url)s%(query)s' % {
                 'base_url': self.build_url(base_url=base_url, **kwargs),
-                'query': '?%s' % parse.urlencode(kwargs) if kwargs else '',
+                'query': '?%s' % urlparse.urlencode(kwargs) if kwargs else '',
             },
             self.collection_key)
 
@@ -380,7 +378,7 @@ class CrudManager(BaseManager):
         rl = self._list(
             '%(base_url)s%(query)s' % {
                 'base_url': self.build_url(base_url=base_url, **kwargs),
-                'query': '?%s' % parse.urlencode(kwargs) if kwargs else '',
+                'query': '?%s' % urlparse.urlencode(kwargs) if kwargs else '',
             },
             self.collection_key)
         num = len(rl)

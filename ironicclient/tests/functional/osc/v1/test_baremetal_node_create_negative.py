@@ -13,7 +13,6 @@
 # under the License.
 
 import ddt
-import six
 from tempest.lib import exceptions
 
 from ironicclient.tests.functional.osc.v1 import base
@@ -44,5 +43,5 @@ class BaremetalNodeCreateNegativeTests(base.TestCase):
     def test_baremetal_node_create(self, argument, value, ex_text):
         base_cmd = 'baremetal node create --driver %s' % self.driver_name
         command = self.construct_cmd(base_cmd, argument, value)
-        six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
-                              self.openstack, command)
+        self.assertRaisesRegex(exceptions.CommandFailed, ex_text,
+                               self.openstack, command)

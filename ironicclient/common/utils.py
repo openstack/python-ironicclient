@@ -28,7 +28,6 @@ import time
 
 from oslo_serialization import base64
 from oslo_utils import strutils
-import six
 
 from ironicclient.common.i18n import _
 from ironicclient import exc
@@ -163,7 +162,7 @@ def convert_list_props_to_comma_separated(data, props=None):
     for prop in props:
         val = data.get(prop, None)
         if isinstance(val, list):
-            result[prop] = ', '.join(map(six.text_type, val))
+            result[prop] = ', '.join(map(str, val))
 
     return result
 

@@ -17,7 +17,6 @@ import tempfile
 import time
 
 import mock
-import six
 import testtools
 from testtools.matchers import HasLength
 
@@ -28,9 +27,6 @@ from ironicclient.v1 import node
 from ironicclient.v1 import volume_connector
 from ironicclient.v1 import volume_target
 
-if six.PY3:
-    import io
-    file = io.BytesIO
 
 NODE1 = {'uuid': '66666666-7777-8888-9999-000000000000',
          'chassis_uuid': 'aaaaaaaa-1111-bbbb-2222-cccccccccccc',

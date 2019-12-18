@@ -19,9 +19,7 @@ Base utilities to build API operation managers and objects on top of.
 
 import abc
 import copy
-import six
-
-import six.moves.urllib.parse as urlparse
+from urllib import parse as urlparse
 
 from ironicclient.common.apiclient import base
 from ironicclient import exc
@@ -39,8 +37,7 @@ def getid(obj):
         return obj
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Manager(object):
+class Manager(object, metaclass=abc.ABCMeta):
     """Provides  CRUD operations with a particular API."""
 
     def __init__(self, api):
@@ -55,13 +52,15 @@ class Manager(object):
         return ('/v1/%s/%s' % (self._resource_name, resource_id)
                 if resource_id else '/v1/%s' % self._resource_name)
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def resource_class(self):
         """The resource class
 
         """
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def _resource_name(self):
         """The resource name.
 
@@ -259,11 +258,11 @@ class Manager(object):
         self.api.raw_request('DELETE', self._path(resource_id))
 
 
-@six.add_metaclass(abc.ABCMeta)
-class CreateManager(Manager):
+class CreateManager(Manager, metaclass=abc.ABCMeta):
     """Provides creation operations with a particular API."""
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def _creation_attributes(self):
         """A list of required creation attributes for a resource type.
 

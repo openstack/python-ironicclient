@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import six
-
 
 def get_dict_from_output(output):
     """Parse list of dictionaries, return a dictionary.
@@ -22,7 +20,7 @@ def get_dict_from_output(output):
     """
     obj = {}
     for item in output:
-        obj[item['Property']] = six.text_type(item['Value'])
+        obj[item['Property']] = str(item['Value'])
     return obj
 
 

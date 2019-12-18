@@ -13,7 +13,6 @@
 import json
 
 import ddt
-import six
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 
@@ -160,9 +159,7 @@ class BaremetalDeployTemplateTests(base.TestCase):
     @ddt.data(
         ('--uuid', '', 'expected one argument'),
         ('--uuid', '!@#$^*&%^', 'Expected a UUID'),
-        ('', '',
-         'too few arguments' if six.PY2
-         else 'the following arguments are required'),
+        ('', '', 'the following arguments are required'),
         ('', 'not/a/name', 'Deploy template name must be a valid trait'),
         ('', 'foo', 'Deploy template name must be a valid trait'),
         ('--steps', '', 'expected one argument'),

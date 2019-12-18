@@ -13,9 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from http import client as http_client
+
 from oslotest import base as test_base
-import six
-from six.moves import http_client
 
 from ironicclient.common.apiclient import exceptions
 
@@ -89,17 +89,17 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
         json_data1 = {"error_message": {"debuginfo": None,
                                         "faultcode": "Client",
                                         "faultstring": "fake message"}}
-        message = six.text_type(
+        message = str(
             json_data1["error_message"]["faultstring"])
-        details = six.text_type(json_data1)
+        details = str(json_data1)
         self.assert_exception(
             exceptions.BadRequest, method, url, status_code, json_data1,
             message, details)
 
         json_data2 = {"badRequest": {"message": "fake message",
                                      "code": http_client.BAD_REQUEST}}
-        message = six.text_type(json_data2["badRequest"]["message"])
-        details = six.text_type(json_data2)
+        message = str(json_data2["badRequest"]["message"])
+        details = str(json_data2)
         self.assert_exception(
             exceptions.BadRequest, method, url, status_code, json_data2,
             message, details)

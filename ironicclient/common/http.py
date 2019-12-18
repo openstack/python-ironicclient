@@ -14,6 +14,8 @@
 #    under the License.
 
 from distutils.version import StrictVersion
+import functools
+from http import client as http_client
 import logging
 import os
 import re
@@ -21,13 +23,11 @@ import socket
 import ssl
 import textwrap
 import time
+from urllib import parse as urlparse
 
 from keystoneauth1 import adapter
 from keystoneauth1 import exceptions as kexc
 from oslo_serialization import jsonutils
-import six
-from six.moves import http_client
-import six.moves.urllib.parse as urlparse
 
 from ironicclient.common import filecache
 from ironicclient.common.i18n import _
@@ -196,7 +196,7 @@ class VersionNegotiationMixin(object):
                 % {'req': requested_version,
                    'min': min_ver, 'max': max_ver}))
 
-        if isinstance(requested_version, six.string_types):
+        if isinstance(requested_version, str):
             if requested_version == 'latest':
                 negotiated_ver = max_ver
             else:
@@ -276,7 +276,7 @@ _RETRY_EXCEPTIONS = (exc.Conflict, exc.ServiceUnavailable,
 
 def with_retries(func):
     """Wrapper for _http_request adding support for retries."""
-    @six.wraps(func)
+    @functools.wraps(func)
     def wrapper(self, url, method, **kwargs):
         if self.conflict_max_retries is None:
             self.conflict_max_retries = DEFAULT_MAX_RETRIES
@@ -303,7 +303,7 @@ def with_retries(func):
     return wrapper
 
 
-class VerifiedHTTPSConnection(six.moves.http_client.HTTPSConnection):
+class VerifiedHTTPSConnection(http_client.HTTPSConnection):
     """httplib-compatible connection using client-side SSL authentication
 
     :see http://code.activestate.com/recipes/
@@ -312,9 +312,9 @@ class VerifiedHTTPSConnection(six.moves.http_client.HTTPSConnection):
 
     def __init__(self, host, port, key_file=None, cert_file=None,
                  ca_file=None, timeout=None, insecure=False):
-        six.moves.http_client.HTTPSConnection.__init__(self, host, port,
-                                                       key_file=key_file,
-                                                       cert_file=cert_file)
+        http_client.HTTPSConnection.__init__(self, host, port,
+                                             key_file=key_file,
+                                             cert_file=cert_file)
         self.key_file = key_file
         self.cert_file = cert_file
         if ca_file is not None:
@@ -380,7 +380,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         self.api_version_select_state = api_version_select_state
         self.conflict_max_retries = max_retries
         self.conflict_retry_interval = retry_interval
-        if isinstance(kwargs.get('endpoint_override'), six.string_types):
+        if isinstance(kwargs.get('endpoint_override'), str):
             kwargs['endpoint_override'] = _trim_endpoint_api_version(
                 kwargs['endpoint_override'])
 
@@ -421,7 +421,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
 
         kwargs.setdefault('user_agent', USER_AGENT)
         kwargs.setdefault('auth', self.auth)
-        if isinstance(self.endpoint_override, six.string_types):
+        if isinstance(self.endpoint_override, str):
             kwargs.setdefault('endpoint_override', self.endpoint_override)
 
         if getattr(self, 'os_ironic_api_version', None):

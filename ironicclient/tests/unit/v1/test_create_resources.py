@@ -10,10 +10,9 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
+import builtins
 import jsonschema
 import mock
-import six
-import six.moves.builtins as __builtin__
 
 from ironicclient import exc
 from ironicclient.tests.unit import utils
@@ -193,14 +192,14 @@ class CreateResourcesTest(utils.BaseTestCase):
 
 class LoadFromFileTest(utils.BaseTestCase):
 
-    @mock.patch.object(__builtin__, 'open',
+    @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='{"a": "b"}'))
     def test_load_json(self):
         fname = 'abc.json'
         res = create_resources.load_from_file(fname)
         self.assertEqual({'a': 'b'}, res)
 
-    @mock.patch.object(__builtin__, 'open',
+    @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='{"a": "b"}'))
     def test_load_unknown_extension(self):
         fname = 'abc'
@@ -208,7 +207,7 @@ class LoadFromFileTest(utils.BaseTestCase):
                                'must have .json or .yaml extension',
                                create_resources.load_from_file, fname)
 
-    @mock.patch.object(__builtin__, 'open', autospec=True)
+    @mock.patch.object(builtins, 'open', autospec=True)
     def test_load_ioerror(self, mock_open):
         mock_open.side_effect = IOError('file does not exist')
         fname = 'abc.json'
@@ -216,7 +215,7 @@ class LoadFromFileTest(utils.BaseTestCase):
                                'Cannot read file',
                                create_resources.load_from_file, fname)
 
-    @mock.patch.object(__builtin__, 'open',
+    @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='{{bbb'))
     def test_load_incorrect_json(self):
         fname = 'abc.json'
@@ -224,14 +223,14 @@ class LoadFromFileTest(utils.BaseTestCase):
             exc.ClientException, 'File "%s" is invalid' % fname,
             create_resources.load_from_file, fname)
 
-    @mock.patch.object(__builtin__, 'open',
+    @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='---\na: b'))
     def test_load_yaml(self):
         fname = 'abc.yaml'
         res = create_resources.load_from_file(fname)
         self.assertEqual({'a': 'b'}, res)
 
-    @mock.patch.object(__builtin__, 'open',
+    @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='---\na-: - b'))
     def test_load_incorrect_yaml(self):
         fname = 'abc.yaml'
@@ -365,7 +364,7 @@ class CreateMethodsTest(utils.BaseTestCase):
                                              'node-uuid-1', 'pg-uuid-2')
         self.assertEqual(1, len(errs))
         self.assertIsInstance(errs[0], exc.ClientException)
-        self.assertIn('port group', six.text_type(errs[0]))
+        self.assertIn('port group', str(errs[0]))
         self.assertFalse(self.client.port.create.called)
 
     @mock.patch.object(create_resources, 'create_portgroups', autospec=True)

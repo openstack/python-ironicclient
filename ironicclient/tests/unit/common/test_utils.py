@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import builtins
 import json
 import os
 import subprocess
@@ -20,7 +21,6 @@ import sys
 import tempfile
 
 import mock
-import six.moves.builtins as __builtin__
 
 from ironicclient.common import utils
 from ironicclient import exc
@@ -355,7 +355,7 @@ class HandleJsonFileTest(test_utils.BaseTestCase):
 
         self.assertEqual(json.loads(contents), steps)
 
-    @mock.patch.object(__builtin__, 'open', autospec=True)
+    @mock.patch.object(builtins, 'open', autospec=True)
     def test_handle_json_or_file_arg_file_fail(self, mock_open):
         mock_file_object = mock.MagicMock()
         mock_file_handle = mock.MagicMock()

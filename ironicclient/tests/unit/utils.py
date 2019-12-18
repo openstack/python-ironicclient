@@ -14,13 +14,13 @@
 #    under the License.
 
 import copy
+import io
 import os
 
 import fixtures
 import mock
 from oslo_utils import strutils
 import requests
-import six
 import testtools
 
 
@@ -58,7 +58,7 @@ class FakeAPI(object):
 
     def raw_request(self, *args, **kwargs):
         response = self._request(*args, **kwargs)
-        body_iter = iter(six.StringIO(response[1]))
+        body_iter = iter(io.StringIO(response[1]))
         return FakeResponse(response[0]), body_iter
 
     def json_request(self, *args, **kwargs):

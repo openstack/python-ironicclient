@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 from tempest.lib import exceptions
 
 from ironicclient.tests.functional.osc.v1 import base
@@ -44,8 +43,7 @@ class TestNodeListFields(base.TestCase):
         fields = ['instance_uuid', 'name', 'uuid']
 
         node_list = self.openstack(
-            'baremetal node list --fields {}'
-            .format(' '.join(fields)))
+            'baremetal node list --fields {}'.format(' '.join(fields)))
 
         nodes_list_headers = self._get_table_headers(node_list)
         self.assertEqual(headers, nodes_list_headers)
@@ -53,14 +51,14 @@ class TestNodeListFields(base.TestCase):
     def test_list_no_fields(self):
         command = 'baremetal node list --fields'
         ex_text = 'expected at least one argument'
-        six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
-                              self.openstack, command)
+        self.assertRaisesRegex(exceptions.CommandFailed, ex_text,
+                               self.openstack, command)
 
     def test_list_wrong_field(self):
         command = 'baremetal node list --fields ABC'
         ex_text = 'invalid choice'
-        six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
-                              self.openstack, command)
+        self.assertRaisesRegex(exceptions.CommandFailed, ex_text,
+                               self.openstack, command)
 
 
 class TestNodeShowFields(base.TestCase):
@@ -117,8 +115,8 @@ class TestNodeShowFields(base.TestCase):
             'uuid']
 
         node_show = self.openstack(
-            'baremetal node show {} --fields {} {}'
-            .format(self.node['uuid'], ' '.join(rows), self.api_version))
+            'baremetal node show {} --fields {} {}'.format(
+                self.node['uuid'], ' '.join(rows), self.api_version))
 
         nodes_show_rows = self._get_table_rows(node_show)
         self.assertEqual(set(rows), set(nodes_show_rows))
@@ -127,12 +125,12 @@ class TestNodeShowFields(base.TestCase):
         command = 'baremetal node show {} --fields {}'.format(
             self.node['uuid'], self.api_version)
         ex_text = 'expected at least one argument'
-        six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
-                              self.openstack, command)
+        self.assertRaisesRegex(exceptions.CommandFailed, ex_text,
+                               self.openstack, command)
 
     def test_show_wrong_field(self):
         command = 'baremetal node show {} --fields ABC {}'.format(
             self.node['uuid'], self.api_version)
         ex_text = 'invalid choice'
-        six.assertRaisesRegex(self, exceptions.CommandFailed, ex_text,
-                              self.openstack, command)
+        self.assertRaisesRegex(exceptions.CommandFailed, ex_text,
+                               self.openstack, command)

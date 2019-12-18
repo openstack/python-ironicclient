@@ -12,10 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import configparser
 import os
 
-import six
-import six.moves.configparser as config_parser
 from tempest.lib.cli import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
@@ -60,16 +59,12 @@ class FunctionalTestBase(base.ClientTestBase):
     def _get_config(self):
         config_file = os.environ.get('IRONICCLIENT_TEST_CONFIG',
                                      DEFAULT_CONFIG_FILE)
-        # SafeConfigParser was deprecated in Python 3.2
-        if six.PY3:
-            config = config_parser.ConfigParser()
-        else:
-            config = config_parser.SafeConfigParser()
+        config = configparser.ConfigParser()
         if not config.read(config_file):
             self.skipTest('Skipping, no test config found @ %s' % config_file)
         try:
             auth_strategy = config.get('functional', 'auth_strategy')
-        except config_parser.NoOptionError:
+        except configparser.NoOptionError:
             auth_strategy = 'keystone'
         if auth_strategy not in ['keystone', 'noauth']:
             raise self.fail(
@@ -92,7 +87,7 @@ class FunctionalTestBase(base.ClientTestBase):
         for c in conf_settings + keystone_v3_conf_settings:
             try:
                 cli_flags[c] = config.get('functional', c)
-            except config_parser.NoOptionError:
+            except configparser.NoOptionError:
                 # NOTE(vdrok): Here we ignore the absence of KS v3 options as
                 # v2 may be used. Keystone client will do the actual check of
                 # the parameters' correctness.
