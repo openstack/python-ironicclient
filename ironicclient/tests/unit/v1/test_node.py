@@ -49,7 +49,8 @@ NODE2 = {'uuid': '66666666-7777-8888-9999-111111111111',
          'resource_class': 'bar',
          'extra': {},
          'owner': '33333333-2222-1111-0000-111111111111',
-         'retired': True}
+         'retired': True,
+         'lessee': '77777777-8888-5555-2222-999999999999'}
 PORT = {'uuid': '11111111-2222-3333-4444-555555555555',
         'node_uuid': '66666666-7777-8888-9999-000000000000',
         'address': 'AA:AA:AA:AA:AA:AA',
@@ -207,6 +208,13 @@ fake_responses = {
         )
     },
     '/v1/nodes/?owner=%s' % NODE2['owner']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]},
+        )
+    },
+    '/v1/nodes/?lessee=%s' % NODE2['lessee']:
     {
         'GET': (
             {},
@@ -856,6 +864,15 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['owner'], getattr(nodes[0], 'owner'))
+
+    def test_node_list_lessee(self):
+        nodes = self.mgr.list(lessee=NODE2['lessee'])
+        expect = [
+            ('GET', '/v1/nodes/?lessee=%s' % NODE2['lessee'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE2['lessee'], getattr(nodes[0], 'lessee'))
 
     def test_node_list_provision_state_fail(self):
         self.assertRaises(KeyError, self.mgr.list,
