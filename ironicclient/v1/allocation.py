@@ -30,10 +30,11 @@ class AllocationManager(base.CreateManager):
     resource_class = Allocation
     _resource_name = 'allocations'
     _creation_attributes = ['extra', 'name', 'resource_class', 'uuid',
-                            'traits', 'candidate_nodes', 'node']
+                            'traits', 'candidate_nodes', 'node', 'owner']
 
     def list(self, resource_class=None, state=None, node=None, limit=None,
-             marker=None, sort_key=None, sort_dir=None, fields=None):
+             marker=None, sort_key=None, sort_dir=None, fields=None,
+             owner=None):
         """Retrieve a list of allocations.
 
         :param resource_class: Optional, get allocations with this resource
@@ -60,6 +61,7 @@ class AllocationManager(base.CreateManager):
 
         :param fields: Optional, a list with a specified set of fields
                        of the resource to be returned.
+        :param owner: Optional, project that owns the allocation.
 
         :returns: A list of allocations.
         :raises: InvalidAttribute if a subset of fields is requested with
@@ -72,7 +74,8 @@ class AllocationManager(base.CreateManager):
         filters = utils.common_filters(marker, limit, sort_key, sort_dir,
                                        fields)
         for name, value in [('resource_class', resource_class),
-                            ('state', state), ('node', node)]:
+                            ('state', state), ('node', node),
+                            ('owner', owner)]:
             if value is not None:
                 filters.append('%s=%s' % (name, value))
 

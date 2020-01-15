@@ -174,6 +174,28 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
 
         self.baremetal_mock.allocation.create.assert_called_once_with(**args)
 
+    def test_baremetal_allocation_create_owner(self):
+        arglist = [
+            '--resource-class', baremetal_fakes.baremetal_resource_class,
+            '--owner', baremetal_fakes.baremetal_owner,
+        ]
+
+        verifylist = [
+            ('resource_class', baremetal_fakes.baremetal_resource_class),
+            ('owner', baremetal_fakes.baremetal_owner),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        args = {
+            'resource_class': baremetal_fakes.baremetal_resource_class,
+            'owner': baremetal_fakes.baremetal_owner,
+        }
+
+        self.baremetal_mock.allocation.create.assert_called_once_with(**args)
+
     def test_baremetal_allocation_create_no_options(self):
         arglist = []
         verifylist = []
@@ -344,6 +366,36 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
                      baremetal_fakes.baremetal_uuid),)
         self.assertEqual(datalist, tuple(data))
 
+    def test_baremetal_allocation_list_owner(self):
+        arglist = ['--owner',
+                   baremetal_fakes.baremetal_owner]
+        verifylist = [('owner',
+                       baremetal_fakes.baremetal_owner)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        columns, data = self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'owner': baremetal_fakes.baremetal_owner,
+            'marker': None,
+            'limit': None}
+        self.baremetal_mock.allocation.list.assert_called_once_with(**kwargs)
+
+        collist = (
+            "UUID",
+            "Name",
+            "Resource Class",
+            "State",
+            "Node UUID")
+        self.assertEqual(collist, columns)
+
+        datalist = ((baremetal_fakes.baremetal_uuid,
+                     baremetal_fakes.baremetal_name,
+                     baremetal_fakes.baremetal_resource_class,
+                     baremetal_fakes.baremetal_allocation_state,
+                     baremetal_fakes.baremetal_uuid),)
+        self.assertEqual(datalist, tuple(data))
+
     def test_baremetal_allocation_list_state(self):
         arglist = ['--state', baremetal_fakes.baremetal_allocation_state]
         verifylist = [('state', baremetal_fakes.baremetal_allocation_state)]
@@ -388,6 +440,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         collist = ('UUID',
                    'Name',
                    'State',
+                   'Owner',
                    'Node UUID',
                    'Last Error',
                    'Resource Class',
@@ -401,6 +454,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         datalist = ((baremetal_fakes.baremetal_uuid,
                      baremetal_fakes.baremetal_name,
                      baremetal_fakes.baremetal_allocation_state,
+                     '',
                      baremetal_fakes.baremetal_uuid,
                      '',
                      baremetal_fakes.baremetal_resource_class,

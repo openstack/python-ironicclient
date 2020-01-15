@@ -34,6 +34,7 @@ BAREMETAL_CHASSIS = {
 
 baremetal_uuid = 'xxx-xxxxxx-xxxx'
 baremetal_name = 'fake name'
+baremetal_owner = 'fake-owner'
 baremetal_instance_uuid = 'yyy-yyyyyy-yyyy'
 baremetal_power_state = None
 baremetal_provision_state = None

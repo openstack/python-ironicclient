@@ -493,6 +493,7 @@ ALLOCATION_DETAILED_RESOURCE = Resource(
     ['uuid',
      'name',
      'state',
+     'owner',
      'node_uuid',
      'last_error',
      'resource_class',

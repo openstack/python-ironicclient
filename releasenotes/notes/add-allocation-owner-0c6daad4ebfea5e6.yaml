@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Adds support to create an allocation with an ``owner``,
+    as well as display it. Introduced in API 1.60.

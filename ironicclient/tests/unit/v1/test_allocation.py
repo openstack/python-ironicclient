@@ -21,6 +21,7 @@ import ironicclient.v1.allocation
 
 ALLOCATION = {'uuid': '11111111-2222-3333-4444-555555555555',
               'name': 'Allocation-name',
+              'owner': None,
               'state': 'active',
               'node_uuid': '66666666-7777-8888-9999-000000000000',
               'last_error': None,
@@ -31,6 +32,7 @@ ALLOCATION = {'uuid': '11111111-2222-3333-4444-555555555555',
 
 ALLOCATION2 = {'uuid': '55555555-4444-3333-2222-111111111111',
                'name': 'Allocation2-name',
+               'owner': 'fake-owner',
                'state': 'allocating',
                'node_uuid': None,
                'last_error': None,
@@ -71,6 +73,13 @@ fake_responses = {
         'GET': (
             {},
             {"allocations": [ALLOCATION]},
+        ),
+    },
+    '/v1/allocations/?owner=%s' % ALLOCATION2['owner']:
+    {
+        'GET': (
+            {},
+            {"allocations": [ALLOCATION2]},
         ),
     },
 }
@@ -150,6 +159,19 @@ class AllocationManagerTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/allocations']['GET'])
 
+    def test_allocations_list_by_owner(self):
+        allocations = self.mgr.list(owner=ALLOCATION2['owner'])
+        expect = [
+            ('GET', '/v1/allocations/?owner=%s' % ALLOCATION2['owner'], {},
+             None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(allocations))
+
+        expected_resp = ({}, {"allocations": [ALLOCATION, ALLOCATION2]},)
+        self.assertEqual(expected_resp,
+                         self.api.responses['/v1/allocations']['GET'])
+
     def test_allocations_show(self):
         allocation = self.mgr.get(ALLOCATION['uuid'])
         expect = [
@@ -158,6 +180,7 @@ class AllocationManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(ALLOCATION['uuid'], allocation.uuid)
         self.assertEqual(ALLOCATION['name'], allocation.name)
+        self.assertEqual(ALLOCATION['owner'], allocation.owner)
         self.assertEqual(ALLOCATION['node_uuid'], allocation.node_uuid)
         self.assertEqual(ALLOCATION['state'], allocation.state)
         self.assertEqual(ALLOCATION['resource_class'],

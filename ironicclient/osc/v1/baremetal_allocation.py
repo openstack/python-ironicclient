@@ -57,6 +57,10 @@ class CreateBaremetalAllocation(command.ShowOne):
             dest='uuid',
             help=_('UUID of the allocation.'))
         parser.add_argument(
+            '--owner',
+            dest='owner',
+            help=_('Owner of the allocation.'))
+        parser.add_argument(
             '--extra',
             metavar="<key=value>",
             action='append',
@@ -91,7 +95,7 @@ class CreateBaremetalAllocation(command.ShowOne):
                 _('--resource-class is required except when --node is used'))
 
         field_list = ['name', 'uuid', 'extra', 'resource_class', 'traits',
-                      'candidate_nodes', 'node']
+                      'candidate_nodes', 'node', 'owner']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
 
@@ -182,6 +186,10 @@ class ListBaremetalAllocation(command.Lister):
             '--state',
             metavar='<state>',
             help=_("Only list allocations in this state."))
+        parser.add_argument(
+            '--owner',
+            metavar='<owner>',
+            help=_("Only list allocations with this owner."))
 
         # NOTE(dtantsur): the allocation API does not expose the 'detail' flag,
         # but some fields are inconvenient to display in a table, so we emulate
@@ -216,7 +224,7 @@ class ListBaremetalAllocation(command.Lister):
                 parsed_args.limit)
         params['limit'] = parsed_args.limit
         params['marker'] = parsed_args.marker
-        for field in ('node', 'resource_class', 'state'):
+        for field in ('node', 'resource_class', 'state', 'owner'):
             value = getattr(parsed_args, field)
             if value is not None:
                 params[field] = value
