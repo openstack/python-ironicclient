@@ -56,11 +56,12 @@ class NodeManager(base.CreateManager):
                             'automated_clean']
     _resource_name = 'nodes'
 
-    def list(self, associated=None, maintenance=None, marker=None, limit=None,
-             detail=False, sort_key=None, sort_dir=None, fields=None,
-             provision_state=None, driver=None, resource_class=None,
-             chassis=None, fault=None, os_ironic_api_version=None,
-             conductor_group=None, conductor=None, owner=None):
+    def list(self, associated=None, maintenance=None, marker=None,
+             limit=None, detail=False, sort_key=None, sort_dir=None,
+             fields=None, provision_state=None, driver=None,
+             resource_class=None, chassis=None, fault=None,
+             os_ironic_api_version=None, conductor_group=None,
+             conductor=None, owner=None, retired=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -72,6 +73,9 @@ class NodeManager(base.CreateManager):
                             to return nodes in maintenance mode (True or
                             "True"), or not in maintenance mode (False or
                             "False").
+        :param retired: Optional. Either a Boolean or a string representation
+                        of a Boolean that indicates whether to return retired
+                        nodes (True or "True").
         :param provision_state: Optional. String value to get only nodes in
                                 that provision state.
         :param marker: Optional, the UUID of a node, eg the last
@@ -135,6 +139,8 @@ class NodeManager(base.CreateManager):
             filters.append('associated=%s' % associated)
         if maintenance is not None:
             filters.append('maintenance=%s' % maintenance)
+        if retired is not None:
+            filters.append('retired=%s' % retired)
         if fault is not None:
             filters.append('fault=%s' % fault)
         if provision_state is not None:
