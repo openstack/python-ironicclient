@@ -592,6 +592,12 @@ class ListBaremetalNode(command.Lister):
             help=_("Limit list to nodes not in maintenance mode"),
         )
         parser.add_argument(
+            '--retired',
+            dest='retired',
+            action='store_true',
+            default=None,
+            help=_("Limit list to retired nodes."))
+        parser.add_argument(
             '--fault',
             dest='fault',
             metavar='<fault>',
@@ -683,7 +689,7 @@ class ListBaremetalNode(command.Lister):
             params['associated'] = True
         if parsed_args.unassociated:
             params['associated'] = False
-        for field in ['maintenance', 'fault', 'conductor_group']:
+        for field in ['maintenance', 'fault', 'conductor_group', 'retired']:
             if getattr(parsed_args, field) is not None:
                 params[field] = getattr(parsed_args, field)
         for field in ['provision_state', 'driver', 'resource_class',
@@ -1161,6 +1167,16 @@ class SetBaremetalNode(command.Command):
             help=_('Set the reason of marking the node as protected'),
         )
         parser.add_argument(
+            '--retired',
+            action='store_true',
+            help=_('Mark the node as retired'),
+        )
+        parser.add_argument(
+            '--retired-reason',
+            metavar='<retired_reason>',
+            help=_('Set the reason of marking the node as retired'),
+        )
+        parser.add_argument(
             '--target-raid-config',
             metavar='<target_raid_config>',
             help=_('Set the target RAID configuration (JSON) for the node. '
@@ -1227,7 +1243,7 @@ class SetBaremetalNode(command.Command):
         for field in ['automated_clean', 'instance_uuid', 'name',
                       'chassis_uuid', 'driver', 'resource_class',
                       'conductor_group', 'protected', 'protected_reason',
-                      'owner', 'description']:
+                      'retired', 'retired_reason', 'owner', 'description']:
             value = getattr(parsed_args, field)
             if value:
                 properties.extend(utils.args_array_to_patch(
@@ -1501,6 +1517,17 @@ class UnsetBaremetalNode(command.Command):
                    'protected is unset)'),
         )
         parser.add_argument(
+            "--retired",
+            action="store_true",
+            help=_('Unset the retired flag on the node'),
+        )
+        parser.add_argument(
+            "--retired-reason",
+            action="store_true",
+            help=_('Unset the retired reason (gets unset automatically when '
+                   'retired is unset)'),
+        )
+        parser.add_argument(
             "--owner",
             action="store_true",
             help=_('Unset the owner field of the node'),
@@ -1532,8 +1559,8 @@ class UnsetBaremetalNode(command.Command):
                       'management_interface', 'network_interface',
                       'power_interface', 'raid_interface', 'rescue_interface',
                       'storage_interface', 'vendor_interface',
-                      'protected', 'protected_reason', 'owner',
-                      'description']:
+                      'protected', 'protected_reason', 'retired',
+                      'retired_reason', 'owner', 'description']:
             if getattr(parsed_args, field):
                 properties.extend(utils.args_array_to_patch('remove', [field]))
 

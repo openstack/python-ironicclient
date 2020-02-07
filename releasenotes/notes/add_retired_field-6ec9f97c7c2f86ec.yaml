@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Adds the ability to set and unset the ``retired`` and
+    ``retired_reason`` with API 1.61. Setting the ``retired``
+    field on a node excludes it from scheduling, but still
+    allows the node to be cleaned (unlike maintenance, for
+    instance). The fields can be set irrespective of the
+    node's state and are meant to be used to prepare nodes
+    for removal from ironic.

@@ -658,6 +658,8 @@ class TestBaremetalList(TestBaremetal):
             'Rescue Interface',
             'Reservation',
             'Resource Class',
+            'Retired',
+            'Retired Reason',
             'Storage Interface',
             'Target Power State',
             'Target Provision State',
@@ -2454,6 +2456,50 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
+    def test_baremetal_set_retired(self):
+        arglist = [
+            'node_uuid',
+            '--retired'
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('retired', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/retired', 'value': 'True', 'op': 'add'}],
+            reset_interfaces=None,
+        )
+
+    def test_baremetal_set_retired_with_reason(self):
+        arglist = [
+            'node_uuid',
+            '--retired',
+            '--retired-reason', 'out of warranty!'
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('retired', True),
+            ('retired_reason', 'out of warranty!')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/retired', 'value': 'True', 'op': 'add'},
+             {'path': '/retired_reason', 'value': 'out of warranty!',
+              'op': 'add'}],
+            reset_interfaces=None,
+        )
+
     def test_baremetal_set_extra(self):
         arglist = [
             'node_uuid',
@@ -3005,6 +3051,44 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/protected_reason', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_retired(self):
+        arglist = [
+            'node_uuid',
+            '--retired',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('retired', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/retired', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_retired_reason(self):
+        arglist = [
+            'node_uuid',
+            '--retired-reason',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('retired_reason', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/retired_reason', 'op': 'remove'}]
         )
 
     def test_baremetal_unset_extra(self):

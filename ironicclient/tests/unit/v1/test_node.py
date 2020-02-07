@@ -48,7 +48,8 @@ NODE2 = {'uuid': '66666666-7777-8888-9999-111111111111',
          'properties': {'num_cpu': 4},
          'resource_class': 'bar',
          'extra': {},
-         'owner': '33333333-2222-1111-0000-111111111111'}
+         'owner': '33333333-2222-1111-0000-111111111111',
+         'retired': True}
 PORT = {'uuid': '11111111-2222-3333-4444-555555555555',
         'node_uuid': '66666666-7777-8888-9999-000000000000',
         'address': 'AA:AA:AA:AA:AA:AA',
@@ -170,7 +171,21 @@ fake_responses = {
             {"nodes": [NODE2]},
         )
     },
+    '/v1/nodes/?retired=True':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]},
+        )
+    },
     '/v1/nodes/?associated=True&maintenance=True':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]},
+        )
+    },
+    '/v1/nodes/?associated=True&retired=True':
     {
         'GET': (
             {},
@@ -798,6 +813,15 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
+    def test_node_list_retired(self):
+        nodes = self.mgr.list(retired=True)
+        expect = [
+            ('GET', '/v1/nodes/?retired=True', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
     def test_node_list_provision_state(self):
         nodes = self.mgr.list(provision_state="available")
         expect = [
@@ -870,6 +894,15 @@ class NodeManagerTest(testtools.TestCase):
         nodes = self.mgr.list(associated=True, maintenance=True)
         expect = [
             ('GET', '/v1/nodes/?associated=True&maintenance=True', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_associated_and_retired(self):
+        nodes = self.mgr.list(associated=True, retired=True)
+        expect = [
+            ('GET', '/v1/nodes/?associated=True&retired=True', {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
