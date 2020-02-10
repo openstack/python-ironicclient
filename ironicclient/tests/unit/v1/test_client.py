@@ -115,3 +115,25 @@ class ClientTest(utils.BaseTestCase):
         # is being called in the client and returns a version,
         # although mocking might need to be restrutured to
         # properly achieve that.
+
+    def test_client_no_session(self, http_client_mock):
+        self.assertRaisesRegex(TypeError,
+                               "session is required",
+                               client.Client,
+                               "http://example.com")
+
+    def test_client_session_via_posargs(self, http_client_mock):
+        session = mock.Mock()
+        client.Client("http://example.com", session)
+        http_client_mock.assert_called_once_with(
+            session, api_version_select_state='default',
+            endpoint_override="http://example.com",
+            os_ironic_api_version=client.DEFAULT_VER)
+
+    def test_client_session_via_kwargs(self, http_client_mock):
+        session = mock.Mock()
+        client.Client(session=session, endpoint_override="http://example.com")
+        http_client_mock.assert_called_once_with(
+            session, api_version_select_state='default',
+            endpoint_override="http://example.com",
+            os_ironic_api_version=client.DEFAULT_VER)
