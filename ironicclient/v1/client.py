@@ -44,6 +44,11 @@ class Client(object):
 
     def __init__(self, endpoint_override=None, *args, **kwargs):
         """Initialize a new client for the Ironic v1 API."""
+        if not args and not kwargs.get('session'):
+            raise TypeError("A session is required for creating a client, "
+                            "use ironicclient.client.get_client to create "
+                            "it automatically")
+
         allow_downgrade = kwargs.pop('allow_api_version_downgrade', False)
         if kwargs.get('os_ironic_api_version'):
             # TODO(TheJulia): We should sanity check os_ironic_api_version

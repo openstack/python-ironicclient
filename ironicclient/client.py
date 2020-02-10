@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 
 
 def get_client(api_version, auth_type=None, os_ironic_api_version=None,
-               max_retries=None, retry_interval=None, **kwargs):
+               max_retries=None, retry_interval=None, session=None, **kwargs):
     """Get an authenticated client, based on the credentials.
 
     :param api_version: the API version to use. Valid value: '1'.
@@ -31,6 +31,8 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
     :param max_retries: Maximum number of retries in case of conflict error
     :param retry_interval: Amount of time (in seconds) between retries in case
         of conflict error.
+    :param session: An existing keystoneauth session. Will be created from
+        kwargs if not provided.
     :param kwargs: all the other params that are passed to keystoneauth.
     """
     # TODO(TheJulia): At some point, we should consider possibly noting
@@ -48,7 +50,6 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
             auth_type = 'token'
         else:
             auth_type = 'password'
-    session = kwargs.get('session')
     if not session:
         loader = kaloading.get_plugin_loader(auth_type)
         loader_options = loader.get_options()
@@ -104,8 +105,22 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
     return Client(api_version, **ironicclient_kwargs)
 
 
-def Client(version, *args, **kwargs):
+def Client(version, endpoint_override=None, session=None, *args, **kwargs):
+    """Create a client of an appropriate version.
+
+    This call requires a session. If you want it to be created, use
+    ``get_client`` instead.
+
+    :param endpoint_override: A bare metal endpoint to use.
+    :param session: A keystoneauth session to use. This argument is actually
+        required and is marked optional only for backward compatibility.
+    :param args: Other arguments to pass to the HTTP client. Not recommended,
+        use kwargs instead.
+    :param kwargs: Other keyword arguments to pass to the HTTP client (e.g.
+        ``insecure``).
+    """
     module = importutils.import_versioned_module('ironicclient',
                                                  version, 'client')
     client_class = getattr(module, 'Client')
-    return client_class(*args, **kwargs)
+    return client_class(endpoint_override=endpoint_override, session=session,
+                        *args, **kwargs)

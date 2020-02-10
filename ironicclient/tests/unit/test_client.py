@@ -265,3 +265,21 @@ class ClientTest(utils.BaseTestCase):
         }
         self.assertRaises(exc.AmbiguousAuthSystem, iroclient.get_client,
                           '1', **kwargs)
+
+    def test_client_no_session(self):
+        # get_client can create a session, all other calls require it
+        self.assertRaisesRegex(TypeError,
+                               "session is required",
+                               iroclient.Client,
+                               1, "http://example.com")
+
+    def test_client_session_via_posargs(self):
+        session = mock.Mock()
+        session.get_endpoint.return_value = 'http://localhost:35357/v2.0'
+        iroclient.Client('1', "http://example.com", session)
+
+    def test_client_session_via_kwargs(self):
+        session = mock.Mock()
+        session.get_endpoint.return_value = 'http://localhost:35357/v2.0'
+        iroclient.Client('1', session=session,
+                         endpoint_override="http://example.com")

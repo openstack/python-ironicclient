@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fails with a clear TypeError when a session is not provided to
+    ``client.Client`` or ``v1.client.Client``. Before we used to throw::
+
+      _construct_http_client() takes at least 1 argument
