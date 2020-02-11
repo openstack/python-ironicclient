@@ -746,6 +746,36 @@ class TestBaremetalList(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
+    def _test_baremetal_list_retired(self, retired_option, retired_value):
+        arglist = [
+            retired_option,
+        ]
+        verifylist = [
+            ('retired', retired_value),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'retired': retired_value,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_retired(self):
+        self._test_baremetal_list_retired('--retired', True)
+
+    def test_baremetal_list_no_retired(self):
+        self._test_baremetal_list_retired('--no-retired', False)
+
     def test_baremetal_list_fault(self):
         arglist = [
             '--maintenance',

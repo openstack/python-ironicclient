@@ -591,12 +591,21 @@ class ListBaremetalNode(command.Lister):
             default=None,
             help=_("Limit list to nodes not in maintenance mode"),
         )
-        parser.add_argument(
+        retired_group = parser.add_mutually_exclusive_group(required=False)
+        retired_group.add_argument(
             '--retired',
             dest='retired',
             action='store_true',
             default=None,
-            help=_("Limit list to retired nodes."))
+            help=_("Limit list to retired nodes.")
+        )
+        retired_group.add_argument(
+            '--no-retired',
+            dest='retired',
+            action='store_false',
+            default=None,
+            help=_("Limit list to not retired nodes.")
+        )
         parser.add_argument(
             '--fault',
             dest='fault',

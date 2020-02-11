@@ -171,6 +171,13 @@ fake_responses = {
             {"nodes": [NODE2]},
         )
     },
+    '/v1/nodes/?retired=False':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1]},
+        )
+    },
     '/v1/nodes/?retired=True':
     {
         'GET': (
@@ -821,6 +828,15 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_not_retired(self):
+        nodes = self.mgr.list(retired=False)
+        expect = [
+            ('GET', '/v1/nodes/?retired=False', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
     def test_node_list_provision_state(self):
         nodes = self.mgr.list(provision_state="available")

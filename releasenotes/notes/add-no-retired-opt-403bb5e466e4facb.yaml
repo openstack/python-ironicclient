@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds ability to get list of nodes that are not marked
+    for retirement adding the --no-retired optional argument
+    to the ``openstack baremetal node list`` command.
