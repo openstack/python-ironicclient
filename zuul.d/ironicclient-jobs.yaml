@@ -43,4 +43,5 @@
     timeout: 10800
     vars:
       devstack_localrc:
+        IRONIC_RAMDISK_TYPE: tinyipa
         EBTABLES_RACE_FIX: True
