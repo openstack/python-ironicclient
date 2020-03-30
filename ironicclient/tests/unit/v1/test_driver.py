@@ -172,7 +172,7 @@ class DriverManagerTest(testtools.TestCase):
             'driver_name': 'driver_name',
             'method': 'method',
             'args': vendor_passthru_args
-            }
+        }
 
         final_path = 'driver_name/vendor_passthru/method'
         for http_method in ('POST', 'PUT', 'PATCH'):
@@ -189,7 +189,7 @@ class DriverManagerTest(testtools.TestCase):
             'driver_name': 'driver_name',
             'method': 'method',
             'http_method': 'GET',
-            }
+        }
 
         final_path = 'driver_name/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
@@ -201,7 +201,7 @@ class DriverManagerTest(testtools.TestCase):
             'driver_name': 'driver_name',
             'method': 'method',
             'http_method': 'DELETE',
-            }
+        }
 
         final_path = 'driver_name/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
@@ -213,7 +213,7 @@ class DriverManagerTest(testtools.TestCase):
             'driver_name': 'driver_name',
             'method': 'method',
             'http_method': 'UNKNOWN',
-            }
+        }
         self.assertRaises(exc.InvalidAttribute, self.mgr.vendor_passthru,
                           **kwargs)
 

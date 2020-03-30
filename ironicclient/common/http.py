@@ -104,9 +104,9 @@ class VersionNegotiationMixin(object):
         :param resp: The response object from http request
         """
         def _query_server(conn):
-            if (self.os_ironic_api_version and
-                    not isinstance(self.os_ironic_api_version, list) and
-                    self.os_ironic_api_version != 'latest'):
+            if (self.os_ironic_api_version
+                    and not isinstance(self.os_ironic_api_version, list)
+                    and self.os_ironic_api_version != 'latest'):
                 base_version = ("/v%s" %
                                 str(self.os_ironic_api_version).split('.')[0])
             else:
@@ -119,8 +119,8 @@ class VersionNegotiationMixin(object):
 
         version_overridden = False
 
-        if (resp and hasattr(resp, 'request') and
-                hasattr(resp.request, 'headers')):
+        if (resp and hasattr(resp, 'request')
+                and hasattr(resp.request, 'headers')):
             orig_hdr = resp.request.headers
             # Get the version of the client's last request and fallback
             # to the default for things like unit tests to not cause
@@ -129,8 +129,8 @@ class VersionNegotiationMixin(object):
                                        self.os_ironic_api_version)
         else:
             req_api_ver = self.os_ironic_api_version
-        if (resp and req_api_ver != self.os_ironic_api_version and
-                self.api_version_select_state == 'negotiated'):
+        if (resp and req_api_ver != self.os_ironic_api_version
+                and self.api_version_select_state == 'negotiated'):
             # If we have a non-standard api version on the request,
             # but we think we've negotiated, then the call was overridden.
             # We should report the error with the called version
@@ -173,10 +173,10 @@ class VersionNegotiationMixin(object):
         # be supported by the requested version.
         # TODO(TheJulia): We should break this method into several parts,
         # such as a sanity check/error method.
-        if ((self.api_version_select_state == 'user' and
-                not self._must_negotiate_version()) or
-                (self.api_version_select_state == 'negotiated' and
-                    version_overridden)):
+        if ((self.api_version_select_state == 'user'
+             and not self._must_negotiate_version())
+                or (self.api_version_select_state == 'negotiated'
+                    and version_overridden)):
             raise exc.UnsupportedVersion(textwrap.fill(
                 _("Requested API version %(req)s is not supported by the "
                   "server, client, or the requested operation is not "
@@ -263,9 +263,10 @@ class VersionNegotiationMixin(object):
         raise NotImplementedError()
 
     def _must_negotiate_version(self):
-        return (self.api_version_select_state == 'user' and
-                (self.os_ironic_api_version == 'latest' or
-                 isinstance(self.os_ironic_api_version, list)))
+        return (self.api_version_select_state == 'user'
+                and (self.os_ironic_api_version == 'latest'
+                     or isinstance(self.os_ironic_api_version, list)))
+
 
 _RETRY_EXCEPTIONS = (exc.Conflict, exc.ServiceUnavailable,
                      exc.ConnectionRefused, kexc.RetriableConnectionFailure)
@@ -398,8 +399,8 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         body = resp.content
         content_type = resp.headers.get('content-type', None)
         status = resp.status_code
-        if (status in (http_client.NO_CONTENT, http_client.RESET_CONTENT) or
-                content_type is None):
+        if (status in (http_client.NO_CONTENT, http_client.RESET_CONTENT)
+                or content_type is None):
             return resp, list()
         if 'application/json' in content_type:
             try:

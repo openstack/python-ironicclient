@@ -21,7 +21,7 @@ fasteners==0.7.0
 fixtures==3.0.0
 flake8==2.5.5
 future==0.16.0
-hacking==1.0.0
+hacking==3.0.0
 idna==2.6
 imagesize==0.7.1
 iso8601==0.1.11

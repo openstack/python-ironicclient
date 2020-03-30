@@ -367,7 +367,8 @@ fake_responses = {
             {},
             {"connectors": [CONNECTOR]},
         ),
-    },    '/v1/nodes/%s/volume/targets' % NODE1['uuid']:
+    },
+    '/v1/nodes/%s/volume/targets' % NODE1['uuid']:
     {
         'GET': (
             {},
@@ -1594,7 +1595,7 @@ class NodeManagerTest(testtools.TestCase):
             'node_id': 'node_uuid',
             'method': 'method',
             'args': vendor_passthru_args
-            }
+        }
 
         final_path = 'node_uuid/vendor_passthru/method'
         for http_method in ('POST', 'PUT', 'PATCH'):
@@ -1611,7 +1612,7 @@ class NodeManagerTest(testtools.TestCase):
             'node_id': 'node_uuid',
             'method': 'method',
             'http_method': 'GET',
-            }
+        }
 
         final_path = 'node_uuid/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
@@ -1623,7 +1624,7 @@ class NodeManagerTest(testtools.TestCase):
             'node_id': 'node_uuid',
             'method': 'method',
             'http_method': 'DELETE',
-            }
+        }
 
         final_path = 'node_uuid/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
@@ -1635,7 +1636,7 @@ class NodeManagerTest(testtools.TestCase):
             'node_id': 'node_uuid',
             'method': 'method',
             'http_method': 'UNKNOWN',
-            }
+        }
         self.assertRaises(exc.InvalidAttribute, self.mgr.vendor_passthru,
                           **kwargs)
 
@@ -1643,7 +1644,7 @@ class NodeManagerTest(testtools.TestCase):
     def test_vif_list(self, _list_mock):
         kwargs = {
             'node_ident': NODE1['uuid'],
-            }
+        }
 
         final_path = '/v1/nodes/%s/vifs' % NODE1['uuid']
         self.mgr.vif_list(**kwargs)
@@ -1654,7 +1655,7 @@ class NodeManagerTest(testtools.TestCase):
         kwargs = {
             'node_ident': NODE1['uuid'],
             'vif_id': 'vif_id',
-            }
+        }
 
         final_path = '%s/vifs' % NODE1['uuid']
         self.mgr.vif_attach(**kwargs)
@@ -1667,7 +1668,7 @@ class NodeManagerTest(testtools.TestCase):
             'node_ident': NODE1['uuid'],
             'vif_id': 'vif_id',
             'foo': 'bar',
-            }
+        }
 
         final_path = '%s/vifs' % NODE1['uuid']
         self.mgr.vif_attach(**kwargs)
@@ -1682,7 +1683,7 @@ class NodeManagerTest(testtools.TestCase):
             'node_ident': NODE1['uuid'],
             'vif_id': 'vif_id',
             'id': 'bar',
-            }
+        }
         self.assertRaises(
             exc.InvalidAttribute,
             self.mgr.vif_attach, **kwargs)
@@ -1692,7 +1693,7 @@ class NodeManagerTest(testtools.TestCase):
         kwargs = {
             'node_ident': NODE1['uuid'],
             'vif_id': 'vif_id',
-            }
+        }
 
         final_path = '%s/vifs/vif_id' % NODE1['uuid']
         self.mgr.vif_detach(**kwargs)

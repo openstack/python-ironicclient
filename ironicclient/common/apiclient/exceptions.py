@@ -444,10 +444,10 @@ def from_response(response, method, url):
             if isinstance(body, dict):
                 error = body.get(list(body)[0])
                 if isinstance(error, dict):
-                    kwargs["message"] = (error.get("message") or
-                                         error.get("faultstring"))
-                    kwargs["details"] = (error.get("details") or
-                                         str(body))
+                    kwargs["message"] = (error.get("message")
+                                         or error.get("faultstring"))
+                    kwargs["details"] = (error.get("details")
+                                         or str(body))
     elif content_type.startswith("text/"):
         kwargs["details"] = getattr(response, 'text', '')
 
@@ -458,8 +458,8 @@ def from_response(response, method, url):
         if response.status_code >= http_client.INTERNAL_SERVER_ERROR:
             cls = HttpServerError
         # 4XX status codes are client request errors
-        elif (http_client.BAD_REQUEST <= response.status_code <
-                http_client.INTERNAL_SERVER_ERROR):
+        elif (http_client.BAD_REQUEST <= response.status_code
+              < http_client.INTERNAL_SERVER_ERROR):
             cls = HTTPClientError
         else:
             cls = HttpError
