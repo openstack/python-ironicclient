@@ -39,6 +39,14 @@ CONFIG_DRIVE_ARG_HELP = _(
     "more details).")
 
 
+NETWORK_DATA_ARG_HELP = _(
+    "JSON string or a file or '-' for stdin to read static network "
+    "configuration for the baremetal node associated with this ironic node. "
+    "Format of this file should comply with Nova network data metadata "
+    "(network_data.json). Depending on ironic boot interface capabilities "
+    "being used, network configuration may or may not been served to the "
+    "node for offline network configuration.")
+
 SUPPORTED_INTERFACES = ['bios', 'boot', 'console', 'deploy', 'inspect',
                         'management', 'network', 'power', 'raid', 'rescue',
                         'storage', 'vendor']
@@ -403,6 +411,11 @@ class CreateBaremetalNode(command.ShowOne):
                    'only applicable when the specified --driver is a '
                    'hardware type.'))
         parser.add_argument(
+            '--network-data',
+            metavar="<network data>",
+            dest='network_data',
+            help=NETWORK_DATA_ARG_HELP)
+        parser.add_argument(
             '--network-interface',
             metavar='<network_interface>',
             help=_('Network interface used for switching node to '
@@ -477,6 +490,9 @@ class CreateBaremetalNode(command.ShowOne):
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'driver_info')
         fields = utils.args_array_to_dict(fields, 'extra')
+        if parsed_args.network_data:
+            fields['network_data'] = utils.handle_json_arg(
+                parsed_args.network_data, 'static network configuration')
         fields = utils.args_array_to_dict(fields, 'properties')
         node = baremetal_client.node.create(**fields)._info
 
@@ -1123,6 +1139,12 @@ class SetBaremetalNode(command.Command):
             reset_help=_('Reset the network interface to its hardware type '
                          'default'),
         )
+        parser.add_argument(
+            '--network-data',
+            metavar="<network data>",
+            dest='network_data',
+            help=NETWORK_DATA_ARG_HELP
+        )
         self._add_interface_args(
             parser, 'power',
             set_help=_('Set the power interface for the node'),
@@ -1300,6 +1322,12 @@ class SetBaremetalNode(command.Command):
             properties.extend(utils.args_array_to_patch(
                 'add', ['instance_info/' + x for x
                         in parsed_args.instance_info]))
+        if parsed_args.network_data:
+            network_data = utils.handle_json_arg(
+                parsed_args.network_data, 'static network configuration')
+            network_data = ["network_data=%s" % json.dumps(network_data)]
+            properties.extend(utils.args_array_to_patch('add', network_data))
+
         if properties:
             baremetal_client.node.update(
                 parsed_args.node, properties,
@@ -1475,6 +1503,11 @@ class UnsetBaremetalNode(command.Command):
             help=_('Unset inspect interface on this baremetal node'),
         )
         parser.add_argument(
+            '--network-data',
+            action='store_true',
+            help=_("Unset network data on this baremetal port.")
+        )
+        parser.add_argument(
             "--management-interface",
             dest='management_interface',
             action='store_true',
@@ -1607,6 +1640,9 @@ class UnsetBaremetalNode(command.Command):
             properties.extend(utils.args_array_to_patch('remove',
                               ['instance_info/' + x for x
                                in parsed_args.instance_info]))
+        if parsed_args.network_data:
+            properties.extend(utils.args_array_to_patch(
+                'remove', ["network_data"]))
         if properties:
             baremetal_client.node.update(parsed_args.node, properties)
         elif not parsed_args.target_raid_config:

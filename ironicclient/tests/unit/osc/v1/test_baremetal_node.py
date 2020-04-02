@@ -415,6 +415,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('management_interface', 'management')],
                                 {'management_interface': 'management'})
 
+    def test_baremetal_create_with_network_data(self):
+        self.check_with_options(['--network-data', '{"a": ["b"]}'],
+                                [('network_data', '{"a": ["b"]}')],
+                                {'network_data': {"a": ["b"]}})
+
     def test_baremetal_create_with_network_interface(self):
         self.check_with_options(['--network-interface', 'neutron'],
                                 [('network_interface', 'neutron')],
@@ -2780,9 +2785,32 @@ class TestBaremetalSet(TestBaremetal):
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid', [{'op': 'add',
+                           'path': '/lessee',
+                           'value': 'lessee 1'}],
+            reset_interfaces=None
+        )
+
+    @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
+    @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
+    def test_baremetal_set_network_data(self, mock_handle, mock_stdin):
+        self.cmd.log = mock.Mock(autospec=True)
+        network_data_string = '{"a": ["b"]}'
+        expected_network_data = {'a': ['b']}
+        mock_handle.return_value = expected_network_data.copy()
+
+        arglist = ['node_uuid',
+                   '--network-data', network_data_string]
+        verifylist = [('node', 'node_uuid'),
+                      ('network_data', network_data_string)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
-            [{'path': '/lessee',
-              'value': 'lessee 1',
+            [{'path': '/network_data', 'value': expected_network_data,
               'op': 'add'}],
             reset_interfaces=None,
         )
@@ -3403,6 +3431,25 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/lessee', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_network_data(self):
+        arglist = [
+            'node_uuid',
+            '--network-data',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('network_data', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/network_data', 'op': 'remove'}]
         )
 
 
