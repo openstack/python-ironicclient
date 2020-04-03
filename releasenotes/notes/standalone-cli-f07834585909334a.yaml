@@ -1,0 +1,11 @@
+---
+prelude: |
+    This release includes a new standalone CLI tool ``baremetal`` that is
+    mostly identical to the existing OSC plugin, but
+
+    * Does not require commands to be prefixed with ``openstack``.
+    * Does not require ``python-openstackclient`` to be installed.
+    * Defaults to no authentication.
+features:
+  - |
+    Adds a new ``baremetal`` CLI tool, mostly targeted at standalone users.

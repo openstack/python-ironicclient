@@ -30,6 +30,16 @@ package  must be installed. There are two ways to do this:
 
   $ pip install python-openstackclient
 
+This CLI is provided by python-openstackclient and osc-lib projects:
+
+* https://opendev.org/openstack/python-openstackclient
+* https://opendev.org/openstack/osc-lib
+
+.. _osc-auth:
+
+Authentication
+--------------
+
 To use the CLI, you must provide your OpenStack username, password,
 project, and auth endpoint. You can use configuration options
 ``--os-username``, ``--os-password``, ``--os-project-id``
@@ -43,11 +53,6 @@ or set the corresponding environment variables::
     $ export OS_USER_DOMAIN_ID=default
     $ export OS_IDENTITY_API_VERSION=3
     $ export OS_AUTH_URL=http://auth.example.com:5000/identity
-
-This CLI is provided by python-openstackclient and osc-lib projects:
-
-* https://opendev.org/openstack/python-openstackclient
-* https://opendev.org/openstack/osc-lib
 
 
 Getting help
@@ -90,6 +95,7 @@ The baremetal API version can be specified via:
 * or optional command line argument --os-baremetal-api-version::
 
     $ openstack baremetal port group list --os-baremetal-api-version 1.25
+
 
 Command Reference
 =================
