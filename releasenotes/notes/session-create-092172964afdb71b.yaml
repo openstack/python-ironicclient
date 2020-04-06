@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    When no session is provided in the ``get_client`` call, a session is now
+    created using OpenStackSDK. Only arguments that are supported by it are
+    supported now.

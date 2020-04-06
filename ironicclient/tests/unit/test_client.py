@@ -12,7 +12,7 @@
 
 import mock
 
-from keystoneauth1 import loading as kaloading
+from openstack import config
 
 from ironicclient import client as iroclient
 from ironicclient.common import filecache
@@ -25,50 +25,39 @@ from ironicclient.v1 import client as v1
 class ClientTest(utils.BaseTestCase):
 
     @mock.patch.object(filecache, 'retrieve_data', autospec=True)
-    @mock.patch.object(kaloading.session, 'Session', autospec=True)
-    @mock.patch.object(kaloading, 'get_plugin_loader', autospec=True)
-    def _test_get_client(self, mock_ks_loader, mock_ks_session,
-                         mock_retrieve_data, version=None,
-                         auth='password', expected_interface=None, **kwargs):
-        session = mock_ks_session.return_value.load_from_options.return_value
+    @mock.patch.object(config, 'get_cloud_region', autospec=True)
+    def _test_get_client(self, mock_cloud_region, mock_retrieve_data,
+                         version=None, auth='password',
+                         expected_interface=None, **kwargs):
+        session = mock_cloud_region.return_value.get_session.return_value
         session.get_endpoint.return_value = 'http://localhost:6385/v1/f14b4123'
-
-        class Opt(object):
-            def __init__(self, name):
-                self.dest = name
-
-        session_loader_options = [
-            Opt('insecure'), Opt('cafile'), Opt('certfile'), Opt('keyfile'),
-            Opt('timeout')]
-        mock_ks_session.return_value.get_conf_options.return_value = (
-            session_loader_options)
-        mock_ks_loader.return_value.load_from_options.return_value = 'auth'
         mock_retrieve_data.return_value = version
 
         client = iroclient.get_client('1', **kwargs)
 
-        mock_ks_loader.assert_called_once_with(auth)
-        session_opts = {k: v for (k, v) in kwargs.items() if k in
-                        [o.dest for o in session_loader_options]}
-        mock_ks_session.return_value.load_from_options.assert_called_once_with(
-            auth='auth', **session_opts)
+        expected_version = kwargs.pop('os_ironic_api_version', None)
+        kwargs.pop('interface', None)
+        kwargs.pop('valid_interfaces', None)
+
         get_endpoint_call = mock.call(
-            service_type=kwargs.get('service_type') or 'baremetal',
+            service_type=kwargs.pop('service_type', None) or 'baremetal',
             interface=expected_interface,
-            region_name=kwargs.get('region_name'))
-        if not {'endpoint'}.intersection(kwargs):
+            region_name=kwargs.pop('region_name', None))
+        mock_cloud_region.assert_called_once_with(load_yaml_config=False,
+                                                  load_envvars=False,
+                                                  auth_type=auth, **kwargs)
+        if 'endpoint' not in kwargs:
             self.assertEqual([get_endpoint_call],
                              session.get_endpoint.call_args_list)
         else:
             # we use adaper.get_endpoint instead of session.get_endpoint
             self.assertFalse(session.get_endpoint.called)
-        if 'os_ironic_api_version' in kwargs:
+        if expected_version is not None:
             # NOTE(TheJulia): This does not test the negotiation logic
             # as a request must be triggered in order for any version
             # negotiation actions to occur.
             self.assertEqual(0, mock_retrieve_data.call_count)
-            self.assertEqual(kwargs['os_ironic_api_version'],
-                             client.current_api_version)
+            self.assertEqual(expected_version, client.current_api_version)
             self.assertFalse(client.is_api_version_negotiated)
         else:
             mock_retrieve_data.assert_called_once_with(
