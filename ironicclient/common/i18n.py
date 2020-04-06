@@ -13,9 +13,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import oslo_i18n
+try:
+    import oslo_i18n
+except ImportError:
+    def _(msg):
+        return msg
+else:
+    _translators = oslo_i18n.TranslatorFactory(domain='ironicclient')
 
-_translators = oslo_i18n.TranslatorFactory(domain='ironicclient')
-
-# The primary translation function using the well-known name "_"
-_ = _translators.primary
+    # The primary translation function using the well-known name "_"
+    _ = _translators.primary
