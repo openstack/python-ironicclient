@@ -10,12 +10,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
 import logging
 import sys
 
 from cliff import app
 from cliff import commandmanager
+try:
+    import ironic_inspector_client
+except ImportError:
+    ironic_inspector_client = None
 from openstack import config as os_config
 from osc_lib import utils
 import pbr.version
@@ -30,18 +33,92 @@ _DEFAULTS = {
     'auth_type': 'none',
 }
 _TYPE = 'baremetal'
+_INSPECTOR_TYPE = 'baremetal-introspection'
 _DESCRIPTION = 'Bare Metal service (ironic) client'
 _NAMESPACE = 'openstack.baremetal.v1'
+_INSPECTOR_NAMESPACE = 'openstack.baremetal_introspection.v1'
+_HELP = _("%(err)s.\n* Use --os-endpoint for standalone %(project)s.\n"
+          "* Use --os-auth-url and credentials for authentication.\n"
+          "* Use --os-cloud to load configuration from clouds.yaml\n"
+          "* See `%(cmd)s --help` for more details")
 
 LOG = logging.getLogger(__name__)
 
-ClientManager = collections.namedtuple('ClientManager', ['baremetal'])
+
+class ClientManager(object):
+
+    def __init__(self, cloud_region, options):
+        self.cloud_region = cloud_region
+        self.options = options
+        self._ironic = None
+        self._inspector = None
+
+    @property
+    def baremetal(self):
+        if self._ironic is None:
+            self._ironic = self._create_ironic_client()
+        return self._ironic
+
+    @property
+    def baremetal_introspection(self):
+        if self._inspector is None:
+            self._inspector = self._create_inspector_client()
+        return self._inspector
+
+    def _create_ironic_client(self):
+        api_version = self.options.os_baremetal_api_version
+        allow_api_version_downgrade = False
+        if not api_version:
+            api_version = self.cloud_region.get_default_microversion(_TYPE)
+            if not api_version:
+                api_version = http.LATEST_VERSION
+                allow_api_version_downgrade = True
+        LOG.debug(
+            'Using bare metal API version %s, downgrade %s', api_version,
+            'allowed' if allow_api_version_downgrade else 'disallowed')
+
+        # NOTE(dtantsur): endpoint_override is required to respect settings in
+        # clouds.yaml, such as baremetal_endpoint_override.
+        endpoint_override = self.cloud_region.get_endpoint(_TYPE)
+        try:
+            return client.Client(
+                os_ironic_api_version=api_version,
+                allow_api_version_downgrade=allow_api_version_downgrade,
+                session=self.cloud_region.get_session(),
+                region_name=self.cloud_region.get_region_name(_TYPE),
+                endpoint_override=endpoint_override,
+                max_retries=self.options.max_retries,
+                retry_interval=self.options.retry_interval,
+            )
+        except exc.EndpointNotFound as e:
+            # Re-raise with a more obvious message.
+            raise exc.EndpointNotFound(_HELP % {'err': e, 'cmd': sys.argv[0],
+                                                'project': 'ironic'})
+
+    def _create_inspector_client(self):
+        assert ironic_inspector_client is not None, \
+            'BUG: _create_inspector_client called without inspector client'
+        # NOTE(dtantsur): endpoint_override is required to respect settings in
+        # clouds.yaml, such as baremetal_introspection_endpoint_override.
+        endpoint_override = self.cloud_region.get_endpoint(_INSPECTOR_TYPE)
+        try:
+            return ironic_inspector_client.ClientV1(
+                inspector_url=endpoint_override,
+                session=self.cloud_region.get_session(),
+                region_name=self.cloud_region.get_region_name(_INSPECTOR_TYPE),
+            )
+        except ironic_inspector_client.EndpointNotFound as e:
+            # Re-raise with a more obvious message.
+            raise exc.EndpointNotFound(_HELP % {'err': e, 'cmd': sys.argv[0],
+                                                'project': 'ironic-inspector'})
 
 
 class CommandManager(commandmanager.CommandManager):
 
     def load_commands(self, namespace):
         super(CommandManager, self).load_commands(namespace)
+        if ironic_inspector_client is not None:
+            super(CommandManager, self).load_commands(_INSPECTOR_NAMESPACE)
         # Stip the 'baremetal' prefix used in OSC
         prefix = 'baremetal '
         prefix_len = len(prefix)
@@ -94,40 +171,8 @@ class App(app.App):
     def initialize_app(self, argv):
         super(App, self).initialize_app(argv)
         self.cloud_region = self.config.get_one(argparse=self.options)
-
-        api_version = self.options.os_baremetal_api_version
-        allow_api_version_downgrade = False
-        if not api_version:
-            api_version = self.cloud_region.get_default_microversion(_TYPE)
-            if not api_version:
-                api_version = http.LATEST_VERSION
-                allow_api_version_downgrade = True
-        LOG.debug('Using API version %s, downgrade %s', api_version,
-                  'allowed' if allow_api_version_downgrade else 'disallowed')
-
-        # NOTE(dtantsur): endpoint_override is required to respect settings in
-        # clouds.yaml, such as baremetal_endpoint_override.
-        endpoint_override = self.cloud_region.get_endpoint(_TYPE)
-        try:
-            self.client = client.Client(
-                os_ironic_api_version=api_version,
-                allow_api_version_downgrade=allow_api_version_downgrade,
-                session=self.cloud_region.get_session(),
-                region_name=self.cloud_region.get_region_name(_TYPE),
-                endpoint_override=endpoint_override,
-                max_retries=self.options.max_retries,
-                retry_interval=self.options.retry_interval,
-            )
-        except exc.EndpointNotFound as e:
-            # Re-raise with a more obvious message.
-            msg = _("%(err)s.\n* Use --os-endpoint for standalone ironic.\n"
-                    "* Use --os-auth-url and credentials for authentication.\n"
-                    "* Use --os-cloud to load configuration from clouds.yaml\n"
-                    "* See `%(cmd)s --help` for more details")
-            raise exc.EndpointNotFound(msg % {'err': e, 'cmd': sys.argv[0]})
-
         # Compatibility with OSC
-        self.client_manager = ClientManager(self.client)
+        self.client_manager = ClientManager(self.cloud_region, self.options)
 
 
 def main(argv=sys.argv[1:]):

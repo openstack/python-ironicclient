@@ -29,6 +29,18 @@ exceptions:
 Check the :doc:`OSC CLI reference </cli/osc/v1/index>` for a list of available
 commands.
 
+Inspector support
+-----------------
+
+The standalone ``baremetal`` tool optionally supports the low-level bare metal
+introspection API provided by ironic-inspector_. If ironic-inspector-client_ is
+installed, its commands_ are automatically available (also without the
+``openstack`` prefix).
+
+.. _ironic-inspector: https://docs.openstack.org/ironic-inspector/
+.. _ironic-inspector-client: https://docs.openstack.org/python-ironic-inspector-client/
+.. _commands: https://docs.openstack.org/python-ironic-inspector-client/latest/cli/index.html
+
 Standalone usage
 ----------------
 
@@ -59,6 +71,22 @@ endpoint to connect to. It can be done in three ways:
         baremetal_endpoint_override: http://127.0.0.1:6385
     $ export OS_CLOUD=ironic
     $ baremetal node list
+
+#. `Inspector support`_ works similarly, but the ``clouds.yaml`` option is
+   called ``baremetal_introspection_endpoint_override``. The two endpoints can
+   be configured simultaneously, e.g.:
+
+   .. code-block:: bash
+
+    $ cat ~/.config/openstack/clouds.yaml
+    clouds:
+      ironic:
+        auth_type: none
+        baremetal_endpoint_override: http://127.0.0.1:6385
+        baremetal_introspection_endpoint_override: http://127.0.0.1:5050
+    $ export OS_CLOUD=ironic
+    $ baremetal node list
+    $ baremetal introspection list
 
 .. _clouds.yaml: https://docs.openstack.org/openstacksdk/latest/user/guides/connect_from_config.html
 
