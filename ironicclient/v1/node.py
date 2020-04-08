@@ -61,7 +61,7 @@ class NodeManager(base.CreateManager):
              fields=None, provision_state=None, driver=None,
              resource_class=None, chassis=None, fault=None,
              os_ironic_api_version=None, conductor_group=None,
-             conductor=None, owner=None, retired=None):
+             conductor=None, owner=None, retired=None, lessee=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -122,6 +122,8 @@ class NodeManager(base.CreateManager):
                           mapped to the given conductor.
         :param owner: Optional. String value to get only nodes
                           mapped to a specific owner.
+        :param lessee: Optional. String value to get only nodes
+                          mapped to a specific lessee.
 
         :returns: A list of nodes.
 
@@ -157,6 +159,8 @@ class NodeManager(base.CreateManager):
             filters.append('conductor=%s' % conductor)
         if owner is not None:
             filters.append('owner=%s' % owner)
+        if lessee is not None:
+            filters.append('lessee=%s' % lessee)
 
         path = ''
         if detail:

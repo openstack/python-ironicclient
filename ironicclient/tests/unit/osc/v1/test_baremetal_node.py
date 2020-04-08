@@ -470,6 +470,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('description', 'there is no spoon')],
                                 {'description': 'there is no spoon'})
 
+    def test_baremetal_create_with_lessee(self):
+        self.check_with_options(['--lessee', 'lessee 1'],
+                                [('lessee', 'lessee 1')],
+                                {'lessee': 'lessee 1'})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -641,6 +646,7 @@ class TestBaremetalList(TestBaremetal):
             'Instance Info',
             'Instance UUID',
             'Last Error',
+            'Lessee',
             'Maintenance',
             'Maintenance Reason',
             'Management Interface',
@@ -1074,6 +1080,29 @@ class TestBaremetalList(TestBaremetal):
             'marker': None,
             'limit': None,
             'description_contains': description
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_by_lessee(self):
+        lessee = 'lessee 1'
+        arglist = [
+            '--lessee', lessee,
+        ]
+        verifylist = [
+            ('lessee', lessee),
+        ]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'lessee': lessee,
         }
 
         self.baremetal_mock.node.list.assert_called_with(
@@ -2736,6 +2765,28 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
+    def test_baremetal_set_lessee(self):
+        arglist = [
+            'node_uuid',
+            '--lessee', 'lessee 1',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('lessee', 'lessee 1')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/lessee',
+              'value': 'lessee 1',
+              'op': 'add'}],
+            reset_interfaces=None,
+        )
+
 
 class TestBaremetalShow(TestBaremetal):
     def setUp(self):
@@ -3333,6 +3384,25 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/description', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_lessee(self):
+        arglist = [
+            'node_uuid',
+            '--lessee',
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('lessee', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/lessee', 'op': 'remove'}]
         )
 
 
