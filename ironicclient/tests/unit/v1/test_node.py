@@ -15,8 +15,8 @@
 import copy
 import tempfile
 import time
+from unittest import mock
 
-import mock
 import testtools
 from testtools.matchers import HasLength
 

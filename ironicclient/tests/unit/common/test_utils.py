@@ -19,8 +19,8 @@ import os
 import subprocess
 import sys
 import tempfile
+from unittest import mock
 
-import mock
 
 from ironicclient.common import utils
 from ironicclient import exc

@@ -15,9 +15,9 @@
 
 from http import client as http_client
 import time
+from unittest import mock
 
 from keystoneauth1 import exceptions as kexc
-import mock
 from oslo_serialization import jsonutils
 
 from ironicclient.common import filecache

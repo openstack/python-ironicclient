@@ -15,8 +15,8 @@
 #
 
 import json
+from unittest import mock
 
-import mock
 from osc_lib.tests import utils
 
 from ironicclient.tests.unit.osc import fakes

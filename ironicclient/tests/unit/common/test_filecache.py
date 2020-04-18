@@ -11,9 +11,9 @@
 #    under the License.
 
 import os
+from unittest import mock
 
 import dogpile.cache
-import mock
 
 from ironicclient.common import filecache
 from ironicclient.tests.unit import utils

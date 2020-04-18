@@ -11,8 +11,8 @@
 #   under the License.
 
 import argparse
+from unittest import mock
 
-import mock
 import testtools
 
 from ironicclient.osc import plugin

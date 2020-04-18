@@ -14,8 +14,8 @@
 #    under the License.
 
 from http import client as http_client
+from unittest import mock
 
-import mock
 
 from ironicclient.common.apiclient import exceptions
 from ironicclient import exc

@@ -15,8 +15,8 @@
 #
 
 import copy
+from unittest import mock
 
-import mock
 from osc_lib.tests import utils as osctestutils
 from osc_lib import utils as oscutils
 

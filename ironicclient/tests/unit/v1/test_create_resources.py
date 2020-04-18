@@ -11,9 +11,9 @@
 #   under the License.
 
 import builtins
+from unittest import mock
 
 import jsonschema
-import mock
 
 from ironicclient import exc
 from ironicclient.tests.unit import utils
