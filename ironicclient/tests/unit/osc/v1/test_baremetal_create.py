@@ -12,7 +12,6 @@
 #
 
 import mock
-
 from osc_lib.tests import utils as oscutils
 
 from ironicclient.osc.v1 import baremetal_create
