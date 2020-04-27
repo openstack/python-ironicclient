@@ -42,4 +42,5 @@
       - openstack/python-ironicclient
     vars:
       devstack_localrc:
+        IRONIC_DEFAULT_BOOT_OPTION: netboot
         EBTABLES_RACE_FIX: True
