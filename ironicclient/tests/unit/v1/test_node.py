@@ -1498,6 +1498,15 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
+    def test_node_set_provision_state_with_configdrive_invalid_bytes(self):
+        invalid_utf8 = b"\xc3\x28"
+        target_state = 'active'
+        self.assertRaisesRegex(ValueError,
+                               'Config drive',
+                               self.mgr.set_provision_state,
+                               NODE1['uuid'], target_state,
+                               configdrive=invalid_utf8)
+
     def test_node_set_provision_state_with_configdrive_as_dict(self):
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
@@ -1518,7 +1527,8 @@ class NodeManagerTest(testtools.TestCase):
             self.mgr.set_provision_state(NODE1['uuid'], target_state,
                                          configdrive=f.name)
 
-        body = {'target': target_state, 'configdrive': file_content}
+        body = {'target': target_state,
+                'configdrive': file_content.decode('utf-8')}
         expect = [
             ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
         ]

@@ -557,6 +557,12 @@ class NodeManager(base.CreateManager):
                 if os.path.isdir(configdrive):
                     configdrive = utils.make_configdrive(configdrive)
 
+            if isinstance(configdrive, bytes):
+                try:
+                    configdrive = configdrive.decode('utf-8')
+                except UnicodeError:
+                    raise ValueError('Config drive must be a dictionary or '
+                                     'a base64 encoded string')
             body['configdrive'] = configdrive
         elif cleansteps:
             body['clean_steps'] = cleansteps

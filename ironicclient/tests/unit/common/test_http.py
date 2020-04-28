@@ -14,11 +14,11 @@
 #    under the License.
 
 from http import client as http_client
+import json
 import time
 from unittest import mock
 
 from keystoneauth1 import exceptions as kexc
-from oslo_serialization import jsonutils
 
 from ironicclient.common import filecache
 from ironicclient.common import http
@@ -40,9 +40,9 @@ def _get_error_body(faultstring=None, debuginfo=None, description=None):
             'faultstring': faultstring,
             'debuginfo': debuginfo
         }
-    raw_error_body = jsonutils.dump_as_bytes(error_body)
+    raw_error_body = json.dumps(error_body)
     body = {'error_message': raw_error_body}
-    return jsonutils.dumps(body)
+    return json.dumps(body)
 
 
 def _session_client(**kwargs):
