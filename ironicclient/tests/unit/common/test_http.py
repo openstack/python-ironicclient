@@ -16,10 +16,9 @@
 from http import client as http_client
 import time
 
+from keystoneauth1 import exceptions as kexc
 import mock
 from oslo_serialization import jsonutils
-
-from keystoneauth1 import exceptions as kexc
 
 from ironicclient.common import filecache
 from ironicclient.common import http

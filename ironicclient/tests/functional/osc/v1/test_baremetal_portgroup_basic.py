@@ -13,7 +13,6 @@
 #    under the License.
 
 import ddt
-
 from tempest.lib.common.utils import data_utils
 
 from ironicclient.tests.functional.osc.v1 import base

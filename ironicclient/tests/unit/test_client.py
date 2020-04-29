@@ -11,7 +11,6 @@
 #    under the License.
 
 import mock
-
 from openstack import config
 
 from ironicclient import client as iroclient

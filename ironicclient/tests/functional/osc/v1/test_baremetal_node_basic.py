@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import ddt
 import json
+
+import ddt
 from tempest.lib.common.utils import data_utils
 
 from ironicclient.tests.functional.osc.v1 import base

@@ -19,8 +19,9 @@
 import argparse
 import logging
 
-from ironicclient.common import http
 from osc_lib import utils
+
+from ironicclient.common import http
 
 LOG = logging.getLogger(__name__)
 
