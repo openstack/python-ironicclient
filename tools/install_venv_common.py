@@ -17,12 +17,10 @@
 virtual environments.
 
 Since this script is used to bootstrap a virtualenv from the system's Python
-environment, it should be kept strictly compatible with Python 2.7.
+environment, it should be kept strictly compatible with Python 3.6.
 
 Synced in from openstack-common
 """
-
-from __future__ import print_function
 
 import optparse
 import os
@@ -47,8 +45,8 @@ class InstallVenv(object):
         sys.exit(1)
 
     def check_python_version(self):
-        if sys.version_info < (2, 7):
-            self.die("Need Python Version >= 2.7")
+        if sys.version_info < (3, 6):
+            self.die("Need Python Version >= 3.6")
 
     def run_command_with_code(self, cmd, redirect_output=True,
                               check_exit_code=True):
@@ -65,7 +63,7 @@ class InstallVenv(object):
         output = proc.communicate()[0]
         if check_exit_code and proc.returncode != 0:
             self.die('Command "%s" failed.\n%s', ' '.join(cmd), output)
-        return (output, proc.returncode)
+        return output, proc.returncode
 
     def run_command(self, cmd, redirect_output=True, check_exit_code=True):
         return self.run_command_with_code(cmd, redirect_output,
