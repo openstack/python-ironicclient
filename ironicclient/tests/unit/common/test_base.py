@@ -23,6 +23,7 @@ from ironicclient import exc
 from ironicclient.tests.unit import utils
 
 
+REQ_ID = "req-A387D380-D384-486B-BC54-520342C13D03"
 TESTABLE_RESOURCE = {
     'uuid': '11111111-2222-3333-4444-555555555555',
     'attribute1': '1',
@@ -115,18 +116,33 @@ class ManagerTestCase(testtools.TestCase):
         self.assertTrue(resource)
         self.assertIsInstance(resource, TestableResource)
 
+    def test_create_microversion_and_global_request_id_override(self):
+        resource = self.manager.create(
+            **CREATE_TESTABLE_RESOURCE,
+            os_ironic_api_version="1.22", global_request_id=REQ_ID)
+        expect = [
+            ('POST', '/v1/testableresources',
+             {'X-OpenStack-Ironic-API-Version': '1.22',
+              'X-Openstack-Request-Id': REQ_ID}, CREATE_TESTABLE_RESOURCE),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertTrue(resource)
+        self.assertIsInstance(resource, TestableResource)
+
     def test_create_with_invalid_attribute(self):
         self.assertRaisesRegex(exc.InvalidAttribute, "non-existent-attribute",
                                self.manager.create,
                                **INVALID_ATTRIBUTE_TESTABLE_RESOURCE)
 
-    def test__get_microversion_override(self):
+    def test__get_microversion_and_global_request_id_override(self):
         resource_id = TESTABLE_RESOURCE['uuid']
-        resource = self.manager._get(resource_id,
-                                     os_ironic_api_version='1.22')
+        resource = self.manager._get(
+            resource_id, os_ironic_api_version='1.22',
+            global_request_id=REQ_ID)
         expect = [
             ('GET', '/v1/testableresources/%s' % resource_id,
-             {'X-OpenStack-Ironic-API-Version': '1.22'}, None),
+             {'X-OpenStack-Ironic-API-Version': '1.22',
+              'X-Openstack-Request-Id': REQ_ID}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(resource_id, resource.uuid)
@@ -148,13 +164,15 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(TESTABLE_RESOURCE, resource)
 
-    def test__get_as_dict_microversion_override(self):
+    def test__get_as_dict_microversion_and_global_request_id_override(self):
         resource_id = TESTABLE_RESOURCE['uuid']
-        resource = self.manager._get_as_dict(resource_id,
-                                             os_ironic_api_version='1.21')
+        resource = self.manager._get_as_dict(
+            resource_id, os_ironic_api_version='1.21',
+            global_request_id=REQ_ID)
         expect = [
             ('GET', '/v1/testableresources/%s' % resource_id,
-             {'X-OpenStack-Ironic-API-Version': '1.21'}, None),
+             {'X-OpenStack-Ironic-API-Version': '1.21',
+              'X-Openstack-Request-Id': REQ_ID}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(TESTABLE_RESOURCE, resource)
@@ -164,8 +182,9 @@ class ManagerTestCase(testtools.TestCase):
         mock_get.return_value = None
         resource_id = TESTABLE_RESOURCE['uuid']
         resource = self.manager._get_as_dict(resource_id)
-        mock_get.assert_called_once_with(mock.ANY, resource_id, fields=None,
-                                         os_ironic_api_version=None)
+        mock_get.assert_called_once_with(
+            mock.ANY, resource_id, fields=None,
+            os_ironic_api_version=None, global_request_id=None)
         self.assertEqual({}, resource)
 
     def test_get(self):
@@ -178,12 +197,14 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(TESTABLE_RESOURCE['uuid'], resource.uuid)
         self.assertEqual(TESTABLE_RESOURCE['attribute1'], resource.attribute1)
 
-    def test_get_microversion_override(self):
-        resource = self.manager.get(TESTABLE_RESOURCE['uuid'],
-                                    os_ironic_api_version='1.10')
+    def test_get_microversion_and_global_request_id_override(self):
+        resource = self.manager.get(
+            TESTABLE_RESOURCE['uuid'], os_ironic_api_version='1.10',
+            global_request_id=REQ_ID)
         expect = [
             ('GET', '/v1/testableresources/%s' % TESTABLE_RESOURCE['uuid'],
-             {'X-OpenStack-Ironic-API-Version': '1.10'}, None),
+             {'X-OpenStack-Ironic-API-Version': '1.10',
+              'X-Openstack-Request-Id': REQ_ID}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(TESTABLE_RESOURCE['uuid'], resource.uuid)
@@ -204,17 +225,18 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_ATTRIBUTE_VALUE, resource.attribute1)
 
-    def test_update_microversion_override(self):
+    def test_update_microversion_and_global_request_id_override(self):
         patch = {'op': 'replace',
                  'value': NEW_ATTRIBUTE_VALUE,
                  'path': '/attribute1'}
         resource = self.manager.update(
             testable_resource_id=TESTABLE_RESOURCE['uuid'],
-            patch=patch, os_ironic_api_version='1.9'
+            patch=patch, os_ironic_api_version='1.9', global_request_id=REQ_ID
         )
         expect = [
             ('PATCH', '/v1/testableresources/%s' % TESTABLE_RESOURCE['uuid'],
-             {'X-OpenStack-Ironic-API-Version': '1.9'}, patch),
+             {'X-OpenStack-Ironic-API-Version': '1.9',
+              'X-Openstack-Request-Id': REQ_ID}, patch),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_ATTRIBUTE_VALUE, resource.attribute1)
@@ -226,6 +248,19 @@ class ManagerTestCase(testtools.TestCase):
         expect = [
             ('DELETE', '/v1/testableresources/%s' % TESTABLE_RESOURCE['uuid'],
              {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(resource)
+
+    def test_delete_microversion_and_global_request_id_override(self):
+        resource = self.manager.delete(
+            testable_resource_id=TESTABLE_RESOURCE['uuid'],
+            os_ironic_api_version="1.9", global_request_id=REQ_ID
+        )
+        expect = [
+            ('DELETE', '/v1/testableresources/%s' % TESTABLE_RESOURCE['uuid'],
+             {'X-OpenStack-Ironic-API-Version': '1.9',
+              'X-Openstack-Request-Id': REQ_ID}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(resource)
