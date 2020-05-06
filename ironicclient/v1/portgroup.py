@@ -30,7 +30,8 @@ class PortgroupManager(base.CreateManager):
                             'standalone_ports_supported', 'mode', 'properties']
 
     def list(self, node=None, address=None, limit=None, marker=None,
-             sort_key=None, sort_dir=None, detail=False, fields=None):
+             sort_key=None, sort_dir=None, detail=False, fields=None,
+             os_ironic_api_version=None, global_request_id=None):
         """Retrieve a list of portgroups.
 
         :param node: Optional, UUID or name of a node, to get
@@ -61,6 +62,12 @@ class PortgroupManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of portgroups.
         :raises: InvalidAttribute if a subset of fields is requested with
                  detail option set.
@@ -85,15 +92,17 @@ class PortgroupManager(base.CreateManager):
             path += 'detail'
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "portgroups")
+            return self._list(self._path(path), "portgroups", **header_values)
         else:
             return self._list_pagination(self._path(path), "portgroups",
-                                         limit=limit)
+                                         limit=limit, **header_values)
 
     def list_ports(self, portgroup_id, marker=None, limit=None, sort_key=None,
-                   sort_dir=None, detail=False, fields=None):
+                   sort_dir=None, detail=False, fields=None,
+                   os_ironic_api_version=None, global_request_id=None):
         """List all the ports for a given portgroup.
 
         :param portgroup_id: Name or UUID of the portgroup.
@@ -121,6 +130,12 @@ class PortgroupManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of ports.
 
         """
@@ -140,33 +155,46 @@ class PortgroupManager(base.CreateManager):
 
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "ports")
+            return self._list(self._path(path), "ports", **header_values)
         else:
             return self._list_pagination(self._path(path), "ports",
-                                         limit=limit)
+                                         limit=limit, **header_values)
 
-    def get(self, portgroup_id, fields=None):
+    def get(self, portgroup_id, fields=None, os_ironic_api_version=None,
+            global_request_id=None):
         """Get a port group with the specified identifier.
 
         :param portgroup_id: The UUID or name of a portgroup.
         :param fields: Optional, a list with a specified set of fields
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
 
         :returns: a :class:`Portgroup` object.
 
         """
-        return self._get(resource_id=portgroup_id, fields=fields)
+        return self._get(resource_id=portgroup_id, fields=fields,
+                         os_ironic_api_version=os_ironic_api_version,
+                         global_request_id=global_request_id)
 
-    def get_by_address(self, address, fields=None):
+    def get_by_address(self, address, fields=None, os_ironic_api_version=None,
+                       global_request_id=None):
         """Get a port group with the specified MAC address.
 
         :param address: The MAC address of a portgroup.
         :param fields: Optional, a list with a specified set of fields
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
 
         :returns: a :class:`Portgroup` object.
 
@@ -177,7 +205,9 @@ class PortgroupManager(base.CreateManager):
         else:
             path = 'detail' + path
 
-        portgroups = self._list(self._path(path), 'portgroups')
+        portgroups = self._list(self._path(path), 'portgroups',
+                                os_ironic_api_version=os_ironic_api_version,
+                                global_request_id=global_request_id)
         # get all the details of the portgroup assuming that
         # filtering by address returns a collection of one portgroup
         # if successful.
@@ -186,19 +216,31 @@ class PortgroupManager(base.CreateManager):
         else:
             raise exc.NotFound()
 
-    def delete(self, portgroup_id):
+    def delete(self, portgroup_id, os_ironic_api_version=None,
+               global_request_id=None):
         """Delete the Portgroup from the DB.
 
         :param portgroup_id: The UUID or name of a portgroup.
-
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
-        return self._delete(resource_id=portgroup_id)
+        return self._delete(resource_id=portgroup_id,
+                            os_ironic_api_version=os_ironic_api_version,
+                            global_request_id=global_request_id)
 
-    def update(self, portgroup_id, patch):
+    def update(self, portgroup_id, patch, os_ironic_api_version=None,
+               global_request_id=None):
         """Update the Portgroup.
 
         :param portgroup_id: The UUID or name of a portgroup.
         :param patch: The patch request with updates.
-
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
-        return self._update(resource_id=portgroup_id, patch=patch)
+        return self._update(resource_id=portgroup_id, patch=patch,
+                            os_ironic_api_version=os_ironic_api_version,
+                            global_request_id=global_request_id)

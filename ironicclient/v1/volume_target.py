@@ -31,7 +31,8 @@ class VolumeTargetManager(base.CreateManager):
     _resource_name = 'volume/targets'
 
     def list(self, node=None, limit=None, marker=None, sort_key=None,
-             sort_dir=None, detail=False, fields=None):
+             sort_dir=None, detail=False, fields=None,
+             os_ironic_api_version=None, global_request_id=None):
         """Retrieve a list of volume target.
 
         :param node:   Optional, UUID or name of a node, to get volume
@@ -60,6 +61,12 @@ class VolumeTargetManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of volume targets.
 
         """
@@ -79,18 +86,28 @@ class VolumeTargetManager(base.CreateManager):
         path = ''
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "targets")
+            return self._list(self._path(path), "targets", **header_values)
         else:
             return self._list_pagination(self._path(path), "targets",
-                                         limit=limit)
+                                         limit=limit, **header_values)
 
-    def get(self, volume_target_id, fields=None):
-        return self._get(resource_id=volume_target_id, fields=fields)
+    def get(self, volume_target_id, fields=None, os_ironic_api_version=None,
+            global_request_id=None):
+        return self._get(resource_id=volume_target_id, fields=fields,
+                         os_ironic_api_version=os_ironic_api_version,
+                         global_request_id=global_request_id)
 
-    def delete(self, volume_target_id):
-        return self._delete(resource_id=volume_target_id)
+    def delete(self, volume_target_id, os_ironic_api_version=None,
+               global_request_id=None):
+        return self._delete(resource_id=volume_target_id,
+                            os_ironic_api_version=os_ironic_api_version,
+                            global_request_id=global_request_id)
 
-    def update(self, volume_target_id, patch):
-        return self._update(resource_id=volume_target_id, patch=patch)
+    def update(self, volume_target_id, patch, os_ironic_api_version=None,
+               global_request_id=None):
+        return self._update(resource_id=volume_target_id, patch=patch,
+                            os_ironic_api_version=os_ironic_api_version,
+                            global_request_id=global_request_id)
