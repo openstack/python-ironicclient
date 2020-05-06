@@ -1628,9 +1628,10 @@ class NodeManagerTest(testtools.TestCase):
         for http_method in ('POST', 'PUT', 'PATCH'):
             kwargs['http_method'] = http_method
             self.mgr.vendor_passthru(**kwargs)
-            update_mock.assert_called_once_with(mock.ANY, final_path,
-                                                vendor_passthru_args,
-                                                http_method=http_method)
+            update_mock.assert_called_once_with(
+                mock.ANY, final_path, vendor_passthru_args,
+                http_method=http_method, os_ironic_api_version=None,
+                global_request_id=None)
             update_mock.reset_mock()
 
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
@@ -1643,7 +1644,9 @@ class NodeManagerTest(testtools.TestCase):
 
         final_path = 'node_uuid/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
-        get_mock.assert_called_once_with(mock.ANY, final_path)
+        get_mock.assert_called_once_with(
+            mock.ANY, final_path,
+            os_ironic_api_version=None, global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'delete', autospec=True)
     def test_vendor_passthru_delete(self, delete_mock):
@@ -1655,7 +1658,9 @@ class NodeManagerTest(testtools.TestCase):
 
         final_path = 'node_uuid/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
-        delete_mock.assert_called_once_with(mock.ANY, final_path)
+        delete_mock.assert_called_once_with(
+            mock.ANY, final_path, os_ironic_api_version=None,
+            global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'delete', autospec=True)
     def test_vendor_passthru_unknown_http_method(self, delete_mock):
@@ -1675,7 +1680,9 @@ class NodeManagerTest(testtools.TestCase):
 
         final_path = '/v1/nodes/%s/vifs' % NODE1['uuid']
         self.mgr.vif_list(**kwargs)
-        _list_mock.assert_called_once_with(mock.ANY, final_path, "vifs")
+        _list_mock.assert_called_once_with(
+            mock.ANY, final_path, "vifs",
+            os_ironic_api_version=None, global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'update', autospec=True)
     def test_vif_attach(self, update_mock):
@@ -1687,7 +1694,8 @@ class NodeManagerTest(testtools.TestCase):
         final_path = '%s/vifs' % NODE1['uuid']
         self.mgr.vif_attach(**kwargs)
         update_mock.assert_called_once_with(
-            mock.ANY, final_path, {'id': 'vif_id'}, http_method="POST")
+            mock.ANY, final_path, {'id': 'vif_id'}, http_method="POST",
+            os_ironic_api_version=None, global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'update', autospec=True)
     def test_vif_attach_custom_fields(self, update_mock):
@@ -1702,7 +1710,8 @@ class NodeManagerTest(testtools.TestCase):
         update_mock.assert_called_once_with(
             mock.ANY,
             final_path, {'id': 'vif_id', 'foo': 'bar'},
-            http_method="POST")
+            http_method="POST", os_ironic_api_version=None,
+            global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'update', autospec=True)
     def test_vif_attach_custom_fields_id(self, update_mock):
@@ -1724,7 +1733,9 @@ class NodeManagerTest(testtools.TestCase):
 
         final_path = '%s/vifs/vif_id' % NODE1['uuid']
         self.mgr.vif_detach(**kwargs)
-        delete_mock.assert_called_once_with(mock.ANY, final_path)
+        delete_mock.assert_called_once_with(
+            mock.ANY, final_path,
+            os_ironic_api_version=None, global_request_id=None)
 
     def _test_node_set_boot_device(self, boot_device, persistent=False):
         self.mgr.set_boot_device(NODE1['uuid'], boot_device, persistent)
@@ -1796,7 +1807,9 @@ class NodeManagerTest(testtools.TestCase):
 
         self.mgr.wait_for_provision_state('node', 'active')
 
-        mock_get.assert_called_with(self.mgr, 'node')
+        mock_get.assert_called_with(
+            self.mgr, 'node', os_ironic_api_version=None,
+            global_request_id=None)
         self.assertEqual(3, mock_get.call_count)
         mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
         self.assertEqual(2, mock_sleep.call_count)
@@ -1824,7 +1837,9 @@ class NodeManagerTest(testtools.TestCase):
                                self.mgr.wait_for_provision_state,
                                'node', 'active')
 
-        mock_get.assert_called_with(self.mgr, 'node')
+        mock_get.assert_called_with(
+            self.mgr, 'node',
+            os_ironic_api_version=None, global_request_id=None)
         self.assertEqual(2, mock_get.call_count)
         mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
         self.assertEqual(1, mock_sleep.call_count)
@@ -1840,7 +1855,9 @@ class NodeManagerTest(testtools.TestCase):
         self.mgr.wait_for_provision_state('node', 'active',
                                           poll_delay_function=delay_mock)
 
-        mock_get.assert_called_with(self.mgr, 'node')
+        mock_get.assert_called_with(
+            self.mgr, 'node',
+            os_ironic_api_version=None, global_request_id=None)
         self.assertEqual(2, mock_get.call_count)
         delay_mock.assert_called_with(node._DEFAULT_POLL_INTERVAL)
         self.assertEqual(1, delay_mock.call_count)
@@ -1868,7 +1885,9 @@ class NodeManagerTest(testtools.TestCase):
                                self.mgr.wait_for_provision_state,
                                'node', 'active')
 
-        mock_get.assert_called_with(self.mgr, 'node')
+        mock_get.assert_called_with(
+            self.mgr, 'node', os_ironic_api_version=None,
+            global_request_id=None)
         self.assertEqual(2, mock_get.call_count)
         mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
         self.assertEqual(1, mock_sleep.call_count)
@@ -1887,7 +1906,9 @@ class NodeManagerTest(testtools.TestCase):
         self.mgr.wait_for_provision_state('node', 'active',
                                           fail_on_unexpected_state=False)
 
-        mock_get.assert_called_with(self.mgr, 'node')
+        mock_get.assert_called_with(
+            self.mgr, 'node',
+            os_ironic_api_version=None, global_request_id=None)
         self.assertEqual(4, mock_get.call_count)
         mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
         self.assertEqual(3, mock_sleep.call_count)

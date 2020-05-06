@@ -61,7 +61,8 @@ class NodeManager(base.CreateManager):
              fields=None, provision_state=None, driver=None,
              resource_class=None, chassis=None, fault=None,
              os_ironic_api_version=None, conductor_group=None,
-             conductor=None, owner=None, retired=None, lessee=None):
+             conductor=None, owner=None, retired=None, lessee=None,
+             global_request_id=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -113,8 +114,12 @@ class NodeManager(base.CreateManager):
 
         :param fault: Optional. String value to get only nodes with
                       specified fault.
+
         :param os_ironic_api_version: String version (e.g. "1.35") to use for
             the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
 
         :param conductor_group: Optional. String value to get only nodes
                                 with the given conductor group set.
@@ -167,17 +172,17 @@ class NodeManager(base.CreateManager):
             path += 'detail'
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "nodes",
-                              os_ironic_api_version=os_ironic_api_version)
+            return self._list(self._path(path), "nodes", **header_values)
         else:
             return self._list_pagination(
-                self._path(path), "nodes", limit=limit,
-                os_ironic_api_version=os_ironic_api_version)
+                self._path(path), "nodes", limit=limit, **header_values)
 
     def list_ports(self, node_id, marker=None, limit=None, sort_key=None,
-                   sort_dir=None, detail=False, fields=None):
+                   sort_dir=None, detail=False, fields=None,
+                   os_ironic_api_version=None, global_request_id=None):
         """List all the ports for a given node.
 
         :param node_id: Name or UUID of the node.
@@ -205,6 +210,12 @@ class NodeManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of ports.
 
         """
@@ -224,16 +235,18 @@ class NodeManager(base.CreateManager):
 
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "ports")
+            return self._list(self._path(path), "ports", **header_values)
         else:
-            return self._list_pagination(self._path(path), "ports",
-                                         limit=limit)
+            return self._list_pagination(
+                self._path(path), "ports", limit=limit, **header_values)
 
     def list_volume_connectors(self, node_id, marker=None, limit=None,
                                sort_key=None, sort_dir=None, detail=False,
-                               fields=None):
+                               fields=None, os_ironic_api_version=None,
+                               global_request_id=None):
         """List all the volume connectors for a given node.
 
         :param node_id: Name or UUID of the node.
@@ -261,6 +274,12 @@ class NodeManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of volume connectors.
 
         """
@@ -278,18 +297,21 @@ class NodeManager(base.CreateManager):
         path = "%s/volume/connectors" % node_id
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
             return self._list(self._path(path), response_key="connectors",
-                              obj_class=volume_connector.VolumeConnector)
+                              obj_class=volume_connector.VolumeConnector,
+                              **header_values)
         else:
             return self._list_pagination(
                 self._path(path), response_key="connectors", limit=limit,
-                obj_class=volume_connector.VolumeConnector)
+                obj_class=volume_connector.VolumeConnector, **header_values)
 
     def list_volume_targets(self, node_id, marker=None, limit=None,
                             sort_key=None, sort_dir=None, detail=False,
-                            fields=None):
+                            fields=None, os_ironic_api_version=None,
+                            global_request_id=None):
         """List all the volume targets for a given node.
 
         :param node_id: Name or UUID of the node.
@@ -317,6 +339,12 @@ class NodeManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of volume targets.
 
         """
@@ -334,27 +362,36 @@ class NodeManager(base.CreateManager):
         path = "%s/volume/targets" % node_id
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
             return self._list(self._path(path), response_key="targets",
-                              obj_class=volume_target.VolumeTarget)
+                              obj_class=volume_target.VolumeTarget,
+                              **header_values)
         else:
             return self._list_pagination(
                 self._path(path), response_key="targets", limit=limit,
-                obj_class=volume_target.VolumeTarget)
+                obj_class=volume_target.VolumeTarget, **header_values)
 
-    def get(self, node_id, fields=None, os_ironic_api_version=None):
+    def get(self, node_id, fields=None, os_ironic_api_version=None,
+            global_request_id=None):
         return self._get(resource_id=node_id, fields=fields,
-                         os_ironic_api_version=os_ironic_api_version)
+                         os_ironic_api_version=os_ironic_api_version,
+                         global_request_id=global_request_id)
 
-    def get_by_instance_uuid(self, instance_uuid, fields=None):
+    def get_by_instance_uuid(
+            self, instance_uuid, fields=None,
+            os_ironic_api_version=None, global_request_id=None):
         path = '?instance_uuid=%s' % instance_uuid
         if fields is not None:
             path += '&fields=' + ','.join(fields)
         else:
             path = 'detail' + path
 
-        nodes = self._list(self._path(path), 'nodes')
+        nodes = self._list(
+            self._path(path), 'nodes',
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
         # get all the details of the node assuming that
         # filtering by instance_uuid returns a collection
         # of one node if successful.
@@ -363,21 +400,28 @@ class NodeManager(base.CreateManager):
         else:
             raise exc.NotFound()
 
-    def delete(self, node_id):
-        return self._delete(resource_id=node_id)
+    def delete(self, node_id, os_ironic_api_version=None,
+               global_request_id=None):
+        return self._delete(
+            resource_id=node_id,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
 
     def update(self, node_id, patch, http_method='PATCH',
-               os_ironic_api_version=None, reset_interfaces=None):
+               os_ironic_api_version=None, reset_interfaces=None,
+               global_request_id=None):
         params = {}
         if reset_interfaces is not None:
             params['reset_interfaces'] = reset_interfaces
         return self._update(resource_id=node_id, patch=patch,
                             method=http_method,
                             os_ironic_api_version=os_ironic_api_version,
+                            global_request_id=global_request_id,
                             params=params)
 
     def vendor_passthru(self, node_id, method, args=None,
-                        http_method=None):
+                        http_method=None, os_ironic_api_version=None,
+                        global_request_id=None):
         """Issue requests for vendor-specific actions on a given node.
 
         :param node_id: The UUID of the node.
@@ -385,6 +429,10 @@ class NodeManager(base.CreateManager):
         :param args: Optional. The arguments to be passed to the method.
         :param http_method: The HTTP method to use on the request.
                             Defaults to POST.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         if args is None:
             args = {}
@@ -393,32 +441,47 @@ class NodeManager(base.CreateManager):
             http_method = 'POST'
 
         http_method = http_method.upper()
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
 
         path = "%s/vendor_passthru/%s" % (node_id, method)
         if http_method in ('POST', 'PUT', 'PATCH'):
-            return self.update(path, args, http_method=http_method)
+            return self.update(path, args, http_method=http_method,
+                               **header_values)
         elif http_method == 'DELETE':
-            return self.delete(path)
+            return self.delete(path, **header_values)
         elif http_method == 'GET':
-            return self.get(path)
+            return self.get(path, **header_values)
         else:
             raise exc.InvalidAttribute(
                 _('Unknown HTTP method: %s') % http_method)
 
-    def vif_list(self, node_ident):
+    def vif_list(self, node_ident, os_ironic_api_version=None,
+                 global_request_id=None):
         """List VIFs attached to a given node.
 
         :param node_ident: The UUID or Name of the node.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/vifs" % node_ident
 
-        return self._list(self._path(path), "vifs")
+        return self._list(self._path(path), "vifs",
+                          os_ironic_api_version=os_ironic_api_version,
+                          global_request_id=global_request_id)
 
-    def vif_attach(self, node_ident, vif_id, **kwargs):
+    def vif_attach(self, node_ident, vif_id, os_ironic_api_version=None,
+                   global_request_id=None, **kwargs):
         """Attach VIF to a given node.
 
         :param node_ident: The UUID or Name of the node.
         :param vif_id: The UUID or Name of the VIF to attach.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         :param kwargs: A dictionary containing the attributes of the resource
                        that will be created.
         """
@@ -429,18 +492,27 @@ class NodeManager(base.CreateManager):
                                        "specified in vif-info")
         data.update(kwargs)
         # TODO(vdrok): cleanup places doing custom path and http_method
-        self.update(path, data, http_method="POST")
+        self.update(path, data, http_method="POST",
+                    os_ironic_api_version=os_ironic_api_version,
+                    global_request_id=global_request_id)
 
-    def vif_detach(self, node_ident, vif_id):
+    def vif_detach(self, node_ident, vif_id, os_ironic_api_version=None,
+                   global_request_id=None):
         """Detach VIF from a given node.
 
         :param node_ident: The UUID or Name of the node.
         :param vif_id: The UUID or Name of the VIF to detach.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/vifs/%s" % (node_ident, vif_id)
-        self.delete(path)
+        self.delete(path, os_ironic_api_version=os_ironic_api_version,
+                    global_request_id=global_request_id)
 
-    def set_maintenance(self, node_id, state, maint_reason=None):
+    def set_maintenance(self, node_id, state, maint_reason=None,
+                        os_ironic_api_version=None, global_request_id=None):
         """Set the maintenance mode for the node.
 
         :param node_id: The UUID of the node.
@@ -450,9 +522,13 @@ class NodeManager(base.CreateManager):
                       to take the node out of maintenance mode.
         :param maint_reason: Optional string. Reason for putting node
                              into maintenance mode.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :raises: InvalidAttribute if state is an invalid string (that doesn't
                  represent a Boolean).
-
         """
         if isinstance(state, bool):
             maintenance_mode = state
@@ -463,19 +539,28 @@ class NodeManager(base.CreateManager):
                 raise exc.InvalidAttribute(_("Argument 'state': %(err)s") %
                                            {'err': e})
         path = "%s/maintenance" % node_id
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if maintenance_mode:
             reason = {'reason': maint_reason}
-            return self.update(path, reason, http_method='PUT')
+            return self.update(path, reason, http_method='PUT',
+                               **header_values)
         else:
-            return self.delete(path)
+            return self.delete(path, **header_values)
 
-    def set_power_state(self, node_id, state, soft=False, timeout=None):
+    def set_power_state(self, node_id, state, soft=False, timeout=None,
+                        os_ironic_api_version=None, global_request_id=None):
         """Sets power state for a node.
 
         :param node_id: Node identifier
         :param state: One of target power state, 'on', 'off', or 'reboot'
         :param soft: The flag for graceful power 'off' or 'reboot'
         :param timeout: The timeout (in seconds) positive integer value (> 0)
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :raises: ValueError if 'soft' or 'timeout' option is invalid
         :returns: The status of the request
         """
@@ -501,26 +586,40 @@ class NodeManager(base.CreateManager):
                 raise ValueError(msg)
             body = {'target': target, 'timeout': timeout}
 
-        return self.update(path, body, http_method='PUT')
+        return self.update(path, body, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def set_target_raid_config(self, node_ident, target_raid_config):
+    def set_target_raid_config(
+            self, node_ident, target_raid_config,
+            os_ironic_api_version=None, global_request_id=None):
         """Sets target_raid_config for a node.
 
         :param node_ident: Node identifier
         :param target_raid_config: A dictionary with the target RAID
             configuration; may be empty.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: status of the request
         """
         path = "%s/states/raid" % node_ident
-        return self.update(path, target_raid_config, http_method='PUT')
+        return self.update(path, target_raid_config, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def validate(self, node_uuid):
+    def validate(self, node_uuid, os_ironic_api_version=None,
+                 global_request_id=None):
         path = "%s/validate" % node_uuid
-        return self.get(path)
+        return self.get(path, os_ironic_api_version=os_ironic_api_version,
+                        global_request_id=global_request_id)
 
-    def set_provision_state(self, node_uuid, state, configdrive=None,
-                            cleansteps=None, rescue_password=None,
-                            os_ironic_api_version=None):
+    def set_provision_state(
+            self, node_uuid, state, configdrive=None, cleansteps=None,
+            rescue_password=None, os_ironic_api_version=None,
+            global_request_id=None):
         """Set the provision state for the node.
 
         :param node_uuid: The UUID or name of the node.
@@ -543,6 +642,9 @@ class NodeManager(base.CreateManager):
             specified (and is only valid) when setting 'state' to 'rescue'.
         :param os_ironic_api_version: String version (e.g. "1.35") to use for
             the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :raises: InvalidAttribute if there was an error with the clean steps
         :returns: The status of the request
         """
@@ -570,67 +672,111 @@ class NodeManager(base.CreateManager):
             body['rescue_password'] = rescue_password
 
         return self.update(path, body, http_method='PUT',
-                           os_ironic_api_version=os_ironic_api_version)
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def states(self, node_uuid):
+    def states(self, node_uuid, os_ironic_api_version=None,
+               global_request_id=None):
         path = "%s/states" % node_uuid
-        return self.get(path)
+        return self.get(path, os_ironic_api_version=os_ironic_api_version,
+                        global_request_id=global_request_id)
 
-    def get_console(self, node_uuid):
+    def get_console(self, node_uuid, os_ironic_api_version=None,
+                    global_request_id=None):
         path = "%s/states/console" % node_uuid
-        return self._get_as_dict(path)
+        return self._get_as_dict(
+            path, os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
 
-    def set_console_mode(self, node_uuid, enabled):
+    def set_console_mode(self, node_uuid, enabled, os_ironic_api_version=None,
+                         global_request_id=None):
         """Set the console mode for the node.
 
         :param node_uuid: The UUID of the node.
         :param enabled: Either a Boolean or a string representation of a
                         Boolean. True to enable the console; False to disable.
-
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/states/console" % node_uuid
         target = {'enabled': enabled}
-        return self.update(path, target, http_method='PUT')
+        return self.update(path, target, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def set_boot_device(self, node_uuid, boot_device, persistent=False):
+    def set_boot_device(self, node_uuid, boot_device, persistent=False,
+                        os_ironic_api_version=None, global_request_id=None):
         path = "%s/management/boot_device" % node_uuid
         target = {'boot_device': boot_device, 'persistent': persistent}
-        return self.update(path, target, http_method='PUT')
+        return self.update(path, target, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def get_boot_device(self, node_uuid):
+    def get_boot_device(self, node_uuid, os_ironic_api_version=None,
+                        global_request_id=None):
         path = "%s/management/boot_device" % node_uuid
-        return self._get_as_dict(path)
+        return self._get_as_dict(
+            path, os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
 
-    def inject_nmi(self, node_uuid):
+    def inject_nmi(self, node_uuid, os_ironic_api_version=None,
+                   global_request_id=None):
         path = "%s/management/inject_nmi" % node_uuid
-        return self.update(path, {}, http_method='PUT')
+        return self.update(path, {}, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def get_supported_boot_devices(self, node_uuid):
+    def get_supported_boot_devices(self, node_uuid, os_ironic_api_version=None,
+                                   global_request_id=None):
         path = "%s/management/boot_device/supported" % node_uuid
-        return self._get_as_dict(path)
+        return self._get_as_dict(
+            path, os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
 
-    def get_vendor_passthru_methods(self, node_ident):
+    def get_vendor_passthru_methods(
+            self, node_ident, os_ironic_api_version=None,
+            global_request_id=None):
         path = "%s/vendor_passthru/methods" % node_ident
-        return self._get_as_dict(path)
+        return self._get_as_dict(
+            path, os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
 
-    def get_traits(self, node_ident):
+    def get_traits(self, node_ident, os_ironic_api_version=None,
+                   global_request_id=None):
         """Get traits for a node.
 
         :param node_ident: node UUID or name.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/traits" % node_ident
-        return self._list_primitives(self._path(path), 'traits')
+        return self._list_primitives(
+            self._path(path), 'traits',
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
 
-    def add_trait(self, node_ident, trait):
+    def add_trait(self, node_ident, trait, os_ironic_api_version=None,
+                  global_request_id=None):
         """Add a trait to a node.
 
         :param node_ident: node UUID or name.
         :param trait: trait to add to the node.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/traits/%s" % (node_ident, trait)
-        return self.update(path, None, http_method='PUT')
+        return self.update(path, None, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def set_traits(self, node_ident, traits):
+    def set_traits(self, node_ident, traits, os_ironic_api_version=None,
+                   global_request_id=None):
         """Set traits for a node.
 
         Removes any existing traits and adds the traits passed in to this
@@ -638,50 +784,85 @@ class NodeManager(base.CreateManager):
 
         :param node_ident: node UUID or name.
         :param traits: list of traits to add to the node.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/traits" % node_ident
         body = {'traits': traits}
-        return self.update(path, body, http_method='PUT')
+        return self.update(path, body, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def remove_trait(self, node_ident, trait):
+    def remove_trait(self, node_ident, trait, os_ironic_api_version=None,
+                     global_request_id=None):
         """Remove a trait from a node.
 
         :param node_ident: node UUID or name.
         :param trait: trait to remove from the node.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/traits/%s" % (node_ident, trait)
-        return self.delete(path)
+        return self.delete(path, os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def remove_all_traits(self, node_ident):
+    def remove_all_traits(self, node_ident, os_ironic_api_version=None,
+                          global_request_id=None):
         """Remove all traits from a node.
 
         :param node_ident: node UUID or name.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/traits" % node_ident
-        return self.delete(path)
+        return self.delete(path, os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
 
-    def get_bios_setting(self, node_ident, name):
+    def get_bios_setting(self, node_ident, name, os_ironic_api_version=None,
+                         global_request_id=None):
         """Get a BIOS setting from a node.
 
         :param node_ident: node UUID or name.
         :param name: BIOS setting name to get from the node.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/bios/%s" % (node_ident, name)
-        return self._get_as_dict(path).get(name)
+        return self._get_as_dict(
+            path, os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id).get(name)
 
-    def list_bios_settings(self, node_ident):
+    def list_bios_settings(self, node_ident, os_ironic_api_version=None,
+                           global_request_id=None):
         """List all BIOS settings from a node.
 
         :param node_ident: node UUID or name.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
         path = "%s/bios" % node_ident
-        return self._list_primitives(self._path(path), 'bios')
+        return self._list_primitives(
+            self._path(path), 'bios',
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
 
     def wait_for_provision_state(self, node_ident, expected_state,
                                  timeout=0,
                                  poll_interval=_DEFAULT_POLL_INTERVAL,
                                  poll_delay_function=None,
-                                 fail_on_unexpected_state=True):
+                                 fail_on_unexpected_state=True,
+                                 os_ironic_api_version=None,
+                                 global_request_id=None):
         """Helper function to wait for a node to reach a given state.
 
         Polls Ironic API in a loop until node gets to a requested state.
@@ -701,6 +882,11 @@ class NodeManager(base.CreateManager):
             in seconds. Any exceptions raised inside it will abort the wait.
         :param fail_on_unexpected_state: whether to fail if the nodes
             reaches a different stable state.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :raises: StateTransitionFailed if node reached an error state
         :raises: StateTransitionTimeout on timeout
         """
@@ -714,7 +900,9 @@ class NodeManager(base.CreateManager):
         # the "fields" argument to reduce amount of data sent.
         for _count in utils.poll(timeout, poll_interval, poll_delay_function,
                                  timeout_msg):
-            node = self.get(node_ident)
+            node = self.get(
+                node_ident, os_ironic_api_version=os_ironic_api_version,
+                global_request_id=global_request_id)
             if node.provision_state == expected_state:
                 LOG.debug('Node %(node)s reached provision state %(state)s',
                           {'node': node_ident, 'state': expected_state})
