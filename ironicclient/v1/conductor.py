@@ -26,7 +26,8 @@ class ConductorManager(base.Manager):
     _resource_name = 'conductors'
 
     def list(self, marker=None, limit=None, sort_key=None, sort_dir=None,
-             fields=None, detail=False):
+             fields=None, detail=False, os_ironic_api_version=None,
+             global_request_id=None):
         """Retrieve a list of conductors.
 
         :param marker: Optional, the hostname of a conductor, eg the last
@@ -53,6 +54,12 @@ class ConductorManager(base.Manager):
         :param detail: Optional, boolean whether to return detailed information
                        about conductors.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of conductors.
 
         """
@@ -68,12 +75,16 @@ class ConductorManager(base.Manager):
         path = ''
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "conductors")
+            return self._list(self._path(path), "conductors", **header_values)
         else:
             return self._list_pagination(self._path(path), "conductors",
-                                         limit=limit)
+                                         limit=limit, **header_values)
 
-    def get(self, hostname, fields=None):
-        return self._get(resource_id=hostname, fields=fields)
+    def get(self, hostname, fields=None, os_ironic_api_version=None,
+            global_request_id=None):
+        return self._get(resource_id=hostname, fields=fields,
+                         os_ironic_api_version=os_ironic_api_version,
+                         global_request_id=global_request_id)
