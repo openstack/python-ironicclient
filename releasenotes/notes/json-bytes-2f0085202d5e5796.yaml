@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    The Python API used to accepts byte arrays and other non-serializable in
+    JSON data types in a few places where strings are required. This is no
+    longer supported, an attempt to do it will result in an exception.

@@ -16,6 +16,7 @@
 from distutils.version import StrictVersion
 import functools
 from http import client as http_client
+import json
 import logging
 import re
 import textwrap
@@ -24,7 +25,6 @@ from urllib import parse as urlparse
 
 from keystoneauth1 import adapter
 from keystoneauth1 import exceptions as kexc
-from oslo_serialization import jsonutils
 
 from ironicclient.common import filecache
 from ironicclient.common.i18n import _
@@ -67,7 +67,7 @@ def _trim_endpoint_api_version(url):
 def _extract_error_json(body):
     """Return  error_message from the HTTP response body."""
     try:
-        body_json = jsonutils.loads(body)
+        body_json = json.loads(body)
     except ValueError:
         return {}
 
@@ -75,7 +75,7 @@ def _extract_error_json(body):
         return {}
 
     try:
-        error_json = jsonutils.loads(body_json['error_message'])
+        error_json = json.loads(body_json['error_message'])
     except ValueError:
         return body_json
 
@@ -393,7 +393,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         kwargs['headers'].setdefault('Accept', 'application/json')
 
         if 'body' in kwargs:
-            kwargs['data'] = jsonutils.dump_as_bytes(kwargs.pop('body'))
+            kwargs['json'] = kwargs.pop('body')
 
         resp = self._http_request(url, method, **kwargs)
         body = resp.content
