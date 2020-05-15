@@ -24,7 +24,8 @@ LOG = logging.getLogger(__name__)
 def get_client(api_version, auth_type=None, os_ironic_api_version=None,
                max_retries=None, retry_interval=None, session=None,
                valid_interfaces=None, interface=None, service_type=None,
-               region_name=None, **kwargs):
+               region_name=None, additional_headers=None,
+               global_request_id=None, **kwargs):
     """Get an authenticated client, based on the credentials.
 
     :param api_version: the API version to use. Valid value: '1'.
@@ -41,7 +42,13 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
     :param service_type: Bare metal endpoint service type.
     :param region_name: Name of the region to use when searching the bare metal
         endpoint.
-    :param kwargs: all the other params that are passed to keystoneauth.
+    :param additional_headers: Additional headers that should be attached
+        to every request passing through the client. Headers of the same name
+        specified per request will take priority.
+    :param global_request_id: A header (in the form of ``req-$uuid``) that will
+        be passed on all requests. Enables cross project request id tracking.
+    :param kwargs: all the other params that are passed to keystoneauth for
+        session construction.
     """
     # TODO(TheJulia): At some point, we should consider possibly noting
     # the "latest" flag for os_ironic_api_version to cause the client to
@@ -95,6 +102,8 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
 
     ironicclient_kwargs = {
         'os_ironic_api_version': os_ironic_api_version,
+        'additional_headers': additional_headers,
+        'global_request_id': global_request_id,
         'max_retries': max_retries,
         'retry_interval': retry_interval,
         'session': session,

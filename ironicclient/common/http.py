@@ -362,6 +362,13 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
             kwargs['headers'].setdefault('X-OpenStack-Ironic-API-Version',
                                          self.os_ironic_api_version)
 
+        for k, v in self.additional_headers.items():
+            kwargs['headers'].setdefault(k, v)
+
+        if self.global_request_id is not None:
+            kwargs['headers'].setdefault(
+                "X-OpenStack-Request-ID", self.global_request_id)
+
         endpoint_filter = kwargs.setdefault('endpoint_filter', {})
         endpoint_filter.setdefault('interface', self.interface)
         endpoint_filter.setdefault('service_type', self.service_type)

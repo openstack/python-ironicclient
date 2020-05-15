@@ -28,12 +28,15 @@ class ClientTest(utils.BaseTestCase):
     @mock.patch.object(config, 'get_cloud_region', autospec=True)
     def _test_get_client(self, mock_cloud_region, mock_retrieve_data,
                          version=None, auth='password',
-                         expected_interface=None, **kwargs):
+                         expected_interface=None, additional_headers=None,
+                         global_request_id=None, **kwargs):
         session = mock_cloud_region.return_value.get_session.return_value
         session.get_endpoint.return_value = 'http://localhost:6385/v1/f14b4123'
         mock_retrieve_data.return_value = version
 
-        client = iroclient.get_client('1', **kwargs)
+        client = iroclient.get_client(
+            '1', additional_headers=additional_headers,
+            global_request_id=global_request_id, **kwargs)
 
         expected_version = kwargs.pop('os_ironic_api_version', None)
         kwargs.pop('interface', None)
@@ -79,6 +82,20 @@ class ClientTest(utils.BaseTestCase):
         self.assertIsInstance(client.http_client, http.SessionClient)
         self.assertEqual('http://localhost:6385',
                          client.http_client.endpoint_override)
+
+    def test_get_client_additional_headers_and_global_request(self):
+        req_id = 'req-7b081d28-8272-45f4-9cf6-89649c1c7a1a'
+        kwargs = {
+            'endpoint': 'http://localhost:6385/v1',
+            'additional_headers': {'foo': 'bar'},
+            'global_request_id': req_id
+        }
+        client = self._test_get_client(auth='none', **kwargs)
+        self.assertIsInstance(client.http_client, http.SessionClient)
+        self.assertEqual('http://localhost:6385',
+                         client.http_client.endpoint_override)
+        self.assertEqual(req_id, client.http_client.global_request_id)
+        self.assertEqual({'foo': 'bar'}, client.http_client.additional_headers)
 
     def test_get_client_with_auth_token_endpoint(self):
         kwargs = {
