@@ -43,9 +43,10 @@ extensions = [
 ]
 
 # openstackdocstheme options
-repository_name = 'openstack/python-ironicclient'
-bug_project = 'python-ironicclient'
-bug_tag = ''
+openstackdocs_repo_name = 'openstack/python-ironicclient'
+openstackdocs_bug_project = 'python-ironicclient'
+openstackdocs_bug_tag = ''
+openstackdocs_auto_name = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -147,10 +148,6 @@ html_static_path = ['_static']
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
 # html_extra_path = []
-
-# If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
-# using the given strftime format.
-html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
