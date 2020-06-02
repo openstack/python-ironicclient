@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Methods of all `Manager` objects now support passing `global_request_id`
+    argument, which is passed to ironic API in the header of an HTTP request.
+    Also it is now possible to instantiate `IronicClient` object passing
+    `global_request_id` and `additional_headers`, which will be passed to all
+    requests this client object will be doing. `global_request_id` passed to
+    the method of the `Manager` object will override the `global_request_id`
+    specified through `IronicClient` constructor.
