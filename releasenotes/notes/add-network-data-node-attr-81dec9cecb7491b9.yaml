@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds support for adding static network configuration to ports and
+    portgroups by adding ``network-data`` attribute to port/portgroup
+    commands.

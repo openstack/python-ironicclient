@@ -93,6 +93,7 @@ class Resource(object):
         'fault': 'Fault',
         'mode': 'Mode',
         'name': 'Name',
+        'network_data': 'Network Configuration',
         'node_uuid': 'Node UUID',
         'owner': 'Owner',
         'power_state': 'Power State',
