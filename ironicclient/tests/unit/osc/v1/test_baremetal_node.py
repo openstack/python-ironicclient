@@ -3551,6 +3551,18 @@ class TestVifAttach(TestBaremetal):
         self.baremetal_mock.node.vif_attach.assert_called_once_with(
             'node_uuid', 'aaa-aaa', foo='bar')
 
+    def test_baremetal_vif_attach_port_uuid(self):
+        arglist = ['node_uuid', 'aaa-aaa', '--port-uuid', 'fake-port-uuid']
+        verifylist = [('node', 'node_uuid'),
+                      ('vif_id', 'aaa-aaa'),
+                      ('port_uuid', 'fake-port-uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.vif_attach.assert_called_once_with(
+            'node_uuid', 'aaa-aaa', port_uuid='fake-port-uuid')
+
 
 class TestVifDetach(TestBaremetal):
     def setUp(self):
