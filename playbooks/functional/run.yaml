@@ -1,4 +1,7 @@
 - hosts: all
+  roles:
+    - ensure-tox
+
   tasks:
     - shell:
         cmd: |
@@ -45,6 +48,6 @@
 
           cd $IRONICCLIENT_DIR
           echo 'Running Functional Tests under Python3'
-          tox -e functionalpy3
+          {{ tox_executable }} -e functionalpy3
         executable: /bin/bash
         chdir: '/opt/stack/python-ironicclient'
