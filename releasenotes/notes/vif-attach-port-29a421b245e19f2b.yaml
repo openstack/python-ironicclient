@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Updates the node vif attach API action to accept an optional ``port_uuid``
+    parameter. If specified, then Ironic will attempt to attach to the
+    specified port.
