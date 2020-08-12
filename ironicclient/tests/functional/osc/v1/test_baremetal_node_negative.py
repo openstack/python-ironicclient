@@ -71,7 +71,7 @@ class BaremetalNodeNegativeTests(base.TestCase):
     @ddt.data(
         ('--property', '',
          'error: the following arguments are required: <node>'),
-        ('--property', 'prop', "Reason: can't remove non-existent object")
+        ('--property', 'prop', "Reason: can't remove a non-existent object")
     )
     @ddt.unpack
     def test_unset_property(self, argument, value, ex_text):
