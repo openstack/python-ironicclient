@@ -9,14 +9,10 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        # NOTE(rpittau) temporary non-voting to be able to land fixing patches
-        - ironicclient-functional:
-            voting: false
-        - ironicclient-tempest:
-            voting: false
-    # NOTE(rpittau) temporary disabling to be able to land fixing patches
-    # gate:
-      # queue: ironic
-      # jobs:
-        # - ironicclient-functional
-        # - ironicclient-tempest
+        - ironicclient-functional
+        - ironicclient-tempest
+    gate:
+      queue: ironic
+      jobs:
+        - ironicclient-functional
+        - ironicclient-tempest
