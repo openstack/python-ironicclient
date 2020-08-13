@@ -44,4 +44,5 @@
     vars:
       devstack_localrc:
         IRONIC_RAMDISK_TYPE: tinyipa
+        IRONIC_DEFAULT_BOOT_OPTION: netboot
         EBTABLES_RACE_FIX: True
