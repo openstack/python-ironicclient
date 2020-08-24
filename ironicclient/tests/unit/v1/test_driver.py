@@ -161,7 +161,8 @@ class DriverManagerTest(testtools.TestCase):
 
         _list_mock.assert_called_once_with(
             self.mgr,
-            '/v1/drivers/%s/raid/logical_disk_properties' % DRIVER2['name'])
+            '/v1/drivers/%s/raid/logical_disk_properties' % DRIVER2['name'],
+            os_ironic_api_version=None, global_request_id=None)
         self.assertEqual({}, properties)
 
     @mock.patch.object(driver.DriverManager, 'update', autospec=True)
@@ -179,9 +180,10 @@ class DriverManagerTest(testtools.TestCase):
         for http_method in ('POST', 'PUT', 'PATCH'):
             kwargs['http_method'] = http_method
             self.mgr.vendor_passthru(**kwargs)
-            update_mock.assert_called_once_with(mock.ANY, final_path,
-                                                vendor_passthru_args,
-                                                http_method=http_method)
+            update_mock.assert_called_once_with(
+                mock.ANY, final_path, vendor_passthru_args,
+                http_method=http_method, os_ironic_api_version=None,
+                global_request_id=None)
             update_mock.reset_mock()
 
     @mock.patch.object(driver.DriverManager, 'get', autospec=True)
@@ -194,7 +196,9 @@ class DriverManagerTest(testtools.TestCase):
 
         final_path = 'driver_name/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
-        get_mock.assert_called_once_with(mock.ANY, final_path)
+        get_mock.assert_called_once_with(
+            mock.ANY, final_path, os_ironic_api_version=None,
+            global_request_id=None)
 
     @mock.patch.object(driver.DriverManager, 'delete', autospec=True)
     def test_vendor_passthru_delete(self, delete_mock):
@@ -206,7 +210,9 @@ class DriverManagerTest(testtools.TestCase):
 
         final_path = 'driver_name/vendor_passthru/method'
         self.mgr.vendor_passthru(**kwargs)
-        delete_mock.assert_called_once_with(mock.ANY, final_path)
+        delete_mock.assert_called_once_with(
+            mock.ANY, final_path, os_ironic_api_version=None,
+            global_request_id=None)
 
     @mock.patch.object(driver.DriverManager, 'delete', autospec=True)
     def test_vendor_passthru_unknown_http_method(self, delete_mock):

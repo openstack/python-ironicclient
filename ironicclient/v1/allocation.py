@@ -34,7 +34,7 @@ class AllocationManager(base.CreateManager):
 
     def list(self, resource_class=None, state=None, node=None, limit=None,
              marker=None, sort_key=None, sort_dir=None, fields=None,
-             owner=None):
+             owner=None, os_ironic_api_version=None, global_request_id=None):
         """Retrieve a list of allocations.
 
         :param resource_class: Optional, get allocations with this resource
@@ -63,6 +63,12 @@ class AllocationManager(base.CreateManager):
                        of the resource to be returned.
         :param owner: Optional, project that owns the allocation.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of allocations.
         :raises: InvalidAttribute if a subset of fields is requested with
                  detail option set.
@@ -83,35 +89,51 @@ class AllocationManager(base.CreateManager):
             path = '?' + '&'.join(filters)
         else:
             path = ''
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "allocations")
+            return self._list(self._path(path), "allocations", **header_values)
         else:
             return self._list_pagination(self._path(path), "allocations",
-                                         limit=limit)
+                                         limit=limit, **header_values)
 
-    def get(self, allocation_id, fields=None):
+    def get(self, allocation_id, fields=None, os_ironic_api_version=None,
+            global_request_id=None):
         """Get an allocation with the specified identifier.
 
         :param allocation_id: The UUID or name of an allocation.
         :param fields: Optional, a list with a specified set of fields
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
 
         :returns: an :class:`Allocation` object.
 
         """
-        return self._get(resource_id=allocation_id, fields=fields)
+        return self._get(resource_id=allocation_id, fields=fields,
+                         os_ironic_api_version=os_ironic_api_version,
+                         global_request_id=global_request_id)
 
-    def delete(self, allocation_id):
+    def delete(self, allocation_id, os_ironic_api_version=None,
+               global_request_id=None):
         """Delete the Allocation.
 
         :param allocation_id: The UUID or name of an allocation.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
-        return self._delete(resource_id=allocation_id)
+        return self._delete(resource_id=allocation_id,
+                            os_ironic_api_version=os_ironic_api_version,
+                            global_request_id=global_request_id)
 
     def wait(self, allocation_id, timeout=0, poll_interval=1,
-             poll_delay_function=None):
+             poll_delay_function=None, os_ironic_api_version=None,
+             global_request_id=None):
         """Wait for the Allocation to become active.
 
         :param timeout: timeout in seconds, no timeout if 0.
@@ -119,6 +141,10 @@ class AllocationManager(base.CreateManager):
         :param poll_delay_function: function to use to wait between polls
             (defaults to time.sleep). Should take one argument - delay time
             in seconds. Any exceptions raised inside it will abort the wait.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         :return: updated :class:`Allocation` object.
         :raises: StateTransitionFailed if allocation reaches the error state.
         :raises: StateTransitionTimeout on timeout.
@@ -129,7 +155,9 @@ class AllocationManager(base.CreateManager):
                             'timeout': timeout}
         for _count in utils.poll(timeout, poll_interval, poll_delay_function,
                                  timeout_msg):
-            allocation = self.get(allocation_id)
+            allocation = self.get(allocation_id,
+                                  os_ironic_api_version=os_ironic_api_version,
+                                  global_request_id=global_request_id)
             if allocation.state == 'error':
                 raise exc.StateTransitionFailed(
                     _('Allocation %(allocation)s failed: %(error)s') %
@@ -143,10 +171,17 @@ class AllocationManager(base.CreateManager):
                       {'allocation': allocation_id,
                        'actual': allocation.state})
 
-    def update(self, allocation_id, patch):
+    def update(self, allocation_id, patch, os_ironic_api_version=None,
+               global_request_id=None):
         """Updates the Allocation. Only 'name' and 'extra' field are allowed.
 
         :param allocation_id: The UUID or name of an allocation.
         :param patch: a json PATCH document to apply to this allocation.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
         """
-        return self._update(resource_id=allocation_id, patch=patch)
+        return self._update(resource_id=allocation_id, patch=patch,
+                            os_ironic_api_version=os_ironic_api_version,
+                            global_request_id=global_request_id)

@@ -31,7 +31,8 @@ class ChassisManager(base.CreateManager):
     _creation_attributes = ['description', 'extra', 'uuid']
 
     def list(self, marker=None, limit=None, sort_key=None,
-             sort_dir=None, detail=False, fields=None):
+             sort_dir=None, detail=False, fields=None,
+             os_ironic_api_version=None, global_request_id=None):
         """Retrieve a list of chassis.
 
         :param marker: Optional, the UUID of a chassis, eg the last
@@ -58,6 +59,12 @@ class ChassisManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of chassis.
 
         """
@@ -76,16 +83,18 @@ class ChassisManager(base.CreateManager):
             path += 'detail'
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "chassis")
+            return self._list(self._path(path), "chassis", **header_values)
         else:
             return self._list_pagination(self._path(path), "chassis",
-                                         limit=limit)
+                                         limit=limit, **header_values)
 
     def list_nodes(self, chassis_id, marker=None, limit=None,
                    sort_key=None, sort_dir=None, detail=False, fields=None,
-                   associated=None, maintenance=None, provision_state=None):
+                   associated=None, maintenance=None, provision_state=None,
+                   os_ironic_api_version=None, global_request_id=None):
         """List all the nodes for a given chassis.
 
         :param chassis_id: The UUID of the chassis.
@@ -127,6 +136,12 @@ class ChassisManager(base.CreateManager):
         :param provision_state: Optional. String value to get only nodes in
                                 that provision state.
 
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
         :returns: A list of nodes.
 
         """
@@ -153,18 +168,28 @@ class ChassisManager(base.CreateManager):
 
         if filters:
             path += '?' + '&'.join(filters)
-
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "nodes")
+            return self._list(self._path(path), "nodes", **header_values)
         else:
             return self._list_pagination(self._path(path), "nodes",
-                                         limit=limit)
+                                         limit=limit, **header_values)
 
-    def get(self, chassis_id, fields=None):
-        return self._get(resource_id=chassis_id, fields=fields)
+    def get(self, chassis_id, fields=None, os_ironic_api_version=None,
+            global_request_id=None):
+        return self._get(resource_id=chassis_id, fields=fields,
+                         os_ironic_api_version=os_ironic_api_version,
+                         global_request_id=global_request_id)
 
-    def delete(self, chassis_id):
-        return self._delete(resource_id=chassis_id)
+    def delete(self, chassis_id, os_ironic_api_version=None,
+               global_request_id=None):
+        return self._delete(resource_id=chassis_id,
+                            os_ironic_api_version=os_ironic_api_version,
+                            global_request_id=global_request_id)
 
-    def update(self, chassis_id, patch):
-        return self._update(resource_id=chassis_id, patch=patch)
+    def update(self, chassis_id, patch, os_ironic_api_version=None,
+               global_request_id=None):
+        return self._update(resource_id=chassis_id, patch=patch,
+                            os_ironic_api_version=os_ironic_api_version,
+                            global_request_id=global_request_id)
