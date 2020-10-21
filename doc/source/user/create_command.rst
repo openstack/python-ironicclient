@@ -75,7 +75,7 @@ command::
                 "nodes": [
                     {
                         "name": "node-3",
-                        "driver": "agent_ipmitool",
+                        "driver": "ipmi",
                         "portgroups": [
                             {
                                 "name": "switch.cz7882.ports.1-2",
@@ -96,11 +96,16 @@ command::
                             {
                                 "address": "00:00:00:00:00:03"
                             }
-                        ]
+                        ],
+                        "driver_info": {
+                            "ipmi_address": "192.168.1.23",
+                            "ipmi_username": "BmcUsername",
+                            "ipmi_password": "BmcPassword",
+                        }
                     },
                     {
                         "name": "node-4",
-                        "driver": "agent_ipmitool",
+                        "driver": "ipmi",
                         "ports": [
                             {
                                 "address": "00:00:00:00:00:04"
@@ -116,7 +121,7 @@ command::
         "nodes": [
             {
                 "name": "node-5",
-                "driver": "pxe_ipmitool",
+                "driver": "ipmi",
                 "chassis_uuid": "74d93e6e-7384-4994-a614-fd7b399b0785",
                 "ports": [
                     {
@@ -126,7 +131,7 @@ command::
             },
             {
                 "name": "node-6",
-                "driver": "pxe_ipmitool"
+                "driver": "ipmi"
             }
         ]
     }
