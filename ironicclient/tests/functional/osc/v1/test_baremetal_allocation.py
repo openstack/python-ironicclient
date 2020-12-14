@@ -129,16 +129,14 @@ class BaremetalAllocationTests(base.TestCase):
 
     @ddt.data(
         ('--uuid', '', 'expected one argument'),
-        ('--uuid', '!@#$^*&%^', 'Expected a UUID'),
+        ('--uuid', '!@#$^*&%^', 'Expected UUID for uuid'),
         ('--extra', '', 'expected one argument'),
         ('--name', '', 'expected one argument'),
         ('--name', 'not/a/name', 'invalid name'),
         ('--resource-class', '', 'expected one argument'),
-        ('--resource-class', 'x' * 81,
-         'Value should have a maximum character requirement of 80'),
+        ('--resource-class', 'x' * 81, 'is too long'),
         ('--trait', '', 'expected one argument'),
-        ('--trait', 'foo',
-         'A custom trait must start with the prefix CUSTOM_'),
+        ('--trait', 'foo', 'does not match'),
         ('--candidate-node', '', 'expected one argument'),
         ('--candidate-node', 'banana?', 'Nodes cannot be found'),
         ('--wait', 'meow', 'invalid int value'))

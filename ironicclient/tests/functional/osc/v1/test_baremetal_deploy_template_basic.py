@@ -158,12 +158,12 @@ class BaremetalDeployTemplateTests(base.TestCase):
 
     @ddt.data(
         ('--uuid', '', 'expected one argument'),
-        ('--uuid', '!@#$^*&%^', 'Expected a UUID'),
+        ('--uuid', '!@#$^*&%^', 'Expected UUID for uuid'),
         ('', '', 'the following arguments are required'),
-        ('', 'not/a/name', 'Deploy template name must be a valid trait'),
-        ('', 'foo', 'Deploy template name must be a valid trait'),
+        ('', 'not/a/name', 'does not match'),
+        ('', 'foo', 'does not match'),
         ('--steps', '', 'expected one argument'),
-        ('--steps', '[]', 'No deploy steps specified'))
+        ('--steps', '[]', 'is too short'))
     @ddt.unpack
     def test_create_negative(self, argument, value, ex_text):
         """Check errors on invalid input parameters."""

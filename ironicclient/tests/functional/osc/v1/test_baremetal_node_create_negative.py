@@ -27,7 +27,7 @@ class BaremetalNodeCreateNegativeTests(base.TestCase):
 
     @ddt.data(
         ('--uuid', '', 'expected one argument'),
-        ('--uuid', '!@#$^*&%^', 'Expected a UUID'),
+        ('--uuid', '!@#$^*&%^', 'Expected UUID for uuid'),
         ('--uuid', '0000 0000', 'unrecognized arguments'),
         ('--driver-info', '', 'expected one argument'),
         ('--driver-info', 'some info', 'unrecognized arguments'),
