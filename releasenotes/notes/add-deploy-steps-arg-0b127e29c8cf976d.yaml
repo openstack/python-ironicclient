@@ -1,0 +1,15 @@
+---
+features:
+  - |
+    Adds support for providing optional deploy steps when deploying or
+    rebuilding; available with ironic-api-version 1.69 or higher. Baremetal CLI
+    is ``baremetal node <provision-state> <node> --deploy-steps
+    <deploy-steps>`` where ``<provision-state>`` is 'deploy' or 'rebuild' and
+    ``<deploy-steps>`` are deploy steps in JSON format. May be path to a file
+    containing deploy steps; OR '-', with the deploy steps being read from
+    standard input; OR a string. The value should be a list of deploy-step
+    dictionaries; each dictionary should have keys 'interface', 'step' and
+    'priority', and optional key 'args'. When overlapping, these steps override
+    deploy template and driver steps. For more information see
+    `Deploy Steps in Node Deployment documentation <https://docs.openstack.org/ironic/latest/admin/node-deployment.html#id3>`_.
+

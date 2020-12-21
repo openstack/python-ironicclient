@@ -1564,6 +1564,31 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
+    def test_node_set_provision_state_with_deploysteps(self):
+        deploysteps = [{"step": "upgrade", "interface": "deploy"}]
+        target_state = 'active'
+        self.mgr.set_provision_state(NODE1['uuid'], target_state,
+                                     deploysteps=deploysteps)
+        body = {'target': target_state, 'deploy_steps': deploysteps}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
+    def test_node_set_provision_state_with_configdrive_and_deploysteps(self):
+        deploysteps = [{"step": "upgrade", "interface": "deploy"}]
+        target_state = 'active'
+        self.mgr.set_provision_state(NODE1['uuid'], target_state,
+                                     configdrive={'user_data': ''},
+                                     deploysteps=deploysteps)
+        body = {'target': target_state,
+                'configdrive': {'user_data': ''},
+                'deploy_steps': deploysteps}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
     def test_node_set_provision_state_with_rescue_password(self):
         rescue_password = 'supersecret'
         target_state = 'rescue'

@@ -81,6 +81,9 @@ class ProvisionStateBaremetalNode(command.Command):
         clean_steps = getattr(parsed_args, 'clean_steps', None)
         clean_steps = utils.handle_json_arg(clean_steps, 'clean steps')
 
+        deploy_steps = getattr(parsed_args, 'deploy_steps', None)
+        deploy_steps = utils.handle_json_arg(deploy_steps, 'deploy steps')
+
         config_drive = getattr(parsed_args, 'config_drive', None)
         if config_drive:
             try:
@@ -98,6 +101,7 @@ class ProvisionStateBaremetalNode(command.Command):
             parsed_args.provision_state,
             configdrive=config_drive,
             cleansteps=clean_steps,
+            deploysteps=deploy_steps,
             rescue_password=rescue_password)
 
 
@@ -554,6 +558,18 @@ class DeployBaremetalNode(ProvisionStateWithWait):
             metavar='<config-drive>',
             default=None,
             help=CONFIG_DRIVE_ARG_HELP)
+
+        parser.add_argument(
+            '--deploy-steps',
+            metavar='<deploy-steps>',
+            required=False,
+            default=None,
+            help=_("The deploy steps in JSON format. May be the path to a "
+                   "file containing the deploy steps; OR '-', with the deploy "
+                   "steps being read from standard input; OR a string. The "
+                   "value should be a list of deploy-step dictionaries; each "
+                   "dictionary should have keys 'interface', 'step', "
+                   "'priority' and optional key 'args'."))
         return parser
 
 
@@ -1029,6 +1045,18 @@ class RebuildBaremetalNode(ProvisionStateWithWait):
             metavar='<config-drive>',
             default=None,
             help=CONFIG_DRIVE_ARG_HELP)
+
+        parser.add_argument(
+            '--deploy-steps',
+            metavar='<deploy-steps>',
+            required=False,
+            default=None,
+            help=_("The deploy steps in JSON format. May be the path to a "
+                   "file containing the deploy steps; OR '-', with the deploy "
+                   "steps being read from standard input; OR a string. The "
+                   "value should be a list of deploy-step dictionaries; each "
+                   "dictionary should have keys 'interface', 'step', "
+                   "'priority' and optional key 'args'."))
         return parser
 
 

@@ -56,7 +56,8 @@ class TestAdopt(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'adopt',
-            cleansteps=None, configdrive=None, rescue_password=None)
+            cleansteps=None, deploysteps=None, configdrive=None,
+            rescue_password=None)
 
     def test_adopt_no_wait(self):
         arglist = ['node_uuid']
@@ -1441,11 +1442,13 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
 
     def test_deploy_baremetal_provision_state_active_and_configdrive(self):
         arglist = ['node_uuid',
-                   '--config-drive', 'path/to/drive']
+                   '--config-drive', 'path/to/drive',
+                   '--deploy-steps', '[{"interface":"deploy"}]']
         verifylist = [
             ('node', 'node_uuid'),
             ('provision_state', 'active'),
             ('config_drive', 'path/to/drive'),
+            ('deploy_steps', '[{"interface":"deploy"}]')
         ]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
@@ -1454,7 +1457,8 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'active',
-            cleansteps=None, configdrive='path/to/drive', rescue_password=None)
+            cleansteps=None, deploysteps=[{"interface": "deploy"}],
+            configdrive='path/to/drive', rescue_password=None)
 
     def test_deploy_baremetal_provision_state_active_and_configdrive_dict(
             self):
@@ -1472,7 +1476,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'active',
-            cleansteps=None, configdrive={'meta_data': {}},
+            cleansteps=None, deploysteps=None, configdrive={'meta_data': {}},
             rescue_password=None)
 
     def test_deploy_no_wait(self):
@@ -1674,8 +1678,8 @@ class TestRescueBaremetalProvisionState(TestBaremetal):
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'rescue', cleansteps=None, configdrive=None,
-            rescue_password='supersecret')
+            'node_uuid', 'rescue', cleansteps=None, deploysteps=None,
+            configdrive=None, rescue_password='supersecret')
 
     def test_rescue_baremetal_provision_state_rescue_and_wait(self):
         arglist = ['node_uuid',
@@ -1850,11 +1854,13 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
 
     def test_rebuild_baremetal_provision_state_active_and_configdrive(self):
         arglist = ['node_uuid',
-                   '--config-drive', 'path/to/drive']
+                   '--config-drive', 'path/to/drive',
+                   '--deploy-steps', '[{"interface":"deploy"}]']
         verifylist = [
             ('node', 'node_uuid'),
             ('provision_state', 'rebuild'),
             ('config_drive', 'path/to/drive'),
+            ('deploy_steps', '[{"interface":"deploy"}]')
         ]
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
@@ -1863,8 +1869,8 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rebuild',
-            cleansteps=None, configdrive='path/to/drive',
-            rescue_password=None)
+            cleansteps=None, deploysteps=[{"interface": "deploy"}],
+            configdrive='path/to/drive', rescue_password=None)
 
     def test_rebuild_no_wait(self):
         arglist = ['node_uuid']
@@ -1879,7 +1885,7 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rebuild',
-            cleansteps=None, configdrive=None,
+            cleansteps=None, deploysteps=None, configdrive=None,
             rescue_password=None)
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
@@ -1997,8 +2003,8 @@ class TestUnrescueBaremetalProvisionState(TestBaremetal):
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
-            'node_uuid', 'unrescue', cleansteps=None, configdrive=None,
-            rescue_password=None)
+            'node_uuid', 'unrescue', cleansteps=None, deploysteps=None,
+            configdrive=None, rescue_password=None)
 
     def test_unrescue_baremetal_provision_state_active_and_wait(self):
         arglist = ['node_uuid',
