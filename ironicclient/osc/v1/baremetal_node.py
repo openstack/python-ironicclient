@@ -456,11 +456,18 @@ class CreateBaremetalNode(command.ShowOne):
             '--conductor-group',
             metavar='<conductor_group>',
             help=_('Conductor group the node will belong to'))
-        parser.add_argument(
+        clean = parser.add_mutually_exclusive_group()
+        clean.add_argument(
             '--automated-clean',
             action='store_true',
             default=None,
             help=_('Enable automated cleaning for the node'))
+        clean.add_argument(
+            '--no-automated-clean',
+            action='store_false',
+            dest='automated_clean',
+            default=None,
+            help=_('Explicitly disable automated cleaning for the node'))
         parser.add_argument(
             '--owner',
             metavar='<owner>',
@@ -1191,11 +1198,18 @@ class SetBaremetalNode(command.Command):
             metavar='<conductor_group>',
             help=_('Set the conductor group for the node'),
         )
-        parser.add_argument(
+        clean = parser.add_mutually_exclusive_group()
+        clean.add_argument(
             '--automated-clean',
             action='store_true',
-            help=_('Enable automated cleaning for the node'),
-        )
+            default=None,
+            help=_('Enable automated cleaning for the node'))
+        clean.add_argument(
+            '--no-automated-clean',
+            action='store_false',
+            dest='automated_clean',
+            default=None,
+            help=_('Explicitly disable automated cleaning for the node'))
         parser.add_argument(
             '--protected',
             action='store_true',
@@ -1284,7 +1298,7 @@ class SetBaremetalNode(command.Command):
                                                          raid_config)
 
         properties = []
-        for field in ['automated_clean', 'instance_uuid', 'name',
+        for field in ['instance_uuid', 'name',
                       'chassis_uuid', 'driver', 'resource_class',
                       'conductor_group', 'protected', 'protected_reason',
                       'retired', 'retired_reason', 'owner', 'lessee',
@@ -1293,6 +1307,10 @@ class SetBaremetalNode(command.Command):
             if value:
                 properties.extend(utils.args_array_to_patch(
                     'add', ["%s=%s" % (field, value)]))
+
+        if parsed_args.automated_clean is not None:
+            properties.extend(utils.args_array_to_patch(
+                'add', ["automated_clean=%s" % parsed_args.automated_clean]))
 
         if parsed_args.reset_interfaces and not parsed_args.driver:
             raise exc.CommandError(

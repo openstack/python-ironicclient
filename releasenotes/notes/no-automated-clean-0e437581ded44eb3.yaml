@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Following a similar change to ironic, it is now possible to set the node's
+    ``automated_clean`` to False using the new ``--no-automated-clean``
+    argument to ``baremetal node set``.

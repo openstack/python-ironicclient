@@ -465,6 +465,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('automated_clean', True)],
                                 {'automated_clean': True})
 
+    def test_baremetal_create_with_no_automated_clean(self):
+        self.check_with_options(['--no-automated-clean'],
+                                [('automated_clean', False)],
+                                {'automated_clean': False})
+
     def test_baremetal_create_with_owner(self):
         self.check_with_options(['--owner', 'owner 1'],
                                 [('owner', 'owner 1')],
@@ -2474,6 +2479,26 @@ class TestBaremetalSet(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/automated_clean', 'value': 'True', 'op': 'add'}],
+            reset_interfaces=None,
+        )
+
+    def test_baremetal_set_no_automated_clean(self):
+        arglist = [
+            'node_uuid',
+            '--no-automated-clean'
+        ]
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('automated_clean', False)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/automated_clean', 'value': 'False', 'op': 'add'}],
             reset_interfaces=None,
         )
 
