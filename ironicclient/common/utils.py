@@ -383,8 +383,8 @@ def handle_json_or_file_arg(json_arg):
     try:
         json_arg = json.loads(json_arg)
     except ValueError as e:
-        err = (_("For JSON: '%(string)s', error: '%(err)s'") %
-               {'err': e, 'string': json_arg})
+        err = (_("Value '%(string)s' is not a file and cannot be parsed "
+                 "as JSON: '%(err)s'") % {'err': e, 'string': json_arg})
         raise exc.InvalidAttribute(err)
 
     return json_arg

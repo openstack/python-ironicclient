@@ -342,7 +342,7 @@ class HandleJsonFileTest(test_utils.BaseTestCase):
     def test_handle_json_or_file_arg_bad_json(self):
         cleansteps = 'foo'
         self.assertRaisesRegex(exc.InvalidAttribute,
-                               'For JSON',
+                               'is not a file and cannot be parsed as JSON',
                                utils.handle_json_or_file_arg, cleansteps)
 
     def test_handle_json_or_file_arg_file(self):
