@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    YAML files are now supported for the ``--network-data``,
+    ``--deploy-steps``, ``--clean-steps`` and ``--target-raid-config``
+    arguments, as well as for the ``--steps`` argument of deploy template
+    commands.

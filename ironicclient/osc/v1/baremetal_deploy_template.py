@@ -25,9 +25,9 @@ from ironicclient.v1 import resource_fields as res_fields
 
 
 _DEPLOY_STEPS_HELP = _(
-    "The deploy steps in JSON format. May be the path to a file containing "
-    "the deploy steps; OR '-', with the deploy steps being read from standard "
-    "input; OR a string. The value should be a list of deploy-step "
+    "The deploy steps. May be the path to a YAML file containing the deploy "
+    "steps; OR '-', with the deploy steps being read from standard "
+    "input; OR a JSON string. The value should be a list of deploy-step "
     "dictionaries; each dictionary should have keys 'interface', 'step', "
     "'args' and 'priority'.")
 
