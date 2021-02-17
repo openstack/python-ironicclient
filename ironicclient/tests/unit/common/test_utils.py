@@ -355,17 +355,24 @@ class HandleJsonFileTest(test_utils.BaseTestCase):
 
         self.assertEqual(json.loads(contents), steps)
 
+    def test_handle_yaml_or_file_arg_file(self):
+        contents = '''---
+- step: upgrade
+  interface: deploy'''
+
+        with tempfile.NamedTemporaryFile(mode='w') as f:
+            f.write(contents)
+            f.flush()
+            steps = utils.handle_json_or_file_arg(f.name)
+
+        self.assertEqual([{"step": "upgrade", "interface": "deploy"}], steps)
+
     @mock.patch.object(builtins, 'open', autospec=True)
     def test_handle_json_or_file_arg_file_fail(self, mock_open):
-        mock_file_object = mock.MagicMock()
-        mock_file_handle = mock.MagicMock()
-        mock_file_handle.__enter__.return_value = mock_file_object
-        mock_open.return_value = mock_file_handle
-        mock_file_object.read.side_effect = IOError
+        mock_open.return_value.__enter__.side_effect = IOError
 
         with tempfile.NamedTemporaryFile(mode='w') as f:
             self.assertRaisesRegex(exc.InvalidAttribute,
                                    "from file",
                                    utils.handle_json_or_file_arg, f.name)
             mock_open.assert_called_once_with(f.name, 'r')
-            mock_file_object.read.assert_called_once_with()

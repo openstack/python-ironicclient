@@ -40,7 +40,7 @@ CONFIG_DRIVE_ARG_HELP = _(
 
 
 NETWORK_DATA_ARG_HELP = _(
-    "JSON string or a file or '-' for stdin to read static network "
+    "JSON string or a YAML file or '-' for stdin to read static network "
     "configuration for the baremetal node associated with this ironic node. "
     "Format of this file should comply with Nova network data metadata "
     "(network_data.json). Depending on ironic boot interface capabilities "
@@ -256,10 +256,10 @@ class CleanBaremetalNode(ProvisionStateWithWait):
             metavar='<clean-steps>',
             required=True,
             default=None,
-            help=_("The clean steps in JSON format. May be the path to a file "
+            help=_("The clean steps. May be the path to a YAML file "
                    "containing the clean steps; OR '-', with the clean steps "
-                   "being read from standard input; OR a string. The value "
-                   "should be a list of clean-step dictionaries; each "
+                   "being read from standard input; OR a JSON string. The "
+                   "value should be a list of clean-step dictionaries; each "
                    "dictionary should have keys 'interface' and 'step', and "
                    "optional key 'args'."))
         return parser
@@ -571,12 +571,12 @@ class DeployBaremetalNode(ProvisionStateWithWait):
             metavar='<deploy-steps>',
             required=False,
             default=None,
-            help=_("The deploy steps in JSON format. May be the path to a "
-                   "file containing the deploy steps; OR '-', with the deploy "
-                   "steps being read from standard input; OR a string. The "
-                   "value should be a list of deploy-step dictionaries; each "
-                   "dictionary should have keys 'interface', 'step', "
-                   "'priority' and optional key 'args'."))
+            help=_("The deploy steps. May be the path to a YAML file "
+                   "containing the deploy steps; OR '-', with the deploy "
+                   "steps being read from standard input; OR a JSON string. "
+                   "The value should be a list of deploy-step dictionaries; "
+                   "each dictionary should have keys 'interface' and 'step', "
+                   "and optional key 'args'."))
         return parser
 
 
@@ -1262,7 +1262,7 @@ class SetBaremetalNode(command.Command):
             '--target-raid-config',
             metavar='<target_raid_config>',
             help=_('Set the target RAID configuration (JSON) for the node. '
-                   'This can be one of: 1. a file containing JSON data of the '
+                   'This can be one of: 1. a file containing YAML data of the '
                    'RAID configuration; 2. "-" to read the contents from '
                    'standard input; or 3. a valid JSON string.'),
         )
