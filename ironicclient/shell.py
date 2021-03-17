@@ -19,6 +19,7 @@ try:
     import ironic_inspector_client
 except ImportError:
     ironic_inspector_client = None
+import openstack
 from openstack import config as os_config
 from osc_lib import utils
 import pbr.version
@@ -168,8 +169,25 @@ class App(app.App):
         )
         return parser
 
+    def _configure_ironic_logging(self):
+        openstack.enable_logging(debug=self.options.debug)
+        # NOTE(dtantsur): I wish logging.basicConfig worked.. but it does not.
+        for name in ('ironicclient', 'ironic_inspector_client'):
+            logger = logging.getLogger(name)
+            logger.setLevel(
+                logging.DEBUG if self.options.debug else logging.WARNING)
+            # warnings are already configured by something else, only configure
+            # debug logging for ironic.
+            if not logger.handlers and self.options.debug:
+                handler = logging.StreamHandler()
+                handler.setFormatter(logging.Formatter(
+                    # This is the openstacksdk default value
+                    '%(asctime)s %(levelname)s: %(name)s %(message)s'))
+                logger.addHandler(handler)
+
     def initialize_app(self, argv):
         super(App, self).initialize_app(argv)
+        self._configure_ironic_logging()
         self.cloud_region = self.config.get_one(argparse=self.options)
         # Compatibility with OSC
         self.client_manager = ClientManager(self.cloud_region, self.options)
