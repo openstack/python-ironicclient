@@ -662,6 +662,7 @@ class TestBaremetalList(TestBaremetal):
             'Maintenance Reason',
             'Management Interface',
             'Name',
+            'Network Configuration',
             'Network Interface',
             'Owner',
             'Power Interface',

@@ -250,6 +250,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'maintenance_reason',
      'management_interface',
      'name',
+     'network_data',
      'network_interface',
      'owner',
      'power_interface',
