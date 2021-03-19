@@ -41,6 +41,18 @@ class TestCase(base.FunctionalTestBase):
     def construct_cmd(*parts):
         return ' '.join(str(x) for x in parts)
 
+    @staticmethod
+    def generate_params(argument, params):
+        """Generate parameters string.
+
+        :param argument: argument
+        :param params: values passed with argument
+        """
+        parts = []
+        for key, value in params.items():
+            parts.append('{} {}={}'.format(argument, key, value))
+        return ' '.join(parts)
+
     def assert_dict_is_subset(self, expected, actual):
         """Check if expected keys/values exist in actual response body.
 
