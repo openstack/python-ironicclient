@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Fixes using ``network_data`` with the ``--fields`` parameter.
