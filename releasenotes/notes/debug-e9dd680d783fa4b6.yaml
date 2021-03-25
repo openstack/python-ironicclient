@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    The ``--debug`` option now works correctly with the built-in ``baremetal``
+    command line tool.
