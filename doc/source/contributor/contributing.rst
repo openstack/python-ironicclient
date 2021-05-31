@@ -7,9 +7,9 @@ Contributing to python-ironicclient
 If you're interested in contributing to the python-ironicclient project,
 the following will help get you started.
 
-#openstack-ironic on Freenode IRC Network
------------------------------------------
-There is a very active chat channel at irc://freenode.net/#openstack-ironic.
+#openstack-ironic on OFTC IRC Network
+-------------------------------------
+There is a very active chat channel at irc://irc.oftc.net/#openstack-ironic.
 This is usually the best place to ask questions and find your way around.
 IRC stands for Internet Relay Chat and it is a way to chat online in real
 time. You can ask a question and come back later to read the answer in the
