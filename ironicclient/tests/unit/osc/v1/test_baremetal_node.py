@@ -15,6 +15,7 @@
 #
 
 import copy
+import json
 from unittest import mock
 
 from osc_lib.tests import utils as oscutils
@@ -34,6 +35,29 @@ class TestBaremetal(baremetal_fakes.TestBaremetal):
         # Get a shortcut to the baremetal manager mock
         self.baremetal_mock = self.app.client_manager.baremetal
         self.baremetal_mock.reset_mock()
+
+
+class TestAbort(TestBaremetal):
+    def setUp(self):
+        super(TestAbort, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.AbortBaremetalNode(self.app, None)
+
+    def test_abort(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'abort'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'abort', cleansteps=None, configdrive=None,
+            deploysteps=None, rescue_password=None)
 
 
 class TestAdopt(TestBaremetal):
@@ -107,6 +131,167 @@ class TestAdopt(TestBaremetal):
         test_node.wait_for_provision_state.assert_called_once_with(
             'node_uuid', expected_state='active',
             poll_interval=2, timeout=0)
+
+
+class TestClean(TestBaremetal):
+    def setUp(self):
+        super(TestClean, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.CleanBaremetalNode(self.app, None)
+
+    def test_clean_without_steps(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'clean'),
+        ]
+
+        self.assertRaises(oscutils.ParserException, self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_clean_with_steps(self):
+        steps_dict = {
+            "clean_steps": [{
+                "interface": "raid",
+                "step": "create_configuration",
+                "args": {"create_nonroot_volumes": False}
+            }, {
+                "interface": "deploy",
+                "step": "erase_devices"
+            }]
+        }
+        steps_json = json.dumps(steps_dict)
+
+        arglist = ['--clean-steps', steps_json, 'node_uuid']
+        verifylist = [
+            ('clean_steps', steps_json),
+            ('provision_state', 'clean'),
+            ('node', 'node_uuid'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'clean', cleansteps=steps_dict, configdrive=None,
+            deploysteps=None, rescue_password=None)
+
+
+class TestInspect(TestBaremetal):
+    def setUp(self):
+        super(TestInspect, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.InspectBaremetalNode(self.app, None)
+
+    def test_inspect(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'inspect'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'inspect', cleansteps=None, configdrive=None,
+            deploysteps=None, rescue_password=None)
+
+
+class TestManage(TestBaremetal):
+    def setUp(self):
+        super(TestManage, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ManageBaremetalNode(self.app, None)
+
+    def test_manage(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'manage'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'manage', cleansteps=None, configdrive=None,
+            deploysteps=None, rescue_password=None)
+
+
+class TestProvide(TestBaremetal):
+    def setUp(self):
+        super(TestProvide, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ProvideBaremetalNode(self.app, None)
+
+    def test_provide(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'provide'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'provide', cleansteps=None, configdrive=None,
+            deploysteps=None, rescue_password=None)
+
+
+class TestRebuild(TestBaremetal):
+    def setUp(self):
+        super(TestRebuild, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.RebuildBaremetalNode(self.app, None)
+
+    def test_rebuild(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'rebuild'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'rebuild', cleansteps=None, configdrive=None,
+            deploysteps=None, rescue_password=None)
+
+
+class TestUndeploy(TestBaremetal):
+    def setUp(self):
+        super(TestUndeploy, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.UndeployBaremetalNode(self.app, None)
+
+    def test_undeploy(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('node', 'node_uuid'),
+            ('provision_state', 'deleted'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'deleted', cleansteps=None, configdrive=None,
+            deploysteps=None, rescue_password=None)
 
 
 class TestBootdeviceSet(TestBaremetal):
