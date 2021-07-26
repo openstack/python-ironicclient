@@ -1,0 +1,4 @@
+# install fonts missing for PDF job
+# see https://bugs.launchpad.net/openstack-i18n/+bug/1935742
+tex-gyre [platform:dpkg doc]
+
