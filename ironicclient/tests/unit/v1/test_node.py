@@ -86,6 +86,8 @@ DRIVER_IFACES = {'deploy': {'result': True},
 
 NODE_STATES = {"last_error": None,
                "power_state": "power on",
+               "boot_mode": "fake-efi",
+               "secure_boot": False,
                "provision_state": "active",
                "target_power_state": None,
                "target_provision_state": None}
@@ -1606,8 +1608,9 @@ class NodeManagerTest(testtools.TestCase):
             ('GET', '/v1/nodes/%s/states' % NODE1['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        expected_fields = ['last_error', 'power_state', 'provision_state',
-                           'target_power_state', 'target_provision_state']
+        expected_fields = ['boot_mode', 'last_error', 'power_state',
+                           'provision_state', 'target_power_state',
+                           'target_provision_state', 'secure_boot']
         self.assertEqual(sorted(expected_fields),
                          sorted(states.to_dict().keys()))
 
