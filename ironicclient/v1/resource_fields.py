@@ -34,11 +34,11 @@ class Resource(object):
         'address': 'Address',
         'alive': 'Alive',
         'allocation_uuid': 'Allocation UUID',
+        'allowable_values': 'Allowable Values',
         'async': 'Async',
+        'attribute_type': 'Attribute Type',
         'automated_clean': 'Automated Clean',
         'attach': 'Response is attachment',
-        'bios_name': 'BIOS setting name',
-        'bios_value': 'BIOS setting value',
         'boot_index': 'Boot Index',
         'boot_mode': 'Boot Mode',
         'candidate_nodes': 'Candidate Nodes',
@@ -89,9 +89,12 @@ class Resource(object):
         'internal_info': 'Internal Info',
         'last_error': 'Last Error',
         'lessee': 'Lessee',
+        'lower_bound': 'Lower Bound',
         'maintenance': 'Maintenance',
         'maintenance_reason': 'Maintenance Reason',
+        'max_length': 'Maximum Length',
         'fault': 'Fault',
+        'min_length': 'Minimum Length',
         'mode': 'Mode',
         'name': 'Name',
         'network_data': 'Network Configuration',
@@ -104,6 +107,8 @@ class Resource(object):
         'provision_state': 'Provisioning State',
         'provision_updated_at': 'Provision Updated At',
         'raid_config': 'Current RAID configuration',
+        'read_only': 'Read Only',
+        'reset_required': 'Reset Required',
         'reservation': 'Reservation',
         'resource_class': 'Resource Class',
         'retired': 'Retired',
@@ -118,6 +123,7 @@ class Resource(object):
         'type': 'Type',
         'updated_at': 'Updated At',
         'uuid': 'UUID',
+        'value': 'Value',
         'volume_id': 'Volume ID',
         'volume_type': 'Driver Volume Type',
         'local_link_connection': 'Local Link Connection',
@@ -134,6 +140,8 @@ class Resource(object):
         'raid_interface': 'RAID Interface',
         'rescue_interface': 'Rescue Interface',
         'storage_interface': 'Storage Interface',
+        'unique': 'Unique',
+        'upper_bound': 'Upper Bound',
         'vendor_interface': 'Vendor Interface',
         'standalone_ports_supported': 'Standalone Ports Supported',
         'physical_network': 'Physical Network',
@@ -381,7 +389,24 @@ TRAIT_RESOURCE = Resource(
 )
 
 BIOS_RESOURCE = Resource(
-    ['bios_name', 'bios_value'],
+    ['name', 'value'],
+    override_labels={'name': 'BIOS setting name',
+                     'value': 'BIOS setting value'}
+)
+
+BIOS_DETAILED_RESOURCE = Resource(
+    ['name',
+     'value',
+     'attribute_type',
+     'allowable_values',
+     'lower_bound',
+     'min_length',
+     'max_length',
+     'read_only',
+     'reset_required',
+     'unique',
+     'upper_bound'
+     ],
 )
 
 # Drivers

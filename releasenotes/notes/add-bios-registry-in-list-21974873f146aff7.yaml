@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Adds new params to the ``baremetal node bios setting list`` command to
+    include support for the BIOS registry. The ``--long`` option will
+    retrieve and display the additonal BIOS registry fields, the ``--fields``
+    option will retrieve and display selected fields. The ``baremetal node
+    bios setting show`` includes these fields by default with no changes.

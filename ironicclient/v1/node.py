@@ -847,8 +847,8 @@ class NodeManager(base.CreateManager):
             path, os_ironic_api_version=os_ironic_api_version,
             global_request_id=global_request_id).get(name)
 
-    def list_bios_settings(self, node_ident, os_ironic_api_version=None,
-                           global_request_id=None):
+    def list_bios_settings(self, node_ident, detail=False, fields=None,
+                           os_ironic_api_version=None, global_request_id=None):
         """List all BIOS settings from a node.
 
         :param node_ident: node UUID or name.
@@ -856,8 +856,23 @@ class NodeManager(base.CreateManager):
             the request.  If not specified, the client's default is used.
         :param global_request_id: String containing global request ID header
             value (in form "req-<UUID>") to use for the request.
+        :param detail: Optional, boolean whether to return detailed information
+                       about bios settings.
+        :param fields: Optional, a list with a specified set of fields
+                       of the resource to be returned. Can not be used
+                       when 'detail' is set.
+
         """
+        if detail and fields:
+            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
+                                         "with 'detail' set"))
+
+        filters = utils.common_filters(detail=detail, fields=fields)
         path = "%s/bios" % node_ident
+
+        if filters:
+            path += '?' + '&'.join(filters)
+
         return self._list_primitives(
             self._path(path), 'bios',
             os_ironic_api_version=os_ironic_api_version,
