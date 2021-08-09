@@ -590,6 +590,64 @@ class NodeManager(base.CreateManager):
                            os_ironic_api_version=os_ironic_api_version,
                            global_request_id=global_request_id)
 
+    def set_boot_mode(self, node_id, state,
+                      os_ironic_api_version=None, global_request_id=None):
+        """Sets boot mode for a node.
+
+        :param node_id: Node identifier
+        :param state: One of target boot modes, 'uefi' or 'bios'
+        :param os_ironic_api_version: String version (e.g. "1.76") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
+        :raises: ValueError if boot mode is not one of 'uefi' / 'bios'
+        :returns: The status of the request
+        """
+        if state not in ('uefi', 'bios'):
+            raise ValueError(
+                _("Valid boot modes are 'uefi' or 'bios'"))
+
+        path = "%s/states/boot_mode" % node_id
+        target = state
+        body = {'target': target}
+
+        return self.update(path, body, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
+
+    def set_secure_boot(self, node_id, state,
+                        os_ironic_api_version=None, global_request_id=None):
+        """Set the secure boot state for the node.
+
+        :param node_id: The UUID of the node.
+        :param state: the secure boot state; either a Boolean or a string
+                      representation of a Boolean (eg, 'true', 'on', 'false',
+                      'off'). True to turn secure boot on; False
+                      to turn secure boot off.
+        :param os_ironic_api_version: String version (e.g. "1.76") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
+        :raises: InvalidAttribute if state is an invalid string (that doesn't
+                 represent a Boolean).
+        """
+        if isinstance(state, bool):
+            target = state
+        else:
+            try:
+                target = strutils.bool_from_string(state, strict=True)
+            except ValueError as e:
+                raise exc.InvalidAttribute(_("Argument 'state': %(err)s") %
+                                           {'err': e})
+        path = "%s/states/secure_boot" % node_id
+        body = {'target': target}
+
+        return self.update(path, body, http_method='PUT',
+                           os_ironic_api_version=os_ironic_api_version,
+                           global_request_id=global_request_id)
+
     def set_target_raid_config(
             self, node_ident, target_raid_config,
             os_ironic_api_version=None, global_request_id=None):

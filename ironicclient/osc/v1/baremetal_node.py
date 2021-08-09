@@ -242,6 +242,38 @@ class BootdeviceShowBaremetalNode(command.ShowOne):
         return zip(*sorted(info.items()))
 
 
+class BootmodeSetBaremetalNode(command.Command):
+    """Set boot mode for baremetal node"""
+
+    log = logging.getLogger(__name__ + ".BootmodeSetBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(BootmodeSetBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node.")
+        )
+        parser.add_argument(
+            'boot_mode',
+            choices=['uefi', 'bios'],
+            metavar='<boot_mode>',
+            help=_('The boot mode to set for node (uefi/bios)')
+        )
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        baremetal_client.node.set_boot_mode(
+            parsed_args.node,
+            parsed_args.boot_mode)
+
+
 class CleanBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'clean'"""
 
@@ -1084,6 +1116,50 @@ class RescueBaremetalNode(ProvisionStateWithWait):
             help=("The password that will be used to login to the rescue "
                   "ramdisk. The value should be a non-empty string."))
         return parser
+
+
+class SecurebootOnBaremetalNode(command.Command):
+    """Turn secure boot on"""
+
+    log = logging.getLogger(__name__ + ".SecurebootOnBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(SecurebootOnBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node")
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        baremetal_client.node.set_secure_boot(parsed_args.node, 'on')
+
+
+class SecurebootOffBaremetalNode(command.Command):
+    """Turn secure boot off"""
+
+    log = logging.getLogger(__name__ + ".SecurebootOffBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(SecurebootOffBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node")
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        baremetal_client.node.set_secure_boot(parsed_args.node, 'off')
 
 
 class SetBaremetalNode(command.Command):
