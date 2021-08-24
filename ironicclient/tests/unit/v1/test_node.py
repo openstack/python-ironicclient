@@ -412,11 +412,25 @@ fake_responses = {
             None,
         ),
     },
+    '/v1/nodes/%s/states/boot_mode' % NODE1['uuid']:
+    {
+        'PUT': (
+            {},
+            None,
+        ),
+    },
     '/v1/nodes/%s/states/power' % NODE1['uuid']:
     {
         'PUT': (
             {},
             POWER_STATE,
+        ),
+    },
+    '/v1/nodes/%s/states/secure_boot' % NODE1['uuid']:
+    {
+        'PUT': (
+            {},
+            None,
         ),
     },
     '/v1/nodes/%s/validate' % NODE1['uuid']:
@@ -1451,6 +1465,53 @@ class NodeManagerTest(testtools.TestCase):
         self.assertRaises(ValueError,
                           self.mgr.set_power_state,
                           NODE1['uuid'], 'off', soft=False, timeout='a')
+
+    def test_node_set_boot_mode_bios(self):
+        target_state = 'bios'
+        self.mgr.set_boot_mode(NODE1['uuid'], target_state)
+        body = {'target': target_state}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/boot_mode' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
+    def test_node_set_boot_mode_invalid(self):
+        self.assertRaises(ValueError, self.mgr.set_boot_mode,
+                          NODE1['uuid'], 'ancient-bios')
+
+    def test_node_set_secure_boot_bool(self):
+        secure_boot = self.mgr.set_secure_boot(NODE1['uuid'], True)
+        body = {'target': True}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/secure_boot' % NODE1['uuid'],
+             {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(secure_boot)
+
+    def test_node_set_secure_boot_on(self):
+        secure_boot = self.mgr.set_secure_boot(NODE1['uuid'], 'on')
+        body = {'target': True}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/secure_boot' % NODE1['uuid'],
+             {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(secure_boot)
+
+    def test_node_set_secure_boot_off(self):
+        secure_boot = self.mgr.set_secure_boot(NODE1['uuid'], 'off')
+        body = {'target': False}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/secure_boot' % NODE1['uuid'],
+             {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(secure_boot)
+
+    def test_node_set_secure_boot_bad(self):
+        self.assertRaises(exc.InvalidAttribute, self.mgr.set_secure_boot,
+                          NODE1['uuid'], 'band')
 
     def test_set_target_raid_config(self):
         self.mgr.set_target_raid_config(
