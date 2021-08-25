@@ -77,11 +77,25 @@ fake_responses = {
             {'drivers': [DRIVER1]},
         ),
     },
+    '/v1/drivers/?fields=name,hosts':
+    {
+        'GET': (
+            {},
+            {'drivers': [DRIVER1]}
+        )
+    },
     '/v1/drivers/%s' % DRIVER1['name']:
     {
         'GET': (
             {},
             DRIVER1
+        ),
+    },
+    '/v1/drivers/%s?fields=name,hosts' % DRIVER1['name']:
+    {
+        'GET': (
+            {},
+            DRIVER1,
         ),
     },
     '/v1/drivers/%s/properties' % DRIVER2['name']:
@@ -135,6 +149,24 @@ class DriverManagerTest(testtools.TestCase):
             driver_attr[attr] = getattr(driver_, attr)
 
         self.assertEqual(DRIVER1, driver_attr)
+
+    def test_driver_list_fields(self):
+        drivers = self.mgr.list(fields=['name', 'hosts'])
+        expect = [
+            ('GET', '/v1/drivers/?fields=name,hosts', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(drivers, matchers.HasLength(1))
+
+    def test_driver_show_fields(self):
+        driver_ = self.mgr.get(DRIVER1['name'], fields=['name', 'hosts'])
+        expect = [
+            ('GET', '/v1/drivers/%s?fields=name,hosts' %
+             DRIVER1['name'], {}, None)
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(DRIVER1['name'], driver_.name)
+        self.assertEqual(DRIVER1['hosts'], driver_.hosts)
 
     def test_driver_properties(self):
         properties = self.mgr.properties(DRIVER2['name'])

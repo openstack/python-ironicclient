@@ -28,7 +28,7 @@ class DriverManager(base.Manager):
     _resource_name = 'drivers'
 
     def list(self, driver_type=None, detail=None, os_ironic_api_version=None,
-             global_request_id=None):
+             global_request_id=None, fields=None):
         """Retrieve a list of drivers.
 
         :param driver_type: Optional, string to filter the drivers by type.
@@ -41,13 +41,22 @@ class DriverManager(base.Manager):
             the request.  If not specified, the client's default is used.
         :param global_request_id: String containing global request ID header
             value (in form "req-<UUID>") to use for the request.
+        :param fields: Optional, a list with a specified set of fields
+                       of the resource to be returned. Can not be used
+                       when 'detail' is set.
         :returns: A list of drivers.
         """
+
         filters = []
+        if detail and fields:
+            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
+                                         "with 'detail' set"))
         if driver_type is not None:
             filters.append('type=%s' % driver_type)
         if detail is not None:
             filters.append('detail=%s' % detail)
+        if fields is not None:
+            filters.append('fields=%s' % ','.join(fields))
 
         path = ''
         if filters:
@@ -57,8 +66,8 @@ class DriverManager(base.Manager):
                           global_request_id=global_request_id)
 
     def get(self, driver_name, os_ironic_api_version=None,
-            global_request_id=None):
-        return self._get(resource_id=driver_name,
+            global_request_id=None, fields=None):
+        return self._get(resource_id=driver_name, fields=fields,
                          os_ironic_api_version=os_ironic_api_version,
                          global_request_id=global_request_id)
 

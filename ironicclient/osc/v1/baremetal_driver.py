@@ -12,8 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-
-
+import itertools
 import logging
 
 from osc_lib.command import command
@@ -39,11 +38,23 @@ class ListBaremetalDriver(command.Lister):
             help='Type of driver ("classic" or "dynamic"). '
                  'The default is to list all of them.'
         )
-        parser.add_argument(
+        display_group = parser.add_mutually_exclusive_group()
+        display_group.add_argument(
             '--long',
             action='store_true',
             default=None,
             help="Show detailed information about the drivers.")
+        display_group.add_argument(
+            '--fields',
+            nargs='+',
+            dest='fields',
+            metavar='<field>',
+            action='append',
+            default=[],
+            choices=res_fields.DRIVER_DETAILED_RESOURCE.fields,
+            help=_("One or more node fields. Only these fields will be "
+                   "fetched from the server. Can not be used when '--long' "
+                   "is specified."))
         return parser
 
     def take_action(self, parsed_args):
@@ -55,6 +66,12 @@ class ListBaremetalDriver(command.Lister):
         if parsed_args.long:
             labels = res_fields.DRIVER_DETAILED_RESOURCE.labels
             columns = res_fields.DRIVER_DETAILED_RESOURCE.fields
+        elif parsed_args.fields:
+            fields = itertools.chain.from_iterable(parsed_args.fields)
+            resource = res_fields.Resource(list(fields))
+            columns = resource.fields
+            labels = resource.labels
+            params['fields'] = columns
         else:
             labels = res_fields.DRIVER_RESOURCE.labels
             columns = res_fields.DRIVER_RESOURCE.fields
@@ -213,13 +230,26 @@ class ShowBaremetalDriver(command.ShowOne):
             'driver',
             metavar='<driver>',
             help=_('Name of the driver.'))
+        parser.add_argument(
+            '--fields',
+            nargs='+',
+            dest='fields',
+            metavar='<field>',
+            action='append',
+            default=[],
+            choices=res_fields.DRIVER_DETAILED_RESOURCE.fields,
+            help=_("One or more node fields. Only these fields will be "
+                   "fetched from the server."))
         return parser
 
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
         baremetal_client = self.app.client_manager.baremetal
 
-        driver = baremetal_client.driver.get(parsed_args.driver)._info
+        fields = list(itertools.chain.from_iterable(parsed_args.fields))
+        fields = fields if fields else None
+        driver = baremetal_client.driver.get(parsed_args.driver,
+                                             fields=fields)._info
         driver.pop("links", None)
         driver.pop("properties", None)
         # For list-type properties, show the values as comma separated

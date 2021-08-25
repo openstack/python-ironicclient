@@ -146,6 +146,69 @@ class TestListBaremetalDriver(TestBaremetalDriver):
         ),)
         self.assertEqual(datalist, tuple(data))
 
+    def test_baremetal_driver_list_fields(self):
+        arglist = [
+            '--fields', 'name', 'hosts'
+        ]
+        verifylist = [
+            ('fields', [['name', 'hosts']])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'driver_type': None,
+            'detail': None,
+            'fields': ('name', 'hosts')
+        }
+
+        self.baremetal_mock.driver.list.assert_called_with(**kwargs)
+
+    def test_baremetal_driver_list_fields_multiple(self):
+        arglist = [
+            '--fields', 'name',
+            '--fields', 'hosts', 'type'
+        ]
+        verifylist = [
+            ('fields', [['name'], ['hosts', 'type']])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'driver_type': None,
+            'detail': None,
+            'fields': ('name', 'hosts', 'type')
+        }
+
+        self.baremetal_mock.driver.list.assert_called_with(**kwargs)
+
+    def test_baremetal_driver_list_invalid_fields(self):
+        arglist = [
+            '--fields', 'name', 'invalid'
+        ]
+        verifylist = [
+            ('fields', [['name', 'invalid']])
+        ]
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_driver_list_fields_with_long(self):
+        arglist = [
+            '--fields', 'name', 'hosts',
+            '--long'
+        ]
+        verifylist = [
+            ('fields', [['name', 'invalid']]),
+            ('long', True)
+        ]
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
 
 class TestListBaremetalDriverProperty(TestBaremetalDriver):
 
@@ -362,7 +425,7 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
         columns, data = self.cmd.take_action(parsed_args)
 
         args = ['fakedrivername']
-        self.baremetal_mock.driver.get.assert_called_with(*args)
+        self.baremetal_mock.driver.get.assert_called_with(*args, fields=None)
         self.assertFalse(self.baremetal_mock.driver.properties.called)
 
         collist = ('default_bios_interface', 'default_boot_interface',
@@ -416,6 +479,57 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
     def test_baremetal_driver_show_no_arg(self):
         arglist = []
         verifylist = []
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_driver_show_fields(self):
+        arglist = [
+            'fakedrivername',
+            '--fields', 'name', 'hosts'
+        ]
+        verifylist = [
+            ('driver', 'fakedrivername'),
+            ('fields', [['name', 'hosts']])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        columns, data = self.cmd.take_action(parsed_args)
+
+        args = ['fakedrivername']
+        fields = ['name', 'hosts']
+        self.baremetal_mock.driver.get.assert_called_with(*args, fields=fields)
+        self.assertFalse(self.baremetal_mock.driver.properties.called)
+
+    def test_baremetal_driver_show_fields_multiple(self):
+        arglist = [
+            'fakedrivername',
+            '--fields', 'name',
+            '--fields', 'hosts', 'type'
+        ]
+        verifylist = [
+            ('driver', 'fakedrivername'),
+            ('fields', [['name'], ['hosts', 'type']])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        columns, data = self.cmd.take_action(parsed_args)
+
+        args = ['fakedrivername']
+        fields = ['name', 'hosts', 'type']
+        self.baremetal_mock.driver.get.assert_called_with(*args, fields=fields)
+        self.assertFalse(self.baremetal_mock.driver.properties.called)
+
+    def test_baremetal_driver_show_invalid_fields(self):
+        arglist = [
+            'fakedrivername',
+            '--fields', 'name', 'invalid'
+        ]
+        verifylist = [
+            ('driver', 'fakedrivername'),
+            ('fields', [['name', 'invalid']])
+        ]
 
         self.assertRaises(oscutils.ParserException,
                           self.check_parser,
