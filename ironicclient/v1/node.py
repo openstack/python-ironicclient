@@ -714,12 +714,16 @@ class NodeManager(base.CreateManager):
         path = "%s/states/provision" % node_uuid
         body = {'target': state}
         if configdrive:
-            if not isinstance(configdrive, dict):
+            if isinstance(configdrive, str):
                 if os.path.isfile(configdrive):
                     with open(configdrive, 'rb') as f:
                         configdrive = f.read()
-                if os.path.isdir(configdrive):
+                elif os.path.isdir(configdrive):
                     configdrive = utils.make_configdrive(configdrive)
+                else:
+                    raise ValueError('Config drive seems to refer to a file '
+                                     'or directory but this file/directory '
+                                     'does not exist: %s.' % configdrive)
 
             if isinstance(configdrive, bytes):
                 try:
