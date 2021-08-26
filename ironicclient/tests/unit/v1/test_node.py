@@ -1493,7 +1493,7 @@ class NodeManagerTest(testtools.TestCase):
     def test_node_set_provision_state_with_configdrive(self):
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
-                                     configdrive='foo')
+                                     configdrive=b'foo')
         body = {'target': target_state, 'configdrive': 'foo'}
         expect = [
             ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
@@ -1552,6 +1552,16 @@ class NodeManagerTest(testtools.TestCase):
             ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
         ]
         self.assertEqual(expect, self.api.calls)
+
+    def test_node_set_provision_state_fails_missing_dir_or_file(self):
+        target_state = 'active'
+
+        with common_utils.tempdir() as dirname:
+            self.assertRaisesRegex(ValueError,
+                                   'Config drive',
+                                   self.mgr.set_provision_state,
+                                   NODE1['uuid'], target_state,
+                                   configdrive=dirname + "/thisdoesnotexist")
 
     def test_node_set_provision_state_with_cleansteps(self):
         cleansteps = [{"step": "upgrade", "interface": "deploy"}]
