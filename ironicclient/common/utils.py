@@ -267,20 +267,30 @@ def make_configdrive(path):
     with tempfile.NamedTemporaryFile() as tmpfile:
         with tempfile.NamedTemporaryFile() as tmpzipfile:
             publisher = 'ironicclient-configdrive 0.1'
-            try:
-                p = subprocess.Popen(['genisoimage', '-o', tmpfile.name,
-                                      '-ldots', '-allow-lowercase',
-                                      '-allow-multidot', '-l',
-                                      '-publisher', publisher,
-                                      '-quiet', '-J',
-                                      '-r', '-V', 'config-2',
-                                      path],
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE)
-            except OSError as e:
+            # NOTE(toabctl): Luckily, genisoimage, mkisofs and xorrisofs
+            # understand the same parameters which are currently used.
+            cmds = ['genisoimage', 'mkisofs', 'xorrisofs']
+            for c in cmds:
+                try:
+                    p = subprocess.Popen([c, '-o', tmpfile.name,
+                                          '-ldots', '-allow-lowercase',
+                                          '-allow-multidot', '-l',
+                                          '-publisher', publisher,
+                                          '-quiet', '-J',
+                                          '-r', '-V', 'config-2',
+                                          path],
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE)
+                except OSError as e:
+                    error = e
+                else:
+                    error = None
+                    break
+            if error:
                 raise exc.CommandError(
                     _('Error generating the config drive. Make sure the '
-                      '"genisoimage" tool is installed. Error: %s') % e)
+                      '"genisoimage", "mkisofs", or "xorriso" tool is '
+                      'installed. Error: %s') % error)
 
             stdout, stderr = p.communicate()
             if p.returncode != 0:

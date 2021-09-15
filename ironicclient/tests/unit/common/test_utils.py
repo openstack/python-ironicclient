@@ -265,6 +265,20 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
                                 '-quiet', '-J', '-r', '-V',
                                 'config-2', mock.ANY]
 
+        self.mkisofs_cmd = ['mkisofs', '-o', mock.ANY,
+                            '-ldots', '-allow-lowercase',
+                            '-allow-multidot', '-l',
+                            '-publisher', 'ironicclient-configdrive 0.1',
+                            '-quiet', '-J', '-r', '-V',
+                            'config-2', mock.ANY]
+
+        self.xorrisofs_cmd = ['xorrisofs', '-o', mock.ANY,
+                              '-ldots', '-allow-lowercase',
+                              '-allow-multidot', '-l',
+                              '-publisher', 'ironicclient-configdrive 0.1',
+                              '-quiet', '-J', '-r', '-V',
+                              'config-2', mock.ANY]
+
     def test_make_configdrive(self, mock_popen):
         fake_process = mock.Mock(returncode=0)
         fake_process.communicate.return_value = ('', '')
@@ -276,6 +290,24 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
         mock_popen.assert_called_once_with(self.genisoimage_cmd,
                                            stderr=subprocess.PIPE,
                                            stdout=subprocess.PIPE)
+        fake_process.communicate.assert_called_once_with()
+
+    def test_make_configdrive_fallsback(self, mock_popen):
+        fake_process = mock.Mock(returncode=0)
+        fake_process.communicate.return_value = ('', '')
+        mock_popen.side_effect = iter([OSError('boom'),
+                                       OSError('boom'),
+                                       fake_process])
+        with utils.tempdir() as dirname:
+            utils.make_configdrive(dirname)
+        mock_popen.assert_has_calls([
+            mock.call(self.genisoimage_cmd, stderr=subprocess.PIPE,
+                      stdout=subprocess.PIPE),
+            mock.call(self.mkisofs_cmd, stderr=subprocess.PIPE,
+                      stdout=subprocess.PIPE),
+            mock.call(self.xorrisofs_cmd, stderr=subprocess.PIPE,
+                      stdout=subprocess.PIPE)
+        ])
         fake_process.communicate.assert_called_once_with()
 
     @mock.patch.object(os, 'access', autospec=True)
@@ -292,9 +324,14 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
 
         self.assertRaises(exc.CommandError, utils.make_configdrive, 'fake-dir')
         mock_access.assert_called_once_with('fake-dir', os.R_OK)
-        mock_popen.assert_called_once_with(self.genisoimage_cmd,
-                                           stderr=subprocess.PIPE,
-                                           stdout=subprocess.PIPE)
+        mock_popen.assert_has_calls([
+            mock.call(self.genisoimage_cmd, stderr=subprocess.PIPE,
+                      stdout=subprocess.PIPE),
+            mock.call(self.mkisofs_cmd, stderr=subprocess.PIPE,
+                      stdout=subprocess.PIPE),
+            mock.call(self.xorrisofs_cmd, stderr=subprocess.PIPE,
+                      stdout=subprocess.PIPE)
+        ])
 
     @mock.patch.object(os, 'access', autospec=True)
     def test_make_configdrive_non_zero_returncode(self, mock_access,
