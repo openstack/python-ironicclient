@@ -8,24 +8,26 @@ The ironicclient python API lets you access ironic, the OpenStack
 Bare Metal Provisioning Service.
 
 For example, to manipulate nodes, you interact with an
-`ironicclient.v1.node`_ object.
+:py:class:`ironicclient.v1.node.Node` object.
 You obtain access to nodes via attributes of the
-`ironicclient.v1.client.Client`_ object.
+:py:class:`ironicclient.v1.client.Client` object.
 
 Usage
 =====
 
 Get a Client object
 -------------------
-First, create an `ironicclient.v1.client.Client`_ instance by passing your
-credentials to `ironicclient.client.get_client()`_. By default, the
-Bare Metal Provisioning system is configured so that only administrators
+First, create an :py:class:`ironicclient.v1.client.Client` instance by passing
+your credentials to :py:meth:`ironicclient.client.get_client()`. By default,
+the Bare Metal Provisioning system is configured so that only administrators
 (users with 'admin' role) have access.
 
 .. note::
-    Explicit instantiation of `ironicclient.v1.client.Client`_ may cause
-    errors since it doesn't verify provided arguments, using
-    `ironicclient.client.get_client()` is preferred way to get client object.
+
+   Explicit instantiation of :py:class:`ironicclient.v1.client.Client` may
+   cause errors since it doesn't verify provided arguments, using
+   :py:meth:`ironicclient.client.get_client()` is preferred way to get client
+   object.
 
 There are two different sets of credentials that can be used::
 
@@ -81,15 +83,16 @@ To create a client, you can use the API like so::
 Perform ironic operations
 -------------------------
 
-Once you have an ironic `Client`_, you can perform various tasks::
+Once you have an :py:class:`ironicclient.v1.client.Client`, you can perform
+various tasks::
 
    >>> ironic.driver.list()  # list of drivers
    >>> ironic.node.list()  # list of nodes
    >>> ironic.node.get(node_uuid)  # information about a particular node
 
-When the `Client`_ needs to propagate an exception, it will usually
-raise an instance subclassed from
-`ironicclient.exc.BaseException`_ or `ironicclient.exc.ClientException`_.
+When the Client needs to propagate an exception, it will usually raise an
+instance subclassed from
+:py:class:`ironicclient.common.apiclient.exceptions.ClientException`.
 
 Refer to the modules themselves, for more details.
 
@@ -97,10 +100,3 @@ ironicclient Modules
 ====================
 
 * :ref:`modindex`
-
-.. _ironicclient.v1.node: api/ironicclient.v1.node.html#ironicclient.v1.node.Node
-.. _ironicclient.v1.client.Client: api/ironicclient.v1.client.html#ironicclient.v1.client.Client
-.. _Client: api/ironicclient.v1.client.html#ironicclient.v1.client.Client
-.. _ironicclient.client.get_client(): api/ironicclient.client.html#ironicclient.client.get_client
-.. _ironicclient.exc.BaseException: api/ironicclient.exc.html#ironicclient.exc.BaseException
-.. _ironicclient.exc.ClientException: api/ironicclient.exc.html#ironicclient.exc.ClientException
