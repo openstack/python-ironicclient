@@ -137,7 +137,8 @@ class App(app.App):
         self.config = os_config.OpenStackConfig(override_defaults=_DEFAULTS)
         super(App, self).__init__(description=_DESCRIPTION,
                                   version=str(version_info),
-                                  command_manager=mgr)
+                                  command_manager=mgr,
+                                  deferred_help=True)
 
     def build_option_parser(self, description, version, argparse_kwargs=None):
         parser = super(App, self).build_option_parser(
