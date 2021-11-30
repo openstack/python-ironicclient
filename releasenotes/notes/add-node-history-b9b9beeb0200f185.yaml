@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Adds support for API version ``1.78`` and "node history" functionality
+    allowing users to query a list of events, and retrieve a single history
+    event from a baremetal node.
+  - Adds ``get_history_list`` and ``get_history_event`` methods to the python
+    client library. These methods allow operators to query recorded node event
+    information from an ironic API, where supported and enabled.
