@@ -9,20 +9,10 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        # NOTE(rpittau): yoga jobs support py38 and py39 but we want to keep
-        # testing py36 to maintain compatibility with older distributions like
-        # CentOS Stream 8, Ubuntu Bionic, Debian 10, and openSuse Leap
-        # Remove after Yoga
-        - openstack-tox-py36
         - ironicclient-functional
         - ironicclient-tempest
     gate:
       queue: ironic
       jobs:
-        # NOTE(rpittau): yoga jobs support py38 and py39 but we want to keep
-        # testing py36 to maintain compatibility with older distributions like
-        # CentOS Stream 8, Ubuntu Bionic, Debian 10, and openSuse Leap
-        # Remove after Yoga
-        - openstack-tox-py36
         - ironicclient-functional
         - ironicclient-tempest
