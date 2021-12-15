@@ -243,7 +243,7 @@ class BootdeviceShowBaremetalNode(command.ShowOne):
 
 
 class BootmodeSetBaremetalNode(command.Command):
-    """Set boot mode for baremetal node"""
+    """Set the boot mode for the next baremetal node deployment"""
 
     log = logging.getLogger(__name__ + ".BootmodeSetBaremetalNode")
 
