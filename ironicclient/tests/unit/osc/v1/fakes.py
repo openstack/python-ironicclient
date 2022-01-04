@@ -229,6 +229,18 @@ DEPLOY_TEMPLATE = {
     'steps': baremetal_deploy_template_steps,
     'extra': baremetal_deploy_template_extra,
 }
+NODE_HISTORY = [
+    {
+        'uuid': 'abcdef1',
+        'created_at': 'time',
+        'severity': 'info',
+        'event': 'meow',
+        'event_type': 'purring',
+        'conductor': 'lap-conductor',
+        'user': '0191',
+        'links': {'href': 'url', 'rel': 'self'},
+    }
+]
 
 
 class TestBaremetal(utils.TestCommand):

@@ -2131,3 +2131,77 @@ class BIOSSettingShowBaremetalNode(command.ShowOne):
             parsed_args.node, parsed_args.setting_name)
         setting.pop("links", None)
         return self.dict2columns(setting)
+
+
+class NodeHistoryList(command.Lister):
+    """Get history events for a baremetal node."""
+
+    log = logging.getLogger(__name__ + ".NodeHistoryList")
+
+    def get_parser(self, prog_name):
+        parser = super(NodeHistoryList, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node.")
+        )
+        parser.add_argument(
+            '--long',
+            default=False,
+            help=_("Show detailed information about the BIOS settings."),
+            action='store_true')
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        if parsed_args.long:
+            labels = res_fields.NODE_HISTORY_DETAILED_RESOURCE.labels
+            fields = res_fields.NODE_HISTORY_DETAILED_RESOURCE.fields
+        else:
+            labels = res_fields.NODE_HISTORY_RESOURCE.labels
+            fields = res_fields.NODE_HISTORY_RESOURCE.fields
+
+        data = baremetal_client.node.get_history_list(
+            parsed_args.node,
+            parsed_args.long)
+
+        return (labels,
+                (oscutils.get_dict_properties(s, fields) for s in data))
+
+
+class NodeHistoryEventGet(command.ShowOne):
+    """Get history event for a baremetal node."""
+
+    log = logging.getLogger(__name__ + ".NodeHistoryEventGet")
+
+    def get_parser(self, prog_name):
+        parser = super(NodeHistoryEventGet, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node.")
+        )
+
+        parser.add_argument(
+            'event',
+            metavar='<event>',
+            help=_("UUID of the event.")
+        )
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        data = baremetal_client.node.get_history_event(
+            parsed_args.node,
+            parsed_args.event)
+        data.pop('links')
+
+        return self.dict2columns(data)

@@ -79,6 +79,8 @@ class Resource(object):
         'enabled_storage_interfaces': 'Enabled Storage Interfaces',
         'enabled_vendor_interfaces': 'Enabled Vendor Interfaces',
         'extra': 'Extra',
+        'event': 'Description of the event',
+        'event_type': 'Event Origin Type',
         'hostname': 'Hostname',
         'hosts': 'Active host(s)',
         'http_methods': 'Supported HTTP methods',
@@ -140,8 +142,10 @@ class Resource(object):
         'raid_interface': 'RAID Interface',
         'rescue_interface': 'Rescue Interface',
         'storage_interface': 'Storage Interface',
+        'severity': 'Severity',
         'unique': 'Unique',
         'upper_bound': 'Upper Bound',
+        'user': 'User',
         'vendor_interface': 'Vendor Interface',
         'standalone_ports_supported': 'Standalone Ports Supported',
         'physical_network': 'Physical Network',
@@ -569,4 +573,22 @@ DEPLOY_TEMPLATE_RESOURCE = Resource(
     ['uuid',
      'name',
      ],
+)
+
+
+NODE_HISTORY_RESOURCE = Resource(
+    ['uuid',
+     'created_at',
+     'severity',
+     'event']
+)
+
+NODE_HISTORY_DETAILED_RESOURCE = Resource(
+    ['uuid',
+     'created_at',
+     'severity',
+     'event_type',
+     'event',
+     'conductor',
+     'user']
 )
