@@ -169,21 +169,35 @@ class App(app.App):
         )
         return parser
 
+    # This is the openstacksdk default value
+    _STREAM_FORMAT = '%(asctime)s %(levelname)s: %(name)s %(message)s'
+
     def _configure_ironic_logging(self):
-        openstack.enable_logging(debug=self.options.debug)
-        # NOTE(dtantsur): I wish logging.basicConfig worked.. but it does not.
+        debug_enabled = self.options.debug or self.options.verbose_level > 1
+
+        openstack.enable_logging(debug=debug_enabled, stream=sys.stderr,
+                                 format_template=self._STREAM_FORMAT,
+                                 # No fancy formatting if debug is off
+                                 format_stream=debug_enabled)
+        # NOTE(dtantsur): prevent openstack logging from appearing again in the
+        # cliff handlers
+        for name in ('openstack', 'keystoneauth'):
+            logger = logging.getLogger(name)
+            logger.propagate = False
+
+        # NOTE(dtantsur): I wish logging.basicConfig worked, but at this point
+        # cliff has already started configuring logging.
         for name in ('ironicclient', 'ironic_inspector_client'):
             logger = logging.getLogger(name)
             logger.setLevel(
-                logging.DEBUG if self.options.debug else logging.WARNING)
-            # warnings are already configured by something else, only configure
+                logging.DEBUG if debug_enabled else logging.WARNING)
+            # warnings are already configured by cliff, only configure
             # debug logging for ironic.
-            if not logger.handlers and self.options.debug:
-                handler = logging.StreamHandler()
-                handler.setFormatter(logging.Formatter(
-                    # This is the openstacksdk default value
-                    '%(asctime)s %(levelname)s: %(name)s %(message)s'))
+            if not logger.handlers and debug_enabled:
+                handler = logging.StreamHandler(stream=sys.stderr)
+                handler.setFormatter(logging.Formatter(self._STREAM_FORMAT))
                 logger.addHandler(handler)
+                logger.propagate = False
 
     def initialize_app(self, argv):
         super(App, self).initialize_app(argv)

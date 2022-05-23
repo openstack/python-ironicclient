@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    OpenStackSDK log messages are no longer sent to stdout and no longer break
+    parsing the output.
+  - |
+    The logging configuration now respects the ``--verbose`` flag.
+  - |
+    Some warnings are no longer duplicated.
