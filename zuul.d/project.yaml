@@ -12,7 +12,6 @@
         - ironicclient-functional
         - ironicclient-tempest
     gate:
-      queue: ironic
       jobs:
         - ironicclient-functional
         - ironicclient-tempest
