@@ -61,8 +61,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Ironic Client Release Notes'
-copyright = u'2015, Ironic Developers'
+project = 'Ironic Client Release Notes'
+copyright = '2015, Ironic Developers'
 
 # Release notes are version independent.
 # The short X.Y version.
@@ -208,8 +208,8 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     ('index', 'IronicClientReleaseNotes.tex',
-     u'Ironic Client Release Notes Documentation',
-     u'Ironic Developers', 'manual'),
+     'Ironic Client Release Notes Documentation',
+     'Ironic Developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -239,8 +239,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'ironicclientreleasenotes',
-     u'Ironic Client Release Notes Documentation',
-     [u'Ironic Developers'], 1)
+     'Ironic Client Release Notes Documentation',
+     ['Ironic Developers'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -254,8 +254,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'IronicClientReleaseNotes',
-     u'Ironic Client Release Notes Documentation',
-     u'Ironic Developers', 'IronicClientReleaseNotes',
+     'Ironic Client Release Notes Documentation',
+     'Ironic Developers', 'IronicClientReleaseNotes',
      'Bare metal provisioning service client.',
      'Miscellaneous'),
 ]
