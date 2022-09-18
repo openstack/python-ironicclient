@@ -316,7 +316,7 @@ class TestBaremetalDeployTemplateDelete(TestBaremetalDeployTemplate):
         self.cmd.take_action(parsed_args)
 
         args = ['zzz-zzzzzz-zzzz', 'fakename']
-        self.baremetal_mock.deploy_template.delete.has_calls(
+        self.baremetal_mock.deploy_template.delete.assert_has_calls(
             [mock.call(x) for x in args])
         self.assertEqual(
             2, self.baremetal_mock.deploy_template.delete.call_count)
@@ -333,7 +333,7 @@ class TestBaremetalDeployTemplateDelete(TestBaremetalDeployTemplate):
                           parsed_args)
 
         args = ['zzz-zzzzzz-zzzz', 'badname']
-        self.baremetal_mock.deploy_template.delete.has_calls(
+        self.baremetal_mock.deploy_template.delete.assert_has_calls(
             [mock.call(x) for x in args])
         self.assertEqual(
             2, self.baremetal_mock.deploy_template.delete.call_count)
