@@ -418,6 +418,8 @@ def poll(timeout, poll_interval, poll_delay_function, timeout_message):
         poll_delay_function(poll_interval)
         count += 1
 
+    if callable(timeout_message):
+        timeout_message = timeout_message()
     raise exc.StateTransitionTimeout(timeout_message)
 
 

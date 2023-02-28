@@ -2014,6 +2014,78 @@ class NodeManagerTest(testtools.TestCase):
         mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
         self.assertEqual(3, mock_sleep.call_count)
 
+    @mock.patch.object(time, 'sleep', autospec=True)
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
+    def test_wait_for_provision_state_several(self, mock_get, mock_sleep):
+        mock_get.side_effect = [
+            self._fake_node_for_wait('deploying', target='active'),
+            # Sometimes non-fatal errors can be recorded in last_error
+            self._fake_node_for_wait('deploying', target='active',
+                                     error='Node locked'),
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('active'),
+            self._fake_node_for_wait('active'),
+        ]
+
+        self.mgr.wait_for_provision_state(['node1', 'node2'], 'active')
+
+        mock_get.assert_has_calls([
+            mock.call(self.mgr, 'node1', os_ironic_api_version=None,
+                      global_request_id=None),
+            mock.call(self.mgr, 'node2', os_ironic_api_version=None,
+                      global_request_id=None),
+        ], any_order=True)
+        self.assertEqual(6, mock_get.call_count)
+        mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
+        self.assertEqual(2, mock_sleep.call_count)
+
+    @mock.patch.object(time, 'sleep', autospec=True)
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
+    def test_wait_for_provision_state_one_failed(self, mock_get, mock_sleep):
+        mock_get.side_effect = [
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('deploying', target='active'),
+            self._fake_node_for_wait('active'),
+            self._fake_node_for_wait('deploy failed', error='boom'),
+        ]
+
+        self.assertRaisesRegex(exc.StateTransitionFailed,
+                               'boom',
+                               self.mgr.wait_for_provision_state,
+                               ['node1', 'node2'], 'active')
+
+        mock_get.assert_has_calls([
+            mock.call(self.mgr, 'node1', os_ironic_api_version=None,
+                      global_request_id=None),
+            mock.call(self.mgr, 'node2', os_ironic_api_version=None,
+                      global_request_id=None),
+        ], any_order=True)
+        self.assertEqual(4, mock_get.call_count)
+        mock_sleep.assert_called_with(node._DEFAULT_POLL_INTERVAL)
+        self.assertEqual(1, mock_sleep.call_count)
+
+    @mock.patch.object(time, 'sleep', autospec=True)
+    @mock.patch.object(node.NodeManager, 'get', autospec=True)
+    def test_wait_for_provision_state_one_timeout(self, mock_get, mock_sleep):
+        fake_waiting_node = self._fake_node_for_wait(
+            'deploying', target='active')
+        fake_success_node = self._fake_node_for_wait('active')
+
+        def side_effect(node_manager, node_ident, *args, **kwargs):
+            if node_ident == 'node1':
+                return fake_success_node
+            else:
+                return fake_waiting_node
+
+        mock_get.side_effect = side_effect
+
+        self.assertRaisesRegex(exc.StateTransitionTimeout,
+                               r'Node\(s\) node2',
+                               self.mgr.wait_for_provision_state,
+                               ['node1', 'node2'], 'active',
+                               timeout=0.001)
+
     def test_node_get_traits(self):
         traits = self.mgr.get_traits(NODE1['uuid'])
         expect = [

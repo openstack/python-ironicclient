@@ -61,9 +61,10 @@ class ProvisionStateBaremetalNode(command.Command):
         parser = super(ProvisionStateBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node.")
+            nargs='+',
+            help=_("Names or UUID's of the nodes.")
         )
         parser.add_argument(
             '--provision-state',
@@ -96,13 +97,14 @@ class ProvisionStateBaremetalNode(command.Command):
 
         rescue_password = getattr(parsed_args, 'rescue_password', None)
 
-        baremetal_client.node.set_provision_state(
-            parsed_args.node,
-            parsed_args.provision_state,
-            configdrive=config_drive,
-            cleansteps=clean_steps,
-            deploysteps=deploy_steps,
-            rescue_password=rescue_password)
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_provision_state(
+                node,
+                parsed_args.provision_state,
+                configdrive=config_drive,
+                cleansteps=clean_steps,
+                deploysteps=deploy_steps,
+                rescue_password=rescue_password)
 
 
 class ProvisionStateWithWait(ProvisionStateBaremetalNode):
@@ -145,11 +147,12 @@ class ProvisionStateWithWait(ProvisionStateBaremetalNode):
                 _("'--wait is not supported for provision state '%s'")
                 % parsed_args.provision_state)
 
-        print(_('Waiting for provision state %(state)s on node %(node)s') %
-              {'state': wait_args['expected_state'], 'node': parsed_args.node})
+        print(_('Waiting for provision state %(state)s on node(s) %(node)s') %
+              {'state': wait_args['expected_state'],
+               'node': ', '.join(parsed_args.nodes)})
 
         baremetal_client.node.wait_for_provision_state(
-            parsed_args.node,
+            parsed_args.nodes,
             timeout=parsed_args.wait_timeout,
             **wait_args)
 
@@ -177,9 +180,10 @@ class BootdeviceSetBaremetalNode(command.Command):
         parser = super(BootdeviceSetBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node")
+            nargs='+',
+            help=_("Names or UUID's of the nodes")
         )
         parser.add_argument(
             'device',
@@ -200,10 +204,9 @@ class BootdeviceSetBaremetalNode(command.Command):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-        baremetal_client.node.set_boot_device(
-            parsed_args.node,
-            parsed_args.device,
-            parsed_args.persistent)
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_boot_device(
+                node, parsed_args.device, parsed_args.persistent)
 
 
 class BootdeviceShowBaremetalNode(command.ShowOne):
@@ -251,9 +254,10 @@ class BootmodeSetBaremetalNode(command.Command):
         parser = super(BootmodeSetBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node.")
+            nargs='+',
+            help=_("Names or UUID's of the nodes.")
         )
         parser.add_argument(
             'boot_mode',
@@ -268,10 +272,8 @@ class BootmodeSetBaremetalNode(command.Command):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-
-        baremetal_client.node.set_boot_mode(
-            parsed_args.node,
-            parsed_args.boot_mode)
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_boot_mode(node, parsed_args.boot_mode)
 
 
 class CleanBaremetalNode(ProvisionStateWithWait):
@@ -306,9 +308,10 @@ class ConsoleDisableBaremetalNode(command.Command):
         parser = super(ConsoleDisableBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node")
+            nargs='+',
+            help=_("Names or UUID's of the nodes")
         )
         return parser
 
@@ -316,7 +319,8 @@ class ConsoleDisableBaremetalNode(command.Command):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-        baremetal_client.node.set_console_mode(parsed_args.node, False)
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_console_mode(node, False)
 
 
 class ConsoleEnableBaremetalNode(command.Command):
@@ -328,9 +332,10 @@ class ConsoleEnableBaremetalNode(command.Command):
         parser = super(ConsoleEnableBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node")
+            nargs='+',
+            help=_("Names or UUID's of the nodes")
         )
         return parser
 
@@ -338,7 +343,8 @@ class ConsoleEnableBaremetalNode(command.Command):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-        baremetal_client.node.set_console_mode(parsed_args.node, True)
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_console_mode(node, True)
 
 
 class ConsoleShowBaremetalNode(command.ShowOne):
@@ -817,9 +823,10 @@ class MaintenanceSetBaremetalNode(command.Command):
         parser = super(MaintenanceSetBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node.")
+            nargs='+',
+            help=_("Names or UUID's of the nodes.")
         )
         parser.add_argument(
             '--reason',
@@ -834,10 +841,9 @@ class MaintenanceSetBaremetalNode(command.Command):
 
         baremetal_client = self.app.client_manager.baremetal
 
-        baremetal_client.node.set_maintenance(
-            parsed_args.node,
-            True,
-            maint_reason=parsed_args.reason)
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_maintenance(
+                node, True, maint_reason=parsed_args.reason)
 
 
 class MaintenanceUnsetBaremetalNode(command.Command):
@@ -850,9 +856,10 @@ class MaintenanceUnsetBaremetalNode(command.Command):
                        self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node.")
+            nargs='+',
+            help=_("Names or UUID's of the nodes.")
         )
         return parser
 
@@ -861,9 +868,8 @@ class MaintenanceUnsetBaremetalNode(command.Command):
 
         baremetal_client = self.app.client_manager.baremetal
 
-        baremetal_client.node.set_maintenance(
-            parsed_args.node,
-            False)
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_maintenance(node, False)
 
 
 class ManageBaremetalNode(ProvisionStateWithWait):
@@ -971,9 +977,10 @@ class PowerBaremetalNode(command.Command):
         parser = super(PowerBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node.")
+            nargs='+',
+            help=_("Names or UUID's of the nodes.")
         )
         parser.add_argument(
             '--power-timeout',
@@ -992,9 +999,10 @@ class PowerBaremetalNode(command.Command):
 
         soft = getattr(parsed_args, 'soft', False)
 
-        baremetal_client.node.set_power_state(
-            parsed_args.node, self.POWER_STATE, soft,
-            timeout=parsed_args.power_timeout)
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_power_state(
+                node, self.POWER_STATE, soft,
+                timeout=parsed_args.power_timeout)
 
 
 class PowerOffBaremetalNode(PowerBaremetalNode):
@@ -1038,9 +1046,10 @@ class RebootBaremetalNode(command.Command):
         parser = super(RebootBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node.")
+            nargs='+',
+            help=_("Names or UUID's of the nodes.")
         )
         parser.add_argument(
             '--soft',
@@ -1065,9 +1074,10 @@ class RebootBaremetalNode(command.Command):
 
         baremetal_client = self.app.client_manager.baremetal
 
-        baremetal_client.node.set_power_state(
-            parsed_args.node, 'reboot', parsed_args.soft,
-            timeout=parsed_args.power_timeout)
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_power_state(
+                node, 'reboot', parsed_args.soft,
+                timeout=parsed_args.power_timeout)
 
 
 class RebuildBaremetalNode(ProvisionStateWithWait):
@@ -1127,8 +1137,9 @@ class SecurebootOnBaremetalNode(command.Command):
         parser = super(SecurebootOnBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
+            nargs='+',
             help=_("Name or UUID of the node")
         )
         return parser
@@ -1137,7 +1148,8 @@ class SecurebootOnBaremetalNode(command.Command):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-        baremetal_client.node.set_secure_boot(parsed_args.node, 'on')
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_secure_boot(node, 'on')
 
 
 class SecurebootOffBaremetalNode(command.Command):
@@ -1149,8 +1161,9 @@ class SecurebootOffBaremetalNode(command.Command):
         parser = super(SecurebootOffBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
+            nargs='+',
             help=_("Name or UUID of the node")
         )
         return parser
@@ -1159,7 +1172,8 @@ class SecurebootOffBaremetalNode(command.Command):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-        baremetal_client.node.set_secure_boot(parsed_args.node, 'off')
+        for node in parsed_args.nodes:
+            baremetal_client.node.set_secure_boot(node, 'off')
 
 
 class SetBaremetalNode(command.Command):
@@ -1184,9 +1198,10 @@ class SetBaremetalNode(command.Command):
         parser = super(SetBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node."),
+            nargs='+',
+            help=_("Names or UUID's of the nodes."),
         )
         parser.add_argument(
             "--instance-uuid",
@@ -1389,6 +1404,13 @@ class SetBaremetalNode(command.Command):
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
 
+        if parsed_args.name and len(parsed_args.nodes) > 1:
+            raise exc.CommandError(
+                _("--name cannot be used with more than one node"))
+        if parsed_args.instance_uuid and len(parsed_args.nodes) > 1:
+            raise exc.CommandError(
+                _("--instance-uuid cannot be used with more than one node"))
+
         baremetal_client = self.app.client_manager.baremetal
 
         # NOTE(rloo): Do this before updating the rest. Otherwise, it won't
@@ -1398,8 +1420,8 @@ class SetBaremetalNode(command.Command):
             raid_config = parsed_args.target_raid_config
             raid_config = utils.handle_json_arg(raid_config,
                                                 'target_raid_config')
-            baremetal_client.node.set_target_raid_config(parsed_args.node,
-                                                         raid_config)
+            for node in parsed_args.nodes:
+                baremetal_client.node.set_target_raid_config(node, raid_config)
 
         properties = []
         for field in ['instance_uuid', 'name',
@@ -1451,9 +1473,10 @@ class SetBaremetalNode(command.Command):
             properties.extend(utils.args_array_to_patch('add', network_data))
 
         if properties:
-            baremetal_client.node.update(
-                parsed_args.node, properties,
-                reset_interfaces=parsed_args.reset_interfaces)
+            for node in parsed_args.nodes:
+                baremetal_client.node.update(
+                    node, properties,
+                    reset_interfaces=parsed_args.reset_interfaces)
         elif not parsed_args.target_raid_config:
             self.log.warning("Please specify what to set.")
 
@@ -1534,9 +1557,10 @@ class UnsetBaremetalNode(command.Command):
         parser = super(UnsetBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node.")
+            nargs='+',
+            help=_("Names or UUID's of the nodes.")
         )
         parser.add_argument(
             '--instance-uuid',
@@ -1732,7 +1756,8 @@ class UnsetBaremetalNode(command.Command):
         #             work if parsed_args.node is the name and the name is
         #             also being removed.
         if parsed_args.target_raid_config:
-            baremetal_client.node.set_target_raid_config(parsed_args.node, {})
+            for node in parsed_args.nodes:
+                baremetal_client.node.set_target_raid_config(node, {})
 
         properties = []
         for field in ['instance_uuid', 'name', 'chassis_uuid',
@@ -1765,8 +1790,10 @@ class UnsetBaremetalNode(command.Command):
         if parsed_args.network_data:
             properties.extend(utils.args_array_to_patch(
                 'remove', ["network_data"]))
+
         if properties:
-            baremetal_client.node.update(parsed_args.node, properties)
+            for node in parsed_args.nodes:
+                baremetal_client.node.update(node, properties)
         elif not parsed_args.target_raid_config:
             self.log.warning("Please specify what to unset.")
 
@@ -1912,9 +1939,10 @@ class InjectNmiBaremetalNode(command.Command):
         parser = super(InjectNmiBaremetalNode, self).get_parser(prog_name)
 
         parser.add_argument(
-            'node',
+            'nodes',
             metavar='<node>',
-            help=_("Name or UUID of the node.")
+            nargs='+',
+            help=_("Names or UUID's of the nodes.")
         )
 
         return parser
@@ -1923,8 +1951,8 @@ class InjectNmiBaremetalNode(command.Command):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-
-        baremetal_client.node.inject_nmi(parsed_args.node)
+        for node in parsed_args.nodes:
+            baremetal_client.node.inject_nmi(node)
 
 
 class ListTraitsBaremetalNode(command.Lister):
