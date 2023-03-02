@@ -413,3 +413,16 @@ class HandleJsonFileTest(test_utils.BaseTestCase):
                                    "from file",
                                    utils.handle_json_or_file_arg, f.name)
             mock_open.assert_called_once_with(f.name, 'r')
+
+
+class GetJsonDataTest(test_utils.BaseTestCase):
+
+    def test_success(self):
+        result = utils.get_json_data(b'\n{"answer": 42}')
+        self.assertEqual({"answer": 42}, result)
+
+    def test_definitely_not_json(self):
+        self.assertIsNone(utils.get_json_data(b'0x010x020x03'))
+
+    def test_could_be_json(self):
+        self.assertIsNone(utils.get_json_data(b'{"hahaha, just kidding\x00'))
