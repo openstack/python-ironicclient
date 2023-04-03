@@ -435,3 +435,24 @@ def handle_json_arg(json_arg, info_desc):
     if json_arg:
         json_arg = handle_json_or_file_arg(json_arg)
     return json_arg
+
+
+def get_json_data(data):
+    """Check if the binary data is JSON and parse it if so.
+
+    Only supports dictionaries.
+    """
+    # We don't want to simply loads() a potentially large binary. Doing so,
+    # in my testing, is orders of magnitude (!!) slower than this process.
+    for idx in range(len(data)):
+        char = data[idx:idx + 1]
+        if char.isspace():
+            continue
+        if char != b'{' and char != 'b[':
+            return None  # not JSON, at least not JSON we care about
+        break  # maybe JSON
+
+    try:
+        return json.loads(data)
+    except ValueError:
+        return None

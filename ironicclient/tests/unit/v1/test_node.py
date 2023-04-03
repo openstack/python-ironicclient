@@ -1599,6 +1599,23 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
+    def test_node_set_provision_state_with_configdrive_json_file(self):
+        target_state = 'active'
+        file_content = b'{"user_data": "foo bar"}'
+
+        with tempfile.NamedTemporaryFile() as f:
+            f.write(file_content)
+            f.flush()
+            self.mgr.set_provision_state(NODE1['uuid'], target_state,
+                                         configdrive=f.name)
+
+        body = {'target': target_state,
+                'configdrive': {"user_data": "foo bar"}}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
     @mock.patch.object(common_utils, 'make_configdrive', autospec=True)
     def test_node_set_provision_state_with_configdrive_dir(self,
                                                            mock_configdrive):

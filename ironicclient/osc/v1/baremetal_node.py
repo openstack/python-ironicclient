@@ -32,11 +32,11 @@ CONFIG_DRIVE_ARG_HELP = _(
     "A gzipped, base64-encoded configuration drive string OR "
     "the path to the configuration drive file OR the path to a "
     "directory containing the config drive files OR a JSON object to build "
-    "config drive from. In case it's a directory, a config drive will be "
-    "generated from it. In case it's a JSON object with optional keys "
-    "`meta_data`, `user_data` and `network_data`, a config drive will "
-    "be generated on the server side (see the bare metal API reference for "
-    "more details).")
+    "config drive from OR the path to the JSON file. In case it's a "
+    "directory, a config drive will be generated from it. In case it's a JSON "
+    "object with optional keys `meta_data`, `user_data` and `network_data` "
+    "or a JSON file, a config drive will be generated on the server side "
+    "(see the bare metal API reference for more details).")
 
 
 NETWORK_DATA_ARG_HELP = _(

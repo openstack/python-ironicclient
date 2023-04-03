@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    The ``--config-drive`` argument to the ``node deploy`` CLI command, as well
+    as the underlying ``configdrive`` argument to the ``set_provision_state``
+    call now accept a JSON file with a dictionary.

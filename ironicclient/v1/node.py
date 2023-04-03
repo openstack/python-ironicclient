@@ -684,13 +684,18 @@ class NodeManager(base.CreateManager):
         :param state: The desired provision state. One of 'active', 'deleted',
              'rebuild', 'inspect', 'provide', 'manage', 'clean', 'abort',
              'rescue', 'unrescue'.
-        :param configdrive: A gzipped, base64-encoded configuration drive
-            string OR the path to the configuration drive file OR the path to
-            a directory containing the config drive files OR a dictionary to
-            build config drive from. In case it's a directory, a config drive
-            will be generated from it. In case it's a dictionary, a config
-            drive will be generated on the server side (requires API version
-            1.56). This is only valid when setting state to 'active'.
+        :param configdrive: One of:
+
+            * a gzipped, base64-encoded configuration drive string
+            * a dictionary to build config drive from
+            * a path to the configuration drive file (ISO 9660 or VFAT)
+            * a path to a directory containing the config drive files
+            * a path to a JSON file to build config from
+
+            In case it's a directory, a config drive will be generated from
+            it. In case it's a dictionary or a JSON file, a config drive will
+            be generated on the server side (requires API version 1.56).
+            This is only valid when setting state to 'active'.
         :param cleansteps: The clean steps as a list of clean-step
             dictionaries; each dictionary should have keys 'interface' and
             'step', and optional key 'args'. This must be specified (and is
@@ -718,6 +723,9 @@ class NodeManager(base.CreateManager):
                 if os.path.isfile(configdrive):
                     with open(configdrive, 'rb') as f:
                         configdrive = f.read()
+                    json_data = utils.get_json_data(configdrive)
+                    if json_data is not None:
+                        configdrive = json_data
                 elif os.path.isdir(configdrive):
                     configdrive = utils.make_configdrive(configdrive)
                 else:
