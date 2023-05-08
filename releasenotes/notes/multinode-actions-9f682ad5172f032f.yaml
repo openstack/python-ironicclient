@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Most of the node action commands now support providing several nodes.
+    The nodes are processed sequentially, the process is stopped on first
+    failure.
+  - |
+    The ``wait_for_provision_state`` Python call now supports several nodes.

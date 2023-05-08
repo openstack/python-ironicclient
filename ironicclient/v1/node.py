@@ -948,6 +948,43 @@ class NodeManager(base.CreateManager):
             os_ironic_api_version=os_ironic_api_version,
             global_request_id=global_request_id)
 
+    def _check_one_provision_state(self, node_ident, expected_state,
+                                   fail_on_unexpected_state=True,
+                                   os_ironic_api_version=None,
+                                   global_request_id=None):
+        # TODO(dtantsur): use version negotiation to request API 1.8 and use
+        # the "fields" argument to reduce amount of data sent.
+        node = self.get(
+            node_ident, os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
+        if node.provision_state == expected_state:
+            LOG.debug('Node %(node)s reached provision state %(state)s',
+                      {'node': node_ident, 'state': expected_state})
+            return True
+
+        # Note that if expected_state == 'error' we still succeed
+        if (node.provision_state == 'error'
+                or node.provision_state.endswith(' failed')):
+            raise exc.StateTransitionFailed(
+                _('Node %(node)s failed to reach state %(state)s. '
+                    'It\'s in state %(actual)s, and has error: %(error)s') %
+                {'node': node_ident, 'state': expected_state,
+                    'actual': node.provision_state, 'error': node.last_error})
+
+        if fail_on_unexpected_state and not node.target_provision_state:
+            raise exc.StateTransitionFailed(
+                _('Node %(node)s failed to reach state %(state)s. '
+                    'It\'s in unexpected stable state %(actual)s') %
+                {'node': node_ident, 'state': expected_state,
+                 'actual': node.provision_state})
+
+        LOG.debug('Still waiting for node %(node)s to reach state '
+                  '%(state)s, the current state is %(actual)s',
+                  {'node': node_ident, 'state': expected_state,
+                   'actual': node.provision_state})
+
+        return False
+
     def wait_for_provision_state(self, node_ident, expected_state,
                                  timeout=0,
                                  poll_interval=_DEFAULT_POLL_INTERVAL,
@@ -955,7 +992,7 @@ class NodeManager(base.CreateManager):
                                  fail_on_unexpected_state=True,
                                  os_ironic_api_version=None,
                                  global_request_id=None):
-        """Helper function to wait for a node to reach a given state.
+        """Helper function to wait for nodes to reach a given state.
 
         Polls Ironic API in a loop until node gets to a requested state.
 
@@ -965,7 +1002,7 @@ class NodeManager(base.CreateManager):
         * Unexpected stable state is reached and fail_on_unexpected_state is on
         * Error state is reached (if it's not equal to expected_state)
 
-        :param node_ident: node UUID or name
+        :param node_ident: node UUID or name (one or a list)
         :param expected_state: expected final provision state
         :param timeout: timeout in seconds, no timeout if 0
         :param poll_interval: interval in seconds between 2 poll
@@ -983,43 +1020,32 @@ class NodeManager(base.CreateManager):
         :raises: StateTransitionTimeout on timeout
         """
         expected_state = expected_state.lower()
-        timeout_msg = _('Node %(node)s failed to reach state %(state)s in '
-                        '%(timeout)s seconds') % {'node': node_ident,
-                                                  'state': expected_state,
-                                                  'timeout': timeout}
+        if not isinstance(node_ident, list):
+            node_ident = [node_ident]
+        unfinished = node_ident
 
-        # TODO(dtantsur): use version negotiation to request API 1.8 and use
-        # the "fields" argument to reduce amount of data sent.
+        def _timeout():
+            return (
+                _('Node(s) %(node)s failed to reach state %(state)s in '
+                  '%(timeout)s seconds')
+                % {'node': ', '.join(unfinished),
+                   'state': expected_state,
+                   'timeout': timeout}
+            )
+
         for _count in utils.poll(timeout, poll_interval, poll_delay_function,
-                                 timeout_msg):
-            node = self.get(
-                node_ident, os_ironic_api_version=os_ironic_api_version,
-                global_request_id=global_request_id)
-            if node.provision_state == expected_state:
-                LOG.debug('Node %(node)s reached provision state %(state)s',
-                          {'node': node_ident, 'state': expected_state})
-                return
-
-            # Note that if expected_state == 'error' we still succeed
-            if (node.provision_state == 'error'
-                    or node.provision_state.endswith(' failed')):
-                raise exc.StateTransitionFailed(
-                    _('Node %(node)s failed to reach state %(state)s. '
-                      'It\'s in state %(actual)s, and has error: %(error)s') %
-                    {'node': node_ident, 'state': expected_state,
-                     'actual': node.provision_state, 'error': node.last_error})
-
-            if fail_on_unexpected_state and not node.target_provision_state:
-                raise exc.StateTransitionFailed(
-                    _('Node %(node)s failed to reach state %(state)s. '
-                      'It\'s in unexpected stable state %(actual)s') %
-                    {'node': node_ident, 'state': expected_state,
-                     'actual': node.provision_state})
-
-            LOG.debug('Still waiting for node %(node)s to reach state '
-                      '%(state)s, the current state is %(actual)s',
-                      {'node': node_ident, 'state': expected_state,
-                       'actual': node.provision_state})
+                                 _timeout):
+            current, unfinished = unfinished, []
+            for node in current:
+                if not self._check_one_provision_state(
+                        node,
+                        expected_state,
+                        fail_on_unexpected_state=fail_on_unexpected_state,
+                        os_ironic_api_version=os_ironic_api_version,
+                        global_request_id=global_request_id):
+                    unfinished.append(node)
+            if not unfinished:
+                break
 
     def get_history_list(self,
                          node_ident,
