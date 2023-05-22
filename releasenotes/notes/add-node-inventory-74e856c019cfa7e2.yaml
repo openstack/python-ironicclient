@@ -1,0 +1,7 @@
+features:
+  - |
+    Adds support for API version ``1.81``, allowing users to retrieve a node's
+    hardware inventory using the
+    ``baremetal node inventory [--file <filename>] save <node>`` command.
+  - Adds a ``get_inventory`` method to the python client library. This method
+    allows operators to query recorded node inventory from an ironic API.

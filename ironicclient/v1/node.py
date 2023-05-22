@@ -1099,3 +1099,22 @@ class NodeManager(base.CreateManager):
         return self._get_as_dict(
             path, os_ironic_api_version=os_ironic_api_version,
             global_request_id=global_request_id)
+
+    def get_inventory(self,
+                      node_ident,
+                      os_ironic_api_version=None,
+                      global_request_id=None):
+        """Get the hardware inventory of the node.
+
+        Requires API version 1.81.
+
+        :param node_ident: The name or UUID of the node.
+        :param os_ironic_api_version: String version (e.g. "1.81") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+        """
+        path = "%s/inventory" % node_ident
+        return self._get_as_dict(
+            path, os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id)
