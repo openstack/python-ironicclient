@@ -1085,7 +1085,7 @@ class NodeManager(base.CreateManager):
         """Get a single event record for a node.
 
         Provides the ability to request, and return
-        a node's single vent hisotyr entry.
+        a node's single event history entry.
 
         :param node_ident: The name or UUID of the node.
         :param event: The UUID of the event entry as listed

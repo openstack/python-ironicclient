@@ -880,9 +880,9 @@ class ManageBaremetalNode(ProvisionStateWithWait):
 
 
 class PassthruCallBaremetalNode(command.Command):
-    """Call a vendor passthu method for a node"""
+    """Call a vendor passthru method for a node"""
 
-    log = logging.getLogger(__name__ + ".PassthuCallBaremetalNode")
+    log = logging.getLogger(__name__ + ".PassthruCallBaremetalNode")
 
     def get_parser(self, prog_name):
         parser = super(PassthruCallBaremetalNode, self).get_parser(
@@ -2177,7 +2177,7 @@ class NodeHistoryList(command.Lister):
         parser.add_argument(
             '--long',
             default=False,
-            help=_("Show detailed information about the BIOS settings."),
+            help=_("Show detailed information about the node history events."),
             action='store_true')
         return parser
 
