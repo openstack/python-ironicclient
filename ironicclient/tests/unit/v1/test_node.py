@@ -108,6 +108,13 @@ NODE_VENDOR_PASSTHRU_METHOD = {"heartbeat": {"attach": "false",
 
 VIFS = {'vifs': [{'id': 'aaa-aaa'}]}
 TRAITS = {'traits': ['CUSTOM_FOO', 'CUSTOM_BAR']}
+INVENTORY = {'inventory': [{'memory': {'physical_mb': '3072'},
+                            'cpu': {'count': 1, 'architecture': 'x86_64',
+                                    'model_name': 'qemu64'},
+                            'disks': [{'name': 'testvm2.qcow2',
+                                       'size': 11811160064}],
+                            'interfaces':
+                            [{'mac_address': '52:54:00:c7:02:45'}]}]}
 
 CREATE_NODE = copy.deepcopy(NODE1)
 del CREATE_NODE['uuid']
@@ -542,6 +549,13 @@ fake_responses = {
         'DELETE': (
             {},
             None,
+        ),
+    },
+    '/v1/nodes/%s/inventory' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            INVENTORY,
         ),
     }
 }
@@ -2148,3 +2162,11 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(resp)
+
+    def test_node_get_inventory(self):
+        inventory = self.mgr.get_inventory(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/inventory' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(INVENTORY, inventory)
