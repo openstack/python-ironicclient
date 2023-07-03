@@ -731,6 +731,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('lessee', 'lessee 1')],
                                 {'lessee': 'lessee 1'})
 
+    def test_baremetal_create_with_shard(self):
+        self.check_with_options(['--shard', 'myshard'],
+                                [('shard', 'myshard')],
+                                {'shard': 'myshard'})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -1404,7 +1409,7 @@ class TestBaremetalList(TestBaremetal):
 
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
-        self.cmd.take_action(parsed_args)
+        self.cmd.take_action(parsed_args=parsed_args)
 
         # Set expected values
         kwargs = {
@@ -1428,6 +1433,69 @@ class TestBaremetalList(TestBaremetal):
 
         self.assertRaises(oscutils.ParserException,
                           self.check_parser,
+                          self.cmd, arglist, verifylist)
+
+    def test_baremetal_list_by_shards(self):
+        arglist = ['--shards', 'myshard1', 'myshard2']
+        verifylist = [
+            ('shards', ['myshard1', 'myshard2'])
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'shards': ['myshard1', 'myshard2'],
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_sharded(self):
+        arglist = ['--sharded']
+        verifylist = [('sharded', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'sharded': True,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_unsharded(self):
+        arglist = ['--unsharded']
+        verifylist = [('sharded', False)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'sharded': False,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_sharded_unsharded_fail(self):
+        arglist = ['--sharded', '--unsharded']
+        verifylist = [('sharded', True), ('sharded', False)]
+
+        self.assertRaises(oscutils.ParserException, self.check_parser,
                           self.cmd, arglist, verifylist)
 
 
@@ -3133,6 +3201,26 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None
         )
 
+    def test_baremetal_set_shard(self):
+        arglist = [
+            'node_uuid',
+            '--shard', 'myshard',
+        ]
+        verifylist = [
+            ('nodes', ['node_uuid']),
+            ('shard', 'myshard')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid', [{'op': 'add',
+                           'path': '/shard',
+                           'value': 'myshard'}],
+            reset_interfaces=None
+        )
+
     @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
     def test_baremetal_set_network_data(self, mock_handle, mock_stdin):
@@ -3773,6 +3861,25 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/lessee', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_shard(self):
+        arglist = [
+            'node_uuid',
+            '--shard',
+        ]
+        verifylist = [
+            ('nodes', ['node_uuid']),
+            ('shard', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/shard', 'op': 'remove'}]
         )
 
     def test_baremetal_unset_network_data(self):

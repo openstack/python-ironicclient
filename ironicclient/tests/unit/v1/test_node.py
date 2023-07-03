@@ -52,7 +52,8 @@ NODE2 = {'uuid': '66666666-7777-8888-9999-111111111111',
          'extra': {},
          'owner': '33333333-2222-1111-0000-111111111111',
          'retired': True,
-         'lessee': '77777777-8888-5555-2222-999999999999'}
+         'lessee': '77777777-8888-5555-2222-999999999999',
+         'shard': 'myshard'}
 PORT = {'uuid': '11111111-2222-3333-4444-555555555555',
         'node_uuid': '66666666-7777-8888-9999-000000000000',
         'address': 'AA:AA:AA:AA:AA:AA',
@@ -265,6 +266,20 @@ fake_responses = {
         'GET': (
             {},
             {"nodes": [NODE2]},
+        )
+    },
+    '/v1/nodes/?sharded=False':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1]},
+        )
+    },
+    '/v1/nodes/?shard=myshard':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]}
         )
     },
     '/v1/nodes/detail?instance_uuid=%s' % NODE2['instance_uuid']:
@@ -978,6 +993,24 @@ class NodeManagerTest(testtools.TestCase):
         nodes = self.mgr.list(conductor='fake-conductor')
         expect = [
             ('GET', '/v1/nodes/?conductor=fake-conductor', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_not_sharded(self):
+        nodes = self.mgr.list(sharded=False)
+        expect = [
+            ('GET', '/v1/nodes/?sharded=False', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_by_shard(self):
+        nodes = self.mgr.list(shards=["myshard"])
+        expect = [
+            ('GET', '/v1/nodes/?shard=myshard', {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))

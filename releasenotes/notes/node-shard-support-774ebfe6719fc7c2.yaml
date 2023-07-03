@@ -1,0 +1,4 @@
+features:
+  - Add support for Node shard field.
+  - Add support for listing nodes by one or more shards.
+  - Add support for filtering nodes by if they are sharded.

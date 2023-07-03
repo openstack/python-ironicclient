@@ -62,7 +62,7 @@ class NodeManager(base.CreateManager):
              resource_class=None, chassis=None, fault=None,
              os_ironic_api_version=None, conductor_group=None,
              conductor=None, owner=None, retired=None, lessee=None,
-             global_request_id=None):
+             shards=None, sharded=None, global_request_id=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -126,9 +126,14 @@ class NodeManager(base.CreateManager):
         :param conductor: Optional. String value to get only nodes
                           mapped to the given conductor.
         :param owner: Optional. String value to get only nodes
-                          mapped to a specific owner.
+                      mapped to a specific owner.
         :param lessee: Optional. String value to get only nodes
-                          mapped to a specific lessee.
+                       mapped to a specific lessee.
+        :param shards: Optional. A list with a specified set of shards
+                      to limit node returns to.
+        :param sharded: Optional. Boolean value, when true get only nodes
+                        with a non-null node.shard value, when false get only
+                        nodes with a null node.shard value. None is a noop.
 
         :returns: A list of nodes.
 
@@ -166,6 +171,10 @@ class NodeManager(base.CreateManager):
             filters.append('owner=%s' % owner)
         if lessee is not None:
             filters.append('lessee=%s' % lessee)
+        if sharded is not None:
+            filters.append('sharded=%s' % sharded)
+        if shards is not None:
+            filters.append('shard=%s' % ','.join(shards))
 
         path = ''
         if detail:

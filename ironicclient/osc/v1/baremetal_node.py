@@ -523,6 +523,10 @@ class CreateBaremetalNode(command.ShowOne):
             '--description',
             metavar='<description>',
             help=_("Description for the node."))
+        parser.add_argument(
+            '--shard',
+            metavar='<shard>',
+            help=_("Shard for the node."))
 
         return parser
 
@@ -534,8 +538,9 @@ class CreateBaremetalNode(command.ShowOne):
         field_list = ['automated_clean', 'chassis_uuid', 'driver',
                       'driver_info', 'properties', 'extra', 'uuid', 'name',
                       'conductor_group', 'owner', 'description', 'lessee',
-                      'resource_class'] + ['%s_interface' % iface
-                                           for iface in SUPPORTED_INTERFACES]
+                      'shard', 'resource_class'
+                      ] + ['%s_interface' % iface
+                           for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'driver_info')
@@ -748,6 +753,24 @@ class ListBaremetalNode(command.Lister):
             metavar='<description_contains>',
             help=_("Limit list to nodes with description contains "
                    "<description_contains>"))
+        sharded_group = parser.add_mutually_exclusive_group(required=False)
+        sharded_group.add_argument(
+            '--sharded',
+            dest='sharded',
+            help=_("List only nodes that are sharded."),
+            default=None,
+            action='store_true')
+        sharded_group.add_argument(
+            '--unsharded',
+            dest='sharded',
+            help=_("List only nodes that are not sharded."),
+            default=None,
+            action='store_false')
+        parser.add_argument(
+            '--shards',
+            nargs='+',
+            metavar='<shards>',
+            help=_("List only nodes that are in shards <shards>."))
         display_group = parser.add_mutually_exclusive_group(required=False)
         display_group.add_argument(
             '--long',
@@ -785,12 +808,14 @@ class ListBaremetalNode(command.Lister):
             params['associated'] = True
         if parsed_args.unassociated:
             params['associated'] = False
-        for field in ['maintenance', 'fault', 'conductor_group', 'retired']:
+
+        for field in ['maintenance', 'fault', 'conductor_group', 'retired',
+                      'sharded']:
             if getattr(parsed_args, field) is not None:
                 params[field] = getattr(parsed_args, field)
         for field in ['provision_state', 'driver', 'resource_class',
                       'chassis', 'conductor', 'owner', 'lessee',
-                      'description_contains']:
+                      'description_contains', 'shards']:
             if getattr(parsed_args, field):
                 params[field] = getattr(parsed_args, field)
         if parsed_args.long:
@@ -1399,6 +1424,11 @@ class SetBaremetalNode(command.Command):
             metavar='<description>',
             help=_('Set the description for the node'),
         )
+        parser.add_argument(
+            "--shard",
+            metavar='<shard>',
+            help=_('Set the shard for the node'),
+        )
 
         return parser
 
@@ -1429,7 +1459,7 @@ class SetBaremetalNode(command.Command):
                       'chassis_uuid', 'driver', 'resource_class',
                       'conductor_group', 'protected', 'protected_reason',
                       'retired', 'retired_reason', 'owner', 'lessee',
-                      'description']:
+                      'description', 'shard']:
             value = getattr(parsed_args, field)
             if value:
                 properties.extend(utils.args_array_to_patch(
@@ -1745,6 +1775,11 @@ class UnsetBaremetalNode(command.Command):
             action="store_true",
             help=_('Unset the description field of the node'),
         )
+        parser.add_argument(
+            "--shard",
+            action="store_true",
+            help=_('Unset the shard field of the node'),
+        )
 
         return parser
 
@@ -1769,7 +1804,8 @@ class UnsetBaremetalNode(command.Command):
                       'power_interface', 'raid_interface', 'rescue_interface',
                       'storage_interface', 'vendor_interface',
                       'protected', 'protected_reason', 'retired',
-                      'retired_reason', 'owner', 'lessee', 'description']:
+                      'retired_reason', 'owner', 'lessee', 'description',
+                      'shard', ]:
             if getattr(parsed_args, field):
                 properties.extend(utils.args_array_to_patch('remove', [field]))
 
