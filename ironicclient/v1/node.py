@@ -53,7 +53,8 @@ class NodeManager(base.CreateManager):
                             'raid_interface', 'rescue_interface',
                             'storage_interface', 'vendor_interface',
                             'resource_class', 'conductor_group',
-                            'automated_clean', 'network_data']
+                            'automated_clean', 'network_data',
+                            'parent_node']
     _resource_name = 'nodes'
 
     def list(self, associated=None, maintenance=None, marker=None,
@@ -62,7 +63,8 @@ class NodeManager(base.CreateManager):
              resource_class=None, chassis=None, fault=None,
              os_ironic_api_version=None, conductor_group=None,
              conductor=None, owner=None, retired=None, lessee=None,
-             shards=None, sharded=None, global_request_id=None):
+             shards=None, sharded=None, parent_node=None,
+             include_children=None, global_request_id=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -134,7 +136,13 @@ class NodeManager(base.CreateManager):
         :param sharded: Optional. Boolean value, when true get only nodes
                         with a non-null node.shard value, when false get only
                         nodes with a null node.shard value. None is a noop.
-
+                        with a non-null node.shard value.
+        :param parent_node: Optional. String value used to retreive child
+                            nodes with the supplied parent node.
+        :param include_children: Optional. Boolean Value, only True is valid.
+                                 Tells the ironic API to enumerate all child
+                                 nodes which are normally hidden from the
+                                 node list.
         :returns: A list of nodes.
 
         """
@@ -175,6 +183,11 @@ class NodeManager(base.CreateManager):
             filters.append('sharded=%s' % sharded)
         if shards is not None:
             filters.append('shard=%s' % ','.join(shards))
+        if parent_node is not None:
+            filters.append('parent_node=%s' % parent_node)
+        if include_children:
+            # NOTE(TheJulia): Only valid if True.
+            filters.append('include_children=True')
 
         path = ''
         if detail:
@@ -381,6 +394,29 @@ class NodeManager(base.CreateManager):
             return self._list_pagination(
                 self._path(path), response_key="targets", limit=limit,
                 obj_class=volume_target.VolumeTarget, **header_values)
+
+    def list_children_of_node(
+            self, node_id,
+            os_ironic_api_version=None,
+            global_request_id=None):
+        """Get a list of child nodes for the supplied node_id.
+
+        :param node_id: The name or UUID of a node.
+
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+
+        :returns: A list of UUIDs representing child nodes for the supplied
+                  node_id..
+        """
+        path = "%s/children" % node_id
+        header_values = {"os_ironic_api_version": os_ironic_api_version,
+                         "global_request_id": global_request_id}
+        return self._list_primitives(self._path(path), "children",
+                                     **header_values)
 
     def get(self, node_id, fields=None, os_ironic_api_version=None,
             global_request_id=None):

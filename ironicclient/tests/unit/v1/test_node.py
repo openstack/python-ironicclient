@@ -39,7 +39,8 @@ NODE1 = {'uuid': '66666666-7777-8888-9999-000000000000',
          'network_data': {},
          'resource_class': 'foo',
          'extra': {},
-         'conductor_group': 'in-the-closet-to-the-left'}
+         'conductor_group': 'in-the-closet-to-the-left',
+         'parent_node': None}
 NODE2 = {'uuid': '66666666-7777-8888-9999-111111111111',
          'instance_uuid': '66666666-7777-8888-9999-222222222222',
          'chassis_uuid': 'aaaaaaaa-1111-bbbb-2222-cccccccccccc',
@@ -53,7 +54,8 @@ NODE2 = {'uuid': '66666666-7777-8888-9999-111111111111',
          'owner': '33333333-2222-1111-0000-111111111111',
          'retired': True,
          'lessee': '77777777-8888-5555-2222-999999999999',
-         'shard': 'myshard'}
+         'shard': 'myshard',
+         'parent_node': NODE1['uuid']}
 PORT = {'uuid': '11111111-2222-3333-4444-555555555555',
         'node_uuid': '66666666-7777-8888-9999-000000000000',
         'address': 'AA:AA:AA:AA:AA:AA',
@@ -280,6 +282,27 @@ fake_responses = {
         'GET': (
             {},
             {"nodes": [NODE2]}
+        )
+    },
+    '/v1/nodes/?include_children=True':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1, NODE2]}
+        )
+    },
+    '/v1/nodes/?parent_node=%s' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]}
+        )
+    },
+    '/v1/nodes/%s/children' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"children": [NODE2['uuid']]}
         )
     },
     '/v1/nodes/detail?instance_uuid=%s' % NODE2['instance_uuid']:
@@ -1015,6 +1038,35 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_include_chidlren(self):
+        nodes = self.mgr.list(include_children=True)
+        expect = [
+            ('GET', '/v1/nodes/?include_children=True', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(2))
+        self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
+        self.assertEqual(NODE2['uuid'], getattr(nodes[1], 'uuid'))
+
+    def test_node_list_nodes_by_parent_node(self):
+        nodes = self.mgr.list(parent_node=NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/?parent_node=%s' % NODE1['uuid'],
+             {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
+
+    def test_node_list_children_of_node(self):
+        children = self.mgr.list_children_of_node(NODE1['uuid'])
+        expect = [
+            ('GET', '/v1/nodes/%s/children' % NODE1['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(1, len(children))
+        self.assertEqual(NODE2['uuid'], children[0])
 
     def test_node_list_detail(self):
         nodes = self.mgr.list(detail=True)
