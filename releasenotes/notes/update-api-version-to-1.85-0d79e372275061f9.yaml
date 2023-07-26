@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    The maximum API version has been updated to ``1.85`` which allows the
+    ``unhold`` provision state verb to be sent to Ironic.
