@@ -539,8 +539,6 @@ class TestBaremetalCreate(TestBaremetal):
     def check_with_options(self, addl_arglist, addl_verifylist, addl_kwargs):
         arglist = copy.copy(self.arglist) + addl_arglist
         verifylist = copy.copy(self.verifylist) + addl_verifylist
-        print(verifylist)
-        print(arglist)
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
@@ -1514,7 +1512,6 @@ class TestBaremetalList(TestBaremetal):
             ('parent_node', parent_node),
         ]
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
-        print(parsed_args)
 
         # DisplayCommandBase.take_action() returns two tuples
         self.cmd.take_action(parsed_args)
