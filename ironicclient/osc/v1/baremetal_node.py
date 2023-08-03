@@ -922,6 +922,13 @@ class ManageBaremetalNode(ProvisionStateWithWait):
     PROVISION_STATE = 'manage'
 
 
+class UnholdBaremetalNode(ProvisionStateBaremetalNode):
+    """Set provision state of baremetal node to 'unhold'"""
+
+    log = logging.getLogger(__name__ + ".UnholdBaremetalNode")
+    PROVISION_STATE = 'unhold'
+
+
 class PassthruCallBaremetalNode(command.Command):
     """Call a vendor passthru method for a node"""
 

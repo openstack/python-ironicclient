@@ -4525,3 +4525,26 @@ class TestNodeChildrenList(TestBaremetal):
             .assert_called_once_with('node_uuid')
         self.assertEqual(('Child Nodes',), columns)
         self.assertEqual([[node] for node in baremetal_fakes.CHILDREN], data)
+
+
+class TestUnholdBaremetalProvisionState(TestBaremetal):
+    def setUp(self):
+        super(TestUnholdBaremetalProvisionState, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.UnholdBaremetalNode(self.app, None)
+
+    def test_unrescue_no_wait(self):
+        arglist = ['node_uuid']
+        verifylist = [
+            ('nodes', ['node_uuid']),
+            ('provision_state', 'unhold'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'unhold', cleansteps=None, deploysteps=None,
+            configdrive=None, rescue_password=None)
