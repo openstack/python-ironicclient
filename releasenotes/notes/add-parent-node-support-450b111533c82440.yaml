@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Increments the maximum API version to ``1.83`` which allows the Node field
+    ``parent_node`` to become visible.
+  - |
+    Adds client support to allow users to get, set, and update the
+    ``parent_node`` field on a bare metal node.

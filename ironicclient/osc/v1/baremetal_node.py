@@ -527,18 +527,21 @@ class CreateBaremetalNode(command.ShowOne):
             '--shard',
             metavar='<shard>',
             help=_("Shard for the node."))
+        parser.add_argument(
+            '--parent-node',
+            metavar='<parent_node>',
+            help=_('Parent node for the node being created.'))
 
         return parser
 
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
-
         baremetal_client = self.app.client_manager.baremetal
 
         field_list = ['automated_clean', 'chassis_uuid', 'driver',
                       'driver_info', 'properties', 'extra', 'uuid', 'name',
                       'conductor_group', 'owner', 'description', 'lessee',
-                      'shard', 'resource_class'
+                      'shard', 'resource_class', 'parent_node',
                       ] + ['%s_interface' % iface
                            for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
@@ -788,6 +791,18 @@ class ListBaremetalNode(command.Lister):
             help=_("One or more node fields. Only these fields will be "
                    "fetched from the server. Can not be used when '--long' "
                    "is specified."))
+        children_group = parser.add_mutually_exclusive_group(required=False)
+        children_group.add_argument(
+            '--include-children',
+            action='store_true',
+            help=_("Include children in the node list."),
+        )
+        children_group.add_argument(
+            '--parent-node',
+            dest='parent_node',
+            metavar="<parent_node>",
+            help=_('List only nodes associated with a parent node.'),
+        )
         return parser
 
     def take_action(self, parsed_args):
@@ -815,9 +830,11 @@ class ListBaremetalNode(command.Lister):
                 params[field] = getattr(parsed_args, field)
         for field in ['provision_state', 'driver', 'resource_class',
                       'chassis', 'conductor', 'owner', 'lessee',
-                      'description_contains', 'shards']:
+                      'description_contains', 'shards', 'parent_node']:
             if getattr(parsed_args, field):
                 params[field] = getattr(parsed_args, field)
+        if parsed_args.include_children:
+            params['include_children'] = True
         if parsed_args.long:
             params['detail'] = parsed_args.long
             columns = res_fields.NODE_DETAILED_RESOURCE.fields
@@ -1429,6 +1446,11 @@ class SetBaremetalNode(command.Command):
             metavar='<shard>',
             help=_('Set the shard for the node'),
         )
+        parser.add_argument(
+            "--parent-node",
+            metavar='<parent_node>',
+            help=_('Set the parent node for the node'),
+        )
 
         return parser
 
@@ -1459,7 +1481,7 @@ class SetBaremetalNode(command.Command):
                       'chassis_uuid', 'driver', 'resource_class',
                       'conductor_group', 'protected', 'protected_reason',
                       'retired', 'retired_reason', 'owner', 'lessee',
-                      'description', 'shard']:
+                      'description', 'shard', 'parent_node']:
             value = getattr(parsed_args, field)
             if value:
                 properties.extend(utils.args_array_to_patch(
@@ -1780,6 +1802,11 @@ class UnsetBaremetalNode(command.Command):
             action="store_true",
             help=_('Unset the shard field of the node'),
         )
+        parser.add_argument(
+            "--parent-node",
+            action="store_true",
+            help=_('Unset the parent node field of the node'),
+        )
 
         return parser
 
@@ -1805,7 +1832,7 @@ class UnsetBaremetalNode(command.Command):
                       'storage_interface', 'vendor_interface',
                       'protected', 'protected_reason', 'retired',
                       'retired_reason', 'owner', 'lessee', 'description',
-                      'shard', ]:
+                      'shard', 'parent_node']:
             if getattr(parsed_args, field):
                 properties.extend(utils.args_array_to_patch('remove', [field]))
 
@@ -2300,3 +2327,31 @@ class NodeInventorySave(command.Command):
                 json.dump(inventory, fp)
         else:
             json.dump(inventory, sys.stdout)
+
+
+class NodeChildrenList(command.ShowOne):
+    """Get a list of nodes assocated as children."""
+
+    log = logging.getLogger(__name__ + ".NodeChildrenList")
+
+    def get_parser(self, prog_name):
+        parser = super(NodeChildrenList, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node.")
+        )
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        labels = res_fields.CHILDREN_RESOURCE.labels
+
+        data = baremetal_client.node.list_children_of_node(
+            parsed_args.node)
+        return (labels, [[node] for node in data])

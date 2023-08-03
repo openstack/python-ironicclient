@@ -539,7 +539,8 @@ class TestBaremetalCreate(TestBaremetal):
     def check_with_options(self, addl_arglist, addl_verifylist, addl_kwargs):
         arglist = copy.copy(self.arglist) + addl_arglist
         verifylist = copy.copy(self.verifylist) + addl_verifylist
-
+        print(verifylist)
+        print(arglist)
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
 
         # DisplayCommandBase.take_action() returns two tuples
@@ -736,6 +737,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('shard', 'myshard')],
                                 {'shard': 'myshard'})
 
+    def test_baremetal_create_with_parent_node(self):
+        self.check_with_options(['--parent-node', 'nodex'],
+                                [('parent_node', 'nodex')],
+                                {'parent_node': 'nodex'})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -916,6 +922,7 @@ class TestBaremetalList(TestBaremetal):
             'Network Configuration',
             'Network Interface',
             'Owner',
+            'Parent Node',
             'Power Interface',
             'Power State',
             'Properties',
@@ -1497,6 +1504,52 @@ class TestBaremetalList(TestBaremetal):
 
         self.assertRaises(oscutils.ParserException, self.check_parser,
                           self.cmd, arglist, verifylist)
+
+    def test_baremetal_list_by_parent_node(self):
+        parent_node = 'node1'
+        arglist = [
+            '--parent-node', parent_node,
+        ]
+        verifylist = [
+            ('parent_node', parent_node),
+        ]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        print(parsed_args)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'parent_node': parent_node,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_include_children(self):
+        arglist = [
+            '--include-children',
+        ]
+        verifylist = [
+            ('include_children', True),
+        ]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'include_children': True,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
 
 
 class TestBaremetalMaintenanceSet(TestBaremetal):
@@ -4448,3 +4501,27 @@ class TestNodeInventorySave(TestBaremetal):
                          'boot': {'current_boot_mode': 'uefi'}}
         inventory = json.loads(buf.getvalue())
         self.assertEqual(expected_data, inventory['inventory'])
+
+
+class TestNodeChildrenList(TestBaremetal):
+    def setUp(self):
+        super(TestNodeChildrenList, self).setUp()
+
+        self.baremetal_mock.node.list_children_of_node.return_value = (
+            baremetal_fakes.CHILDREN)
+
+        # Get the command object to test
+        self.cmd = baremetal_node.NodeChildrenList(self.app, None)
+
+    def test_child_node_list(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        columns, data = self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.list_children_of_node \
+            .assert_called_once_with('node_uuid')
+        self.assertEqual(('Child Nodes',), columns)
+        self.assertEqual([[node] for node in baremetal_fakes.CHILDREN], data)

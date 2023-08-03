@@ -152,6 +152,8 @@ class Resource(object):
         'id': 'ID',
         'connector_id': 'Connector ID',
         'is_smartnic': 'Is Smart NIC port',
+        'parent_node': 'Parent Node',
+        'children': 'Child Nodes',
     }
 
     def __init__(self, field_ids, sort_excluded=None, override_labels=None):
@@ -268,6 +270,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'network_data',
      'network_interface',
      'owner',
+     'parent_node',
      'power_interface',
      'power_state',
      'properties',
@@ -390,6 +393,10 @@ VIF_RESOURCE = Resource(
 
 TRAIT_RESOURCE = Resource(
     ['traits'],
+)
+
+CHILDREN_RESOURCE = Resource(
+    ['children'],
 )
 
 BIOS_RESOURCE = Resource(

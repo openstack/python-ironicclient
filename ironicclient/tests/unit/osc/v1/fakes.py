@@ -149,6 +149,8 @@ PORTGROUP = {'uuid': baremetal_portgroup_uuid,
 
 VIFS = {'vifs': [{'id': 'aaa-aa'}]}
 TRAITS = ['CUSTOM_FOO', 'CUSTOM_BAR']
+CHILDREN = ['53da080f-6de7-4a3e-bcb6-b7889b380ad0',
+            '48467e9b-3cd1-45b5-a57e-169e01370169']
 BIOS_SETTINGS = [{'name': 'bios_name_1', 'value': 'bios_value_1', 'links': []},
                  {'name': 'bios_name_2', 'value': 'bios_value_2', 'links': []}]
 
