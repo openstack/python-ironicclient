@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Increments the supported API version to 1.87.
+  - |
+    Adds the ability to request Ironic execute service steps upon an
+    ``active`` node, utilizing the ``baremetal node service`` command.

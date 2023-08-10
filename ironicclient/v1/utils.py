@@ -47,6 +47,8 @@ PROVISION_ACTIONS = {
                'poll_interval': _LONG_ACTION_POLL_INTERVAL},
     'unrescue': {'expected_state': 'active',
                  'poll_interval': _LONG_ACTION_POLL_INTERVAL},
+    'service': {'expected_state': 'active',
+                'poll_interval': _LONG_ACTION_POLL_INTERVAL},
 }
 
 PROVISION_STATES = list(PROVISION_ACTIONS)

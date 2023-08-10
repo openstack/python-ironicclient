@@ -723,7 +723,8 @@ class NodeManager(base.CreateManager):
     def set_provision_state(
             self, node_uuid, state, configdrive=None, cleansteps=None,
             rescue_password=None, os_ironic_api_version=None,
-            global_request_id=None, deploysteps=None):
+            global_request_id=None, deploysteps=None,
+            servicesteps=None):
         """Set the provision state for the node.
 
         :param node_uuid: The UUID or name of the node.
@@ -757,6 +758,10 @@ class NodeManager(base.CreateManager):
             dictionaries; each dictionary should have keys 'interface', 'step',
             'priority', and optional key 'args'. This is optional and is
             only valid when setting provision-state to 'active' or 'rebuild'.
+        :param servicesteps: The service steps as list of service-step
+            dictionaries; each dictonary should have keys 'interface', 'step',
+            and optional key 'args' when setting an 'active' nodes to
+            'service'.
         :raises: InvalidAttribute if there was an error with the clean steps or
             deploy steps
         :returns: The status of the request
@@ -793,6 +798,9 @@ class NodeManager(base.CreateManager):
 
         if deploysteps:
             body['deploy_steps'] = deploysteps
+
+        if servicesteps:
+            body['service_steps'] = servicesteps
 
         return self.update(path, body, http_method='PUT',
                            os_ironic_api_version=os_ironic_api_version,

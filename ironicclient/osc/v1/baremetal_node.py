@@ -86,6 +86,9 @@ class ProvisionStateBaremetalNode(command.Command):
         deploy_steps = getattr(parsed_args, 'deploy_steps', None)
         deploy_steps = utils.handle_json_arg(deploy_steps, 'deploy steps')
 
+        service_steps = getattr(parsed_args, 'service_steps', None)
+        service_steps = utils.handle_json_arg(service_steps, 'service steps')
+
         config_drive = getattr(parsed_args, 'config_drive', None)
         if config_drive:
             try:
@@ -105,7 +108,8 @@ class ProvisionStateBaremetalNode(command.Command):
                 configdrive=config_drive,
                 cleansteps=clean_steps,
                 deploysteps=deploy_steps,
-                rescue_password=rescue_password)
+                rescue_password=rescue_password,
+                servicesteps=service_steps)
 
 
 class ProvisionStateWithWait(ProvisionStateBaremetalNode):
@@ -297,6 +301,29 @@ class CleanBaremetalNode(ProvisionStateWithWait):
                    "value should be a list of clean-step dictionaries; each "
                    "dictionary should have keys 'interface' and 'step', and "
                    "optional key 'args'."))
+        return parser
+
+
+class ServiceBaremetalNode(ProvisionStateWithWait):
+    """Set provision state of baremetal node to 'service'"""
+
+    log = logging.getLogger(__name__ + ".ServiceBaremetalNode")
+    PROVISION_STATE = 'service'
+
+    def get_parser(self, prog_name):
+        parser = super(ServiceBaremetalNode, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '--service-steps',
+            metavar='<service-steps>',
+            required=True,
+            default=None,
+            help=_("The service steps. May be the path to a YAML file "
+                   "containing the service steps; OR '-', with the service "
+                   " steps being read from standard input; OR a JSON string. "
+                   "The value should be a list of service-step dictionaries; "
+                   "each dictionary should have keys 'interface' and 'step', "
+                   "and optional key 'args'."))
         return parser
 
 
