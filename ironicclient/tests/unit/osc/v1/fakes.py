@@ -72,6 +72,7 @@ baremetal_driver_default_boot_if = 'boot'
 baremetal_driver_default_console_if = 'console'
 baremetal_driver_default_deploy_if = 'deploy'
 baremetal_driver_default_inspect_if = 'inspect'
+baremetal_driver_default_firmware_if = 'firmware'
 baremetal_driver_default_management_if = 'management'
 baremetal_driver_default_network_if = 'network'
 baremetal_driver_default_power_if = 'power'
@@ -83,6 +84,7 @@ baremetal_driver_enabled_bios_ifs = ['bios', 'bios2']
 baremetal_driver_enabled_boot_ifs = ['boot', 'boot2']
 baremetal_driver_enabled_console_ifs = ['console', 'console2']
 baremetal_driver_enabled_deploy_ifs = ['deploy', 'deploy2']
+baremetal_driver_enabled_firmware_ifs = ['firmware', 'firmware2']
 baremetal_driver_enabled_inspect_ifs = ['inspect', 'inspect2']
 baremetal_driver_enabled_management_ifs = ['management', 'management2']
 baremetal_driver_enabled_network_ifs = ['network', 'network2']
@@ -100,6 +102,7 @@ BAREMETAL_DRIVER = {
     'default_boot_interface': baremetal_driver_default_boot_if,
     'default_console_interface': baremetal_driver_default_console_if,
     'default_deploy_interface': baremetal_driver_default_deploy_if,
+    'default_firmware_interface': baremetal_driver_default_firmware_if,
     'default_inspect_interface': baremetal_driver_default_inspect_if,
     'default_management_interface': baremetal_driver_default_management_if,
     'default_network_interface': baremetal_driver_default_network_if,
@@ -112,6 +115,7 @@ BAREMETAL_DRIVER = {
     'enabled_boot_interfaces': baremetal_driver_enabled_boot_ifs,
     'enabled_console_interfaces': baremetal_driver_enabled_console_ifs,
     'enabled_deploy_interfaces': baremetal_driver_enabled_deploy_ifs,
+    'enabled_firmware_interfaces': baremetal_driver_enabled_firmware_ifs,
     'enabled_inspect_interfaces': baremetal_driver_enabled_inspect_ifs,
     'enabled_management_interfaces': baremetal_driver_enabled_management_ifs,
     'enabled_network_interfaces': baremetal_driver_enabled_network_ifs,
@@ -258,6 +262,25 @@ NODE_INVENTORY = [
                               'manufacturer': 'Sushy Emulator'},
             'boot': {'current_boot_mode': 'uefi'}
         }
+    }
+]
+
+FIRMWARE_COMPONENTS = [
+    {
+        "component": "bios",
+        "initial_version": "v1.0.0.0 (01.02.2022)",
+        "current_version": "v1.2.3.4 (01.02.2023)",
+        "last_version_flashed": "v1.2.3.4 (01.02.2023)",
+        "created_at": "2023-02-01 09:00:00",
+        "updated_at": "2023-03-01 10:00:00"
+    },
+    {
+        "component": "bmc",
+        "initial_version": "v1.0.0",
+        "current_version": "v1.0.0",
+        "last_version_flashed": "",
+        "created_at": "2023-02-01 09:00:00",
+        "updated_at": ""
     }
 ]
 

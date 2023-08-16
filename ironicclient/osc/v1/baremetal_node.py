@@ -48,9 +48,9 @@ NETWORK_DATA_ARG_HELP = _(
     "being used, network configuration may or may not been served to the "
     "node for offline network configuration.")
 
-SUPPORTED_INTERFACES = ['bios', 'boot', 'console', 'deploy', 'inspect',
-                        'management', 'network', 'power', 'raid', 'rescue',
-                        'storage', 'vendor']
+SUPPORTED_INTERFACES = ['bios', 'boot', 'console', 'deploy', 'firmware',
+                        'inspect', 'management', 'network', 'power', 'raid',
+                        'rescue', 'storage', 'vendor']
 
 
 class ProvisionStateBaremetalNode(command.Command):
@@ -531,6 +531,12 @@ class CreateBaremetalNode(command.ShowOne):
             '--parent-node',
             metavar='<parent_node>',
             help=_('Parent node for the node being created.'))
+        parser.add_argument(
+            '--firmware-interface',
+            metavar='<firmware_interface>',
+            help=_('Firmware interface used by the node\'s driver. This is '
+                   'only applicable when the specified --driver is a '
+                   'hardware type.'))
 
         return parser
 
@@ -1298,6 +1304,12 @@ class SetBaremetalNode(command.Command):
                          'default'),
         )
         self._add_interface_args(
+            parser, 'firmware',
+            set_help=_('Set the firmware interface for the node'),
+            reset_help=_('Reset the firmware interface for its hardware '
+                         'type default'),
+        )
+        self._add_interface_args(
             parser, 'inspect',
             set_help=_('Set the inspect interface for the node'),
             reset_help=_('Reset the inspect interface to its hardware type '
@@ -1703,6 +1715,12 @@ class UnsetBaremetalNode(command.Command):
             help=_('Unset deploy interface on this baremetal node'),
         )
         parser.add_argument(
+            "--firmware-interface",
+            dest='firmware_interface',
+            action='store_true',
+            help=_('Unset firmware interface on this baremetal node'),
+        )
+        parser.add_argument(
             "--inspect-interface",
             dest='inspect_interface',
             action='store_true',
@@ -1833,7 +1851,8 @@ class UnsetBaremetalNode(command.Command):
         for field in ['instance_uuid', 'name', 'chassis_uuid',
                       'resource_class', 'conductor_group', 'automated_clean',
                       'bios_interface', 'boot_interface', 'console_interface',
-                      'deploy_interface', 'inspect_interface',
+                      'deploy_interface', 'firmware_interface',
+                      'inspect_interface',
                       'management_interface', 'network_interface',
                       'power_interface', 'raid_interface', 'rescue_interface',
                       'storage_interface', 'vendor_interface',
@@ -2362,3 +2381,33 @@ class NodeChildrenList(command.ShowOne):
         data = baremetal_client.node.list_children_of_node(
             parsed_args.node)
         return (labels, [[node] for node in data])
+
+
+class ListFirmwareComponentBaremetalNode(command.Lister):
+    """List all Firmware Components of a node"""
+
+    log = logging.getLogger(__name__ + ".ListFirmwareComponentBaremetalNode")
+
+    def get_parser(self, prog_name):
+        parser = super(ListFirmwareComponentBaremetalNode, self).get_parser(
+            prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node")
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        self.log.debug("take_action(%s)", parsed_args)
+
+        labels = res_fields.FIRMWARE_RESOURCE.labels
+        fields = res_fields.FIRMWARE_RESOURCE.fields
+
+        baremetal_client = self.app.client_manager.baremetal
+        components = baremetal_client.node.list_firmware_components(
+            parsed_args.node)
+
+        return (labels,
+                (oscutils.get_dict_properties(s, fields) for s in components))

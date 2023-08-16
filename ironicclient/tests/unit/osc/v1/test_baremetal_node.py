@@ -650,6 +650,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('deploy_interface', 'deploy')],
                                 {'deploy_interface': 'deploy'})
 
+    def test_baremetal_create_with_firmware_interface(self):
+        self.check_with_options(['--firmware-interface', 'firmware'],
+                                [('firmware_interface', 'firmware')],
+                                {'firmware_interface': 'firmware'})
+
     def test_baremetal_create_with_inspect_interface(self):
         self.check_with_options(['--inspect-interface', 'inspect'],
                                 [('inspect_interface', 'inspect')],
@@ -906,6 +911,7 @@ class TestBaremetalList(TestBaremetal):
             'Driver Internal Info',
             'Extra',
             'Fault',
+            'Firmware Interface',
             'Inspect Interface',
             'Inspection Finished At',
             'Inspection Started At',
@@ -2777,6 +2783,9 @@ class TestBaremetalSet(TestBaremetal):
     def test_baremetal_set_deploy_interface(self):
         self._test_baremetal_set_hardware_interface('deploy')
 
+    def test_baremetal_set_firmware_interface(self):
+        self._test_baremetal_set_hardware_interface('firmware')
+
     def test_baremetal_set_inspect_interface(self):
         self._test_baremetal_set_hardware_interface('inspect')
 
@@ -2832,6 +2841,9 @@ class TestBaremetalSet(TestBaremetal):
 
     def test_baremetal_reset_deploy_interface(self):
         self._test_baremetal_reset_hardware_interface('deploy')
+
+    def test_baremetal_reset_firmware_interface(self):
+        self._test_baremetal_reset_hardware_interface('firmware')
 
     def test_baremetal_reset_inspect_interface(self):
         self._test_baremetal_reset_hardware_interface('inspect')
@@ -3832,6 +3844,9 @@ class TestBaremetalUnset(TestBaremetal):
     def test_baremetal_unset_deploy_interface(self):
         self._test_baremetal_unset_hw_interface('deploy')
 
+    def test_baremetal_unset_firmware_interface(self):
+        self._test_baremetal_unset_hw_interface('firmware')
+
     def test_baremetal_unset_inspect_interface(self):
         self._test_baremetal_unset_hw_interface('inspect')
 
@@ -4545,3 +4560,38 @@ class TestUnholdBaremetalProvisionState(TestBaremetal):
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'unhold', cleansteps=None, deploysteps=None,
             configdrive=None, rescue_password=None)
+
+
+class TestListFirmwareComponents(TestBaremetal):
+    def setUp(self):
+        super(TestListFirmwareComponents, self).setUp()
+
+        self.baremetal_mock.node.list_firmware_components.return_value = (
+            baremetal_fakes.FIRMWARE_COMPONENTS)
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ListFirmwareComponentBaremetalNode(self.app,
+                                                                     None)
+
+    def test_baremetal_list_firmware_components(self):
+        arglist = ['node_uuid']
+        verifylist = [('node', 'node_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        columns, data = self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.list_firmware_components \
+            .assert_called_once_with('node_uuid')
+        expected_columns = ('Component', 'Initial Version',
+                            'Current Version', 'Last Version Flashed',
+                            'Created At', 'Updated At')
+        self.assertEqual(expected_columns, columns)
+
+        expected_data = (
+            [(fw['component'], fw['initial_version'],
+              fw['current_version'], fw['last_version_flashed'],
+              fw['created_at'], fw['updated_at'])
+             for fw in baremetal_fakes.FIRMWARE_COMPONENTS])
+
+        self.assertEqual(tuple(expected_data), tuple(data))

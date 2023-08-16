@@ -52,6 +52,7 @@ class Resource(object):
         'default_boot_interface': 'Default Boot Interface',
         'default_console_interface': 'Default Console Interface',
         'default_deploy_interface': 'Default Deploy Interface',
+        'default_firmware_interface': 'Default Firmware Interface',
         'default_inspect_interface': 'Default Inspect Interface',
         'default_management_interface': 'Default Management Interface',
         'default_network_interface': 'Default Network Interface',
@@ -70,6 +71,7 @@ class Resource(object):
         'enabled_boot_interfaces': 'Enabled Boot Interfaces',
         'enabled_console_interfaces': 'Enabled Console Interfaces',
         'enabled_deploy_interfaces': 'Enabled Deploy Interfaces',
+        'enabled_firmware_interfaces': 'Enabled Firmware Interfaces',
         'enabled_inspect_interfaces': 'Enabled Inspect Interfaces',
         'enabled_management_interfaces': 'Enabled Management Interfaces',
         'enabled_network_interfaces': 'Enabled Network Interfaces',
@@ -154,6 +156,7 @@ class Resource(object):
         'is_smartnic': 'Is Smart NIC port',
         'parent_node': 'Parent Node',
         'children': 'Child Nodes',
+        'firmware_interface': 'Firmware Interface',
     }
 
     def __init__(self, field_ids, sort_excluded=None, override_labels=None):
@@ -256,6 +259,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'driver_internal_info',
      'extra',
      'fault',
+     'firmware_interface',
      'inspect_interface',
      'inspection_finished_at',
      'inspection_started_at',
@@ -429,6 +433,7 @@ DRIVER_DETAILED_RESOURCE = Resource(
      'default_boot_interface',
      'default_console_interface',
      'default_deploy_interface',
+     'default_firmware_interface',
      'default_inspect_interface',
      'default_management_interface',
      'default_network_interface',
@@ -441,6 +446,7 @@ DRIVER_DETAILED_RESOURCE = Resource(
      'enabled_boot_interfaces',
      'enabled_console_interfaces',
      'enabled_deploy_interfaces',
+     'enabled_firmware_interfaces',
      'enabled_inspect_interfaces',
      'enabled_management_interfaces',
      'enabled_network_interfaces',
@@ -458,6 +464,22 @@ DRIVER_RESOURCE = Resource(
      ],
     override_labels={'name': 'Supported driver(s)'}
 )
+
+# Firmware
+FIRMWARE_RESOURCE = Resource(
+    ['component',
+     'initial_version',
+     'current_version',
+     'last_version_flashed',
+     'created_at',
+     'updated_at',
+     ],
+    override_labels={'component': 'Component',
+                     'initial_version': 'Initial Version',
+                     'current_version': 'Current Version',
+                     'last_version_flashed': 'Last Version Flashed'}
+)
+
 
 # Volume connectors
 VOLUME_CONNECTOR_DETAILED_RESOURCE = Resource(

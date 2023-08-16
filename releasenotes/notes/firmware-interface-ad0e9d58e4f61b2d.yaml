@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Adds support for the Firmware Interface feature.
+
+    Command to list firmware components of a node:
+
+    * ``openstack baremetal node firmware list <node_ident>``
+
+    The `firmware_interface` can be specified in the commands below:
+
+    * ``openstack baremetal node create``
+    * ``openstack baremetal node show``
+    * ``openstack baremetal node set``
+    * ``openstack baremetal node unset``
+    * ``openstack baremetal driver list``
+    * ``openstack baremetal driver show``
