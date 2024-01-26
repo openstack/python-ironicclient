@@ -10,6 +10,8 @@
       jobs:
         - ironicclient-functional
         - ironicclient-tempest
+        - ironicclient-tox-codespell:
+            voting: false
     gate:
       jobs:
         - ironicclient-functional
