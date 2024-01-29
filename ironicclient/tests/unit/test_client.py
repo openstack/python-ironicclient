@@ -53,7 +53,7 @@ class ClientTest(utils.BaseTestCase):
             self.assertEqual([get_endpoint_call],
                              session.get_endpoint.call_args_list)
         else:
-            # we use adaper.get_endpoint instead of session.get_endpoint
+            # we use adapter.get_endpoint instead of session.get_endpoint
             self.assertFalse(session.get_endpoint.called)
         if expected_version is not None:
             # NOTE(TheJulia): This does not test the negotiation logic

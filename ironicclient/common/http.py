@@ -206,7 +206,7 @@ class VersionNegotiationMixin(object):
                 raise ValueError(textwrap.fill(
                     _("The 'latest' API version can not be requested "
                       "in a list of versions. Please explicitly request "
-                      "'latest' or request only versios between "
+                      "'latest' or request only versions between "
                       "%(min)s to %(max)s")
                     % {'min': min_ver, 'max': max_ver}))
 

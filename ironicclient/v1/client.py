@@ -117,7 +117,7 @@ class Client(object):
 
     @property
     def is_api_version_negotiated(self):
-        """Returns True if microversion negotiation has occured."""
+        """Returns True if microversion negotiation has occurred."""
         return self.http_client.api_version_select_state == 'negotiated'
 
     def negotiate_api_version(self):

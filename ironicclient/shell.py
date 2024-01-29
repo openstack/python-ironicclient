@@ -120,7 +120,7 @@ class CommandManager(commandmanager.CommandManager):
         super(CommandManager, self).load_commands(namespace)
         if ironic_inspector_client is not None:
             super(CommandManager, self).load_commands(_INSPECTOR_NAMESPACE)
-        # Stip the 'baremetal' prefix used in OSC
+        # Strip the 'baremetal' prefix used in OSC
         prefix = 'baremetal '
         prefix_len = len(prefix)
         self.commands = dict(
