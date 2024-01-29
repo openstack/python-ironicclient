@@ -44,12 +44,12 @@ class FunctionalTestBase(base.ClientTestBase):
             client = base.CLIClient(cli_dir=cli_dir,
                                     username=config['os_username'],
                                     password=config['os_password'],
-                                    tenant_name=config['os_project_name'],
+                                    tenant_name=config.get('os_project_name'),
                                     uri=config['os_auth_url'])
             for keystone_object in 'user', 'project':
                 domain_attr = 'os_%s_domain_id' % keystone_object
                 if config.get(domain_attr):
-                    setattr(self, domain_attr, config[domain_attr])
+                    setattr(self, domain_attr, config.get(domain_attr))
         else:
             self.ironic_url = config['ironic_url']
             client = base.CLIClient(cli_dir=cli_dir,
@@ -78,27 +78,24 @@ class FunctionalTestBase(base.ClientTestBase):
                               'os_password', 'os_project_name']
             keystone_v3_conf_settings += ['os_user_domain_id',
                                           'os_project_domain_id',
-                                          'os_identity_api_version']
+                                          'os_identity_api_version',
+                                          'os_system_scope']
         else:
             conf_settings += ['ironic_url']
 
         cli_flags = {}
-        missing = []
         for c in conf_settings + keystone_v3_conf_settings:
             try:
-                cli_flags[c] = config.get('functional', c)
+                setting_value = config.get('functional', c)
+                if setting_value is not None:
+                    cli_flags[c] = setting_value
             except configparser.NoOptionError:
-                # NOTE(vdrok): Here we ignore the absence of KS v3 options as
-                # v2 may be used. Keystone client will do the actual check of
-                # the parameters' correctness.
-                if c not in keystone_v3_conf_settings:
-                    missing.append(c)
-        if missing:
-            self.fail('Missing required setting in test.conf (%(conf)s) for '
-                      'auth_strategy=%(auth)s: %(missing)s' %
-                      {'conf': config_file,
-                       'auth': auth_strategy,
-                       'missing': ','.join(missing)})
+                # NOTE(TheJulia): Here we populate the options, and if we
+                # don't have an option, it is okay, The keystone client will
+                # do the actual validity check instead of us trying to have
+                # internal check logic, as there are several different forms
+                # and parameters which can be used.
+                pass
         return cli_flags
 
     def _cmd_no_auth(self, cmd, action, flags='', params=''):
@@ -150,7 +147,8 @@ class FunctionalTestBase(base.ClientTestBase):
         else:
             for keystone_object in 'user', 'project':
                 domain_attr = 'os_%s_domain_id' % keystone_object
-                if hasattr(self, domain_attr):
+                if (hasattr(self, domain_attr)
+                        and getattr(self, domain_attr) is not None):
                     flags += ' --os-%(ks_obj)s-domain-id %(value)s' % {
                         'ks_obj': keystone_object,
                         'value': getattr(self, domain_attr)
