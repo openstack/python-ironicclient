@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixes the list of fields permitted when creating a node. The following
+    fields can now be set: firmware_interface, automated_clean, network_data,
+    parent_node, owner, lessee, shard, desription.
