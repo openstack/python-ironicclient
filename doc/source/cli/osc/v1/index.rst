@@ -18,12 +18,26 @@ baremetal chassis
 .. autoprogram-cliff:: openstack.baremetal.v1
     :command: baremetal chassis *
 
+===================
+baremetal conductor
+===================
+
+.. autoprogram-cliff:: openstack.baremetal.v1
+    :command: baremetal conductor *
+
 ================
 baremetal create
 ================
 
 .. autoprogram-cliff:: openstack.baremetal.v1
     :command: baremetal create
+
+=========================
+baremetal deploy template
+=========================
+
+.. autoprogram-cliff:: openstack.baremetal.v1
+    :command: baremetal deploy template *
 
 ================
 baremetal driver
