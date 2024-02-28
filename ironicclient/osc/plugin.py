@@ -29,7 +29,7 @@ CLIENT_CLASS = 'ironicclient.v1.client.Client'
 API_VERSION_OPTION = 'os_baremetal_api_version'
 API_NAME = 'baremetal'
 # NOTE(TheJulia) Latest known version tracking has been moved
-# to the ironicclient/common/http.py file as the OSC committment
+# to the ironicclient/common/http.py file as the OSC commitment
 # is latest known, and we should only store it in one location.
 LAST_KNOWN_API_VERSION = http.LAST_KNOWN_API_VERSION
 LATEST_VERSION = http.LATEST_VERSION

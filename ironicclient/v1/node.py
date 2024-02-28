@@ -137,7 +137,7 @@ class NodeManager(base.CreateManager):
                         with a non-null node.shard value, when false get only
                         nodes with a null node.shard value. None is a noop.
                         with a non-null node.shard value.
-        :param parent_node: Optional. String value used to retreive child
+        :param parent_node: Optional. String value used to retrieve child
                             nodes with the supplied parent node.
         :param include_children: Optional. Boolean Value, only True is valid.
                                  Tells the ironic API to enumerate all child

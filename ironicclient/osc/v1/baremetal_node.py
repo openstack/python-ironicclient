@@ -1675,14 +1675,15 @@ class UnsetBaremetalNode(command.Command):
             metavar="<key>",
             action='append',
             help=_('Driver information to unset on this baremetal node '
-                   '(repeat option to unset multiple driver informations)'),
+                   '(repeat option to unset multiple items '
+                   'in driver information)'),
         )
         parser.add_argument(
             "--instance-info",
             metavar="<key>",
             action='append',
             help=_('Instance information to unset on this baremetal node '
-                   '(repeat option to unset multiple instance informations)'),
+                   '(repeat option to unset multiple instance information)'),
         )
         parser.add_argument(
             "--chassis-uuid",
@@ -2356,7 +2357,7 @@ class NodeInventorySave(command.Command):
 
 
 class NodeChildrenList(command.ShowOne):
-    """Get a list of nodes assocated as children."""
+    """Get a list of nodes associated as children."""
 
     log = logging.getLogger(__name__ + ".NodeChildrenList")
 

@@ -2,6 +2,6 @@
 fixes:
   - |
     Embedded configuration drive generation support has been updated to
-    support ``mkisofs`` and ``xorrisofs`` in adition to the previously
+    support ``mkisofs`` and ``xorrisofs`` in addition to the previously
     supported ``genisoimage`` utility. This is as distributions such as
     Debian and OpenSUSE do not ship ``genisoimage``.

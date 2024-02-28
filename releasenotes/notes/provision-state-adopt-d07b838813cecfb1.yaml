@@ -2,5 +2,5 @@
 features:
   - Support has been added for the node-set-provision-state verb
     ``adopt`` which requires API version 1.17. This feature allows
-    an operator move a node from ``MANAGABLE`` state to ``ACTIVE``
+    an operator move a node from ``MANAGEABLE`` state to ``ACTIVE``
     state without performing cleaning or a deployment operation.
