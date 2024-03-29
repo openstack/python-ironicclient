@@ -17,8 +17,8 @@
 import logging
 import os
 
-import appdirs
 import dogpile.cache
+import platformdirs
 
 
 LOG = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ AUTHOR = 'openstack'
 PROGNAME = 'python-ironicclient'
 
 CACHE = None
-CACHE_DIR = appdirs.user_cache_dir(PROGNAME, AUTHOR)
+CACHE_DIR = platformdirs.user_cache_dir(PROGNAME, AUTHOR)
 CACHE_EXPIRY_ENV_VAR = 'IRONICCLIENT_CACHE_EXPIRY'  # environment variable
 CACHE_FILENAME = os.path.join(CACHE_DIR, 'ironic-api-version.dbm')
 DEFAULT_EXPIRY = 300  # seconds
