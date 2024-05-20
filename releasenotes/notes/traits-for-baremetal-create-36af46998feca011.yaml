@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Traits can be specified and applied for nodes to be created
+    with the ``openstack baremetal create`` command.

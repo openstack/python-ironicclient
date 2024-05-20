@@ -150,7 +150,10 @@ def create_single_node(client, **params):
     """
     params.pop('ports', None)
     params.pop('portgroups', None)
+    traits = params.pop('traits', None)
     ret = client.node.create(**params)
+    if traits:
+        client.node.set_traits(ret.uuid, traits)
     return ret.uuid
 
 
