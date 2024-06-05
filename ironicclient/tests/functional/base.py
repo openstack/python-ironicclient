@@ -29,6 +29,12 @@ class FunctionalTestBase(base.ClientTestBase):
 
     def setUp(self):
         super(FunctionalTestBase, self).setUp()
+        if not self.auth_ref.project_scoped:
+            raise Exception("Could not run functional tests, which are "
+                            "run based on the scope provided for "
+                            "authentication. Please provide a project "
+                            "scope information.")
+
         self.client = self._get_clients()
         # NOTE(kromanenko) set ironic api version for portgroups
         self.pg_api_ver = '--ironic-api-version 1.25'
