@@ -255,6 +255,17 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.node.create.assert_called_once_with(driver='fake')
 
+    def test_create_single_node_with_traits(self):
+        params = {'driver': 'fake', 'traits': ['CUSTOM_PERFORMANCE']}
+        self.client.node.create.return_value = mock.Mock(uuid='uuid')
+        self.assertEqual(
+            ('uuid', None),
+            create_resources.create_single_node(self.client, **params)
+        )
+        self.client.node.create.assert_called_once_with(driver='fake')
+        self.client.node.set_traits.assert_called_once_with(
+            mock.ANY, ['CUSTOM_PERFORMANCE'])
+
     def test_create_single_node_with_ports(self):
         params = {'driver': 'fake', 'ports': ['some ports here']}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
