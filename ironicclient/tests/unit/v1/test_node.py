@@ -55,7 +55,8 @@ NODE2 = {'uuid': '66666666-7777-8888-9999-111111111111',
          'retired': True,
          'lessee': '77777777-8888-5555-2222-999999999999',
          'shard': 'myshard',
-         'parent_node': NODE1['uuid']}
+         'parent_node': NODE1['uuid'],
+         'description': 'foo bar'}
 PORT = {'uuid': '11111111-2222-3333-4444-555555555555',
         'node_uuid': '66666666-7777-8888-9999-000000000000',
         'address': 'AA:AA:AA:AA:AA:AA',
@@ -292,6 +293,13 @@ fake_responses = {
         )
     },
     '/v1/nodes/?parent_node=%s' % NODE1['uuid']:
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE2]}
+        )
+    },
+    '/v1/nodes/?description_contains=foo':
     {
         'GET': (
             {},
@@ -1067,6 +1075,16 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(children))
         self.assertEqual(NODE2['uuid'], children[0])
+
+    def test_node_list_by_description(self):
+        nodes = self.mgr.list(description_contains='foo')
+        expect = [
+            ('GET', '/v1/nodes/?description_contains=foo', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertThat(nodes, HasLength(1))
+        self.assertEqual(NODE2['description'],
+                         getattr(nodes[0], 'description'))
 
     def test_node_list_detail(self):
         nodes = self.mgr.list(detail=True)

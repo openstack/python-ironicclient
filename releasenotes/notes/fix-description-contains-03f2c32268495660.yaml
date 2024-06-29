@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes the issue that ``--description-contains`` does not work when trying
+    to query nodes with description filter.
