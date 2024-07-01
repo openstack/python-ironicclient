@@ -750,7 +750,8 @@ class TestBaremetalPortList(TestBaremetalPort):
         collist = ('UUID', 'Address', 'Created At', 'Extra', 'Node UUID',
                    'Local Link Connection', 'Portgroup UUID',
                    'PXE boot enabled', 'Physical Network', 'Updated At',
-                   'Internal Info', 'Is Smart NIC port')
+                   'Internal Info', 'Is Smart NIC port',
+                   'Port Name')
         self.assertEqual(collist, columns)
 
         datalist = ((
@@ -765,7 +766,8 @@ class TestBaremetalPortList(TestBaremetalPort):
             '',
             '',
             '',
-            ''
+            '',
+            '',
         ), )
         self.assertEqual(datalist, tuple(data))
 

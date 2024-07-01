@@ -157,6 +157,7 @@ class Resource(object):
         'parent_node': 'Parent Node',
         'children': 'Child Nodes',
         'firmware_interface': 'Firmware Interface',
+        'port_name': 'Port Name',
     }
 
     def __init__(self, field_ids, sort_excluded=None, override_labels=None):
@@ -345,6 +346,7 @@ PORT_DETAILED_RESOURCE = Resource(
      'updated_at',
      'internal_info',
      'is_smartnic',
+     'port_name',
      ],
     sort_excluded=[
         'extra',

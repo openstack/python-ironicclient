@@ -106,6 +106,12 @@ class CreateBaremetalPort(command.ShowOne):
             action='store_true',
             help=_("Indicates whether this Port is a Smart NIC port"))
 
+        parser.add_argument(
+            '--name',
+            dest='name',
+            metavar='<port name>',
+            help=_("Name of the port."))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -231,6 +237,12 @@ class UnsetBaremetalPort(command.Command):
             action='store_true',
             help=_("Set Port as not Smart NIC port"))
 
+        parser.add_argument(
+            '--name',
+            dest='name',
+            action='store_true',
+            help=_("Unset the name for this port"))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -251,6 +263,9 @@ class UnsetBaremetalPort(command.Command):
         if parsed_args.is_smartnic:
             properties.extend(utils.args_array_to_patch(
                 'add', ["is_smartnic=False"]))
+        if parsed_args.name:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['name']))
 
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
@@ -336,6 +351,12 @@ class SetBaremetalPort(command.Command):
             action='store_true',
             help=_("Set port to be Smart NIC port"))
 
+        parser.add_argument(
+            '--name',
+            metavar='<name>',
+            dest='name',
+            help=_("Set name for this port"))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -372,6 +393,9 @@ class SetBaremetalPort(command.Command):
         if parsed_args.is_smartnic:
             is_smartnic = ["is_smartnic=%s" % parsed_args.is_smartnic]
             properties.extend(utils.args_array_to_patch('add', is_smartnic))
+        if parsed_args.name:
+            port_name = ["name=%s" % parsed_args.name]
+            properties.extend(utils.args_array_to_patch('add', port_name))
 
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)

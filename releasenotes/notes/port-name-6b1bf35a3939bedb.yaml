@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Adds ``name`` field support, which is introduced in ironic API 1.88.
