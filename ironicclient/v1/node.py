@@ -65,7 +65,8 @@ class NodeManager(base.CreateManager):
              os_ironic_api_version=None, conductor_group=None,
              conductor=None, owner=None, retired=None, lessee=None,
              shards=None, sharded=None, parent_node=None,
-             include_children=None, global_request_id=None):
+             include_children=None, description_contains=None,
+             global_request_id=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -144,6 +145,8 @@ class NodeManager(base.CreateManager):
                                  Tells the ironic API to enumerate all child
                                  nodes which are normally hidden from the
                                  node list.
+        :param description_contains: Optional. String value to get nodes
+                                 with description contains specified value.
         :returns: A list of nodes.
 
         """
@@ -189,6 +192,8 @@ class NodeManager(base.CreateManager):
         if include_children:
             # NOTE(TheJulia): Only valid if True.
             filters.append('include_children=True')
+        if description_contains is not None:
+            filters.append('description_contains=%s' % description_contains)
 
         path = ''
         if detail:
