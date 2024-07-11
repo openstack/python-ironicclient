@@ -37,7 +37,7 @@ from ironicclient import exc
 #             http://specs.openstack.org/openstack/ironic-specs/specs/kilo/api-microversions.html # noqa
 #             for full details.
 DEFAULT_VER = '1.9'
-LAST_KNOWN_API_VERSION = 88
+LAST_KNOWN_API_VERSION = 92
 LATEST_VERSION = '1.{}'.format(LAST_KNOWN_API_VERSION)
 
 LOG = logging.getLogger(__name__)

@@ -59,7 +59,8 @@ class TestAbort(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'abort', cleansteps=None, configdrive=None,
-            deploysteps=None, rescue_password=None, servicesteps=None)
+            deploysteps=None, rescue_password=None, servicesteps=None,
+            runbook=None)
 
 
 class TestAdopt(TestBaremetal):
@@ -83,7 +84,7 @@ class TestAdopt(TestBaremetal):
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'adopt',
             cleansteps=None, deploysteps=None, configdrive=None,
-            rescue_password=None, servicesteps=None)
+            rescue_password=None, servicesteps=None, runbook=None)
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
     def test_adopt_baremetal_provision_state_active_and_wait(self):
@@ -103,7 +104,7 @@ class TestAdopt(TestBaremetal):
         test_node.set_provision_state.assert_called_once_with(
             'node_uuid', 'adopt',
             cleansteps=None, deploysteps=None, configdrive=None,
-            rescue_password=None, servicesteps=None)
+            rescue_password=None, servicesteps=None, runbook=None)
         test_node.wait_for_provision_state.assert_called_once_with(
             ['node_uuid'], expected_state='active',
             poll_interval=2, timeout=15)
@@ -125,7 +126,7 @@ class TestAdopt(TestBaremetal):
         test_node.set_provision_state.assert_called_once_with(
             'node_uuid', 'adopt',
             cleansteps=None, deploysteps=None, configdrive=None,
-            rescue_password=None, servicesteps=None)
+            rescue_password=None, servicesteps=None, runbook=None)
         test_node.wait_for_provision_state.assert_called_once_with(
             ['node_uuid'], expected_state='active',
             poll_interval=2, timeout=0)
@@ -174,7 +175,55 @@ class TestClean(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'clean', cleansteps=steps_dict, configdrive=None,
-            deploysteps=None, rescue_password=None, servicesteps=None)
+            deploysteps=None, rescue_password=None, servicesteps=None,
+            runbook=None)
+
+    def test_clean_with_runbook(self):
+        runbook_name = 'runbook_name'
+        arglist = ['--runbook', runbook_name, 'node_uuid']
+        verifylist = [
+            ('runbook', runbook_name),
+            ('provision_state', 'clean'),
+            ('nodes', ['node_uuid']),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'clean', cleansteps=None, configdrive=None,
+            deploysteps=None, rescue_password=None, servicesteps=None,
+            runbook=runbook_name)
+
+    def test_clean_with_runbook_and_steps(self):
+        runbook_name = 'runbook_name'
+
+        steps_dict = {
+            "clean_steps": [{
+                "interface": "raid",
+                "step": "create_configuration",
+                "args": {"create_nonroot_volumes": False}
+            }, {
+                "interface": "deploy",
+                "step": "erase_devices"
+            }]
+        }
+        steps_json = json.dumps(steps_dict)
+
+        arglist = ['--runbook', runbook_name, '--clean-steps', steps_json,
+                   'node_uuid']
+
+        verifylist = [
+            ('clean_steps', steps_json),
+            ('runbook', runbook_name),
+            ('provision_state', 'clean'),
+            ('nodes', ['node_uuid']),
+        ]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
 
 
 class TestService(TestBaremetal):
@@ -210,7 +259,54 @@ class TestService(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'service', cleansteps=None, configdrive=None,
-            deploysteps=None, rescue_password=None, servicesteps=steps_dict)
+            deploysteps=None, rescue_password=None, servicesteps=steps_dict,
+            runbook=None)
+
+    def test_service_with_runbook(self):
+        runbook_name = 'runbook_name'
+        arglist = ['--runbook', runbook_name, 'node_uuid']
+        verifylist = [
+            ('runbook', runbook_name),
+            ('provision_state', 'service'),
+            ('nodes', ['node_uuid']),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.set_provision_state.assert_called_once_with(
+            'node_uuid', 'service', cleansteps=None, configdrive=None,
+            deploysteps=None, rescue_password=None, servicesteps=None,
+            runbook=runbook_name)
+
+    def test_service_with_runbook_and_steps(self):
+        runbook_name = 'runbook_name'
+        steps_dict = {
+            "service_steps": [{
+                "interface": "raid",
+                "step": "create_configuration",
+                "args": {"create_nonroot_volumes": False}
+            }, {
+                "interface": "deploy",
+                "step": "erase_devices"
+            }]
+        }
+        steps_json = json.dumps(steps_dict)
+
+        arglist = ['--service-steps', steps_json, '--runbook', runbook_name,
+                   'node_uuid']
+
+        verifylist = [
+            ('service_steps', steps_json),
+            ('runbook', runbook_name),
+            ('provision_state', 'service'),
+            ('nodes', ['node_uuid']),
+        ]
+
+        self.assertRaises(oscutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
 
 
 class TestInspect(TestBaremetal):
@@ -233,7 +329,8 @@ class TestInspect(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'inspect', cleansteps=None, configdrive=None,
-            deploysteps=None, rescue_password=None, servicesteps=None)
+            deploysteps=None, rescue_password=None, servicesteps=None,
+            runbook=None)
 
 
 class TestManage(TestBaremetal):
@@ -256,7 +353,8 @@ class TestManage(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'manage', cleansteps=None, configdrive=None,
-            deploysteps=None, rescue_password=None, servicesteps=None)
+            deploysteps=None, rescue_password=None, servicesteps=None,
+            runbook=None)
 
 
 class TestProvide(TestBaremetal):
@@ -279,7 +377,8 @@ class TestProvide(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'provide', cleansteps=None, configdrive=None,
-            deploysteps=None, rescue_password=None, servicesteps=None)
+            deploysteps=None, rescue_password=None, servicesteps=None,
+            runbook=None)
 
 
 class TestRebuild(TestBaremetal):
@@ -302,7 +401,8 @@ class TestRebuild(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rebuild', cleansteps=None, configdrive=None,
-            deploysteps=None, rescue_password=None, servicesteps=None)
+            deploysteps=None, rescue_password=None, servicesteps=None,
+            runbook=None)
 
 
 class TestUndeploy(TestBaremetal):
@@ -325,7 +425,8 @@ class TestUndeploy(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'deleted', cleansteps=None, configdrive=None,
-            deploysteps=None, rescue_password=None, servicesteps=None)
+            deploysteps=None, rescue_password=None, servicesteps=None,
+            runbook=None)
 
 
 class TestBootdeviceSet(TestBaremetal):
@@ -1912,7 +2013,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
             'node_uuid', 'active',
             cleansteps=None, deploysteps=[{"interface": "deploy"}],
             configdrive='path/to/drive', rescue_password=None,
-            servicesteps=None)
+            servicesteps=None, runbook=None)
 
     def test_deploy_baremetal_provision_state_active_and_configdrive_dict(
             self):
@@ -1931,7 +2032,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'active',
             cleansteps=None, deploysteps=None, configdrive={'meta_data': {}},
-            rescue_password=None, servicesteps=None)
+            rescue_password=None, servicesteps=None, runbook=None)
 
     def test_deploy_no_wait(self):
         arglist = ['node_uuid']
@@ -1996,7 +2097,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
         test_node.set_provision_state.assert_has_calls([
             mock.call(n, 'active', cleansteps=None, deploysteps=None,
                       configdrive=None, rescue_password=None,
-                      servicesteps=None)
+                      servicesteps=None, runbook=None)
             for n in ['node_uuid', 'node_name']
         ])
         test_node.wait_for_provision_state.assert_called_once_with(
@@ -2220,7 +2321,7 @@ class TestRescueBaremetalProvisionState(TestBaremetal):
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rescue', cleansteps=None, deploysteps=None,
             configdrive=None, rescue_password='supersecret',
-            servicesteps=None)
+            servicesteps=None, runbook=None)
 
     def test_rescue_baremetal_provision_state_rescue_and_wait(self):
         arglist = ['node_uuid',
@@ -2412,7 +2513,7 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
             'node_uuid', 'rebuild',
             cleansteps=None, deploysteps=[{"interface": "deploy"}],
             configdrive='path/to/drive', rescue_password=None,
-            servicesteps=None)
+            servicesteps=None, runbook=None)
 
     def test_rebuild_no_wait(self):
         arglist = ['node_uuid']
@@ -2428,7 +2529,7 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'rebuild',
             cleansteps=None, deploysteps=None, configdrive=None,
-            rescue_password=None, servicesteps=None)
+            rescue_password=None, servicesteps=None, runbook=None)
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
@@ -2546,7 +2647,8 @@ class TestUnrescueBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'unrescue', cleansteps=None, deploysteps=None,
-            configdrive=None, rescue_password=None, servicesteps=None)
+            configdrive=None, rescue_password=None, servicesteps=None,
+            runbook=None)
 
     def test_unrescue_baremetal_provision_state_active_and_wait(self):
         arglist = ['node_uuid',
@@ -4661,7 +4763,8 @@ class TestUnholdBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.set_provision_state.assert_called_once_with(
             'node_uuid', 'unhold', cleansteps=None, deploysteps=None,
-            configdrive=None, rescue_password=None, servicesteps=None)
+            configdrive=None, rescue_password=None, servicesteps=None,
+            runbook=None)
 
 
 class TestListFirmwareComponents(TestBaremetal):

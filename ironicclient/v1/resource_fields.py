@@ -158,6 +158,7 @@ class Resource(object):
         'children': 'Child Nodes',
         'firmware_interface': 'Firmware Interface',
         'port_name': 'Port Name',
+        'public': 'Public'
     }
 
     def __init__(self, field_ids, sort_excluded=None, override_labels=None):
@@ -606,6 +607,25 @@ DEPLOY_TEMPLATE_RESOURCE = Resource(
      ],
 )
 
+# Runbooks
+RUNBOOK_DETAILED_RESOURCE = Resource(
+    ['uuid',
+     'name',
+     'owner',
+     'public',
+     'steps',
+     'extra',
+     'created_at',
+     'updated_at'
+     ],
+    sort_excluded=['extra', 'steps']
+)
+
+RUNBOOK_RESOURCE = Resource(
+    ['uuid',
+     'name',
+     ],
+)
 
 NODE_HISTORY_RESOURCE = Resource(
     ['uuid',
