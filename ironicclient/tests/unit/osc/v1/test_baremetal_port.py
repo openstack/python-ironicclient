@@ -272,6 +272,33 @@ class TestCreateBaremetalPort(TestBaremetalPort):
             'is_smartnic': True}
         self.baremetal_mock.port.create.assert_called_once_with(**args)
 
+    def test_baremetal_port_create_name(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--name', 'portname1'
+        ]
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_port_address),
+            ('name', 'portname1')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = {
+            'address': baremetal_fakes.baremetal_port_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'name': 'portname1'
+        }
+
+        self.baremetal_mock.port.create.assert_called_once_with(**args)
+
 
 class TestShowBaremetalPort(TestBaremetalPort):
     def setUp(self):
@@ -426,6 +453,18 @@ class TestBaremetalPortUnset(TestBaremetalPort):
         self.baremetal_mock.port.update.assert_called_once_with(
             'port',
             [{'path': '/is_smartnic', 'op': 'add', 'value': 'False'}])
+
+    def test_baremetal_port_unset_name(self):
+        arglist = ['port', '--name']
+        verifylist = [('port', 'port'),
+                      ('name', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port',
+            [{'path': '/name', 'op': 'remove'}])
 
 
 class TestBaremetalPortSet(TestBaremetalPort):
@@ -593,6 +632,22 @@ class TestBaremetalPortSet(TestBaremetalPort):
         self.baremetal_mock.port.update.assert_called_once_with(
             baremetal_fakes.baremetal_port_uuid,
             [{'path': '/is_smartnic', 'value': 'True',
+              'op': 'add'}])
+
+    def test_baremetal_port_set_name(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--name', 'portname2']
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('name', 'portname2')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/name', 'value': 'portname2',
               'op': 'add'}])
 
 
