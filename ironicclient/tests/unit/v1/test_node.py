@@ -1771,6 +1771,20 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
+    def test_node_set_provision_state_with_cleansteps_disable_ramdisk(self):
+        cleansteps = [{"step": "delete_configuration", "interface": "raid"}]
+        target_state = 'clean'
+        self.mgr.set_provision_state(NODE1['uuid'], target_state,
+                                     cleansteps=cleansteps,
+                                     disable_ramdisk=True)
+        body = {'target': target_state,
+                'clean_steps': cleansteps,
+                'disable_ramdisk': True}
+        expect = [
+            ('PUT', '/v1/nodes/%s/states/provision' % NODE1['uuid'], {}, body),
+        ]
+        self.assertEqual(expect, self.api.calls)
+
     def test_node_set_provision_state_with_deploysteps(self):
         deploysteps = [{"step": "upgrade", "interface": "deploy"}]
         target_state = 'active'

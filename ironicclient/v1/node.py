@@ -729,7 +729,7 @@ class NodeManager(base.CreateManager):
             self, node_uuid, state, configdrive=None, cleansteps=None,
             rescue_password=None, os_ironic_api_version=None,
             global_request_id=None, deploysteps=None,
-            servicesteps=None, runbook=None):
+            servicesteps=None, runbook=None, disable_ramdisk=None):
         """Set the provision state for the node.
 
         :param node_uuid: The UUID or name of the node.
@@ -769,6 +769,10 @@ class NodeManager(base.CreateManager):
             'service'.
         :param runbook: The identifier of a predefined runbook to use for
             provisioning.
+        :param disable_ramdisk: Boolean if set to true will not boot the
+            ironic-python-agent for cleaning. Only valid when setting 'state'
+            to 'clean' or 'service' and only for steps explicitly marked as
+            not requiring the ironic-python-agent can use this.
         :raises: InvalidAttribute if there was an error with the clean steps or
             deploy steps
         :returns: The status of the request
@@ -811,6 +815,16 @@ class NodeManager(base.CreateManager):
 
         if runbook:
             body['runbook'] = runbook
+
+        if isinstance(disable_ramdisk, bool):
+            body['disable_ramdisk'] = disable_ramdisk
+        elif disable_ramdisk:
+            try:
+                body['disable_ramdisk'] = strutils.bool_from_string(state,
+                                                                    True)
+            except ValueError as e:
+                raise exc.InvalidAttribute(_("Argument 'disable_ramdisk': "
+                                             "%(err)s") % {'err': e})
 
         return self.update(path, body, http_method='PUT',
                            os_ironic_api_version=os_ironic_api_version,

@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Adds support for ``NodeManager.set_provision_state``,
+    to accept ``disable_ramdisk`` keyword argument to disable booting
+    ironic-python-agent for clean and service steps that support it.
+  - |
+    Add ``--disable-ramdisk`` CLI option to `node clean` and
+    `node service` to disable booting ironic-python-agent for steps
+    that support it.

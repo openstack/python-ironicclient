@@ -103,6 +103,13 @@ class ProvisionStateBaremetalNode(command.Command):
 
         rescue_password = getattr(parsed_args, 'rescue_password', None)
 
+        disable_ramdisk = getattr(parsed_args, 'disable_ramdisk', None)
+
+        if runbook and disable_ramdisk:
+            raise exc.CommandError(
+                _("You cannot supply --runbook and --disable-ramdisk together")
+            )
+
         for node in parsed_args.nodes:
             baremetal_client.node.set_provision_state(
                 node,
@@ -112,7 +119,8 @@ class ProvisionStateBaremetalNode(command.Command):
                 deploysteps=deploy_steps,
                 rescue_password=rescue_password,
                 servicesteps=service_steps,
-                runbook=runbook)
+                runbook=runbook,
+                disable_ramdisk=disable_ramdisk)
 
 
 class ProvisionStateWithWait(ProvisionStateBaremetalNode):
@@ -308,6 +316,13 @@ class CleanBaremetalNode(ProvisionStateWithWait):
             metavar='<runbook>',
             help=_("The identifier of a predefined runbook to use for "
                    "cleaning."))
+        parser.add_argument(
+            '--disable-ramdisk',
+            action='store_true',
+            default=None,
+            help=_("ironic-python-agent will not be booted for cleaning. "
+                   "Only steps explicitly marked as not requiring "
+                   "ironic-python-agent can be executed with this set."))
         return parser
 
 
@@ -335,6 +350,13 @@ class ServiceBaremetalNode(ProvisionStateWithWait):
             metavar='<runbook>',
             help=_("The identifier of a predefined runbook to use for "
                    "servicing."))
+        parser.add_argument(
+            '--disable-ramdisk',
+            action='store_true',
+            default=None,
+            help=_("ironic-python-agent will not be booted for cleaning. "
+                   "Only steps explicitly marked as not requiring "
+                   "ironic-python-agent can be executed with this set."))
         return parser
 
 
