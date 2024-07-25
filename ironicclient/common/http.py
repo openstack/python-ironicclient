@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from distutils.version import StrictVersion
 import functools
 from http import client as http_client
 import json
@@ -48,15 +47,34 @@ _MAJOR_VERSION = 1
 API_VERSION = '/v%d' % _MAJOR_VERSION
 API_VERSION_SELECTED_STATES = ('user', 'negotiated', 'cached', 'default')
 
-
 DEFAULT_MAX_RETRIES = 5
 DEFAULT_RETRY_INTERVAL = 2
 SENSITIVE_HEADERS = ('X-Auth-Token',)
 
-
 SUPPORTED_ENDPOINT_SCHEME = ('http', 'https')
 
 _API_VERSION_RE = re.compile(r'/+(v%d)?/*$' % _MAJOR_VERSION)
+
+
+@functools.total_ordering
+class _Version:
+    _version_re = re.compile(r'^(\d) \. (\d+)$', re.VERBOSE | re.ASCII)
+
+    def __init__(self, version):
+        match = self._version_re.match(version)
+        if not match:
+            raise ValueError('invalid version number %s' % version)
+        major, minor = match.group(1, 2)
+        self.version = (int(major), int(minor))
+
+    def __str__(self):
+        return '.'.join(str(v) for v in self.version)
+
+    def __eq__(self, other):
+        return self.version == other.version
+
+    def __lt__(self, other):
+        return self.version < other.version
 
 
 def _trim_endpoint_api_version(url):
@@ -159,7 +177,8 @@ class VersionNegotiationMixin(object):
             resp = _query_server(conn)
             min_ver, max_ver = self._parse_version_headers(resp)
         # Reset the maximum version that we permit
-        if StrictVersion(max_ver) > StrictVersion(LATEST_VERSION):
+
+        if _Version(max_ver) > _Version(LATEST_VERSION):
             LOG.debug("Remote API version %(max_ver)s is greater than the "
                       "version supported by ironicclient. Maximum available "
                       "version is %(client_ver)s",
@@ -198,8 +217,8 @@ class VersionNegotiationMixin(object):
                 negotiated_ver = max_ver
             else:
                 negotiated_ver = str(
-                    min(StrictVersion(requested_version),
-                        StrictVersion(max_ver)))
+                    min(_Version(requested_version), _Version(max_ver))
+                )
 
         elif isinstance(requested_version, list):
             if 'latest' in requested_version:
@@ -212,8 +231,8 @@ class VersionNegotiationMixin(object):
 
             versions = []
             for version in requested_version:
-                if min_ver <= StrictVersion(version) <= max_ver:
-                    versions.append(StrictVersion(version))
+                if _Version(min_ver) <= _Version(version) <= _Version(max_ver):
+                    versions.append(_Version(version))
             if versions:
                 negotiated_ver = str(max(versions))
             else:
@@ -232,8 +251,9 @@ class VersionNegotiationMixin(object):
                   "or a list of string values representing API versions.")
                 % {'req': requested_version}))
 
-        if StrictVersion(negotiated_ver) < StrictVersion(min_ver):
+        if _Version(negotiated_ver) < _Version(min_ver):
             negotiated_ver = min_ver
+
         # server handles microversions, but doesn't support
         # the requested version, so try a negotiated version
         self.api_version_select_state = 'negotiated'
@@ -248,10 +268,8 @@ class VersionNegotiationMixin(object):
         return negotiated_ver
 
     def _generic_parse_version_headers(self, accessor_func):
-        min_ver = accessor_func('X-OpenStack-Ironic-API-Minimum-Version',
-                                None)
-        max_ver = accessor_func('X-OpenStack-Ironic-API-Maximum-Version',
-                                None)
+        min_ver = accessor_func('X-OpenStack-Ironic-API-Minimum-Version', None)
+        max_ver = accessor_func('X-OpenStack-Ironic-API-Maximum-Version', None)
         return min_ver, max_ver
 
     def _parse_version_headers(self, accessor_func):

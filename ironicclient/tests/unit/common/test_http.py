@@ -232,7 +232,7 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         mock_conn = mock.MagicMock()
         self.test_object.api_version_select_state = 'user'
         self.test_object.os_ironic_api_version = ['1.1', '1.6', '1.25',
-                                                  '1.26', '1.26.1', '1.27',
+                                                  '1.26', '1.27', '1.28',
                                                   '1.30']
         result = self.test_object.negotiate_version(mock_conn, self.response)
         self.assertEqual('1.26', result)
