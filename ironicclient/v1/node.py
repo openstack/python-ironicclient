@@ -729,7 +729,7 @@ class NodeManager(base.CreateManager):
             self, node_uuid, state, configdrive=None, cleansteps=None,
             rescue_password=None, os_ironic_api_version=None,
             global_request_id=None, deploysteps=None,
-            servicesteps=None):
+            servicesteps=None, runbook=None):
         """Set the provision state for the node.
 
         :param node_uuid: The UUID or name of the node.
@@ -767,6 +767,8 @@ class NodeManager(base.CreateManager):
             dictionaries; each dictonary should have keys 'interface', 'step',
             and optional key 'args' when setting an 'active' nodes to
             'service'.
+        :param runbook: The identifier of a predefined runbook to use for
+            provisioning.
         :raises: InvalidAttribute if there was an error with the clean steps or
             deploy steps
         :returns: The status of the request
@@ -806,6 +808,9 @@ class NodeManager(base.CreateManager):
 
         if servicesteps:
             body['service_steps'] = servicesteps
+
+        if runbook:
+            body['runbook'] = runbook
 
         return self.update(path, body, http_method='PUT',
                            os_ironic_api_version=os_ironic_api_version,

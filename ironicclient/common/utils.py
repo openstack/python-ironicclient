@@ -214,7 +214,7 @@ def common_params_for_list(args, fields, field_labels):
 
 
 def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None,
-                   fields=None, detail=False):
+                   fields=None, detail=False, project=None, public=None):
     """Generate common filters for any list request.
 
     :param marker: entity ID from which to start returning entities.
@@ -237,6 +237,10 @@ def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None,
         filters.append('sort_key=%s' % sort_key)
     if sort_dir is not None:
         filters.append('sort_dir=%s' % sort_dir)
+    if project is not None:
+        filters.append('project=%s' % project)
+    if public is not None:
+        filters.append('public=True')
     if fields is not None:
         filters.append('fields=%s' % ','.join(fields))
     if detail:
