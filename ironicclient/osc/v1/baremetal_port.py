@@ -132,7 +132,7 @@ class CreateBaremetalPort(command.ShowOne):
 
         field_list = ['address', 'uuid', 'extra', 'node_uuid', 'pxe_enabled',
                       'local_link_connection', 'portgroup_uuid',
-                      'physical_network']
+                      'physical_network', 'name']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'extra')
