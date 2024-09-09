@@ -1148,7 +1148,7 @@ class NodeManager(base.CreateManager):
         path = "%s/history" % node_ident
 
         if detail:
-            path = path + '/detail'
+            path = path + '?detail=%s' % detail
 
         return self._list_primitives(
             self._path(path), 'history',
