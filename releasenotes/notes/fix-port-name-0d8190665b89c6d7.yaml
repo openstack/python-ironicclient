@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Display correct field for the port name of the Port resource.

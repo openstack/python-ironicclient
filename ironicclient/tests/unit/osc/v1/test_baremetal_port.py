@@ -806,7 +806,7 @@ class TestBaremetalPortList(TestBaremetalPort):
                    'Local Link Connection', 'Portgroup UUID',
                    'PXE boot enabled', 'Physical Network', 'Updated At',
                    'Internal Info', 'Is Smart NIC port',
-                   'Port Name')
+                   'Name')
         self.assertEqual(collist, columns)
 
         datalist = ((

@@ -157,7 +157,6 @@ class Resource(object):
         'parent_node': 'Parent Node',
         'children': 'Child Nodes',
         'firmware_interface': 'Firmware Interface',
-        'port_name': 'Port Name',
         'public': 'Public'
     }
 
@@ -347,7 +346,7 @@ PORT_DETAILED_RESOURCE = Resource(
      'updated_at',
      'internal_info',
      'is_smartnic',
-     'port_name',
+     'name',
      ],
     sort_excluded=[
         'extra',
