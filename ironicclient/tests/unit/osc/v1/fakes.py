@@ -255,6 +255,14 @@ RUNBOOK = {
     'steps': baremetal_runbook_steps,
     'extra': baremetal_runbook_extra,
 }
+
+baremetal_shard_name = 'example_shard'
+baremetal_shard_count = 47
+SHARD = {
+    'name': baremetal_shard_name,
+    'count': baremetal_shard_count,
+}
+
 NODE_HISTORY = [
     {
         'uuid': 'abcdef1',

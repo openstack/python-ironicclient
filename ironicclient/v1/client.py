@@ -28,6 +28,7 @@ from ironicclient.v1 import node
 from ironicclient.v1 import port
 from ironicclient.v1 import portgroup
 from ironicclient.v1 import runbook
+from ironicclient.v1 import shard
 from ironicclient.v1 import volume_connector
 from ironicclient.v1 import volume_target
 
@@ -106,6 +107,7 @@ class Client(object):
         self.allocation = allocation.AllocationManager(self.http_client)
         self.deploy_template = deploy_template.DeployTemplateManager(
             self.http_client)
+        self.shard = shard.ShardManager(self.http_client)
 
     @property
     def current_api_version(self):

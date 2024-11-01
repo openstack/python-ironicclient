@@ -47,6 +47,7 @@ class Resource(object):
         'conductor': 'Conductor',
         'conductor_group': 'Conductor Group',
         'console_enabled': 'Console Enabled',
+        'count': 'Count',
         'created_at': 'Created At',
         'default_bios_interface': 'Default BIOS Interface',
         'default_boot_interface': 'Default Boot Interface',
@@ -642,4 +643,9 @@ NODE_HISTORY_DETAILED_RESOURCE = Resource(
      'event',
      'conductor',
      'user']
+)
+
+SHARD_RESOURCE = Resource(
+    ['name',
+     'count']
 )
