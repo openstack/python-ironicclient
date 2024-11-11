@@ -989,6 +989,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('parent_node', 'nodex')],
                                 {'parent_node': 'nodex'})
 
+    def test_baremetal_create_with_disable_power_off(self):
+        self.check_with_options(['--disable-power-off'],
+                                [('disable_power_off', True)],
+                                {'disable_power_off': True})
+
 
 class TestBaremetalDelete(TestBaremetal):
     def setUp(self):
@@ -1150,6 +1155,7 @@ class TestBaremetalList(TestBaremetal):
             'Deploy Interface',
             'Deploy Step',
             'Description',
+            'Disable Power Off',
             'Driver',
             'Driver Info',
             'Driver Internal Info',
@@ -3617,6 +3623,46 @@ class TestBaremetalSet(TestBaremetal):
             'node_uuid',
             [{'path': '/network_data', 'value': expected_network_data,
               'op': 'add'}],
+            reset_interfaces=None,
+        )
+
+    def test_baremetal_set_disable_power_off(self):
+        arglist = [
+            'node_uuid',
+            '--disable-power-off'
+        ]
+        verifylist = [
+            ('nodes', ['node_uuid']),
+            ('disable_power_off', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/disable_power_off', 'value': 'True', 'op': 'add'}],
+            reset_interfaces=None,
+        )
+
+    def test_baremetal_set_enable_power_off(self):
+        arglist = [
+            'node_uuid',
+            '--enable-power-off'
+        ]
+        verifylist = [
+            ('nodes', ['node_uuid']),
+            ('disable_power_off', False)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/disable_power_off', 'value': 'False', 'op': 'add'}],
             reset_interfaces=None,
         )
 

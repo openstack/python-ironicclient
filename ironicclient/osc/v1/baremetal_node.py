@@ -597,17 +597,22 @@ class CreateBaremetalNode(command.ShowOne):
             help=_('Firmware interface used by the node\'s driver. This is '
                    'only applicable when the specified --driver is a '
                    'hardware type.'))
-
+        parser.add_argument(
+            '--disable-power-off',
+            action='store_true',
+            dest='disable_power_off',
+            default=None,
+            help=_('Explicitly disable power off actions on the node'))
         return parser
 
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
         baremetal_client = self.app.client_manager.baremetal
 
-        field_list = ['automated_clean', 'chassis_uuid', 'driver',
-                      'driver_info', 'properties', 'extra', 'uuid', 'name',
-                      'conductor_group', 'owner', 'description', 'lessee',
-                      'shard', 'resource_class', 'parent_node',
+        field_list = ['automated_clean', 'chassis_uuid', 'disable_power_off',
+                      'driver', 'driver_info', 'properties', 'extra', 'uuid',
+                      'name', 'conductor_group', 'owner', 'description',
+                      'lessee', 'shard', 'resource_class', 'parent_node',
                       ] + ['%s_interface' % iface
                            for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
@@ -1530,6 +1535,19 @@ class SetBaremetalNode(command.Command):
             metavar='<parent_node>',
             help=_('Set the parent node for the node'),
         )
+        power_off = parser.add_mutually_exclusive_group()
+        power_off.add_argument(
+            '--enable-power-off',
+            action='store_false',
+            dest='disable_power_off',
+            default=None,
+            help=_('Explicitly enable power off actions on nodes'))
+        power_off.add_argument(
+            '--disable-power-off',
+            action='store_true',
+            dest='disable_power_off',
+            default=None,
+            help=_('Explicitly disable power off actions on nodes'))
 
         return parser
 
@@ -1569,6 +1587,11 @@ class SetBaremetalNode(command.Command):
         if parsed_args.automated_clean is not None:
             properties.extend(utils.args_array_to_patch(
                 'add', ["automated_clean=%s" % parsed_args.automated_clean]))
+
+        if parsed_args.disable_power_off is not None:
+            properties.extend(utils.args_array_to_patch(
+                'add', ["disable_power_off=%s" % parsed_args.disable_power_off]
+            ))
 
         if parsed_args.reset_interfaces and not parsed_args.driver:
             raise exc.CommandError(

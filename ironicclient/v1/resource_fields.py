@@ -157,7 +157,8 @@ class Resource(object):
         'parent_node': 'Parent Node',
         'children': 'Child Nodes',
         'firmware_interface': 'Firmware Interface',
-        'public': 'Public'
+        'public': 'Public',
+        'disable_power_off': 'Disable Power Off'
     }
 
     def __init__(self, field_ids, sort_excluded=None, override_labels=None):
@@ -255,6 +256,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'deploy_interface',
      'deploy_step',
      'description',
+     'disable_power_off',
      'driver',
      'driver_info',
      'driver_internal_info',

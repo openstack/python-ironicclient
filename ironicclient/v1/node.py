@@ -48,13 +48,13 @@ class NodeManager(base.CreateManager):
                             'extra', 'uuid', 'properties', 'name',
                             'bios_interface', 'boot_interface',
                             'console_interface', 'deploy_interface',
-                            'inspect_interface', 'management_interface',
-                            'network_interface', 'power_interface',
-                            'raid_interface', 'rescue_interface',
-                            'storage_interface', 'vendor_interface',
-                            'firmware_interface', 'resource_class',
-                            'conductor_group', 'automated_clean',
-                            'network_data', 'parent_node',
+                            'disable_power_off', 'inspect_interface',
+                            'management_interface', 'network_interface',
+                            'power_interface', 'raid_interface',
+                            'rescue_interface', 'storage_interface',
+                            'vendor_interface', 'firmware_interface',
+                            'resource_class', 'conductor_group',
+                            'automated_clean', 'network_data', 'parent_node',
                             'owner', 'lessee', 'shard', 'description']
     _resource_name = 'nodes'
 
