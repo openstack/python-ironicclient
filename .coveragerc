@@ -1,3 +1,2 @@
 [report]
 include = ironicclient/*
-omit = ironicclient/tests/functional/*

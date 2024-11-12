@@ -12,7 +12,6 @@ extensions = ['sphinxcontrib.apidoc',
 apidoc_module_dir = '../../ironicclient'
 apidoc_output_dir = 'reference/api'
 apidoc_excluded_paths = [
-    'tests/functional/*',
     'tests']
 apidoc_separate_modules = True
 
@@ -54,7 +53,7 @@ pygments_style = 'native'
 # A list of glob-style patterns that should be excluded when looking for
 # source files. They are matched against the source file names relative to the
 # source directory, using slashes as directory separators on all platforms.
-exclude_patterns = ['api/ironicclient.tests.functional.*']
+exclude_patterns = ['']
 
 # -- Options for HTML output --------------------------------------------------
 

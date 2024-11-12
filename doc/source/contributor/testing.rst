@@ -34,34 +34,4 @@ chosen environments after a -e flag::
 Functional Testing
 ..................
 
-Functional testing assumes the existence of the script run_functional.sh in the
-python-ironicclient/tools directory. The script run_functional.sh generates
-test.conf file. To run functional tests just run ./run_functional.sh.
-
-Also, the test.conf file could be created manually or generated from
-environment variables. It assumes the existence of an openstack
-cloud installation along with admin credentials. The test.conf file lives in
-ironicclient/tests/functional/ directory. To run functional tests in that way
-create test.conf manually and run::
-
-    $ tox -e functional
-
-An example test.conf file::
-
-    [functional]
-    api_version = 1
-    os_auth_url=http://192.168.0.2:5000/v2.0/
-    os_username=admin
-    os_password=admin
-    os_project_name=admin
-
-If you are testing ironic in standalone mode, only the parameters
-'auth_strategy', 'os_auth_token' and 'ironic_url' are required;
-all others will be ignored.
-
-An example test.conf file for standalone host::
-
-    [functional]
-    auth_strategy = noauth
-    os_auth_token = fake
-    ironic_url = http://10.0.0.2:6385
+Functional tests have been removed as of November 2024.
