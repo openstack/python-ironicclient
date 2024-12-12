@@ -159,7 +159,12 @@ class Resource(object):
         'children': 'Child Nodes',
         'firmware_interface': 'Firmware Interface',
         'public': 'Public',
-        'disable_power_off': 'Disable Power Off'
+        'disable_power_off': 'Disable Power Off',
+        'priority': 'Priority',
+        'sensitive': 'Sensitive',
+        'phase': 'Phase',
+        'actions': 'Actions',
+        'conditions': 'Conditions'
     }
 
     def __init__(self, field_ids, sort_excluded=None, override_labels=None):
@@ -649,4 +654,22 @@ NODE_HISTORY_DETAILED_RESOURCE = Resource(
 SHARD_RESOURCE = Resource(
     ['name',
      'count']
+)
+
+INSPECTION_RULE_DETAILED_RESOURCE = Resource(
+    ['uuid',
+     'description',
+     'priority',
+     'sensitive',
+     'phase',
+     'actions',
+     'conditions',
+     'created_at',
+     'updated_at'],
+    sort_excluded=['actions', 'conditions']
+)
+
+INSPECTION_RULE_RESOURCE = Resource(
+    ['uuid',
+     'description'],
 )
