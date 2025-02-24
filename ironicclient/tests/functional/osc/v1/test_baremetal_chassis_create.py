@@ -26,7 +26,7 @@ class BaremetalChassisCreate(base.TestCase):
     @staticmethod
     def generate_params(argument, params):
         params_str = ''
-        for key, value in params.iteritems():
+        for key, value in params.items():
             params_str += ' {0} {1}={2}'.format(argument, key, value)
         return params_str
 
