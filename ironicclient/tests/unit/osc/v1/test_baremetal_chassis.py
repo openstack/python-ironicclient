@@ -50,14 +50,14 @@ class TestChassisCreate(TestChassis):
         self.arglist = []
         self.verifylist = []
         self.collist = (
+            'uuid',
             'description',
             'extra',
-            'uuid',
         )
         self.datalist = (
+            baremetal_fakes.baremetal_chassis_uuid,
             baremetal_fakes.baremetal_chassis_description,
             baremetal_fakes.baremetal_chassis_extra,
-            baremetal_fakes.baremetal_chassis_uuid,
         )
         self.actual_kwargs = {}
 

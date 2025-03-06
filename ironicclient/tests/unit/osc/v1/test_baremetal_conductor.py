@@ -212,17 +212,18 @@ class TestBaremetalConductorShow(TestBaremetalConductor):
             *args, fields=None
         )
 
-        collist = ('alive',
-                   'conductor_group',
-                   'drivers',
-                   'hostname',
-                   )
+        collist = (
+            'hostname',
+            'conductor_group',
+            'alive',
+            'drivers',
+        )
         self.assertEqual(collist, columns)
         datalist = (
-            baremetal_fakes.baremetal_alive,
-            baremetal_fakes.baremetal_conductor_group,
-            baremetal_fakes.baremetal_drivers,
             baremetal_fakes.baremetal_hostname,
+            baremetal_fakes.baremetal_conductor_group,
+            baremetal_fakes.baremetal_alive,
+            baremetal_fakes.baremetal_drivers,
         )
         self.assertEqual(datalist, tuple(data))
 
