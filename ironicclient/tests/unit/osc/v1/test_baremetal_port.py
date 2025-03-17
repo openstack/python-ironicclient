@@ -299,6 +299,33 @@ class TestCreateBaremetalPort(TestBaremetalPort):
 
         self.baremetal_mock.port.create.assert_called_once_with(**args)
 
+    def test_baremetal_port_create_description(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--description', 'Public Network'
+        ]
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_port_address),
+            ('description', 'Public Network')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = {
+            'address': baremetal_fakes.baremetal_port_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'description': 'Public Network'
+        }
+
+        self.baremetal_mock.port.create.assert_called_once_with(**args)
+
 
 class TestShowBaremetalPort(TestBaremetalPort):
     def setUp(self):
@@ -465,6 +492,18 @@ class TestBaremetalPortUnset(TestBaremetalPort):
         self.baremetal_mock.port.update.assert_called_once_with(
             'port',
             [{'path': '/name', 'op': 'remove'}])
+
+    def test_baremetal_port_unset_description(self):
+        arglist = ['port', '--description']
+        verifylist = [('port', 'port'),
+                      ('description', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port',
+            [{'path': '/description', 'op': 'remove'}])
 
 
 class TestBaremetalPortSet(TestBaremetalPort):
@@ -648,6 +687,22 @@ class TestBaremetalPortSet(TestBaremetalPort):
         self.baremetal_mock.port.update.assert_called_once_with(
             baremetal_fakes.baremetal_port_uuid,
             [{'path': '/name', 'value': 'portname2',
+              'op': 'add'}])
+
+    def test_baremetal_port_set_description(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--description', 'Public Network']
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('description', 'Public Network')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/description', 'value': 'Public Network',
               'op': 'add'}])
 
 
