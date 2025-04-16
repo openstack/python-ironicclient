@@ -112,6 +112,12 @@ class CreateBaremetalPort(command.ShowOne):
             metavar='<port name>',
             help=_("Name of the port."))
 
+        parser.add_argument(
+            '--description',
+            dest='description',
+            metavar='<port description>',
+            help=_("An optional description for the port."))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -132,7 +138,7 @@ class CreateBaremetalPort(command.ShowOne):
 
         field_list = ['address', 'uuid', 'extra', 'node_uuid', 'pxe_enabled',
                       'local_link_connection', 'portgroup_uuid',
-                      'physical_network', 'name']
+                      'physical_network', 'name', 'description']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'extra')
@@ -243,6 +249,12 @@ class UnsetBaremetalPort(command.Command):
             action='store_true',
             help=_("Unset the name for this port"))
 
+        parser.add_argument(
+            '--description',
+            dest='description',
+            action='store_true',
+            help=_("Unset the description for this port."))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -266,6 +278,9 @@ class UnsetBaremetalPort(command.Command):
         if parsed_args.name:
             properties.extend(utils.args_array_to_patch('remove',
                               ['name']))
+        if parsed_args.description:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['description']))
 
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
@@ -357,6 +372,12 @@ class SetBaremetalPort(command.Command):
             dest='name',
             help=_("Set name for this port"))
 
+        parser.add_argument(
+            '--description',
+            metavar='<description>',
+            dest='description',
+            help=_("Set a description for this port"))
+
         return parser
 
     def take_action(self, parsed_args):
@@ -396,6 +417,10 @@ class SetBaremetalPort(command.Command):
         if parsed_args.name:
             port_name = ["name=%s" % parsed_args.name]
             properties.extend(utils.args_array_to_patch('add', port_name))
+        if parsed_args.description:
+            port_description = ["description=%s" % parsed_args.description]
+            properties.extend(utils.args_array_to_patch('add',
+                                                        port_description))
 
         if properties:
             baremetal_client.port.update(parsed_args.port, properties)
