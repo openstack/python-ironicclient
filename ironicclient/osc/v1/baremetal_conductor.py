@@ -21,6 +21,7 @@ from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
+from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.v1 import resource_fields as res_fields
 
@@ -106,7 +107,7 @@ class ListBaremetalConductor(command.Lister):
 
         return (labels,
                 (oscutils.get_item_properties(s, columns, formatters={
-                    'Properties': oscutils.format_dict},) for s in data))
+                    'Properties': utils.HashColumn},) for s in data))
 
 
 class ShowBaremetalConductor(command.ShowOne):

@@ -25,6 +25,7 @@ import sys
 import tempfile
 import time
 
+from cliff import columns
 from oslo_utils import strutils
 import yaml
 
@@ -462,3 +463,26 @@ def get_json_data(data):
         return json.loads(data)
     except ValueError:
         return None
+
+
+def format_hash(data):
+    if data is None:
+        return None
+
+    output = ""
+    for s in sorted(data):
+        key_str = s
+        if isinstance(data[s], dict):
+            # NOTE(dtroyer): Only append the separator chars here, quoting
+            #                is completely handled in the terminal case.
+            output = output + format_hash(data[s], prefix=key_str) + ", "
+        elif data[s] is not None:
+            output = output + key_str + "='" + str(data[s]) + "', "
+        else:
+            output = output + key_str + "=, "
+    return output[:-2]
+
+
+class HashColumn(columns.FormattableColumn):
+    def human_readable(self):
+        return format_hash(self._value)
