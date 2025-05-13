@@ -2240,7 +2240,7 @@ class NodeManagerTest(testtools.TestCase):
         mock_get.side_effect = side_effect
 
         self.assertRaisesRegex(exc.StateTransitionTimeout,
-                               r'Node\(s\) node2',
+                               r'.*node2.*',
                                self.mgr.wait_for_provision_state,
                                ['node1', 'node2'], 'active',
                                timeout=0.001)

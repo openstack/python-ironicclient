@@ -234,7 +234,7 @@ class ListBaremetalVolumeTarget(command.Lister):
 
         return (labels,
                 (oscutils.get_item_properties(s, columns, formatters={
-                    'Properties': oscutils.format_dict},) for s in data))
+                    'Properties': utils.HashColumn},) for s in data))
 
 
 class DeleteBaremetalVolumeTarget(command.Command):

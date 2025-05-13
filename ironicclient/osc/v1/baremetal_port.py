@@ -572,4 +572,4 @@ class ListBaremetalPort(command.Lister):
 
         return (labels,
                 (oscutils.get_item_properties(s, columns, formatters={
-                    'extra': oscutils.format_dict},) for s in data))
+                    'extra': utils.HashColumn},) for s in data))

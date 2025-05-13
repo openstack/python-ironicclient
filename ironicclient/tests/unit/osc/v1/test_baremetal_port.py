@@ -18,8 +18,8 @@ import copy
 from unittest import mock
 
 from osc_lib.tests import utils as osctestutils
-from osc_lib import utils as oscutils
 
+from ironicclient.common import utils
 from ironicclient import exc
 from ironicclient.osc.v1 import baremetal_port
 from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
@@ -868,7 +868,7 @@ class TestBaremetalPortList(TestBaremetalPort):
             baremetal_fakes.baremetal_port_uuid,
             baremetal_fakes.baremetal_port_address,
             '',
-            oscutils.format_dict(baremetal_fakes.baremetal_port_extra),
+            utils.HashColumn(baremetal_fakes.baremetal_port_extra),
             baremetal_fakes.baremetal_uuid,
             '',
             '',
