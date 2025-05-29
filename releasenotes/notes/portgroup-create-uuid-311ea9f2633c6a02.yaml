@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    When creating a portgroup, the UUID can be specified to support idempotency.
+    The CLI incorrectly disallowed this.
