@@ -1,2 +1,7 @@
+[run]
+branch = True
+source = ironicclient
+omit = ironicclient/tests/*
+
 [report]
-include = ironicclient/*
+ignore_errors = True
