@@ -127,6 +127,28 @@ class TestCreateBaremetalRunbook(TestBaremetalRunbook):
                           self.cmd, arglist, verifylist)
         self.assertFalse(self.baremetal_mock.runbook.create.called)
 
+    def test_baremetal_runbook_create_public_false(self):
+        arglist = [
+            '--name', baremetal_fakes.baremetal_runbook_name,
+            '--steps', baremetal_fakes.baremetal_runbook_steps,
+            '--public', 'false',
+        ]
+        verifylist = [
+            ('name', baremetal_fakes.baremetal_runbook_name),
+            ('steps', baremetal_fakes.baremetal_runbook_steps),
+            ('public', 'false'),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+
+        expected = {
+            'name': baremetal_fakes.baremetal_runbook_name,
+            'steps': json.loads(baremetal_fakes.baremetal_runbook_steps),
+            'public': False,
+        }
+        self.baremetal_mock.runbook.create.assert_called_once_with(**expected)
+
 
 class TestShowBaremetalRunbook(TestBaremetalRunbook):
     def setUp(self):
