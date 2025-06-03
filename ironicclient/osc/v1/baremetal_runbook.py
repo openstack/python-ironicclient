@@ -55,6 +55,9 @@ class CreateBaremetalRunbook(command.ShowOne):
             help=_('UUID of the runbook.'))
         parser.add_argument(
             '--public',
+            dest='public',
+            nargs='?',
+            const='true',
             metavar='<public>',
             help=_('Whether the runbook will be private or public.')
         )
@@ -86,6 +89,9 @@ class CreateBaremetalRunbook(command.ShowOne):
         field_list = ['name', 'uuid', 'owner', 'public', 'extra']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
+        if parsed_args.public is not None:
+            fields['public'] = utils.bool_argument_value(
+                '--public', parsed_args.public, strict=True)
         fields = utils.args_array_to_dict(fields, 'extra')
         runbook = baremetal_client.runbook.create(steps=steps,
                                                   **fields)
@@ -156,6 +162,9 @@ class SetBaremetalRunbook(command.Command):
         )
         parser.add_argument(
             '--public',
+            dest='public',
+            nargs='?',
+            const='true',
             metavar='<public>',
             help=_('Make a private runbook public.')
         )
@@ -190,8 +199,10 @@ class SetBaremetalRunbook(command.Command):
         if parsed_args.owner:
             owner = ["owner=%s" % parsed_args.owner]
             properties.extend(utils.args_array_to_patch('add', owner))
-        if parsed_args.public:
-            public = ["public=%s" % parsed_args.public]
+        if parsed_args.public is not None:
+            to_bool = utils.bool_argument_value(
+                '--public', parsed_args.public, strict=True)
+            public = ["public=%s" % to_bool]
             properties.extend(utils.args_array_to_patch('add', public))
         if parsed_args.steps:
             steps = utils.handle_json_arg(parsed_args.steps, 'runbook steps')
