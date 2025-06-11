@@ -24,6 +24,7 @@ from ironicclient.v1 import conductor
 from ironicclient.v1 import deploy_template
 from ironicclient.v1 import driver
 from ironicclient.v1 import events
+from ironicclient.v1 import inspection_rule
 from ironicclient.v1 import node
 from ironicclient.v1 import port
 from ironicclient.v1 import portgroup
@@ -108,6 +109,8 @@ class Client(object):
         self.deploy_template = deploy_template.DeployTemplateManager(
             self.http_client)
         self.shard = shard.ShardManager(self.http_client)
+        self.inspection_rule = inspection_rule.InspectionRuleManager(
+            self.http_client)
 
     @property
     def current_api_version(self):

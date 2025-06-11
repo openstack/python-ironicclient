@@ -313,6 +313,32 @@ FIRMWARE_COMPONENTS = [
 ]
 
 
+baremetal_inspection_rule_uuid = 'ddd-tttttt-dddd'
+baremetal_inspection_rule_description = 'Blah'
+baremetal_inspection_rule_priority = 0
+baremetal_inspection_rule_sensitive = False
+baremetal_inspection_rule_phase = 'main'
+baremetal_inspection_rule_actions = json.dumps([{
+    'op': 'set-attribute',
+    'args': ["/driver", "idrac"],
+}])
+baremetal_inspection_rule_conditions = json.dumps([{
+    'op': 'is-true',
+    'args': ["{node.auto_discovered}"],
+    'multiple': 'any',
+}])
+
+INSPECTION_RULE = {
+    'uuid': baremetal_inspection_rule_uuid,
+    'description': baremetal_inspection_rule_description,
+    'priority': baremetal_inspection_rule_priority,
+    'sensitive': baremetal_inspection_rule_sensitive,
+    'phase': baremetal_inspection_rule_phase,
+    'actions': baremetal_inspection_rule_actions,
+    'conditions': baremetal_inspection_rule_conditions,
+}
+
+
 class TestBaremetal(utils.TestCommand):
 
     def setUp(self):
