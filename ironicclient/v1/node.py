@@ -55,7 +55,8 @@ class NodeManager(base.CreateManager):
                             'vendor_interface', 'firmware_interface',
                             'resource_class', 'conductor_group',
                             'automated_clean', 'network_data', 'parent_node',
-                            'owner', 'lessee', 'shard', 'description']
+                            'owner', 'lessee', 'shard', 'description',
+                            'instance_name']
     _resource_name = 'nodes'
 
     def list(self, associated=None, maintenance=None, marker=None,
@@ -66,7 +67,7 @@ class NodeManager(base.CreateManager):
              conductor=None, owner=None, retired=None, lessee=None,
              shards=None, sharded=None, parent_node=None,
              include_children=None, description_contains=None,
-             global_request_id=None):
+             global_request_id=None, instance_name=None):
         """Retrieve a list of nodes.
 
         :param associated: Optional. Either a Boolean or a string
@@ -147,6 +148,8 @@ class NodeManager(base.CreateManager):
                                  node list.
         :param description_contains: Optional. String value to get nodes
                                  with description contains specified value.
+        :param instance_name: Optional. String value to get only nodes with
+                               the given instance_name set.
         :returns: A list of nodes.
 
         """
@@ -194,6 +197,8 @@ class NodeManager(base.CreateManager):
             filters.append('include_children=True')
         if description_contains is not None:
             filters.append('description_contains=%s' % description_contains)
+        if instance_name is not None:
+            filters.append('instance_name=%s' % instance_name)
 
         path = ''
         if detail:

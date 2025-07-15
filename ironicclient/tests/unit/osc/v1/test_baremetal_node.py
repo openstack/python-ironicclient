@@ -990,6 +990,11 @@ class TestBaremetalCreate(TestBaremetal):
                                 [('parent_node', 'nodex')],
                                 {'parent_node': 'nodex'})
 
+    def test_baremetal_create_with_instance_name(self):
+        self.check_with_options(['--instance-name', 'for-instance'],
+                                [('instance_name', 'for-instance')],
+                                {'instance_name': 'for-instance'})
+
     def test_baremetal_create_with_disable_power_off(self):
         self.check_with_options(['--disable-power-off'],
                                 [('disable_power_off', True)],
@@ -1167,6 +1172,7 @@ class TestBaremetalList(TestBaremetal):
             'Inspection Finished At',
             'Inspection Started At',
             'Instance Info',
+            'Instance Name',
             'Instance UUID',
             'Last Error',
             'Lessee',
@@ -1629,6 +1635,29 @@ class TestBaremetalList(TestBaremetal):
             'marker': None,
             'limit': None,
             'lessee': lessee,
+        }
+
+        self.baremetal_mock.node.list.assert_called_with(
+            **kwargs
+        )
+
+    def test_baremetal_list_by_instance_name(self):
+        instance_name = 'for-instance'
+        arglist = [
+            '--instance-name', instance_name,
+        ]
+        verifylist = [
+            ('instance_name', instance_name),
+        ]
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        kwargs = {
+            'marker': None,
+            'limit': None,
+            'instance_name': instance_name,
         }
 
         self.baremetal_mock.node.list.assert_called_with(
@@ -2991,6 +3020,26 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
+    def test_baremetal_set_instance_name(self):
+        arglist = [
+            'node_uuid',
+            '--instance-name', 'for-instance',
+        ]
+        verifylist = [
+            ('nodes', ['node_uuid']),
+            ('instance_name', 'for-instance')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/instance_name', 'value': 'for-instance', 'op': 'add'}],
+            reset_interfaces=None,
+        )
+
     def test_baremetal_set_chassis(self):
         chassis = '4f4135ea-7e58-4e3d-bcc4-b87ca16e980b'
         arglist = [
@@ -3918,6 +3967,25 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.update.assert_called_once_with(
             'node_uuid',
             [{'path': '/name', 'op': 'remove'}]
+        )
+
+    def test_baremetal_unset_instance_name(self):
+        arglist = [
+            'node_uuid',
+            '--instance-name',
+        ]
+        verifylist = [
+            ('nodes', ['node_uuid']),
+            ('instance_name', True)
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.update.assert_called_once_with(
+            'node_uuid',
+            [{'path': '/instance_name', 'op': 'remove'}]
         )
 
     def test_baremetal_unset_resource_class(self):

@@ -205,7 +205,7 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     def test_negotiate_version_server_user_latest(
             self, mock_pvh, mock_msr, mock_save_data):
         # have to retry with simple get
-        mock_pvh.side_effect = iter([(None, None), ('1.1', '1.99')])
+        mock_pvh.side_effect = iter([(None, None), ('1.1', '1.104')])
         mock_conn = mock.MagicMock()
         self.test_object.api_version_select_state = 'user'
         self.test_object.os_ironic_api_version = 'latest'

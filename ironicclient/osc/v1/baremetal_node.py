@@ -478,6 +478,10 @@ class CreateBaremetalNode(command.ShowOne):
             metavar='<name>',
             help=_("Unique name for the node."))
         parser.add_argument(
+            '--instance-name',
+            metavar='<instance_name>',
+            help=_('Name of the instance deployed on this node.'))
+        parser.add_argument(
             '--bios-interface',
             metavar='<bios_interface>',
             help=_('BIOS interface used by the node\'s driver. This is '
@@ -611,8 +615,9 @@ class CreateBaremetalNode(command.ShowOne):
 
         field_list = ['automated_clean', 'chassis_uuid', 'disable_power_off',
                       'driver', 'driver_info', 'properties', 'extra', 'uuid',
-                      'name', 'conductor_group', 'owner', 'description',
-                      'lessee', 'shard', 'resource_class', 'parent_node',
+                      'name', 'instance_name', 'conductor_group', 'owner',
+                      'description', 'lessee', 'shard', 'resource_class',
+                      'parent_node',
                       ] + ['%s_interface' % iface
                            for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
@@ -827,6 +832,10 @@ class ListBaremetalNode(command.Lister):
             metavar='<description_contains>',
             help=_("Limit list to nodes with description contains "
                    "<description_contains>"))
+        parser.add_argument(
+            '--instance-name',
+            metavar='<instance_name>',
+            help=_("Filter the list of returned nodes by an instance name."))
         sharded_group = parser.add_mutually_exclusive_group(required=False)
         sharded_group.add_argument(
             '--sharded',
@@ -901,7 +910,8 @@ class ListBaremetalNode(command.Lister):
                 params[field] = getattr(parsed_args, field)
         for field in ['provision_state', 'driver', 'resource_class',
                       'chassis', 'conductor', 'owner', 'lessee',
-                      'description_contains', 'shards', 'parent_node']:
+                      'description_contains', 'shards', 'parent_node',
+                      'instance_name']:
             if getattr(parsed_args, field):
                 params[field] = getattr(parsed_args, field)
         if parsed_args.include_children:
@@ -1330,6 +1340,11 @@ class SetBaremetalNode(command.Command):
             help=_("Set instance UUID of node to <uuid>"),
         )
         parser.add_argument(
+            "--instance-name",
+            metavar="<instance_name>",
+            help=_('Set the name of the instance deployed on this node.'),
+        )
+        parser.add_argument(
             "--name",
             metavar="<name>",
             help=_("Set the name of the node"),
@@ -1574,7 +1589,7 @@ class SetBaremetalNode(command.Command):
                 baremetal_client.node.set_target_raid_config(node, raid_config)
 
         properties = []
-        for field in ['instance_uuid', 'name',
+        for field in ['instance_uuid', 'instance_name', 'name',
                       'chassis_uuid', 'driver', 'resource_class',
                       'conductor_group', 'protected', 'protected_reason',
                       'retired', 'retired_reason', 'owner', 'lessee',
@@ -1722,6 +1737,12 @@ class UnsetBaremetalNode(command.Command):
             action='store_true',
             default=False,
             help=_('Unset instance UUID on this baremetal node')
+        )
+        parser.add_argument(
+            '--instance-name',
+            action='store_true',
+            default=False,
+            help=_('Unset instance name on this baremetal node')
         )
         parser.add_argument(
             "--name",
@@ -1932,7 +1953,7 @@ class UnsetBaremetalNode(command.Command):
                 baremetal_client.node.set_target_raid_config(node, {})
 
         properties = []
-        for field in ['instance_uuid', 'name', 'chassis_uuid',
+        for field in ['instance_uuid', 'instance_name', 'name', 'chassis_uuid',
                       'resource_class', 'conductor_group', 'automated_clean',
                       'bios_interface', 'boot_interface', 'console_interface',
                       'deploy_interface', 'firmware_interface',
