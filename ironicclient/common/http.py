@@ -19,6 +19,7 @@ import json
 import logging
 import re
 import textwrap
+import threading
 import time
 from urllib import parse as urlparse
 
@@ -345,6 +346,7 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
                 _('The Bare Metal API endpoint cannot be detected and was '
                   'not provided explicitly'))
         self.endpoint_trimmed = _trim_endpoint_api_version(endpoint)
+        self._first_negotiation_lock = threading.Lock()
 
     def _parse_version_headers(self, resp):
         return self._generic_parse_version_headers(resp.headers.get)
@@ -369,7 +371,9 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         # NOTE(TheJulia): self.os_ironic_api_version is reset in
         # the self.negotiate_version() call if negotiation occurs.
         if self.os_ironic_api_version and self._must_negotiate_version():
-            self.negotiate_version(self.session, None)
+            with self._first_negotiation_lock:
+                if self._must_negotiate_version():
+                    self.negotiate_version(self.session, None)
 
         kwargs.setdefault('user_agent', USER_AGENT)
         kwargs.setdefault('auth', self.auth)
