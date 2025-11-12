@@ -1106,7 +1106,8 @@ class TestBaremetalList(TestBaremetal):
             "Instance UUID",
             "Power State",
             "Provisioning State",
-            "Maintenance"
+            "Maintenance",
+            "Health"
         )
         self.assertEqual(collist, columns)
         datalist = ((
@@ -1116,6 +1117,7 @@ class TestBaremetalList(TestBaremetal):
             baremetal_fakes.baremetal_power_state,
             baremetal_fakes.baremetal_provision_state,
             baremetal_fakes.baremetal_maintenance,
+            '',  # health
         ), )
         self.assertEqual(datalist, tuple(data))
 
@@ -1168,6 +1170,7 @@ class TestBaremetalList(TestBaremetal):
             'Extra',
             'Fault',
             'Firmware Interface',
+            'Health',
             'Inspect Interface',
             'Inspection Finished At',
             'Inspection Started At',

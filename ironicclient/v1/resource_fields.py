@@ -161,6 +161,7 @@ class Resource(object):
         'parent_node': 'Parent Node',
         'children': 'Child Nodes',
         'firmware_interface': 'Firmware Interface',
+        'health': 'Health',
         'public': 'Public',
         'disable_power_off': 'Disable Power Off',
         'priority': 'Priority',
@@ -272,6 +273,7 @@ NODE_DETAILED_RESOURCE = Resource(
      'extra',
      'fault',
      'firmware_interface',
+     'health',
      'inspect_interface',
      'inspection_finished_at',
      'inspection_started_at',
@@ -335,6 +337,7 @@ NODE_RESOURCE = Resource(
      'power_state',
      'provision_state',
      'maintenance',
+     'health',
      ])
 VENDOR_PASSTHRU_METHOD_RESOURCE = Resource(
     ['name',

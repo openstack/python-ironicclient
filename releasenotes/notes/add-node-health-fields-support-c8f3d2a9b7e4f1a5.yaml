@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Adds support for displaying the node health status field (``health``)
+    in the baremetal node list commands. This field exposes the Redfish
+    hardware health status (Status.Health) that is synchronized from BMCs
+    to Ironic node records. The health field is displayed by default in
+    both standard and long listing formats, providing operators with
+    visibility into the hardware health status of managed nodes. This
+    requires Ironic API version ``1.109`` or later.
+
