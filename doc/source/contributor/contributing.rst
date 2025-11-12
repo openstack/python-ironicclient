@@ -16,19 +16,24 @@ time. You can ask a question and come back later to read the answer in the
 log files. Logs for the #openstack-ironic IRC channel are stored at
 http://eavesdrop.openstack.org/irclogs/%23openstack-ironic/.
 
-Contributor License Agreement
------------------------------
+Developer Certificate of Origin
+-------------------------------
 
 .. index::
    single: license; agreement
 
-In order to contribute to the python-ironicclient project, you need to have
-signed OpenStack's contributor's agreement.
+In order to contribute to the python-ironicclient project, you need to adhere
+to the `Developer Certificate of Origin`_. OpenStack utilizes the Developer
+Certificate of Origin (DCO) as a lightweight means to confirm that you are
+entitled to contribute the code you submit. This ensures that you are
+providing your contributions under the project's license and that you have
+the right to do so.
+
+.. _Developer Certificate of Origin: https://developercertificate.org/
 
 .. seealso::
 
-   * https://docs.openstack.org/infra/manual/developers.html
-   * https://wiki.openstack.org/wiki/CLA
+   * https://docs.openstack.org/contributors/common/dco.html
 
 Project Hosting Details
 -----------------------
