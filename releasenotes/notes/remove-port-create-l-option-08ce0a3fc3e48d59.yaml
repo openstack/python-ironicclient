@@ -1,0 +1,5 @@
+---
+deprecations:
+  - |
+    The deprecated ``-l`` option of ``openstack baremetal port create`` command
+    was removed. Use the ``--local-link-connection`` option istead.

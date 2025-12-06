@@ -180,24 +180,6 @@ class TestCreateBaremetalPort(TestBaremetalPort):
         self.baremetal_mock.port.create.assert_called_once_with(**args)
         self.cmd.log.warning.assert_called()
 
-    def test_baremetal_port_create_llc_warning_some_deprecated(self):
-        self._test_baremetal_port_create_llc_warning(
-            additional_args=['-l', 'port_id=eth0', '--local-link-connection',
-                             'switch_id=aa:bb:cc:dd:ee:ff'],
-            additional_verify_items=[
-                ('local_link_connection_deprecated', ['port_id=eth0']),
-                ('local_link_connection', ['switch_id=aa:bb:cc:dd:ee:ff'])]
-        )
-
-    def test_baremetal_port_create_llc_warning_all_deprecated(self):
-        self._test_baremetal_port_create_llc_warning(
-            additional_args=['-l', 'port_id=eth0', '-l',
-                             'switch_id=aa:bb:cc:dd:ee:ff'],
-            additional_verify_items=[('local_link_connection_deprecated',
-                                      ['port_id=eth0',
-                                       'switch_id=aa:bb:cc:dd:ee:ff'])]
-        )
-
     def test_baremetal_port_create_portgroup_uuid(self):
         arglist = [
             baremetal_fakes.baremetal_port_address,

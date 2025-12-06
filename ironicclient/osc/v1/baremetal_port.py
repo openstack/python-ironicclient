@@ -70,17 +70,6 @@ class CreateBaremetalPort(command.ShowOne):
                    "Argument can be specified multiple times.")
         )
         parser.add_argument(
-            '-l',
-            dest='local_link_connection_deprecated',
-            metavar="<key=value>",
-            action='append',
-            help=_("DEPRECATED. Please use --local-link-connection instead. "
-                   "Key/value metadata describing Local link connection "
-                   "information. Valid keys are 'switch_info', 'switch_id', "
-                   "and 'port_id'. The keys 'switch_id' and 'port_id' are "
-                   "required. Can be specified multiple times.")
-        )
-        parser.add_argument(
             '--pxe-enabled',
             metavar='<boolean>',
             help=_('Indicates whether this Port should be used when '
@@ -123,18 +112,6 @@ class CreateBaremetalPort(command.ShowOne):
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
         baremetal_client = self.app.client_manager.baremetal
-
-        if parsed_args.local_link_connection_deprecated:
-            self.log.warning("Please use --local-link-connection instead "
-                             "of -l, as it is deprecated and will be "
-                             "removed in future releases.")
-            # It is parsed to either None, or to an array
-            if parsed_args.local_link_connection:
-                parsed_args.local_link_connection.extend(
-                    parsed_args.local_link_connection_deprecated)
-            else:
-                parsed_args.local_link_connection = (
-                    parsed_args.local_link_connection_deprecated)
 
         field_list = ['address', 'uuid', 'extra', 'node_uuid', 'pxe_enabled',
                       'local_link_connection', 'portgroup_uuid',
