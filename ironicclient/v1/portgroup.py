@@ -32,7 +32,7 @@ class PortgroupManager(base.CreateManager):
 
     def list(self, node=None, address=None, limit=None, marker=None,
              sort_key=None, sort_dir=None, detail=False, fields=None,
-             os_ironic_api_version=None, global_request_id=None):
+             shards=None, os_ironic_api_version=None, global_request_id=None):
         """Retrieve a list of portgroups.
 
         :param node: Optional, UUID or name of a node, to get
@@ -63,6 +63,10 @@ class PortgroupManager(base.CreateManager):
                        of the resource to be returned. Can not be used
                        when 'detail' is set.
 
+        :param shards: Optional, a list of shards to filter portgroups by.
+                       Only portgroups associated with nodes in these shards
+                       will be returned.
+
         :param os_ironic_api_version: String version (e.g. "1.35") to use for
             the request.  If not specified, the client's default is used.
 
@@ -87,6 +91,8 @@ class PortgroupManager(base.CreateManager):
             filters.append('address=%s' % address)
         if node is not None:
             filters.append('node=%s' % node)
+        if shards is not None:
+            filters.append('shard=%s' % ','.join(shards))
 
         path = ''
         if detail:

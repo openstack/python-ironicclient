@@ -162,6 +162,16 @@ fake_responses_sorting = {
     },
 }
 
+fake_responses_shards = {
+    '/v1/portgroups/?shard=shard1,shard2':
+    {
+        'GET': (
+            {},
+            {"portgroups": [PORTGROUP, PORTGROUP2]}
+        ),
+    },
+}
+
 
 class PortgroupManagerTest(testtools.TestCase):
 
@@ -416,3 +426,24 @@ class PortgroupManagerSortingTest(testtools.TestCase):
         self.assertEqual(
             expected_resp,
             self.api.responses['/v1/portgroups/?sort_dir=desc']['GET'])
+
+
+class PortgroupManagerShardsTest(testtools.TestCase):
+
+    def setUp(self):
+        super(PortgroupManagerShardsTest, self).setUp()
+        self.api = utils.FakeAPI(fake_responses_shards)
+        self.mgr = ironicclient.v1.portgroup.PortgroupManager(self.api)
+
+    def test_portgroups_list_by_shards(self):
+        portgroups = self.mgr.list(shards=['shard1', 'shard2'])
+        expect = [
+            ('GET', '/v1/portgroups/?shard=shard1,shard2', {}, None)
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(2, len(portgroups))
+
+        expected_resp = ({}, {"portgroups": [PORTGROUP, PORTGROUP2]},)
+        self.assertEqual(
+            expected_resp,
+            self.api.responses['/v1/portgroups/?shard=shard1,shard2']['GET'])

@@ -204,6 +204,11 @@ class ListBaremetalPortGroup(command.Lister):
             dest='node',
             metavar='<node>',
             help=_("Only list port groups of this node (name or UUID)."))
+        parser.add_argument(
+            '--shards',
+            nargs='+',
+            metavar='<shard>',
+            help=_("Only list port groups of nodes in these shards."))
 
         display_group = parser.add_mutually_exclusive_group(required=False)
         display_group.add_argument(
@@ -243,6 +248,8 @@ class ListBaremetalPortGroup(command.Lister):
             params['address'] = parsed_args.address
         if parsed_args.node is not None:
             params['node'] = parsed_args.node
+        if parsed_args.shards:
+            params['shards'] = parsed_args.shards
 
         if parsed_args.detail:
             params['detail'] = parsed_args.detail
