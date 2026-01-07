@@ -15,10 +15,6 @@ import sys
 
 from cliff import app
 from cliff import commandmanager
-try:
-    import ironic_inspector_client
-except ImportError:
-    ironic_inspector_client = None
 import openstack
 from openstack import config as os_config
 from osc_lib import utils
@@ -34,10 +30,8 @@ _DEFAULTS = {
     'auth_type': 'none',
 }
 _TYPE = 'baremetal'
-_INSPECTOR_TYPE = 'baremetal-introspection'
 _DESCRIPTION = 'Bare Metal service (ironic) client'
 _NAMESPACE = 'openstack.baremetal.v1'
-_INSPECTOR_NAMESPACE = 'openstack.baremetal_introspection.v1'
 _HELP = _("%(err)s.\n* Use --os-endpoint for standalone %(project)s.\n"
           "* Use --os-auth-url and credentials for authentication.\n"
           "* Use --os-cloud to load configuration from clouds.yaml\n"
@@ -52,19 +46,12 @@ class ClientManager(object):
         self.cloud_region = cloud_region
         self.options = options
         self._ironic = None
-        self._inspector = None
 
     @property
     def baremetal(self):
         if self._ironic is None:
             self._ironic = self._create_ironic_client()
         return self._ironic
-
-    @property
-    def baremetal_introspection(self):
-        if self._inspector is None:
-            self._inspector = self._create_inspector_client()
-        return self._inspector
 
     def _create_ironic_client(self):
         api_version = self.options.os_baremetal_api_version
@@ -96,30 +83,11 @@ class ClientManager(object):
             raise exc.EndpointNotFound(_HELP % {'err': e, 'cmd': sys.argv[0],
                                                 'project': 'ironic'})
 
-    def _create_inspector_client(self):
-        assert ironic_inspector_client is not None, \
-            'BUG: _create_inspector_client called without inspector client'
-        # NOTE(dtantsur): endpoint_override is required to respect settings in
-        # clouds.yaml, such as baremetal_introspection_endpoint_override.
-        endpoint_override = self.cloud_region.get_endpoint(_INSPECTOR_TYPE)
-        try:
-            return ironic_inspector_client.ClientV1(
-                inspector_url=endpoint_override,
-                session=self.cloud_region.get_session(),
-                region_name=self.cloud_region.get_region_name(_INSPECTOR_TYPE),
-            )
-        except ironic_inspector_client.EndpointNotFound as e:
-            # Re-raise with a more obvious message.
-            raise exc.EndpointNotFound(_HELP % {'err': e, 'cmd': sys.argv[0],
-                                                'project': 'ironic-inspector'})
-
 
 class CommandManager(commandmanager.CommandManager):
 
     def load_commands(self, namespace):
         super(CommandManager, self).load_commands(namespace)
-        if ironic_inspector_client is not None:
-            super(CommandManager, self).load_commands(_INSPECTOR_NAMESPACE)
         # Strip the 'baremetal' prefix used in OSC
         prefix = 'baremetal '
         prefix_len = len(prefix)
@@ -188,17 +156,16 @@ class App(app.App):
 
         # NOTE(dtantsur): I wish logging.basicConfig worked, but at this point
         # cliff has already started configuring logging.
-        for name in ('ironicclient', 'ironic_inspector_client'):
-            logger = logging.getLogger(name)
-            logger.setLevel(
-                logging.DEBUG if debug_enabled else logging.WARNING)
-            # warnings are already configured by cliff, only configure
-            # debug logging for ironic.
-            if not logger.handlers and debug_enabled:
-                handler = logging.StreamHandler(stream=sys.stderr)
-                handler.setFormatter(logging.Formatter(self._STREAM_FORMAT))
-                logger.addHandler(handler)
-                logger.propagate = False
+        logger = logging.getLogger('ironicclient')
+        logger.setLevel(
+            logging.DEBUG if debug_enabled else logging.WARNING)
+        # warnings are already configured by cliff, only configure
+        # debug logging for ironic.
+        if not logger.handlers and debug_enabled:
+            handler = logging.StreamHandler(stream=sys.stderr)
+            handler.setFormatter(logging.Formatter(self._STREAM_FORMAT))
+            logger.addHandler(handler)
+            logger.propagate = False
 
     def initialize_app(self, argv):
         super(App, self).initialize_app(argv)

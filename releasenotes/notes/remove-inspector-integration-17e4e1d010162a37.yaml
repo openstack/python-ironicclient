@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Integration with ``python-ironic-inspector-client`` has been removed,
+    because the ironic-inspector project has been retired.

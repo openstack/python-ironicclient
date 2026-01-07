@@ -72,22 +72,6 @@ endpoint to connect to. It can be done in three ways:
     $ export OS_CLOUD=ironic
     $ baremetal node list
 
-`Inspector support`_ works similarly, but the ``clouds.yaml`` option is
-called ``baremetal_introspection_endpoint_override``. The two endpoints can
-be configured simultaneously, e.g.:
-
-.. code-block:: bash
-
-    $ cat ~/.config/openstack/clouds.yaml
-    clouds:
-      ironic:
-        auth_type: none
-        baremetal_endpoint_override: http://127.0.0.1:6385
-        baremetal_introspection_endpoint_override: http://127.0.0.1:5050
-    $ export OS_CLOUD=ironic
-    $ baremetal node list
-    $ baremetal introspection list
-
 .. _clouds.yaml: https://docs.openstack.org/openstacksdk/latest/user/guides/connect_from_config.html
 
 Usage with OpenStack
