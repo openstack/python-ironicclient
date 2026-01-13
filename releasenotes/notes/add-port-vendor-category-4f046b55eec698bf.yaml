@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds ``vendor`` field and ``category`` field support, which is introduced
+    in ironic API 1.100 and 1.101 respectively. These field is used to store
+    informational text about the port for trait based scheduling.
