@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Update the Ironic API that the client supports to the 2025.2 release of
+    Ironic.
