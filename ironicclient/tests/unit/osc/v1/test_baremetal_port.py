@@ -308,6 +308,60 @@ class TestCreateBaremetalPort(TestBaremetalPort):
 
         self.baremetal_mock.port.create.assert_called_once_with(**args)
 
+    def test_baremetal_port_create_vendor(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--vendor', 'VendorA'
+        ]
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_port_address),
+            ('vendor', 'VendorA')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = {
+            'address': baremetal_fakes.baremetal_port_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'vendor': 'VendorA'
+        }
+
+        self.baremetal_mock.port.create.assert_called_once_with(**args)
+
+    def test_baremetal_port_create_category(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--category', 'Green'
+        ]
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_port_address),
+            ('category', 'Green')
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = {
+            'address': baremetal_fakes.baremetal_port_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'category': 'Green'
+        }
+
+        self.baremetal_mock.port.create.assert_called_once_with(**args)
+
 
 class TestShowBaremetalPort(TestBaremetalPort):
     def setUp(self):
@@ -486,6 +540,30 @@ class TestBaremetalPortUnset(TestBaremetalPort):
         self.baremetal_mock.port.update.assert_called_once_with(
             'port',
             [{'path': '/description', 'op': 'remove'}])
+
+    def test_baremetal_port_unset_vendor(self):
+        arglist = ['port', '--vendor']
+        verifylist = [('port', 'port'),
+                      ('vendor', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port',
+            [{'path': '/vendor', 'op': 'remove'}])
+
+    def test_baremetal_port_unset_category(self):
+        arglist = ['port', '--category']
+        verifylist = [('port', 'port'),
+                      ('category', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port',
+            [{'path': '/category', 'op': 'remove'}])
 
 
 class TestBaremetalPortSet(TestBaremetalPort):
@@ -687,6 +765,38 @@ class TestBaremetalPortSet(TestBaremetalPort):
             [{'path': '/description', 'value': 'Public Network',
               'op': 'add'}])
 
+    def test_baremetal_port_set_vendor(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--vendor', 'VendorA']
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('vendor', 'VendorA')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/vendor', 'value': 'VendorA',
+              'op': 'add'}])
+
+    def test_baremetal_port_set_category(self):
+        arglist = [
+            baremetal_fakes.baremetal_port_uuid,
+            '--category', 'Green']
+        verifylist = [
+            ('port', baremetal_fakes.baremetal_port_uuid),
+            ('category', 'Green')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.port.update.assert_called_once_with(
+            baremetal_fakes.baremetal_port_uuid,
+            [{'path': '/category', 'value': 'Green',
+              'op': 'add'}])
+
 
 class TestBaremetalPortDelete(TestBaremetalPort):
     def setUp(self):
@@ -840,6 +950,7 @@ class TestBaremetalPortList(TestBaremetalPort):
         self.baremetal_mock.port.list.assert_called_with(**kwargs)
 
         collist = ('UUID', 'Address', 'Created At', 'Extra', 'Node UUID',
+                   'Category', 'Vendor',
                    'Local Link Connection', 'Portgroup UUID',
                    'PXE boot enabled', 'Physical Network', 'Updated At',
                    'Internal Info', 'Is Smart NIC port',
@@ -852,6 +963,8 @@ class TestBaremetalPortList(TestBaremetalPort):
             '',
             utils.HashColumn(baremetal_fakes.baremetal_port_extra),
             baremetal_fakes.baremetal_uuid,
+            '',
+            '',
             '',
             '',
             '',

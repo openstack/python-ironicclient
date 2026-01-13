@@ -30,7 +30,7 @@ class PortManager(base.CreateManager):
     _creation_attributes = ['address', 'extra', 'local_link_connection',
                             'node_uuid', 'physical_network', 'portgroup_uuid',
                             'pxe_enabled', 'uuid', 'is_smartnic', 'name',
-                            'description']
+                            'description', 'vendor', 'category']
     _resource_name = 'ports'
 
     def list(self, address=None, limit=None, marker=None, sort_key=None,
