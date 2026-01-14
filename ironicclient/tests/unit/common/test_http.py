@@ -204,8 +204,16 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
                        autospec=True)
     def test_negotiate_version_server_user_latest(
             self, mock_pvh, mock_msr, mock_save_data):
+        # For the test to work we need to have the mock reply
+        # with a version range that exceeds the client version
+        # otherwise we are not confirming that the client is
+        # clamping the version correctly
+        large_value = http.LAST_KNOWN_API_VERSION + 99
         # have to retry with simple get
-        mock_pvh.side_effect = iter([(None, None), ('1.1', '1.104')])
+        mock_pvh.side_effect = iter([
+            (None, None),
+            ('1.1', f"1.{large_value}")
+        ])
         mock_conn = mock.MagicMock()
         self.test_object.api_version_select_state = 'user'
         self.test_object.os_ironic_api_version = 'latest'
