@@ -882,8 +882,8 @@ class TestBaremetalPortList(TestBaremetalPort):
         self.baremetal_mock.port.list.assert_called_with(**kwargs)
 
         collist = (
-            "UUID",
-            "Address")
+            "uuid",
+            "address")
         self.assertEqual(collist, columns)
 
         datalist = ((
@@ -949,12 +949,12 @@ class TestBaremetalPortList(TestBaremetalPort):
         }
         self.baremetal_mock.port.list.assert_called_with(**kwargs)
 
-        collist = ('UUID', 'Address', 'Created At', 'Extra', 'Node UUID',
-                   'Category', 'Vendor',
-                   'Local Link Connection', 'Portgroup UUID',
-                   'PXE boot enabled', 'Physical Network', 'Updated At',
-                   'Internal Info', 'Is Smart NIC port',
-                   'Name')
+        collist = ('uuid', 'address', 'created_at', 'extra', 'node_uuid',
+                   'category', 'vendor',
+                   'local_link_connection', 'portgroup_uuid',
+                   'pxe_enabled', 'physical_network', 'updated_at',
+                   'internal_info', 'is_smartnic',
+                   'name')
         self.assertEqual(collist, columns)
 
         datalist = ((

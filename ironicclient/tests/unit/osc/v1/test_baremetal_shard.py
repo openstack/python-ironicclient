@@ -49,7 +49,7 @@ class TestBaremetalShardList(TestBaremetalShard):
         columns, data = self.cmd.take_action(parsed_args)
 
         # Define expected columns and data output
-        collist = ("Name", "Count")
+        collist = ("name", "count")
         datalist = ((baremetal_fakes.baremetal_shard_name,
                      baremetal_fakes.baremetal_shard_count), )
 

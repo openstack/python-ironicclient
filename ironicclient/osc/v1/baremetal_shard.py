@@ -30,7 +30,6 @@ class ListBaremetalShard(command.Lister):
 
         data = client.shard.list()
         columns = res_fields.SHARD_RESOURCE.fields
-        labels = res_fields.SHARD_RESOURCE.labels
 
-        return (labels,
+        return (columns,
                 (oscutils.get_item_properties(s, columns) for s in data))

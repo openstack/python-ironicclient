@@ -1101,12 +1101,12 @@ class TestBaremetalList(TestBaremetal):
         )
 
         collist = (
-            "UUID",
-            "Name",
-            "Instance UUID",
-            "Power State",
-            "Provisioning State",
-            "Maintenance",
+            "uuid",
+            "name",
+            "instance_uuid",
+            "power_state",
+            "provision_state",
+            "maintenance",
         )
         self.assertEqual(collist, columns)
         datalist = ((
@@ -1142,83 +1142,80 @@ class TestBaremetalList(TestBaremetal):
         self.baremetal_mock.node.list.assert_called_with(
             **kwargs
         )
-
         # NOTE(dtantsur): please keep this list sorted for sanity reasons
-        collist = [
-            'Allocation UUID',
-            'Automated Clean',
-            'BIOS Interface',
-            'Boot Interface',
-            'Boot Mode',
-            'Chassis UUID',
-            'Clean Step',
-            'Conductor',
-            'Conductor Group',
-            'Console Enabled',
-            'Console Interface',
-            'Created At',
-            'Current RAID configuration',
-            'Deploy Interface',
-            'Deploy Step',
-            'Description',
-            'Disable Power Off',
-            'Driver',
-            'Driver Info',
-            'Driver Internal Info',
-            'Extra',
-            'Fault',
-            'Firmware Interface',
-            'Health',
-            'Inspect Interface',
-            'Inspection Finished At',
-            'Inspection Started At',
-            'Instance Info',
-            'Instance Name',
-            'Instance UUID',
-            'Last Error',
-            'Lessee',
-            'Maintenance',
-            'Maintenance Reason',
-            'Management Interface',
-            'Name',
-            'Network Configuration',
-            'Network Interface',
-            'Owner',
-            'Parent Node',
-            'Power Interface',
-            'Power State',
-            'Properties',
-            'Protected',
-            'Protected Reason',
-            'Provision Updated At',
-            'Provisioning State',
-            'RAID Interface',
-            'Rescue Interface',
-            'Reservation',
-            'Resource Class',
-            'Retired',
-            'Retired Reason',
-            'Secure Boot',
-            'Storage Interface',
-            'Target Power State',
-            'Target Provision State',
-            'Target RAID configuration',
-            'Traits',
-            'UUID',
-            'Updated At',
-            'Vendor Interface'
-        ]
-        # Enforce sorting
-        collist.sort()
-        self.assertEqual(tuple(collist), columns)
+        collist = tuple([
+            'allocation_uuid',
+            'automated_clean',
+            'bios_interface',
+            'boot_interface',
+            'boot_mode',
+            'chassis_uuid',
+            'clean_step',
+            'conductor',
+            'conductor_group',
+            'console_enabled',
+            'console_interface',
+            'created_at',
+            'raid_config',
+            'deploy_interface',
+            'deploy_step',
+            'description',
+            'disable_power_off',
+            'driver',
+            'driver_info',
+            'driver_internal_info',
+            'extra',
+            'fault',
+            'firmware_interface',
+            'health',
+            'inspect_interface',
+            'inspection_finished_at',
+            'inspection_started_at',
+            'instance_info',
+            'instance_name',
+            'instance_uuid',
+            'last_error',
+            'lessee',
+            'maintenance',
+            'maintenance_reason',
+            'management_interface',
+            'name',
+            'network_data',
+            'network_interface',
+            'owner',
+            'parent_node',
+            'power_interface',
+            'power_state',
+            'properties',
+            'protected',
+            'protected_reason',
+            'provision_updated_at',
+            'provision_state',
+            'raid_interface',
+            'rescue_interface',
+            'reservation',
+            'resource_class',
+            'retired',
+            'retired_reason',
+            'secure_boot',
+            'storage_interface',
+            'target_power_state',
+            'target_provision_state',
+            'target_raid_config',
+            'traits',
+            'uuid',
+            'updated_at',
+            'vendor_interface'
+        ])
+        self.assertEqual(collist, columns)
 
         fake_values = {
-            'Instance UUID': baremetal_fakes.baremetal_instance_uuid,
-            'Maintenance': baremetal_fakes.baremetal_maintenance,
-            'Name': baremetal_fakes.baremetal_name,
-            'Power State': baremetal_fakes.baremetal_power_state,
-            'Provisioning State': baremetal_fakes.baremetal_provision_state,
-            'UUID': baremetal_fakes.baremetal_uuid,
+            'instance_uuid': baremetal_fakes.baremetal_instance_uuid,
+            'maintenance': baremetal_fakes.baremetal_maintenance,
+            'name': baremetal_fakes.baremetal_name,
+            'power_state': baremetal_fakes.baremetal_power_state,
+            'provision_state': baremetal_fakes.baremetal_provision_state,
+            'uuid': baremetal_fakes.baremetal_uuid,
         }
         values = tuple(fake_values.get(name, '') for name in collist)
         self.assertEqual((values,), tuple(data))
@@ -4575,7 +4572,7 @@ class TestListTraits(TestBaremetal):
 
         self.baremetal_mock.node.get_traits.assert_called_once_with(
             'node_uuid')
-        self.assertEqual(('Traits',), columns)
+        self.assertEqual(('traits',), columns)
         self.assertEqual([[trait] for trait in baremetal_fakes.TRAITS], data)
 
 
@@ -4760,7 +4757,7 @@ class TestListBIOSSetting(TestBaremetal):
 
         self.baremetal_mock.node.list_bios_settings.assert_called_once_with(
             'node_uuid')
-        expected_columns = ('BIOS setting name', 'BIOS setting value')
+        expected_columns = ('name', 'value')
         self.assertEqual(expected_columns, columns)
 
         expected_data = ([(s['name'], s['value'])
@@ -4788,10 +4785,10 @@ class TestListBIOSSetting(TestBaremetal):
 
         self.baremetal_mock.node.list_bios_settings.assert_called_once_with(
             'node_uuid', **kwargs)
-        expected_columns = ('Name', 'Value', 'Attribute Type',
-                            'Allowable Values', 'Lower Bound',
-                            'Minimum Length', 'Maximum Length', 'Read Only',
-                            'Reset Required', 'Unique', 'Upper Bound')
+        expected_columns = ('name', 'value', 'attribute_type',
+                            'allowable_values', 'lower_bound',
+                            'min_length', 'max_length', 'read_only',
+                            'reset_required', 'unique', 'upper_bound')
         self.assertEqual(expected_columns, columns)
 
         expected_data = (('SysName', 'my-system', 'String', '', '', '1', '16',
@@ -4815,9 +4812,9 @@ class TestListBIOSSetting(TestBaremetal):
             baremetal_fakes.BIOS_DETAILED_SETTINGS)
 
         columns, data = self.cmd.take_action(parsed_args)
-        self.assertNotIn('Value', columns)
-        self.assertIn('Name', columns)
-        self.assertIn('Attribute Type', columns)
+        self.assertNotIn('value', columns)
+        self.assertIn('name', columns)
+        self.assertIn('attribute_type', columns)
 
         kwargs = {
             'detail': False,
@@ -4871,9 +4868,9 @@ class TestNodeHistoryEventList(TestBaremetal):
         columns, data = self.cmd.take_action(parsed_args)
         self.baremetal_mock.node.get_history_list.assert_called_once_with(
             'node_uuid', True)
-        expected_columns = ('UUID', 'Created At', 'Severity',
-                            'Event Origin Type', 'Description of the event',
-                            'Conductor', 'User')
+        expected_columns = ('uuid', 'created_at', 'severity',
+                            'event_type', 'event',
+                            'conductor', 'user')
         expected_data = (('abcdef1', 'time', 'info', 'purring', 'meow',
                           'lap-conductor', '0191'),)
         self.assertEqual(expected_columns, columns)
@@ -4965,7 +4962,7 @@ class TestNodeChildrenList(TestBaremetal):
 
         self.baremetal_mock.node.list_children_of_node \
             .assert_called_once_with('node_uuid')
-        self.assertEqual(('Child Nodes',), columns)
+        self.assertEqual(('children',), columns)
         self.assertEqual([[node] for node in baremetal_fakes.CHILDREN], data)
 
 
@@ -5014,9 +5011,9 @@ class TestListFirmwareComponents(TestBaremetal):
 
         self.baremetal_mock.node.list_firmware_components \
             .assert_called_once_with('node_uuid')
-        expected_columns = ('Component', 'Initial Version',
-                            'Current Version', 'Last Version Flashed',
-                            'Created At', 'Updated At')
+        expected_columns = ('component', 'initial_version',
+                            'current_version', 'last_version_flashed',
+                            'created_at', 'updated_at')
         self.assertEqual(expected_columns, columns)
 
         expected_data = (

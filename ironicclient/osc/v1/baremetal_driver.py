@@ -64,16 +64,13 @@ class ListBaremetalDriver(command.Lister):
         params = {'driver_type': parsed_args.type,
                   'detail': parsed_args.long}
         if parsed_args.long:
-            labels = res_fields.DRIVER_DETAILED_RESOURCE.labels
             columns = res_fields.DRIVER_DETAILED_RESOURCE.fields
         elif parsed_args.fields:
             fields = itertools.chain.from_iterable(parsed_args.fields)
             resource = res_fields.Resource(list(fields))
             columns = resource.fields
-            labels = resource.labels
             params['fields'] = columns
         else:
-            labels = res_fields.DRIVER_RESOURCE.labels
             columns = res_fields.DRIVER_RESOURCE.fields
 
         drivers = client.driver.list(**params)
@@ -84,7 +81,7 @@ class ListBaremetalDriver(command.Lister):
         data = [utils.convert_list_props_to_comma_separated(d._info)
                 for d in drivers]
 
-        return (labels,
+        return (columns,
                 (oscutils.get_dict_properties(s, columns) for s in data))
 
 
@@ -107,8 +104,8 @@ class ListBaremetalDriverProperty(command.Lister):
 
         driver_properties = baremetal_client.driver.properties(
             parsed_args.driver)
-        labels = ['Property', 'Description']
-        return labels, sorted(driver_properties.items())
+        columns = ['property', 'description']
+        return columns, sorted(driver_properties.items())
 
 
 class ListBaremetalDriverRaidProperty(command.Lister):
@@ -131,8 +128,8 @@ class ListBaremetalDriverRaidProperty(command.Lister):
 
         raid_props = baremetal_client.driver.raid_logical_disk_properties(
             parsed_args.driver)
-        labels = ['Property', 'Description']
-        return labels, sorted(raid_props.items())
+        columns = ['property', 'description']
+        return columns, sorted(raid_props.items())
 
 
 class PassthruCallBaremetalDriver(command.ShowOne):
@@ -203,7 +200,6 @@ class PassthruListBaremetalDriver(command.Lister):
         baremetal_client = self.app.client_manager.baremetal
 
         columns = res_fields.VENDOR_PASSTHRU_METHOD_RESOURCE.fields
-        labels = res_fields.VENDOR_PASSTHRU_METHOD_RESOURCE.labels
 
         methods = baremetal_client.driver.get_vendor_passthru_methods(
             parsed_args.driver)
@@ -215,7 +211,7 @@ class PassthruListBaremetalDriver(command.Lister):
             response['http_methods'] = http_methods
             params.append(response)
 
-        return (labels,
+        return (columns,
                 (oscutils.get_dict_properties(s, columns) for s in params))
 
 

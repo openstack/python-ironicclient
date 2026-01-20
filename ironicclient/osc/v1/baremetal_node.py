@@ -890,7 +890,6 @@ class ListBaremetalNode(command.Lister):
         client = self.app.client_manager.baremetal
 
         columns = res_fields.NODE_RESOURCE.fields
-        labels = res_fields.NODE_RESOURCE.labels
 
         params = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
@@ -919,13 +918,11 @@ class ListBaremetalNode(command.Lister):
         if parsed_args.long:
             params['detail'] = parsed_args.long
             columns = res_fields.NODE_DETAILED_RESOURCE.fields
-            labels = res_fields.NODE_DETAILED_RESOURCE.labels
         elif parsed_args.fields:
             params['detail'] = False
             fields = itertools.chain.from_iterable(parsed_args.fields)
             resource = res_fields.Resource(list(fields))
             columns = resource.fields
-            labels = resource.labels
             params['fields'] = columns
 
         self.log.debug("params(%s)", params)
@@ -933,7 +930,7 @@ class ListBaremetalNode(command.Lister):
 
         data = oscutils.sort_items(data, parsed_args.sort)
 
-        return (labels,
+        return (columns,
                 (oscutils.get_item_properties(s, columns, formatters={
                     'Properties': utils.HashColumn},) for s in data))
 
@@ -2045,12 +2042,11 @@ class VifListBaremetalNode(command.Lister):
         self.log.debug("take_action(%s)", parsed_args)
 
         columns = res_fields.VIF_RESOURCE.fields
-        labels = res_fields.VIF_RESOURCE.labels
 
         baremetal_client = self.app.client_manager.baremetal
         data = baremetal_client.node.vif_list(parsed_args.node)
 
-        return (labels,
+        return (columns,
                 (oscutils.get_item_properties(s, columns) for s in data))
 
 
@@ -2168,12 +2164,12 @@ class ListTraitsBaremetalNode(command.Lister):
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
 
-        labels = res_fields.TRAIT_RESOURCE.labels
+        columns = res_fields.TRAIT_RESOURCE.fields
 
         baremetal_client = self.app.client_manager.baremetal
         traits = baremetal_client.node.get_traits(parsed_args.node)
 
-        return (labels, [[trait] for trait in traits])
+        return (columns, [[trait] for trait in traits])
 
 
 class AddTraitBaremetalNode(command.Command):
@@ -2299,20 +2295,17 @@ class ListBIOSSettingBaremetalNode(command.Lister):
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
 
-        labels = res_fields.BIOS_RESOURCE.labels
         fields = res_fields.BIOS_RESOURCE.fields
 
         params = {}
         if parsed_args.long:
             params['detail'] = parsed_args.long
             fields = res_fields.BIOS_DETAILED_RESOURCE.fields
-            labels = res_fields.BIOS_DETAILED_RESOURCE.labels
         elif parsed_args.fields:
             params['detail'] = False
             fields = itertools.chain.from_iterable(parsed_args.fields)
             resource = res_fields.Resource(list(fields))
             fields = resource.fields
-            labels = resource.labels
             params['fields'] = fields
 
         self.log.debug("params(%s)", params)
@@ -2321,7 +2314,7 @@ class ListBIOSSettingBaremetalNode(command.Lister):
         settings = baremetal_client.node.list_bios_settings(parsed_args.node,
                                                             **params)
 
-        return (labels,
+        return (fields,
                 (oscutils.get_dict_properties(s, fields) for s in settings))
 
 
@@ -2381,17 +2374,15 @@ class NodeHistoryList(command.Lister):
 
         baremetal_client = self.app.client_manager.baremetal
         if parsed_args.long:
-            labels = res_fields.NODE_HISTORY_DETAILED_RESOURCE.labels
             fields = res_fields.NODE_HISTORY_DETAILED_RESOURCE.fields
         else:
-            labels = res_fields.NODE_HISTORY_RESOURCE.labels
             fields = res_fields.NODE_HISTORY_RESOURCE.fields
 
         data = baremetal_client.node.get_history_list(
             parsed_args.node,
             parsed_args.long)
 
-        return (labels,
+        return (fields,
                 (oscutils.get_dict_properties(s, fields) for s in data))
 
 
@@ -2481,11 +2472,11 @@ class NodeChildrenList(command.ShowOne):
 
         baremetal_client = self.app.client_manager.baremetal
 
-        labels = res_fields.CHILDREN_RESOURCE.labels
+        columns = res_fields.CHILDREN_RESOURCE.fields
 
         data = baremetal_client.node.list_children_of_node(
             parsed_args.node)
-        return (labels, [[node] for node in data])
+        return (columns, [[node] for node in data])
 
 
 class ListFirmwareComponentBaremetalNode(command.Lister):
@@ -2507,12 +2498,11 @@ class ListFirmwareComponentBaremetalNode(command.Lister):
     def take_action(self, parsed_args):
         self.log.debug("take_action(%s)", parsed_args)
 
-        labels = res_fields.FIRMWARE_RESOURCE.labels
         fields = res_fields.FIRMWARE_RESOURCE.fields
 
         baremetal_client = self.app.client_manager.baremetal
         components = baremetal_client.node.list_firmware_components(
             parsed_args.node)
 
-        return (labels,
+        return (fields,
                 (oscutils.get_dict_properties(s, fields) for s in components))

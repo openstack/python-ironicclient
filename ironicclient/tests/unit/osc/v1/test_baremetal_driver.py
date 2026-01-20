@@ -51,8 +51,8 @@ class TestListBaremetalDriver(TestBaremetalDriver):
         columns, data = self.cmd.take_action(parsed_args)
 
         collist = (
-            "Supported driver(s)",
-            "Active host(s)")
+            "name",
+            "hosts")
         self.assertEqual(collist, tuple(columns))
 
         datalist = ((
@@ -68,8 +68,8 @@ class TestListBaremetalDriver(TestBaremetalDriver):
         columns, data = self.cmd.take_action(parsed_args)
 
         collist = (
-            "Supported driver(s)",
-            "Active host(s)")
+            "name",
+            "hosts")
         self.assertEqual(collist, tuple(columns))
 
         datalist = ((
@@ -85,35 +85,35 @@ class TestListBaremetalDriver(TestBaremetalDriver):
         columns, data = self.cmd.take_action(parsed_args)
 
         collist = (
-            "Supported driver(s)",
-            "Type",
-            "Active host(s)",
-            'Default BIOS Interface',
-            'Default Boot Interface',
-            'Default Console Interface',
-            'Default Deploy Interface',
-            'Default Firmware Interface',
-            'Default Inspect Interface',
-            'Default Management Interface',
-            'Default Network Interface',
-            'Default Power Interface',
-            'Default RAID Interface',
-            'Default Rescue Interface',
-            'Default Storage Interface',
-            'Default Vendor Interface',
-            'Enabled BIOS Interfaces',
-            'Enabled Boot Interfaces',
-            'Enabled Console Interfaces',
-            'Enabled Deploy Interfaces',
-            'Enabled Firmware Interfaces',
-            'Enabled Inspect Interfaces',
-            'Enabled Management Interfaces',
-            'Enabled Network Interfaces',
-            'Enabled Power Interfaces',
-            'Enabled RAID Interfaces',
-            'Enabled Rescue Interfaces',
-            'Enabled Storage Interfaces',
-            'Enabled Vendor Interfaces'
+            "name",
+            "type",
+            "hosts",
+            'default_bios_interface',
+            'default_boot_interface',
+            'default_console_interface',
+            'default_deploy_interface',
+            'default_firmware_interface',
+            'default_inspect_interface',
+            'default_management_interface',
+            'default_network_interface',
+            'default_power_interface',
+            'default_raid_interface',
+            'default_rescue_interface',
+            'default_storage_interface',
+            'default_vendor_interface',
+            'enabled_bios_interfaces',
+            'enabled_boot_interfaces',
+            'enabled_console_interfaces',
+            'enabled_deploy_interfaces',
+            'enabled_firmware_interfaces',
+            'enabled_inspect_interfaces',
+            'enabled_management_interfaces',
+            'enabled_network_interfaces',
+            'enabled_power_interfaces',
+            'enabled_raid_interfaces',
+            'enabled_rescue_interfaces',
+            'enabled_storage_interfaces',
+            'enabled_vendor_interfaces'
         )
         self.assertEqual(collist, tuple(columns))
 
@@ -232,7 +232,7 @@ class TestListBaremetalDriverProperty(TestBaremetalDriver):
         columns, data = self.cmd.take_action(parsed_args)
         self.baremetal_mock.driver.properties.assert_called_with(*arglist)
 
-        collist = ['Property', 'Description']
+        collist = ['property', 'description']
         self.assertEqual(collist, columns)
         expected_data = [('property1', 'description1'),
                          ('property2', 'description2')]
@@ -272,7 +272,7 @@ class TestListBaremetalDriverRaidProperty(TestBaremetalDriver):
         (self.baremetal_mock.driver.
          raid_logical_disk_properties.assert_called_with(*arglist))
 
-        collist = ('Property', 'Description')
+        collist = ('property', 'description')
         self.assertEqual(collist, tuple(columns))
 
         expected_data = [('RAIDProperty1', 'driver_raid_property1'),
@@ -388,11 +388,11 @@ class TestPassthruListBaremetalDriver(TestBaremetalDriver):
             assert_called_with(*args))
 
         collist = (
-            "Name",
-            "Supported HTTP methods",
-            "Async",
-            "Description",
-            "Response is attachment",
+            "name",
+            "http_methods",
+            "async",
+            "description",
+            "attach",
         )
         self.assertEqual(collist, tuple(columns))
 

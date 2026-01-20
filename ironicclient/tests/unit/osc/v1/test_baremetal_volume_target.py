@@ -393,11 +393,11 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             **kwargs)
 
         collist = (
-            "UUID",
-            "Node UUID",
-            "Driver Volume Type",
-            "Boot Index",
-            "Volume ID")
+            "uuid",
+            "node_uuid",
+            "volume_type",
+            "boot_index",
+            "volume_id")
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_target_uuid,
@@ -422,11 +422,11 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             **kwargs)
 
         collist = (
-            "UUID",
-            "Node UUID",
-            "Driver Volume Type",
-            "Boot Index",
-            "Volume ID")
+            "uuid",
+            "node_uuid",
+            "volume_type",
+            "boot_index",
+            "volume_id")
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_target_uuid,
@@ -450,9 +450,9 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         }
         self.baremetal_mock.volume_target.list.assert_called_with(**kwargs)
 
-        collist = ('UUID', 'Node UUID', 'Driver Volume Type', 'Properties',
-                   'Boot Index', 'Extra', 'Volume ID', 'Created At',
-                   'Updated At')
+        collist = ('uuid', 'node_uuid', 'volume_type', 'properties',
+                   'boot_index', 'extra', 'volume_id', 'created_at',
+                   'updated_at')
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_target_uuid,
@@ -494,7 +494,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         }
         self.baremetal_mock.volume_target.list.assert_called_with(**kwargs)
 
-        collist = ('UUID', 'Boot Index')
+        collist = ('uuid', 'boot_index')
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_target_uuid,
@@ -528,7 +528,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         }
         self.baremetal_mock.volume_target.list.assert_called_with(**kwargs)
 
-        collist = ('UUID', 'Boot Index', 'Extra')
+        collist = ('uuid', 'boot_index', 'extra')
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_target_uuid,

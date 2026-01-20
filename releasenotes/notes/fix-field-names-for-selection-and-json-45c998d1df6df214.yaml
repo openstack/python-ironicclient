@@ -1,0 +1,33 @@
+---
+upgrade:
+  - |
+    All baremetal list commands now use actual resource field names
+    (e.g., "uuid", "name", "resource_class") as column headers instead
+    of human-friendly labels (e.g., "UUID", "Name", "Resource Class").
+    This change ensures consistency between table output, JSON output,
+    and field selection via the ``--fields`` option.
+
+    **Action Required**: Scripts that parse the output of baremetal list
+    commands will need to be updated to use the new lowercase,
+    snake_case column headers. For example:
+
+    - "UUID" → "uuid"
+    - "Name" → "name"
+    - "Resource Class" → "resource_class"
+    - "Instance UUID" → "instance_uuid"
+    - "Power State" → "power_state"
+    - "Provisioning State" → "provision_state"
+    - "Supported driver(s)" → "name"
+    - "Active host(s)" → "hosts"
+
+    This affects all list commands including node list, port list,
+    portgroup list, allocation list, chassis list, conductor list,
+    deploy template list, driver list, volume connector list,
+    volume target list, runbook list, shard list, and inspection rule list.
+
+fixes:
+  - |
+    Fixes an inconsistency where column headers in list command table
+    output used different names than the actual resource fields,
+    causing confusion when using the ``--fields`` option or comparing
+    with JSON output format (``-f json``).

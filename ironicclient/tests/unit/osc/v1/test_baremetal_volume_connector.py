@@ -331,10 +331,10 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             **kwargs)
 
         collist = (
-            "UUID",
-            "Node UUID",
-            "Type",
-            "Connector ID")
+            "uuid",
+            "node_uuid",
+            "type",
+            "connector_id")
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_connector_uuid,
@@ -358,10 +358,10 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             **kwargs)
 
         collist = (
-            "UUID",
-            "Node UUID",
-            "Type",
-            "Connector ID")
+            "uuid",
+            "node_uuid",
+            "type",
+            "connector_id")
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_connector_uuid,
@@ -384,8 +384,8 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         }
         self.baremetal_mock.volume_connector.list.assert_called_with(**kwargs)
 
-        collist = ('UUID', 'Node UUID', 'Type', 'Connector ID', 'Extra',
-                   'Created At', 'Updated At')
+        collist = ('uuid', 'node_uuid', 'type', 'connector_id', 'extra',
+                   'created_at', 'updated_at')
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_connector_uuid,
@@ -423,7 +423,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         }
         self.baremetal_mock.volume_connector.list.assert_called_with(**kwargs)
 
-        collist = ('UUID', 'Connector ID')
+        collist = ('uuid', 'connector_id')
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_connector_uuid,
@@ -455,7 +455,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         }
         self.baremetal_mock.volume_connector.list.assert_called_with(**kwargs)
 
-        collist = ('UUID', 'Connector ID', 'Extra')
+        collist = ('uuid', 'connector_id', 'extra')
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_volume_connector_uuid,

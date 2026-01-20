@@ -64,9 +64,9 @@ class TestBaremetalConductorList(TestBaremetalConductor):
         )
 
         collist = (
-            "Hostname",
-            "Conductor Group",
-            "Alive",
+            "hostname",
+            "conductor_group",
+            "alive",
         )
         self.assertEqual(collist, columns)
         datalist = ((
@@ -100,21 +100,21 @@ class TestBaremetalConductorList(TestBaremetalConductor):
             **kwargs
         )
 
-        collist = [
-            'Hostname',
-            'Conductor Group',
-            'Alive',
-            'Drivers',
-            'Created At',
-            'Updated At',
-        ]
-        self.assertEqual(tuple(collist), columns)
+        collist = tuple([
+            'hostname',
+            'conductor_group',
+            'alive',
+            'drivers',
+            'created_at',
+            'updated_at',
+        ])
+        self.assertEqual(collist, columns)
 
         fake_values = {
-            'Hostname': baremetal_fakes.baremetal_hostname,
-            'Conductor Group': baremetal_fakes.baremetal_conductor_group,
-            'Alive': baremetal_fakes.baremetal_alive,
-            'Drivers': baremetal_fakes.baremetal_drivers,
+            'hostname': baremetal_fakes.baremetal_hostname,
+            'conductor_group': baremetal_fakes.baremetal_conductor_group,
+            'alive': baremetal_fakes.baremetal_alive,
+            'drivers': baremetal_fakes.baremetal_drivers,
         }
         values = tuple(fake_values.get(name, '') for name in collist)
         self.assertEqual((values,), tuple(data))

@@ -231,23 +231,20 @@ class ListBaremetalAllocation(command.Lister):
 
         if parsed_args.long:
             columns = res_fields.ALLOCATION_DETAILED_RESOURCE.fields
-            labels = res_fields.ALLOCATION_DETAILED_RESOURCE.labels
         elif parsed_args.fields:
             fields = itertools.chain.from_iterable(parsed_args.fields)
             resource = res_fields.Resource(list(fields))
             columns = resource.fields
-            labels = resource.labels
             params['fields'] = columns
         else:
             columns = res_fields.ALLOCATION_RESOURCE.fields
-            labels = res_fields.ALLOCATION_RESOURCE.labels
 
         self.log.debug("params(%s)", params)
         data = client.allocation.list(**params)
 
         data = oscutils.sort_items(data, parsed_args.sort)
 
-        return (labels,
+        return (columns,
                 (oscutils.get_item_properties(s, columns) for s in data))
 
 

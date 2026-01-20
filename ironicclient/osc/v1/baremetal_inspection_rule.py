@@ -380,7 +380,6 @@ class ListBaremetalInspectionRule(command.Lister):
         client = self.app.client_manager.baremetal
 
         columns = res_fields.INSPECTION_RULE_RESOURCE.fields
-        labels = res_fields.INSPECTION_RULE_RESOURCE.labels
 
         params = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
@@ -393,14 +392,12 @@ class ListBaremetalInspectionRule(command.Lister):
         if parsed_args.detail:
             params['detail'] = parsed_args.detail
             columns = res_fields.INSPECTION_RULE_DETAILED_RESOURCE.fields
-            labels = res_fields.INSPECTION_RULE_DETAILED_RESOURCE.labels
 
         elif parsed_args.fields:
             params['detail'] = False
             fields = itertools.chain.from_iterable(parsed_args.fields)
             resource = res_fields.Resource(list(fields))
             columns = resource.fields
-            labels = resource.labels
             params['fields'] = columns
 
         self.log.debug("params(%s)", params)
@@ -408,5 +405,5 @@ class ListBaremetalInspectionRule(command.Lister):
 
         data = oscutils.sort_items(data, parsed_args.sort)
 
-        return (labels,
+        return (columns,
                 (oscutils.get_item_properties(s, columns) for s in data))

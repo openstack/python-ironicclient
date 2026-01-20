@@ -400,8 +400,8 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
         self.baremetal_mock.runbook.list.assert_called_with(**kwargs)
 
         collist = (
-            "UUID",
-            "Name")
+            "uuid",
+            "name")
         self.assertEqual(collist, columns)
 
         datalist = ((
@@ -424,14 +424,14 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
         }
         self.baremetal_mock.runbook.list.assert_called_with(**kwargs)
 
-        collist = ('UUID',
-                   'Name',
-                   'Owner',
-                   'Public',
-                   'Steps',
-                   'Extra',
-                   'Created At',
-                   'Updated At')
+        collist = ('uuid',
+                   'name',
+                   'owner',
+                   'public',
+                   'steps',
+                   'extra',
+                   'created_at',
+                   'updated_at')
         self.assertEqual(collist, columns)
 
         datalist = ((

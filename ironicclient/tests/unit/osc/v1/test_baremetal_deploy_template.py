@@ -374,8 +374,8 @@ class TestBaremetalDeployTemplateList(TestBaremetalDeployTemplate):
         self.baremetal_mock.deploy_template.list.assert_called_with(**kwargs)
 
         collist = (
-            "UUID",
-            "Name")
+            "uuid",
+            "name")
         self.assertEqual(collist, columns)
 
         datalist = ((
@@ -398,8 +398,8 @@ class TestBaremetalDeployTemplateList(TestBaremetalDeployTemplate):
         }
         self.baremetal_mock.deploy_template.list.assert_called_with(**kwargs)
 
-        collist = ('UUID', 'Name', 'Steps', 'Extra', 'Created At',
-                   'Updated At')
+        collist = ('uuid', 'name', 'steps', 'extra', 'created_at',
+                   'updated_at')
         self.assertEqual(collist, columns)
 
         datalist = ((

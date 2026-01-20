@@ -294,11 +294,11 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         self.baremetal_mock.allocation.list.assert_called_with(**kwargs)
 
         collist = (
-            "UUID",
-            "Name",
-            "Resource Class",
-            "State",
-            "Node UUID")
+            "uuid",
+            "name",
+            "resource_class",
+            "state",
+            "node_uuid")
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_uuid,
@@ -322,11 +322,11 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         self.baremetal_mock.allocation.list.assert_called_once_with(**kwargs)
 
         collist = (
-            "UUID",
-            "Name",
-            "Resource Class",
-            "State",
-            "Node UUID")
+            "uuid",
+            "name",
+            "resource_class",
+            "state",
+            "node_uuid")
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_uuid,
@@ -352,11 +352,11 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         self.baremetal_mock.allocation.list.assert_called_once_with(**kwargs)
 
         collist = (
-            "UUID",
-            "Name",
-            "Resource Class",
-            "State",
-            "Node UUID")
+            "uuid",
+            "name",
+            "resource_class",
+            "state",
+            "node_uuid")
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_uuid,
@@ -382,11 +382,11 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         self.baremetal_mock.allocation.list.assert_called_once_with(**kwargs)
 
         collist = (
-            "UUID",
-            "Name",
-            "Resource Class",
-            "State",
-            "Node UUID")
+            "uuid",
+            "name",
+            "resource_class",
+            "state",
+            "node_uuid")
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_uuid,
@@ -410,11 +410,11 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         self.baremetal_mock.allocation.list.assert_called_once_with(**kwargs)
 
         collist = (
-            "UUID",
-            "Name",
-            "Resource Class",
-            "State",
-            "Node UUID")
+            "uuid",
+            "name",
+            "resource_class",
+            "state",
+            "node_uuid")
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_uuid,
@@ -437,18 +437,18 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         }
         self.baremetal_mock.allocation.list.assert_called_once_with(**kwargs)
 
-        collist = ('UUID',
-                   'Name',
-                   'State',
-                   'Owner',
-                   'Node UUID',
-                   'Last Error',
-                   'Resource Class',
-                   'Traits',
-                   'Candidate Nodes',
-                   'Extra',
-                   'Created At',
-                   'Updated At')
+        collist = ('uuid',
+                   'name',
+                   'state',
+                   'owner',
+                   'node_uuid',
+                   'last_error',
+                   'resource_class',
+                   'traits',
+                   'candidate_nodes',
+                   'extra',
+                   'created_at',
+                   'updated_at')
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_uuid,

@@ -209,8 +209,8 @@ class TestChassisList(TestChassis):
         )
 
         collist = (
-            "UUID",
-            "Description",
+            "uuid",
+            "description",
         )
         self.assertEqual(collist, columns)
         datalist = ((
@@ -243,7 +243,7 @@ class TestChassisList(TestChassis):
             **kwargs
         )
 
-        collist = ('UUID', 'Description', 'Created At', 'Updated At', 'Extra')
+        collist = ('uuid', 'description', 'created_at', 'updated_at', 'extra')
         self.assertEqual(collist, columns)
         datalist = ((
             baremetal_fakes.baremetal_chassis_uuid,
