@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adds ``physical_network`` field and ``category`` field support, which is
+    introduced in ironic API 1.102 and 1.103 respectively. The ``physical_network``
+    field is reflected into the port objects that are part of the port group
+    while the ``category`` is informational text for trait based scheduling.

@@ -28,7 +28,7 @@ class PortgroupManager(base.CreateManager):
     _resource_name = 'portgroups'
     _creation_attributes = ['address', 'extra', 'name', 'node_uuid',
                             'standalone_ports_supported', 'mode', 'properties',
-                            'uuid']
+                            'uuid', 'physical_network', 'category']
 
     def list(self, node=None, address=None, limit=None, marker=None,
              sort_key=None, sort_dir=None, detail=False, fields=None,

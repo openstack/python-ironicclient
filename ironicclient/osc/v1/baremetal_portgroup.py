@@ -81,6 +81,17 @@ class CreateBaremetalPortGroup(command.ShowOne):
             action='store_true',
             help=_("Ports that are members of this port group "
                    "cannot be used as stand-alone ports."))
+        parser.add_argument(
+            '--physical-network',
+            dest='physical_network',
+            metavar='<physical network>',
+            help=_("Name of the physical network to which the ports in "
+                   "this port group are connected."))
+        parser.add_argument(
+            '--category',
+            dest='category',
+            metavar='<port category>',
+            help=_("An optional category for the port group."))
 
         return parser
 
@@ -89,7 +100,7 @@ class CreateBaremetalPortGroup(command.ShowOne):
         baremetal_client = self.app.client_manager.baremetal
 
         field_list = ['node_uuid', 'address', 'name', 'uuid', 'extra', 'mode',
-                      'properties']
+                      'properties', 'physical_network', 'category']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         if parsed_args.support_standalone_ports:
@@ -352,6 +363,17 @@ class SetBaremetalPortGroup(command.Command):
             help=_("Ports that are members of this port group "
                    "cannot be used as stand-alone ports.")
         )
+        parser.add_argument(
+            '--physical-network',
+            metavar='<physical network>',
+            dest='physical_network',
+            help=_("Set a physical network for the ports in this port group"))
+
+        parser.add_argument(
+            '--category',
+            metavar='<category>',
+            dest='category',
+            help=_("Set a category for this port group"))
 
         return parser
 
@@ -371,6 +393,16 @@ class SetBaremetalPortGroup(command.Command):
             name = ["name=%s" % parsed_args.name]
             properties.extend(utils.args_array_to_patch(
                 'add', name))
+        if parsed_args.physical_network:
+            physical_network = [
+                f"physical_network={parsed_args.physical_network}"
+            ]
+            properties.extend(utils.args_array_to_patch(
+                'add', physical_network))
+        if parsed_args.category:
+            category = [f"category={parsed_args.category}"]
+            properties.extend(utils.args_array_to_patch(
+                'add', category))
         if parsed_args.support_standalone_ports:
             properties.extend(utils.args_array_to_patch(
                 'add', ["standalone_ports_supported=True"]))
@@ -432,6 +464,17 @@ class UnsetBaremetalPortGroup(command.Command):
             help=_('Property to unset on this baremetal port group '
                    '(repeat option to unset multiple properties).'),
         )
+        parser.add_argument(
+            '--physical-network',
+            action='store_true',
+            dest='physical_network',
+            help=_("Unset the physical network on this baremetal port group."))
+
+        parser.add_argument(
+            '--category',
+            dest='category',
+            action='store_true',
+            help=_("Unset the category for this port group."))
 
         return parser
 
@@ -447,6 +490,12 @@ class UnsetBaremetalPortGroup(command.Command):
         if parsed_args.address:
             properties.extend(utils.args_array_to_patch('remove',
                               ['address']))
+        if parsed_args.physical_network:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['physical_network']))
+        if parsed_args.category:
+            properties.extend(utils.args_array_to_patch('remove',
+                              ['category']))
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch('remove',
                               ['extra/' + x for x in parsed_args.extra]))

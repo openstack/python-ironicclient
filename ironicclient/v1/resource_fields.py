@@ -390,6 +390,8 @@ PORTGROUP_DETAILED_RESOURCE = Resource(
      'internal_info',
      'mode',
      'properties',
+     'physical_network',
+     'category',
      ],
     sort_excluded=[
         'extra',

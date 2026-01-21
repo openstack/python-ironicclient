@@ -219,6 +219,63 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
+    def test_baremetal_portgroup_create_physical_network(self):
+        arglist = [
+            '--address', baremetal_fakes.baremetal_portgroup_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--physical-network',
+            baremetal_fakes.baremetal_port_physical_network,
+        ]
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_portgroup_address),
+            ('physical_network',
+             baremetal_fakes.baremetal_port_physical_network),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = {
+            'address': baremetal_fakes.baremetal_portgroup_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'physical_network':
+            baremetal_fakes.baremetal_port_physical_network,
+        }
+
+        self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
+
+    def test_baremetal_portgroup_create_category(self):
+        arglist = [
+            '--address', baremetal_fakes.baremetal_portgroup_address,
+            '--node', baremetal_fakes.baremetal_uuid,
+            '--category', baremetal_fakes.baremetal_portgroup_category,
+        ]
+
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_uuid),
+            ('address', baremetal_fakes.baremetal_portgroup_address),
+            ('category', baremetal_fakes.baremetal_portgroup_category),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        # DisplayCommandBase.take_action() returns two tuples
+        self.cmd.take_action(parsed_args)
+
+        # Set expected values
+        args = {
+            'address': baremetal_fakes.baremetal_portgroup_address,
+            'node_uuid': baremetal_fakes.baremetal_uuid,
+            'category': baremetal_fakes.baremetal_portgroup_category,
+        }
+
+        self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
+
 
 class TestShowBaremetalPortGroup(TestBaremetalPortGroup):
 
@@ -251,16 +308,19 @@ class TestShowBaremetalPortGroup(TestBaremetalPortGroup):
         self.baremetal_mock.portgroup.get.assert_called_with(*args,
                                                              fields=None)
 
-        collist = ('address', 'extra', 'mode', 'name', 'node_uuid',
-                   'properties', 'uuid')
+        collist = ('address', 'category', 'extra', 'mode', 'name',
+                   'node_uuid', 'physical_network', 'properties',
+                   'uuid')
         self.assertEqual(collist, columns)
 
         datalist = (
             baremetal_fakes.baremetal_portgroup_address,
+            baremetal_fakes.baremetal_portgroup_category,
             baremetal_fakes.baremetal_portgroup_extra,
             baremetal_fakes.baremetal_portgroup_mode,
             baremetal_fakes.baremetal_portgroup_name,
             baremetal_fakes.baremetal_uuid,
+            baremetal_fakes.baremetal_port_physical_network,
             baremetal_fakes.baremetal_portgroup_properties,
             baremetal_fakes.baremetal_portgroup_uuid,
         )
@@ -385,7 +445,8 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
 
         collist = ('UUID', 'Address', 'Created At', 'Extra',
                    'Standalone Ports Supported', 'Node UUID', 'Name',
-                   'Updated At', 'Internal Info', 'Mode', 'Properties')
+                   'Updated At', 'Internal Info', 'Mode', 'Properties',
+                   'Physical Network', 'Category')
         self.assertEqual(collist, columns)
 
         datalist = ((baremetal_fakes.baremetal_portgroup_uuid,
@@ -398,7 +459,10 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
                      '',
                      '',
                      baremetal_fakes.baremetal_portgroup_mode,
-                     baremetal_fakes.baremetal_portgroup_properties),)
+                     baremetal_fakes.baremetal_portgroup_properties,
+                     baremetal_fakes.baremetal_port_physical_network,
+                     baremetal_fakes.baremetal_portgroup_category,
+                     ),)
         self.assertEqual(datalist, tuple(data))
 
     def test_baremetal_portgroup_list_fields(self):
@@ -670,6 +734,40 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
         self.cmd.take_action(parsed_args)
         self.assertFalse(self.baremetal_mock.portgroup.update.called)
 
+    def test_baremetal_portgroup_set_physical_network(self):
+        new_portgroup_physnet = 'physnet2'
+        arglist = [
+            baremetal_fakes.baremetal_portgroup_uuid,
+            '--physical-network', new_portgroup_physnet]
+        verifylist = [
+            ('portgroup', baremetal_fakes.baremetal_portgroup_uuid),
+            ('physical_network', new_portgroup_physnet)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.portgroup.update.assert_called_once_with(
+            baremetal_fakes.baremetal_portgroup_uuid,
+            [{'path': '/physical_network', 'value': new_portgroup_physnet,
+              'op': 'add'}])
+
+    def test_baremetal_portgroup_set_category(self):
+        new_portgroup_category = 'Purple'
+        arglist = [
+            baremetal_fakes.baremetal_portgroup_uuid,
+            '--category', new_portgroup_category]
+        verifylist = [
+            ('portgroup', baremetal_fakes.baremetal_portgroup_uuid),
+            ('category', new_portgroup_category)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.portgroup.update.assert_called_once_with(
+            baremetal_fakes.baremetal_portgroup_uuid,
+            [{'path': '/category', 'value': new_portgroup_category,
+              'op': 'add'}])
+
 
 class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
     def setUp(self):
@@ -762,3 +860,25 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
         self.cmd.take_action(parsed_args)
         self.assertFalse(self.baremetal_mock.portgroup.update.called)
+
+    def test_baremetal_portgroup_unset_physical_network(self):
+        arglist = ['portgroup', '--physical-network']
+        verifylist = [('physical_network', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.portgroup.update.assert_called_once_with(
+            'portgroup',
+            [{'path': '/physical_network', 'op': 'remove'}])
+
+    def test_baremetal_portgroup_unset_category(self):
+        arglist = ['portgroup', '--category']
+        verifylist = [('category', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.portgroup.update.assert_called_once_with(
+            'portgroup',
+            [{'path': '/category', 'op': 'remove'}])

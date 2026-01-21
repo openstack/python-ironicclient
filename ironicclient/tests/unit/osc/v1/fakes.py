@@ -141,6 +141,7 @@ baremetal_portgroup_extra = {'key1': 'value1',
                              'key2': 'value2'}
 baremetal_portgroup_properties = {'key1': 'value11',
                                   'key2': 'value22'}
+baremetal_portgroup_category = 'Green'
 
 PORTGROUP = {'uuid': baremetal_portgroup_uuid,
              'name': baremetal_portgroup_name,
@@ -149,6 +150,8 @@ PORTGROUP = {'uuid': baremetal_portgroup_uuid,
              'extra': baremetal_portgroup_extra,
              'mode': baremetal_portgroup_mode,
              'properties': baremetal_portgroup_properties,
+             'physical_network': baremetal_port_physical_network,
+             'category': baremetal_portgroup_category,
              }
 
 VIFS = {'vifs': [{'id': 'aaa-aa'}]}
