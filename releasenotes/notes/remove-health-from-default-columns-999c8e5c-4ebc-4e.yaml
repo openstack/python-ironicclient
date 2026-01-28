@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    The ``health`` field has been removed from the default columns in
+    ``baremetal node list`` output. This aligns the CLI with the Ironic API,
+    which does not include health in default node list responses. The health
+    field remains available via ``baremetal node list --long`` or
+    ``baremetal node list --fields health``.

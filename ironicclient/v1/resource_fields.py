@@ -337,7 +337,6 @@ NODE_RESOURCE = Resource(
      'power_state',
      'provision_state',
      'maintenance',
-     'health',
      ])
 VENDOR_PASSTHRU_METHOD_RESOURCE = Resource(
     ['name',
