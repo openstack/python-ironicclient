@@ -1,3 +1,12 @@
 [build-system]
 requires = ["pbr>=6.0.0", "setuptools>=64.0.0"]
 build-backend = "pbr.build"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+# Modules that have been fully type-annotated. Add modules here as they are
+# migrated to enable strict type checking for them.
+files = []
