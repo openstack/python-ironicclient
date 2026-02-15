@@ -13,13 +13,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import annotations
+
+from typing import Callable
+
 try:
     import oslo_i18n
 except ImportError:
-    def _(msg):
+    def _(msg: str) -> str:
         return msg
 else:
-    _translators = oslo_i18n.TranslatorFactory(domain='ironicclient')
+    _translators: oslo_i18n.TranslatorFactory = oslo_i18n.TranslatorFactory(
+        domain="ironicclient"
+    )
 
     # The primary translation function using the well-known name "_"
-    _ = _translators.primary
+    _: Callable[[str], str] = _translators.primary  # type: ignore[no-redef]

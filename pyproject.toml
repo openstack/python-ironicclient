@@ -9,4 +9,6 @@ warn_unused_configs = true
 ignore_missing_imports = true
 # Modules that have been fully type-annotated. Add modules here as they are
 # migrated to enable strict type checking for them.
-files = []
+files = [
+    "ironicclient/common/i18n.py",
+]
