@@ -11,4 +11,5 @@ ignore_missing_imports = true
 # migrated to enable strict type checking for them.
 files = [
     "ironicclient/common/i18n.py",
+    "ironicclient/common/filecache.py",
 ]

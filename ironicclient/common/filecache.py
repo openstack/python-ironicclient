@@ -14,8 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import logging
 import os
+from typing import cast
 
 import dogpile.cache
 import platformdirs
@@ -23,17 +26,17 @@ import platformdirs
 
 LOG = logging.getLogger(__name__)
 
-AUTHOR = 'openstack'
-PROGNAME = 'python-ironicclient'
+AUTHOR: str = 'openstack'
+PROGNAME: str = 'python-ironicclient'
 
-CACHE = None
-CACHE_DIR = platformdirs.user_cache_dir(PROGNAME, AUTHOR)
-CACHE_EXPIRY_ENV_VAR = 'IRONICCLIENT_CACHE_EXPIRY'  # environment variable
-CACHE_FILENAME = os.path.join(CACHE_DIR, 'ironic-api-version.dbm')
-DEFAULT_EXPIRY = 300  # seconds
+CACHE: dogpile.cache.CacheRegion | None = None
+CACHE_DIR: str = platformdirs.user_cache_dir(PROGNAME, AUTHOR)
+CACHE_EXPIRY_ENV_VAR: str = 'IRONICCLIENT_CACHE_EXPIRY'  # environment variable
+CACHE_FILENAME: str = os.path.join(CACHE_DIR, 'ironic-api-version.dbm')
+DEFAULT_EXPIRY: int = 300  # seconds
 
 
-def _get_cache():
+def _get_cache() -> dogpile.cache.CacheRegion:
     """Configure file caching."""
     global CACHE
     if CACHE is None:
@@ -65,12 +68,12 @@ def _get_cache():
     return CACHE
 
 
-def _build_key(host, port):
+def _build_key(host: str, port: str | int) -> str:
     """Build a key based upon the hostname or address supplied."""
     return "%s:%s" % (host, port)
 
 
-def save_data(host, port, data):
+def save_data(host: str, port: str | int, data: str) -> None:
     """Save 'data' for a particular 'host' in the appropriate cache dir.
 
     param host: The host that we need to save data for
@@ -81,7 +84,9 @@ def save_data(host, port, data):
     _get_cache().set(key, data)
 
 
-def retrieve_data(host, port, expiry=None):
+def retrieve_data(
+    host: str, port: str | int, expiry: int | None = None
+) -> str | None:
     """Retrieve the version stored for an ironic 'host', if it's not stale.
 
     Check to see if there is valid cached data for the host/port
@@ -100,4 +105,4 @@ def retrieve_data(host, port, expiry=None):
 
     if data == dogpile.cache.api.NO_VALUE:
         return None
-    return data
+    return cast(str, data)
