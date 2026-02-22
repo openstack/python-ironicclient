@@ -20,9 +20,15 @@
 Exception definitions.
 """
 
+from __future__ import annotations
+
 from http import client as http_client
 import inspect
 import sys
+from typing import Any
+from typing import cast
+
+import requests  # type: ignore[import-untyped]
 
 from ironicclient.common.i18n import _
 
@@ -64,7 +70,7 @@ class ConnectionRefused(ConnectionError):
 
 class AuthPluginOptionsMissing(AuthorizationFailure):
     """Auth plugin misses some options."""
-    def __init__(self, opt_names):
+    def __init__(self, opt_names: list[str]) -> None:
         super(AuthPluginOptionsMissing, self).__init__(
             _("Authentication failed. Missing options: %s") %
             ", ".join(opt_names))
@@ -73,7 +79,7 @@ class AuthPluginOptionsMissing(AuthorizationFailure):
 
 class AuthSystemNotFound(AuthorizationFailure):
     """User has specified an AuthSystem that is not installed."""
-    def __init__(self, auth_system):
+    def __init__(self, auth_system: str) -> None:
         super(AuthSystemNotFound, self).__init__(
             _("AuthSystemNotFound: %r") % auth_system)
         self.auth_system = auth_system
@@ -96,7 +102,7 @@ class EndpointNotFound(EndpointException):
 
 class AmbiguousEndpoints(EndpointException):
     """Found more than one matching endpoint in Service Catalog."""
-    def __init__(self, endpoints=None):
+    def __init__(self, endpoints: object | None = None) -> None:
         super(AmbiguousEndpoints, self).__init__(
             _("AmbiguousEndpoints: %r") % endpoints)
         self.endpoints = endpoints
@@ -104,12 +110,19 @@ class AmbiguousEndpoints(EndpointException):
 
 class HttpError(ClientException):
     """The base exception class for all HTTP exceptions."""
-    http_status = 0
-    message = _("HTTP Error")
+    http_status: int = 0
+    message: str = _("HTTP Error")
 
-    def __init__(self, message=None, details=None,
-                 response=None, request_id=None,
-                 url=None, method=None, http_status=None):
+    def __init__(
+        self,
+        message: str | None = None,
+        details: str | None = None,
+        response: requests.Response | None = None,
+        request_id: str | None = None,
+        url: str | None = None,
+        method: str | None = None,
+        http_status: int | None = None,
+    ) -> None:
         self.http_status = http_status or self.http_status
         self.message = message or self.message
         self.details = details
@@ -125,7 +138,7 @@ class HttpError(ClientException):
 
 class HTTPRedirection(HttpError):
     """HTTP Redirection."""
-    message = _("HTTP Redirection")
+    message: str = _("HTTP Redirection")
 
 
 class HTTPClientError(HttpError):
@@ -133,7 +146,7 @@ class HTTPClientError(HttpError):
 
     Exception for cases in which the client seems to have erred.
     """
-    message = _("HTTP Client Error")
+    message: str = _("HTTP Client Error")
 
 
 class HttpServerError(HttpError):
@@ -142,7 +155,7 @@ class HttpServerError(HttpError):
     Exception for cases in which the server is aware that it has
     erred or is incapable of performing the request.
     """
-    message = _("HTTP Server Error")
+    message: str = _("HTTP Server Error")
 
 
 class MultipleChoices(HTTPRedirection):
@@ -151,8 +164,8 @@ class MultipleChoices(HTTPRedirection):
     Indicates multiple options for the resource that the client may follow.
     """
 
-    http_status = http_client.MULTIPLE_CHOICES
-    message = _("Multiple Choices")
+    http_status: int = http_client.MULTIPLE_CHOICES
+    message: str = _("Multiple Choices")
 
 
 class BadRequest(HTTPClientError):
@@ -160,8 +173,8 @@ class BadRequest(HTTPClientError):
 
     The request cannot be fulfilled due to bad syntax.
     """
-    http_status = http_client.BAD_REQUEST
-    message = _("Bad Request")
+    http_status: int = http_client.BAD_REQUEST
+    message: str = _("Bad Request")
 
 
 class Unauthorized(HTTPClientError):
@@ -170,8 +183,8 @@ class Unauthorized(HTTPClientError):
     Similar to 403 Forbidden, but specifically for use when authentication
     is required and has failed or has not yet been provided.
     """
-    http_status = http_client.UNAUTHORIZED
-    message = _("Unauthorized")
+    http_status: int = http_client.UNAUTHORIZED
+    message: str = _("Unauthorized")
 
 
 class PaymentRequired(HTTPClientError):
@@ -179,8 +192,8 @@ class PaymentRequired(HTTPClientError):
 
     Reserved for future use.
     """
-    http_status = http_client.PAYMENT_REQUIRED
-    message = _("Payment Required")
+    http_status: int = http_client.PAYMENT_REQUIRED
+    message: str = _("Payment Required")
 
 
 class Forbidden(HTTPClientError):
@@ -189,8 +202,8 @@ class Forbidden(HTTPClientError):
     The request was a valid request, but the server is refusing to respond
     to it.
     """
-    http_status = http_client.FORBIDDEN
-    message = _("Forbidden")
+    http_status: int = http_client.FORBIDDEN
+    message: str = _("Forbidden")
 
 
 class NotFound(HTTPClientError):
@@ -199,8 +212,8 @@ class NotFound(HTTPClientError):
     The requested resource could not be found but may be available again
     in the future.
     """
-    http_status = http_client.NOT_FOUND
-    message = _("Not Found")
+    http_status: int = http_client.NOT_FOUND
+    message: str = _("Not Found")
 
 
 class MethodNotAllowed(HTTPClientError):
@@ -209,8 +222,8 @@ class MethodNotAllowed(HTTPClientError):
     A request was made of a resource using a request method not supported
     by that resource.
     """
-    http_status = http_client.METHOD_NOT_ALLOWED
-    message = _("Method Not Allowed")
+    http_status: int = http_client.METHOD_NOT_ALLOWED
+    message: str = _("Method Not Allowed")
 
 
 class NotAcceptable(HTTPClientError):
@@ -219,8 +232,8 @@ class NotAcceptable(HTTPClientError):
     The requested resource is only capable of generating content not
     acceptable according to the Accept headers sent in the request.
     """
-    http_status = http_client.NOT_ACCEPTABLE
-    message = _("Not Acceptable")
+    http_status: int = http_client.NOT_ACCEPTABLE
+    message: str = _("Not Acceptable")
 
 
 class ProxyAuthenticationRequired(HTTPClientError):
@@ -228,8 +241,8 @@ class ProxyAuthenticationRequired(HTTPClientError):
 
     The client must first authenticate itself with the proxy.
     """
-    http_status = http_client.PROXY_AUTHENTICATION_REQUIRED
-    message = _("Proxy Authentication Required")
+    http_status: int = http_client.PROXY_AUTHENTICATION_REQUIRED
+    message: str = _("Proxy Authentication Required")
 
 
 class RequestTimeout(HTTPClientError):
@@ -237,8 +250,8 @@ class RequestTimeout(HTTPClientError):
 
     The server timed out waiting for the request.
     """
-    http_status = http_client.REQUEST_TIMEOUT
-    message = _("Request Timeout")
+    http_status: int = http_client.REQUEST_TIMEOUT
+    message: str = _("Request Timeout")
 
 
 class Conflict(HTTPClientError):
@@ -247,8 +260,8 @@ class Conflict(HTTPClientError):
     Indicates that the request could not be processed because of conflict
     in the request, such as an edit conflict.
     """
-    http_status = http_client.CONFLICT
-    message = _("Conflict")
+    http_status: int = http_client.CONFLICT
+    message: str = _("Conflict")
 
 
 class Gone(HTTPClientError):
@@ -257,8 +270,8 @@ class Gone(HTTPClientError):
     Indicates that the resource requested is no longer available and will
     not be available again.
     """
-    http_status = http_client.GONE
-    message = _("Gone")
+    http_status: int = http_client.GONE
+    message: str = _("Gone")
 
 
 class LengthRequired(HTTPClientError):
@@ -267,8 +280,8 @@ class LengthRequired(HTTPClientError):
     The request did not specify the length of its content, which is
     required by the requested resource.
     """
-    http_status = http_client.LENGTH_REQUIRED
-    message = _("Length Required")
+    http_status: int = http_client.LENGTH_REQUIRED
+    message: str = _("Length Required")
 
 
 class PreconditionFailed(HTTPClientError):
@@ -277,8 +290,8 @@ class PreconditionFailed(HTTPClientError):
     The server does not meet one of the preconditions that the requester
     put on the request.
     """
-    http_status = http_client.PRECONDITION_FAILED
-    message = _("Precondition Failed")
+    http_status: int = http_client.PRECONDITION_FAILED
+    message: str = _("Precondition Failed")
 
 
 class RequestEntityTooLarge(HTTPClientError):
@@ -286,10 +299,10 @@ class RequestEntityTooLarge(HTTPClientError):
 
     The request is larger than the server is willing or able to process.
     """
-    http_status = http_client.REQUEST_ENTITY_TOO_LARGE
-    message = _("Request Entity Too Large")
+    http_status: int = http_client.REQUEST_ENTITY_TOO_LARGE
+    message: str = _("Request Entity Too Large")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         try:
             self.retry_after = int(kwargs.pop('retry_after'))
         except (KeyError, ValueError):
@@ -303,8 +316,8 @@ class RequestUriTooLong(HTTPClientError):
 
     The URI provided was too long for the server to process.
     """
-    http_status = http_client.REQUEST_URI_TOO_LONG
-    message = _("Request-URI Too Long")
+    http_status: int = http_client.REQUEST_URI_TOO_LONG
+    message: str = _("Request-URI Too Long")
 
 
 class UnsupportedMediaType(HTTPClientError):
@@ -313,8 +326,8 @@ class UnsupportedMediaType(HTTPClientError):
     The request entity has a media type which the server or resource does
     not support.
     """
-    http_status = http_client.UNSUPPORTED_MEDIA_TYPE
-    message = _("Unsupported Media Type")
+    http_status: int = http_client.UNSUPPORTED_MEDIA_TYPE
+    message: str = _("Unsupported Media Type")
 
 
 class RequestedRangeNotSatisfiable(HTTPClientError):
@@ -323,8 +336,8 @@ class RequestedRangeNotSatisfiable(HTTPClientError):
     The client has asked for a portion of the file, but the server cannot
     supply that portion.
     """
-    http_status = http_client.REQUESTED_RANGE_NOT_SATISFIABLE
-    message = _("Requested Range Not Satisfiable")
+    http_status: int = http_client.REQUESTED_RANGE_NOT_SATISFIABLE
+    message: str = _("Requested Range Not Satisfiable")
 
 
 class ExpectationFailed(HTTPClientError):
@@ -332,8 +345,8 @@ class ExpectationFailed(HTTPClientError):
 
     The server cannot meet the requirements of the Expect request-header field.
     """
-    http_status = http_client.EXPECTATION_FAILED
-    message = _("Expectation Failed")
+    http_status: int = http_client.EXPECTATION_FAILED
+    message: str = _("Expectation Failed")
 
 
 class UnprocessableEntity(HTTPClientError):
@@ -342,8 +355,8 @@ class UnprocessableEntity(HTTPClientError):
     The request was well-formed but was unable to be followed due to semantic
     errors.
     """
-    http_status = http_client.UNPROCESSABLE_ENTITY
-    message = _("Unprocessable Entity")
+    http_status: int = http_client.UNPROCESSABLE_ENTITY
+    message: str = _("Unprocessable Entity")
 
 
 class InternalServerError(HttpServerError):
@@ -351,8 +364,8 @@ class InternalServerError(HttpServerError):
 
     A generic error message, given when no more specific message is suitable.
     """
-    http_status = http_client.INTERNAL_SERVER_ERROR
-    message = _("Internal Server Error")
+    http_status: int = http_client.INTERNAL_SERVER_ERROR
+    message: str = _("Internal Server Error")
 
 
 # NotImplemented is a python keyword.
@@ -362,8 +375,8 @@ class HttpNotImplemented(HttpServerError):
     The server either does not recognize the request method, or it lacks
     the ability to fulfill the request.
     """
-    http_status = http_client.NOT_IMPLEMENTED
-    message = _("Not Implemented")
+    http_status: int = http_client.NOT_IMPLEMENTED
+    message: str = _("Not Implemented")
 
 
 class BadGateway(HttpServerError):
@@ -372,8 +385,8 @@ class BadGateway(HttpServerError):
     The server was acting as a gateway or proxy and received an invalid
     response from the upstream server.
     """
-    http_status = http_client.BAD_GATEWAY
-    message = _("Bad Gateway")
+    http_status: int = http_client.BAD_GATEWAY
+    message: str = _("Bad Gateway")
 
 
 class ServiceUnavailable(HttpServerError):
@@ -381,8 +394,8 @@ class ServiceUnavailable(HttpServerError):
 
     The server is currently unavailable.
     """
-    http_status = http_client.SERVICE_UNAVAILABLE
-    message = _("Service Unavailable")
+    http_status: int = http_client.SERVICE_UNAVAILABLE
+    message: str = _("Service Unavailable")
 
 
 class GatewayTimeout(HttpServerError):
@@ -391,8 +404,8 @@ class GatewayTimeout(HttpServerError):
     The server was acting as a gateway or proxy and did not receive a timely
     response from the upstream server.
     """
-    http_status = http_client.GATEWAY_TIMEOUT
-    message = _("Gateway Timeout")
+    http_status: int = http_client.GATEWAY_TIMEOUT
+    message: str = _("Gateway Timeout")
 
 
 class HttpVersionNotSupported(HttpServerError):
@@ -400,19 +413,21 @@ class HttpVersionNotSupported(HttpServerError):
 
     The server does not support the HTTP protocol version used in the request.
     """
-    http_status = http_client.HTTP_VERSION_NOT_SUPPORTED
-    message = _("HTTP Version Not Supported")
+    http_status: int = http_client.HTTP_VERSION_NOT_SUPPORTED
+    message: str = _("HTTP Version Not Supported")
 
 
 # _code_map contains all the classes that have http_status attribute.
-_code_map = dict(
-    (getattr(obj, 'http_status', None), obj)
+_code_map: dict[int, type[HttpError]] = {
+    cast(int, getattr(obj, 'http_status')): cast(type[HttpError], obj)
     for name, obj in vars(sys.modules[__name__]).items()
     if inspect.isclass(obj) and getattr(obj, 'http_status', False)
-)
+}
 
 
-def from_response(response, method, url):
+def from_response(
+    response: requests.Response, method: str, url: str
+) -> HttpError:
     """Returns an instance of :class:`HttpError` or subclass based on response.
 
     :param response: instance of `requests.Response` class
@@ -424,7 +439,7 @@ def from_response(response, method, url):
     # NOTE(hdd) true for older versions of nova and cinder
     if not req_id:
         req_id = response.headers.get("x-compute-request-id")
-    kwargs = {
+    kwargs: dict[str, Any] = {
         "http_status": response.status_code,
         "response": response,
         "method": method,
@@ -451,6 +466,7 @@ def from_response(response, method, url):
     elif content_type.startswith("text/"):
         kwargs["details"] = getattr(response, 'text', '')
 
+    cls: type[HttpError]
     try:
         cls = _code_map[response.status_code]
     except KeyError:
