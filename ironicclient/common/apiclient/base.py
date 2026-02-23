@@ -20,13 +20,19 @@
 Base utilities to build API operation managers and objects on top of.
 """
 
+from __future__ import annotations
 
 # E1102: %s is not callable
 # pylint: disable=E1102
 
 import abc
+from collections.abc import Sequence
 import copy
 from http import client as http_client
+from typing import Any
+from typing import Callable
+from typing import cast
+from typing import ClassVar
 from urllib import parse as urlparse
 
 from oslo_utils import strutils
@@ -35,7 +41,7 @@ from ironicclient.common.apiclient import exceptions
 from ironicclient.common.i18n import _
 
 
-def getid(obj):
+def getid(obj: Any) -> Any:
     """Return id if argument is a Resource.
 
     Abstracts the common pattern of allowing both an object or an object's ID
@@ -55,10 +61,11 @@ def getid(obj):
 # TODO(aababilov): call run_hooks() in HookableMixin's child classes
 class HookableMixin(object):
     """Mixin so classes can register and run hooks."""
-    _hooks_map = {}
+
+    _hooks_map: ClassVar[dict[str, list[Callable[..., Any]]]] = {}
 
     @classmethod
-    def add_hook(cls, hook_type, hook_func):
+    def add_hook(cls, hook_type: str, hook_func: Callable[..., Any]) -> None:
         """Add a new hook of specified type.
 
         :param cls: class that registers hooks
@@ -71,7 +78,7 @@ class HookableMixin(object):
         cls._hooks_map[hook_type].append(hook_func)
 
     @classmethod
-    def run_hooks(cls, hook_type, *args, **kwargs):
+    def run_hooks(cls, hook_type: str, *args: Any, **kwargs: Any) -> None:
         """Run all hooks of specified type.
 
         :param cls: class that registers hooks
@@ -90,9 +97,10 @@ class BaseManager(HookableMixin):
     Managers interact with a particular type of API (servers, flavors, images,
     etc.) and provide CRUD operations for them.
     """
-    resource_class = None
 
-    def __init__(self, client):
+    resource_class: type[Resource] | None = None
+
+    def __init__(self, client: Any) -> None:
         """Initializes BaseManager with `client`.
 
         :param client: instance of BaseClient descendant for HTTP requests
@@ -100,7 +108,13 @@ class BaseManager(HookableMixin):
         super(BaseManager, self).__init__()
         self.client = client
 
-    def _list(self, url, response_key=None, obj_class=None, json=None):
+    def _list(
+        self,
+        url: str,
+        response_key: str | None = None,
+        obj_class: type[Resource] | None = None,
+        json: dict[str, Any] | None = None,
+    ) -> list[Resource]:
         """List the collection.
 
         :param url: a partial URL, e.g., '/servers'
@@ -120,17 +134,20 @@ class BaseManager(HookableMixin):
         if obj_class is None:
             obj_class = self.resource_class
 
+        if obj_class is None:
+            raise ValueError("resource_class must be set")
+
         data = body[response_key] if response_key is not None else body
         # NOTE(ja): keystone returns values as list as {'values': [ ... ]}
         #           unlike other services which just return the list...
         try:
-            data = data['values']
+            data = data["values"]
         except (KeyError, TypeError):
             pass
 
         return [obj_class(self, res, loaded=True) for res in data if res]
 
-    def _get(self, url, response_key=None):
+    def _get(self, url: str, response_key: str | None = None) -> Resource:
         """Get an object from collection.
 
         :param url: a partial URL, e.g., '/servers'
@@ -138,19 +155,27 @@ class BaseManager(HookableMixin):
             e.g., 'server'. If response_key is None - all response body
             will be used.
         """
+        if self.resource_class is None:
+            raise ValueError("resource_class must be set")
         body = self.client.get(url).json()
         data = body[response_key] if response_key is not None else body
         return self.resource_class(self, data, loaded=True)
 
-    def _head(self, url):
+    def _head(self, url: str) -> bool:
         """Retrieve request headers for an object.
 
         :param url: a partial URL, e.g., '/servers'
         """
         resp = self.client.head(url)
-        return resp.status_code == http_client.NO_CONTENT
+        return bool(resp.status_code == http_client.NO_CONTENT)
 
-    def _post(self, url, json, response_key=None, return_raw=False):
+    def _post(
+        self,
+        url: str,
+        json: dict[str, Any],
+        response_key: str | None = None,
+        return_raw: bool = False,
+    ) -> dict[str, Any] | Resource:
         """Create an object.
 
         :param url: a partial URL, e.g., '/servers'
@@ -162,13 +187,20 @@ class BaseManager(HookableMixin):
         :param return_raw: flag to force returning raw JSON instead of
             Python object of self.resource_class
         """
+        if self.resource_class is None:
+            raise ValueError("resource_class must be set")
         body = self.client.post(url, json=json).json()
         data = body[response_key] if response_key is not None else body
         if return_raw:
-            return data
+            return cast(dict[str, Any], data)
         return self.resource_class(self, data)
 
-    def _put(self, url, json=None, response_key=None):
+    def _put(
+        self,
+        url: str,
+        json: dict[str, Any] | None = None,
+        response_key: str | None = None,
+    ) -> Resource | None:
         """Update an object with PUT method.
 
         :param url: a partial URL, e.g., '/servers'
@@ -178,6 +210,8 @@ class BaseManager(HookableMixin):
             e.g., 'servers'. If response_key is None - all response body
             will be used.
         """
+        if self.resource_class is None:
+            raise ValueError("resource_class must be set")
         resp = self.client.put(url, json=json)
         # PUT requests may not return a body
         if resp.content:
@@ -186,8 +220,14 @@ class BaseManager(HookableMixin):
                 return self.resource_class(self, body[response_key])
             else:
                 return self.resource_class(self, body)
+        return None
 
-    def _patch(self, url, json=None, response_key=None):
+    def _patch(
+        self,
+        url: str,
+        json: dict[str, Any] | None = None,
+        response_key: str | None = None,
+    ) -> Resource:
         """Update an object with PATCH method.
 
         :param url: a partial URL, e.g., '/servers'
@@ -197,13 +237,15 @@ class BaseManager(HookableMixin):
             e.g., 'servers'. If response_key is None - all response body
             will be used.
         """
+        if self.resource_class is None:
+            raise ValueError("resource_class must be set")
         body = self.client.patch(url, json=json).json()
         if response_key is not None:
             return self.resource_class(self, body[response_key])
         else:
             return self.resource_class(self, body)
 
-    def _delete(self, url):
+    def _delete(self, url: str) -> Any:
         """Delete an object.
 
         :param url: a partial URL, e.g., '/servers/my-server'
@@ -215,21 +257,23 @@ class ManagerWithFind(BaseManager, metaclass=abc.ABCMeta):
     """Manager with additional `find()`/`findall()` methods."""
 
     @abc.abstractmethod
-    def list(self):
+    def list(self) -> list[Resource]:
         pass
 
-    def find(self, **kwargs):
+    def find(self, **kwargs: Any) -> Resource:
         """Find a single item with attributes matching ``**kwargs``.
 
         This isn't very efficient: it loads the entire list then filters on
         the Python side.
         """
+        if self.resource_class is None:
+            raise ValueError("resource_class must be set")
         matches = self.findall(**kwargs)
         num_matches = len(matches)
         if num_matches == 0:
             msg = _("No %(name)s matching %(args)s.") % {
-                'name': self.resource_class.__name__,
-                'args': kwargs
+                "name": self.resource_class.__name__,
+                "args": kwargs,
             }
             raise exceptions.NotFound(msg)
         elif num_matches > 1:
@@ -237,19 +281,22 @@ class ManagerWithFind(BaseManager, metaclass=abc.ABCMeta):
         else:
             return matches[0]
 
-    def findall(self, **kwargs):
+    def findall(self, **kwargs: Any) -> Sequence[Resource]:
         """Find all items with attributes matching ``**kwargs``.
 
         This isn't very efficient: it loads the entire list then filters on
         the Python side.
         """
-        found = []
+        found: list[Resource] = []
         searches = kwargs.items()
 
-        for obj in self.list():
+        items = self.list()
+        for obj in items:
             try:
-                if all(getattr(obj, attr) == value
-                       for (attr, value) in searches):
+                if all(
+                    getattr(obj, attr) == value
+                    for (attr, value) in searches
+                ):
                     found.append(obj)
             except AttributeError:
                 continue
@@ -270,10 +317,11 @@ class CrudManager(BaseManager):
       refer to an individual member of the collection.
 
     """
-    collection_key = None
-    key = None
 
-    def build_url(self, base_url=None, **kwargs):
+    collection_key: str | None = None
+    key: str | None = None
+
+    def build_url(self, base_url: str | None = None, **kwargs: Any) -> str:
         """Builds a resource URL for the given kwargs.
 
         Given an example collection where `collection_key = 'entities'` and
@@ -290,18 +338,18 @@ class CrudManager(BaseManager):
 
         :param base_url: if provided, the generated URL will be appended to it
         """
-        url = base_url if base_url is not None else ''
+        url = base_url if base_url is not None else ""
 
-        url += '/%s' % self.collection_key
+        url += "/%s" % self.collection_key
 
         # do we have a specific entity?
-        entity_id = kwargs.get('%s_id' % self.key)
+        entity_id = kwargs.get("%s_id" % self.key)
         if entity_id is not None:
-            url += '/%s' % entity_id
+            url += "/%s" % entity_id
 
         return url
 
-    def _filter_kwargs(self, kwargs):
+    def _filter_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         """Drop null values and handle ids."""
         for key, ref in kwargs.copy().items():
             if ref is None:
@@ -309,27 +357,33 @@ class CrudManager(BaseManager):
             else:
                 if isinstance(ref, Resource):
                     kwargs.pop(key)
-                    kwargs['%s_id' % key] = getid(ref)
+                    kwargs["%s_id" % key] = getid(ref)
         return kwargs
 
-    def create(self, **kwargs):
+    def create(self, **kwargs: Any) -> Resource:
+        if self.key is None:
+            raise ValueError("key must be set")
         kwargs = self._filter_kwargs(kwargs)
-        return self._post(
+        result = self._post(
             self.build_url(**kwargs),
             {self.key: kwargs},
-            self.key)
+            self.key,
+        )
+        if isinstance(result, dict):
+            raise ValueError("Expected Resource, got dict")
+        return result
 
-    def get(self, **kwargs):
+    def get(self, **kwargs: Any) -> Resource:
         kwargs = self._filter_kwargs(kwargs)
-        return self._get(
-            self.build_url(**kwargs),
-            self.key)
+        return self._get(self.build_url(**kwargs), self.key)
 
-    def head(self, **kwargs):
+    def head(self, **kwargs: Any) -> bool:
         kwargs = self._filter_kwargs(kwargs)
         return self._head(self.build_url(**kwargs))
 
-    def list(self, base_url=None, **kwargs):
+    def list(
+        self, base_url: str | None = None, **kwargs: Any
+    ) -> list[Resource]:
         """List the collection.
 
         :param base_url: if provided, the generated URL will be appended to it
@@ -337,13 +391,20 @@ class CrudManager(BaseManager):
         kwargs = self._filter_kwargs(kwargs)
 
         return self._list(
-            '%(base_url)s%(query)s' % {
-                'base_url': self.build_url(base_url=base_url, **kwargs),
-                'query': '?%s' % urlparse.urlencode(kwargs) if kwargs else '',
+            "%(base_url)s%(query)s"
+            % {
+                "base_url": self.build_url(base_url=base_url, **kwargs),
+                "query": (
+                    "?%s" % urlparse.urlencode(kwargs)
+                    if kwargs else ""
+                ),
             },
-            self.collection_key)
+            self.collection_key,
+        )
 
-    def put(self, base_url=None, **kwargs):
+    def put(
+        self, base_url: str | None = None, **kwargs: Any
+    ) -> Resource | None:
         """Update an element.
 
         :param base_url: if provided, the generated URL will be appended to it
@@ -352,41 +413,47 @@ class CrudManager(BaseManager):
 
         return self._put(self.build_url(base_url=base_url, **kwargs))
 
-    def update(self, **kwargs):
+    def update(self, **kwargs: Any) -> Resource:
         kwargs = self._filter_kwargs(kwargs)
         params = kwargs.copy()
-        params.pop('%s_id' % self.key)
+        if self.key is None:
+            raise ValueError("key must be set")
+        params.pop("%s_id" % self.key)
 
         return self._patch(
             self.build_url(**kwargs),
             {self.key: params},
-            self.key)
+            self.key,
+        )
 
-    def delete(self, **kwargs):
+    def delete(self, **kwargs: Any) -> Any:
         kwargs = self._filter_kwargs(kwargs)
 
-        return self._delete(
-            self.build_url(**kwargs))
+        return self._delete(self.build_url(**kwargs))
 
-    def find(self, base_url=None, **kwargs):
+    def find(self, base_url: str | None = None, **kwargs: Any) -> Resource:
         """Find a single item with attributes matching ``**kwargs``.
 
         :param base_url: if provided, the generated URL will be appended to it
         """
+        if self.resource_class is None:
+            raise ValueError("resource_class must be set")
         kwargs = self._filter_kwargs(kwargs)
 
         rl = self._list(
-            '%(base_url)s%(query)s' % {
-                'base_url': self.build_url(base_url=base_url, **kwargs),
-                'query': '?%s' % urlparse.urlencode(kwargs) if kwargs else '',
+            "%(base_url)s%(query)s"
+            % {
+                "base_url": self.build_url(base_url=base_url, **kwargs),
+                "query": "?%s" % urlparse.urlencode(kwargs) if kwargs else "",
             },
-            self.collection_key)
+            self.collection_key,
+        )
         num = len(rl)
 
         if num == 0:
             msg = _("No %(name)s matching %(args)s.") % {
-                'name': self.resource_class.__name__,
-                'args': kwargs
+                "name": self.resource_class.__name__,
+                "args": kwargs,
             }
             raise exceptions.NotFound(msg)
         elif num > 1:
@@ -398,16 +465,18 @@ class CrudManager(BaseManager):
 class Extension(HookableMixin):
     """Extension descriptor."""
 
-    SUPPORTED_HOOKS = ('__pre_parse_args__', '__post_parse_args__')
-    manager_class = None
+    SUPPORTED_HOOKS: tuple[str, ...] = (
+        "__pre_parse_args__", "__post_parse_args__"
+    )
+    manager_class: type[BaseManager] | None = None
 
-    def __init__(self, name, module):
+    def __init__(self, name: str, module: Any) -> None:
         super(Extension, self).__init__()
         self.name = name
         self.module = module
         self._parse_extension_module()
 
-    def _parse_extension_module(self):
+    def _parse_extension_module(self) -> None:
         self.manager_class = None
         for attr_name, attr_value in self.module.__dict__.items():
             if attr_name in self.SUPPORTED_HOOKS:
@@ -419,7 +488,7 @@ class Extension(HookableMixin):
                 except TypeError:
                     pass
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Extension '%s'>" % self.name
 
 
@@ -429,10 +498,12 @@ class Resource(object):
     This is pretty much just a bag for attributes.
     """
 
-    HUMAN_ID = False
-    NAME_ATTR = 'name'
+    HUMAN_ID: bool = False
+    NAME_ATTR: str = "name"
 
-    def __init__(self, manager, info, loaded=False):
+    def __init__(
+        self, manager: BaseManager, info: dict[str, Any], loaded: bool = False
+    ) -> None:
         """Populate and bind to a manager.
 
         :param manager: BaseManager object
@@ -444,24 +515,24 @@ class Resource(object):
         self._add_details(info)
         self._loaded = loaded
 
-    def __repr__(self):
-        reprkeys = sorted(k
-                          for k in self.__dict__.keys()
-                          if k[0] != '_' and k != 'manager')
+    def __repr__(self) -> str:
+        reprkeys = sorted(
+            k for k in self.__dict__.keys() if k[0] != "_" and k != "manager"
+        )
         info = ", ".join("%s=%s" % (k, getattr(self, k)) for k in reprkeys)
         return "<%s %s>" % (self.__class__.__name__, info)
 
     @property
-    def human_id(self):
+    def human_id(self) -> str | None:
         """Human-readable ID which can be used for bash completion."""
         if self.HUMAN_ID:
             name = getattr(self, self.NAME_ATTR, None)
             if name is not None:
-                return strutils.to_slug(name)
+                return str(strutils.to_slug(name))
         return None
 
-    def _add_details(self, info):
-        for (k, v) in info.items():
+    def _add_details(self, info: dict[str, Any]) -> None:
+        for k, v in info.items():
             try:
                 setattr(self, k, v)
                 self._info[k] = v
@@ -469,7 +540,7 @@ class Resource(object):
                 # In this case we already defined the attribute on the class
                 pass
 
-    def __getattr__(self, k):
+    def __getattr__(self, k: str) -> Any:
         if k not in self.__dict__:
             # NOTE(bcwaldon): disallow lazy-loading if already loaded once
             if not self.is_loaded():
@@ -480,7 +551,7 @@ class Resource(object):
         else:
             return self.__dict__[k]
 
-    def get(self):
+    def get(self) -> None:
         """Support for lazy loading details.
 
         Some clients, such as novaclient have the option to lazy load the
@@ -488,16 +559,17 @@ class Resource(object):
         """
         # set_loaded() first ... so if we have to bail, we know we tried.
         self.set_loaded(True)
-        if not hasattr(self.manager, 'get'):
+        if not hasattr(self.manager, "get"):
             return
 
         new = self.manager.get(self.id)
         if new:
             self._add_details(new._info)
             self._add_details(
-                {'x_request_id': self.manager.client.last_request_id})
+                {"x_request_id": self.manager.client.last_request_id}
+            )
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Resource):
             return NotImplemented
         # two resources of different types are not equal
@@ -505,11 +577,11 @@ class Resource(object):
             return False
         return self._info == other._info
 
-    def is_loaded(self):
+    def is_loaded(self) -> bool:
         return self._loaded
 
-    def set_loaded(self, val):
+    def set_loaded(self, val: bool) -> None:
         self._loaded = val
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         return copy.deepcopy(self._info)

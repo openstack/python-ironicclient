@@ -13,4 +13,5 @@ files = [
     "ironicclient/common/i18n.py",
     "ironicclient/common/filecache.py",
     "ironicclient/common/apiclient/exceptions.py",
+    "ironicclient/common/apiclient/base.py",
 ]
