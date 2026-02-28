@@ -15,4 +15,5 @@ files = [
     "ironicclient/common/apiclient/exceptions.py",
     "ironicclient/common/apiclient/base.py",
     "ironicclient/common/base.py",
+    "ironicclient/exc.py",
 ]

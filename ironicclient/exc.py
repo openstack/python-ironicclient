@@ -10,6 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
+import requests  # type: ignore[import-untyped]
+
 from ironicclient.common.apiclient import exceptions
 from ironicclient.common.apiclient.exceptions import *  # noqa
 
@@ -46,11 +50,15 @@ class StateTransitionTimeout(exceptions.ClientException):
 
 
 def from_response(  # type: ignore[no-redef]
-    response, message=None, traceback=None, method=None, url=None
-):
+    response: requests.Response,
+    message: str | None = None,
+    traceback: str | None = None,
+    method: str | None = None,
+    url: str | None = None,
+) -> exceptions.HttpError:
     """Return an HttpError instance based on response from httplib/requests."""
 
-    error_body = {}
+    error_body: dict[str, str] = {}
     if message:
         error_body['message'] = message
     if traceback:
@@ -61,13 +69,19 @@ def from_response(  # type: ignore[no-redef]
         # ability to get all necessary information in method `from_response`
         # from common code, which expecting response object from `requests`
         # library instead of object from `httplib/httplib2` library.
-        response.status_code = response.status
-        response.headers = {
-            'Content-Type': response.getheader('content-type', "")}
+        response.status_code = response.status  # type: ignore[attr-defined]
+        response.headers = {  # type: ignore[assignment]
+            'Content-Type':
+            response.getheader(  # type: ignore[attr-defined]
+                'content-type', "")}
 
     if hasattr(response, 'status_code'):
         # NOTE(jiangfei): These modifications allow SessionClient
         # to handle faultstring.
-        response.json = lambda: {'error': error_body}
+        response.json = (  # type: ignore[method-assign]
+            lambda: {  # type: ignore[misc,assignment]
+                'error': error_body})
 
-    return exceptions.from_response(response, method=method, url=url)
+    return exceptions.from_response(
+        response, method=method or "", url=url or ""
+    )
