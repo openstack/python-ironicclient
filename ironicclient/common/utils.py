@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import base64
 import contextlib
 import gzip
@@ -23,16 +25,35 @@ import subprocess
 import sys
 import tempfile
 import time
+from typing import Any
+from typing import Callable
+from typing import cast
+from typing import Generator
+from typing import Iterator
+from typing import Protocol
 
 from cliff import columns
 from oslo_utils import strutils
-import yaml
+import yaml  # type: ignore[import-untyped]  # PyYAML has no type stubs
 
 from ironicclient.common.i18n import _
 from ironicclient import exc
 
 
-def split_and_deserialize(string):
+class ListCommandArgs(Protocol):
+    """Protocol for parsed args passed to list commands (marker, limit, etc).
+
+    """
+
+    marker: str | None
+    limit: int | None
+    sort_key: str | None
+    sort_dir: str | None
+    detail: bool
+    fields: list[list[str]] | None
+
+
+def split_and_deserialize(string: str) -> tuple[str, Any]:
     """Split and try to JSON deserialize a string.
 
     Gets a string with the KEY=VALUE format, split it (using '=' as the
@@ -53,7 +74,9 @@ def split_and_deserialize(string):
     return (key, value)
 
 
-def key_value_pairs_to_dict(key_value_pairs):
+def key_value_pairs_to_dict(
+    key_value_pairs: list[str] | None,
+) -> dict[str, Any]:
     """Convert a list of key-value pairs to a dictionary.
 
     :param key_value_pairs: a list of strings, each string is in the form
@@ -65,7 +88,10 @@ def key_value_pairs_to_dict(key_value_pairs):
     return {}
 
 
-def args_array_to_dict(kwargs, key_to_convert):
+def args_array_to_dict(
+    kwargs: dict[str, Any],
+    key_to_convert: str,
+) -> dict[str, Any]:
     """Convert the value in a dictionary entry to a dictionary.
 
     From the kwargs dictionary, converts the value of the key_to_convert
@@ -83,7 +109,10 @@ def args_array_to_dict(kwargs, key_to_convert):
     return kwargs
 
 
-def args_array_to_patch(op, attributes):
+def args_array_to_patch(
+    op: str,
+    attributes: list[str],
+) -> list[dict[str, Any]]:
     patch = []
     for attr in attributes:
         # Sanitize
@@ -102,7 +131,10 @@ def args_array_to_patch(op, attributes):
     return patch
 
 
-def convert_list_props_to_comma_separated(data, props=None):
+def convert_list_props_to_comma_separated(
+    data: dict[str, Any],
+    props: list[str] | None = None,
+) -> dict[str, Any]:
     """Convert the list-type properties to comma-separated strings
 
     :param data: the input dict object.
@@ -113,7 +145,7 @@ def convert_list_props_to_comma_separated(data, props=None):
     result = dict(data)
 
     if props is None:
-        props = data.keys()
+        props = list(data.keys())
 
     for prop in props:
         val = data.get(prop, None)
@@ -123,7 +155,11 @@ def convert_list_props_to_comma_separated(data, props=None):
     return result
 
 
-def common_params_for_list(args, fields, field_labels):
+def common_params_for_list(
+    args: ListCommandArgs,
+    fields: list[str],
+    field_labels: list[str],
+) -> dict[str, Any]:
     """Generate 'params' dict that is common for every 'list' command.
 
     :param args: arguments from command line.
@@ -131,7 +167,7 @@ def common_params_for_list(args, fields, field_labels):
     :param field_labels: possible field labels for sorting.
     :returns: a dict with params to pass to the client method.
     """
-    params = {}
+    params: dict[str, Any] = {}
     if args.marker is not None:
         params['marker'] = args.marker
     if args.limit is not None:
@@ -170,8 +206,16 @@ def common_params_for_list(args, fields, field_labels):
     return params
 
 
-def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None,
-                   fields=None, detail=False, project=None, public=None):
+def common_filters(
+    marker: str | None = None,
+    limit: int | None = None,
+    sort_key: str | None = None,
+    sort_dir: str | None = None,
+    fields: list[str] | None = None,
+    detail: bool = False,
+    project: str | None = None,
+    public: bool | None = None,
+) -> list[str]:
     """Generate common filters for any list request.
 
     :param marker: entity ID from which to start returning entities.
@@ -205,8 +249,15 @@ def common_filters(marker=None, limit=None, sort_key=None, sort_dir=None,
     return filters
 
 
+# NOTE(karan): *args/**kwargs can be narrowed to match tempfile.mkdtemp:
+# use keyword-only params (suffix: str | None, prefix: str | None,
+# dir: str | None) and call mkdtemp(suffix=..., prefix=..., dir=...) for
+# stricter typing.
 @contextlib.contextmanager
-def tempdir(*args, **kwargs):
+def tempdir(
+    *args: Any,
+    **kwargs: Any,
+) -> Generator[str, None, None]:
     dirname = tempfile.mkdtemp(*args, **kwargs)
     try:
         yield dirname
@@ -214,7 +265,7 @@ def tempdir(*args, **kwargs):
         shutil.rmtree(dirname)
 
 
-def make_configdrive(path):
+def make_configdrive(path: str) -> bytes:
     """Make the config drive file.
 
     :param path: The directory containing the config drive files.
@@ -231,6 +282,8 @@ def make_configdrive(path):
             # NOTE(toabctl): Luckily, genisoimage, mkisofs and xorrisofs
             # understand the same parameters which are currently used.
             cmds = ['genisoimage', 'mkisofs', 'xorrisofs']
+            error: OSError | None = None
+            p: subprocess.Popen[bytes] | None = None
             for c in cmds:
                 try:
                     p = subprocess.Popen([c, '-o', tmpfile.name,
@@ -247,7 +300,7 @@ def make_configdrive(path):
                 else:
                     error = None
                     break
-            if error:
+            if error or p is None:
                 raise exc.CommandError(
                     _('Error generating the config drive. Make sure the '
                       '"genisoimage", "mkisofs", or "xorriso" tool is '
@@ -269,13 +322,18 @@ def make_configdrive(path):
             return base64.b64encode(tmpzipfile.read())
 
 
-def check_empty_arg(arg, arg_descriptor):
+def check_empty_arg(arg: str, arg_descriptor: str) -> None:
     if not arg.strip():
         raise exc.CommandError(_('%(arg)s cannot be empty or only have blank'
                                  ' spaces') % {'arg': arg_descriptor})
 
 
-def bool_argument_value(arg_name, bool_str, strict=True, default=False):
+def bool_argument_value(
+    arg_name: str,
+    bool_str: str,
+    strict: bool = True,
+    default: bool = False,
+) -> bool:
     """Returns the Boolean represented by bool_str.
 
     Returns the Boolean value for the argument named arg_name. The value is
@@ -299,10 +357,13 @@ def bool_argument_value(arg_name, bool_str, strict=True, default=False):
     except ValueError as e:
         raise exc.CommandError(_("argument %(arg)s: %(err)s.")
                                % {'arg': arg_name, 'err': e})
-    return val
+    return cast(bool, val)
 
 
-def check_for_invalid_fields(fields, valid_fields):
+def check_for_invalid_fields(
+    fields: list[str] | None,
+    valid_fields: list[str],
+) -> None:
     """Check for invalid fields.
 
     :param fields: A list of fields specified by the user.
@@ -320,7 +381,7 @@ def check_for_invalid_fields(fields, valid_fields):
                                     'valid': ', '.join(valid_fields)})
 
 
-def get_from_stdin(info_desc):
+def get_from_stdin(info_desc: str) -> str:
     """Read information from stdin.
 
     :param info_desc: A string description of the desired information
@@ -335,7 +396,9 @@ def get_from_stdin(info_desc):
     return info
 
 
-def handle_json_or_file_arg(json_arg):
+def handle_json_or_file_arg(
+    json_arg: str,
+) -> list[Any] | dict[str, Any]:
     """Attempts to read JSON argument from file or string.
 
     :param json_arg: May be a file name containing the YAML or JSON, or
@@ -347,22 +410,28 @@ def handle_json_or_file_arg(json_arg):
     if os.path.isfile(json_arg):
         try:
             with open(json_arg, 'r') as f:
-                return yaml.safe_load(f)
+                # safe_load returns Any; we treat as list | dict
+                return yaml.safe_load(f)  # type: ignore[no-any-return]
         except Exception as e:
             err = _("Cannot get JSON/YAML from file '%(file)s'. "
                     "Error: %(err)s") % {'err': e, 'file': json_arg}
             raise exc.InvalidAttribute(err)
     try:
-        json_arg = json.loads(json_arg)
+        result: list[Any] | dict[str, Any] = json.loads(json_arg)
     except ValueError as e:
         err = (_("Value '%(string)s' is not a file and cannot be parsed "
                  "as JSON: '%(err)s'") % {'err': e, 'string': json_arg})
         raise exc.InvalidAttribute(err)
 
-    return json_arg
+    return result
 
 
-def poll(timeout, poll_interval, poll_delay_function, timeout_message):
+def poll(
+    timeout: int | float,
+    poll_interval: int | float,
+    poll_delay_function: Callable[[int | float], Any] | None,
+    timeout_message: str | Callable[[], str],
+) -> Iterator[int]:
     if not isinstance(timeout, (int, float)) or timeout < 0:
         raise ValueError(_('Timeout must be a non-negative number'))
 
@@ -384,26 +453,33 @@ def poll(timeout, poll_interval, poll_delay_function, timeout_message):
     raise exc.StateTransitionTimeout(timeout_message)
 
 
-def handle_json_arg(json_arg, info_desc):
+def handle_json_arg(
+    json_arg: str,
+    info_desc: str,
+) -> list[Any] | dict[str, Any] | None:
     """Read a JSON argument from stdin, file or string.
 
     :param json_arg: May be a file name containing the JSON, a JSON string, or
         '-' indicating that the argument should be read from standard input.
     :param info_desc: A string description of the desired information
-    :returns: A list or dictionary parsed from JSON.
+    :returns: A list or dictionary parsed from JSON, or None if json_arg is
+        empty (e.g. after reading from stdin with no input).
     :raises: InvalidAttribute if the argument cannot be parsed.
     """
     if json_arg == '-':
         json_arg = get_from_stdin(info_desc)
     if json_arg:
-        json_arg = handle_json_or_file_arg(json_arg)
-    return json_arg
+        return handle_json_or_file_arg(json_arg)
+    return None
 
 
-def get_json_data(data):
+def get_json_data(
+    data: bytes,
+) -> dict[str, Any] | list[Any] | None:
     """Check if the binary data is JSON and parse it if so.
 
-    Only supports dictionaries.
+    :param data: Raw bytes to parse (e.g. response body).
+    :returns: Parsed dict or list if valid JSON, otherwise None.
     """
     # We don't want to simply loads() a potentially large binary. Doing so,
     # in my testing, is orders of magnitude (!!) slower than this process.
@@ -411,27 +487,32 @@ def get_json_data(data):
         char = data[idx:idx + 1]
         if char.isspace():
             continue
-        if char != b'{' and char != 'b[':
+        if char != b'{' and char != b'[':
             return None  # not JSON, at least not JSON we care about
         break  # maybe JSON
 
     try:
-        return json.loads(data)
+        # loads returns Any; we treat as dict | list
+        return json.loads(data)  # type: ignore[no-any-return]
     except ValueError:
         return None
 
 
-def format_hash(data):
+def format_hash(
+    data: dict[str, Any] | None,
+    prefix: str = "",
+) -> str | None:
     if data is None:
         return None
 
     output = ""
     for s in sorted(data):
-        key_str = s
+        key_str = prefix + "." + s if prefix else s
         if isinstance(data[s], dict):
             # NOTE(dtroyer): Only append the separator chars here, quoting
             #                is completely handled in the terminal case.
-            output = output + format_hash(data[s], prefix=key_str) + ", "
+            hashed = format_hash(data[s], prefix=key_str)
+            output = output + (hashed or "") + ", "
         elif data[s] is not None:
             output = output + key_str + "='" + str(data[s]) + "', "
         else:
@@ -440,5 +521,6 @@ def format_hash(data):
 
 
 class HashColumn(columns.FormattableColumn):
-    def human_readable(self):
+    # base returns Sequence; we return str | None
+    def human_readable(self) -> str | None:  # type: ignore[override]
         return format_hash(self._value)
