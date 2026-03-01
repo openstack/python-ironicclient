@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import functools
 from http import client as http_client
 import json
@@ -21,10 +23,15 @@ import re
 import textwrap
 import threading
 import time
+from typing import Any
+from typing import Callable
+from typing import TypeVar
 from urllib import parse as urlparse
 
 from keystoneauth1 import adapter
 from keystoneauth1 import exceptions as kexc
+from keystoneauth1 import session as ks_session
+import requests  # type: ignore[import-untyped]  # no upstream type stubs
 
 from ironicclient.common import filecache
 from ironicclient.common.i18n import _
@@ -36,57 +43,61 @@ from ironicclient import exc
 #             microversion support in the client properly! See
 #             http://specs.openstack.org/openstack/ironic-specs/specs/kilo/api-microversions.html # noqa
 #             for full details.
-DEFAULT_VER = '1.9'
-LAST_KNOWN_API_VERSION = 109
-LATEST_VERSION = '1.{}'.format(LAST_KNOWN_API_VERSION)
+DEFAULT_VER: str = '1.9'
+LAST_KNOWN_API_VERSION: int = 109
+LATEST_VERSION: str = '1.{}'.format(LAST_KNOWN_API_VERSION)
 
-LOG = logging.getLogger(__name__)
-USER_AGENT = 'python-ironicclient'
-CHUNKSIZE = 1024 * 64  # 64kB
+LOG: logging.Logger = logging.getLogger(__name__)
+USER_AGENT: str = 'python-ironicclient'
+CHUNKSIZE: int = 1024 * 64  # 64kB
 
-_MAJOR_VERSION = 1
-API_VERSION = '/v%d' % _MAJOR_VERSION
-API_VERSION_SELECTED_STATES = ('user', 'negotiated', 'cached', 'default')
+_MAJOR_VERSION: int = 1
+API_VERSION: str = '/v%d' % _MAJOR_VERSION
+API_VERSION_SELECTED_STATES: tuple[str, ...] = (
+    'user', 'negotiated', 'cached', 'default')
 
-DEFAULT_MAX_RETRIES = 5
-DEFAULT_RETRY_INTERVAL = 2
-SENSITIVE_HEADERS = ('X-Auth-Token',)
+DEFAULT_MAX_RETRIES: int = 5
+DEFAULT_RETRY_INTERVAL: int = 2
+SENSITIVE_HEADERS: tuple[str, ...] = ('X-Auth-Token',)
 
-SUPPORTED_ENDPOINT_SCHEME = ('http', 'https')
+SUPPORTED_ENDPOINT_SCHEME: tuple[str, ...] = ('http', 'https')
 
-_API_VERSION_RE = re.compile(r'/+(v%d)?/*$' % _MAJOR_VERSION)
+_API_VERSION_RE: re.Pattern[str] = re.compile(r'/+(v%d)?/*$' % _MAJOR_VERSION)
 
 
 @functools.total_ordering
 class _Version:
-    _version_re = re.compile(r'^(\d) \. (\d+)$', re.VERBOSE | re.ASCII)
+    _version_re: re.Pattern[str] = re.compile(
+        r'^(\d) \. (\d+)$', re.VERBOSE | re.ASCII)
 
-    def __init__(self, version):
+    def __init__(self, version: str) -> None:
         match = self._version_re.match(version)
         if not match:
             raise ValueError('invalid version number %s' % version)
         major, minor = match.group(1, 2)
-        self.version = (int(major), int(minor))
+        self.version: tuple[int, int] = (int(major), int(minor))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '.'.join(str(v) for v in self.version)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, _Version):
+            return NotImplemented
         return self.version == other.version
 
-    def __lt__(self, other):
+    def __lt__(self, other: _Version) -> bool:
         return self.version < other.version
 
 
-def _trim_endpoint_api_version(url):
+def _trim_endpoint_api_version(url: str) -> str:
     """Trim API version and trailing slash from endpoint."""
     return re.sub(_API_VERSION_RE, '', url)
 
 
-def _extract_error_json(body):
+def _extract_error_json(body: bytes | str) -> dict[str, Any]:
     """Return  error_message from the HTTP response body."""
     try:
-        body_json = json.loads(body)
+        body_json: dict[str, Any] = json.loads(body)
     except ValueError:
         return {}
 
@@ -105,7 +116,9 @@ def _extract_error_json(body):
     return body_json
 
 
-def get_server(url):
+def get_server(
+    url: str | None,
+) -> tuple[str | None, str | None]:
     """Extract and return the server & port."""
     if url is None:
         return None, None
@@ -114,7 +127,14 @@ def get_server(url):
 
 
 class VersionNegotiationMixin(object):
-    def negotiate_version(self, conn, resp):
+    os_ironic_api_version: str | list[str]
+    api_version_select_state: str
+
+    def negotiate_version(
+        self,
+        conn: ks_session.Session,
+        resp: requests.Response | None,
+    ) -> str:
         """Negotiate the server version
 
         Assumption: Called after receiving a 406 error when doing a request.
@@ -122,7 +142,7 @@ class VersionNegotiationMixin(object):
         :param conn: A connection object
         :param resp: The response object from http request
         """
-        def _query_server(conn):
+        def _query_server(conn: ks_session.Session) -> requests.Response:
             if (self.os_ironic_api_version
                     and not isinstance(self.os_ironic_api_version, list)
                     and self.os_ironic_api_version != 'latest'):
@@ -178,6 +198,10 @@ class VersionNegotiationMixin(object):
             resp = _query_server(conn)
             min_ver, max_ver = self._parse_version_headers(resp)
         # Reset the maximum version that we permit
+        if min_ver is None or max_ver is None:
+            raise RuntimeError(
+                _('Could not determine API version range from server; '
+                  'version headers missing from response.'))
 
         if _Version(max_ver) > _Version(LATEST_VERSION):
             LOG.debug("Remote API version %(max_ver)s is greater than the "
@@ -264,37 +288,59 @@ class VersionNegotiationMixin(object):
         # Cache the negotiated version for this server
         endpoint_override = getattr(self, 'endpoint_override', None)
         host, port = get_server(endpoint_override)
-        filecache.save_data(host=host, port=port, data=negotiated_ver)
+        if host is not None and port is not None:
+            filecache.save_data(host=host, port=port, data=negotiated_ver)
 
         return negotiated_ver
 
-    def _generic_parse_version_headers(self, accessor_func):
+    def _generic_parse_version_headers(
+        self,
+        accessor_func: Callable[..., str | None],
+    ) -> tuple[str | None, str | None]:
         min_ver = accessor_func('X-OpenStack-Ironic-API-Minimum-Version', None)
         max_ver = accessor_func('X-OpenStack-Ironic-API-Maximum-Version', None)
         return min_ver, max_ver
 
-    def _parse_version_headers(self, accessor_func):
+    def _parse_version_headers(
+        self,
+        resp: requests.Response,
+    ) -> tuple[str | None, str | None]:
         # NOTE(jlvillal): Declared for unit testing purposes
         raise NotImplementedError()
 
-    def _make_simple_request(self, conn, method, url):
+    def _make_simple_request(
+        self,
+        conn: ks_session.Session,
+        method: str,
+        url: str,
+    ) -> requests.Response:
         # NOTE(jlvillal): Declared for unit testing purposes
         raise NotImplementedError()
 
-    def _must_negotiate_version(self):
+    def _must_negotiate_version(self) -> bool:
         return (self.api_version_select_state == 'user'
                 and (self.os_ironic_api_version == 'latest'
                      or isinstance(self.os_ironic_api_version, list)))
 
 
-_RETRY_EXCEPTIONS = (exc.Conflict, exc.ServiceUnavailable,
-                     exc.ConnectionRefused, kexc.RetriableConnectionFailure)
+_RETRY_EXCEPTIONS: tuple[type[Exception], ...] = (
+    exc.Conflict, exc.ServiceUnavailable,
+    exc.ConnectionRefused, kexc.RetriableConnectionFailure)
+
+_RT = TypeVar('_RT')
 
 
-def with_retries(func):
+def with_retries(
+    func: Callable[..., _RT],
+) -> Callable[..., _RT]:
     """Wrapper for _http_request adding support for retries."""
     @functools.wraps(func)
-    def wrapper(self, url, method, **kwargs):
+    def wrapper(
+        self: SessionClient,
+        url: str,
+        method: str,
+        **kwargs: Any,
+    ) -> _RT:
         if self.conflict_max_retries is None:
             self.conflict_max_retries = DEFAULT_MAX_RETRIES
         if self.conflict_retry_interval is None:
@@ -316,6 +362,7 @@ def with_retries(func):
                 else:
                     LOG.debug(msg)
                     time.sleep(self.conflict_retry_interval)
+        raise AssertionError('unreachable')
 
     return wrapper
 
@@ -323,12 +370,14 @@ def with_retries(func):
 class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
     """HTTP client based on Keystone client session."""
 
-    def __init__(self,
-                 os_ironic_api_version,
-                 api_version_select_state,
-                 max_retries,
-                 retry_interval,
-                 **kwargs):
+    def __init__(
+        self,
+        os_ironic_api_version: str | list[str],
+        api_version_select_state: str,
+        max_retries: int | None,
+        retry_interval: int | None,
+        **kwargs: Any,
+    ) -> None:
         self.os_ironic_api_version = os_ironic_api_version
         self.api_version_select_state = api_version_select_state
         self.conflict_max_retries = max_retries
@@ -340,7 +389,10 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         super(SessionClient, self).__init__(**kwargs)
 
         endpoint_filter = self._get_endpoint_filter()
-        endpoint = self.get_endpoint(**endpoint_filter)
+        # type of endpoint_filter is incompatible with ksa stubs
+        endpoint = self.get_endpoint(
+            **endpoint_filter  # type: ignore[arg-type]
+        )
         if endpoint is None:
             raise exc.EndpointNotFound(
                 _('The Bare Metal API endpoint cannot be detected and was '
@@ -348,17 +400,25 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
         self.endpoint_trimmed = _trim_endpoint_api_version(endpoint)
         self._first_negotiation_lock = threading.Lock()
 
-    def _parse_version_headers(self, resp):
+    def _parse_version_headers(
+        self,
+        resp: requests.Response,
+    ) -> tuple[str | None, str | None]:
         return self._generic_parse_version_headers(resp.headers.get)
 
-    def _get_endpoint_filter(self):
+    def _get_endpoint_filter(self) -> dict[str, str | list[str] | None]:
         return {
             'interface': self.interface,
             'service_type': self.service_type,
             'region_name': self.region_name
         }
 
-    def _make_simple_request(self, conn, method, url):
+    def _make_simple_request(
+        self,
+        conn: ks_session.Session,
+        method: str,
+        url: str,
+    ) -> requests.Response:
         # NOTE: conn is self.session for this class
         return conn.request(url, method, raise_exc=False,
                             user_agent=USER_AGENT,
@@ -366,7 +426,12 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
                             endpoint_override=self.endpoint_override)
 
     @with_retries
-    def _http_request(self, url, method, **kwargs):
+    def _http_request(
+        self,
+        url: str,
+        method: str,
+        **kwargs: Any,
+    ) -> requests.Response:
 
         # NOTE(TheJulia): self.os_ironic_api_version is reset in
         # the self.negotiate_version() call if negotiation occurs.
@@ -405,8 +470,14 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
             return self._http_request(url, method, **kwargs)
         if resp.status_code >= http_client.BAD_REQUEST:
             error_json = _extract_error_json(resp.content)
-            raise exc.from_response(resp, error_json.get('error_message'),
-                                    error_json.get('debuginfo'), method, url)
+            # exc.from_response expects str|None; error_json is dict[str, Any]
+            raise exc.from_response(  # type: ignore[call-arg]
+                resp,
+                error_json.get('error_message'),  # type: ignore[arg-type]
+                error_json.get('debuginfo'),  # type: ignore[arg-type]
+                method,
+                url,
+            )
         elif resp.status_code in (http_client.MOVED_PERMANENTLY,
                                   http_client.FOUND, http_client.USE_PROXY):
             # Redirected. Reissue the request to the new location.
@@ -416,7 +487,12 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
             raise exc.from_response(resp, method=method, url=url)
         return resp
 
-    def json_request(self, method, url, **kwargs):
+    def json_request(
+        self,
+        method: str,
+        url: str,
+        **kwargs: Any,
+    ) -> tuple[requests.Response, dict[str, Any] | list[Any] | bytes | None]:
         kwargs.setdefault('headers', {})
         kwargs['headers'].setdefault('Content-Type', 'application/json')
         kwargs['headers'].setdefault('Accept', 'application/json')
@@ -441,26 +517,33 @@ class SessionClient(VersionNegotiationMixin, adapter.LegacyJsonAdapter):
 
         return resp, body
 
-    def raw_request(self, method, url, **kwargs):
+    def raw_request(
+        self,
+        method: str,
+        url: str,
+        **kwargs: dict[str, str],
+    ) -> requests.Response:
         kwargs.setdefault('headers', {})
         kwargs['headers'].setdefault('Content-Type',
                                      'application/octet-stream')
         return self._http_request(url, method, **kwargs)
 
 
-def _construct_http_client(session,
-                           token=None,
-                           auth_ref=None,
-                           os_ironic_api_version=DEFAULT_VER,
-                           api_version_select_state='default',
-                           max_retries=DEFAULT_MAX_RETRIES,
-                           retry_interval=DEFAULT_RETRY_INTERVAL,
-                           timeout=600,
-                           ca_file=None,
-                           cert_file=None,
-                           key_file=None,
-                           insecure=None,
-                           **kwargs):
+def _construct_http_client(
+    session: ks_session.Session,
+    token: str | None = None,
+    auth_ref: object = None,
+    os_ironic_api_version: str | list[str] = DEFAULT_VER,
+    api_version_select_state: str = 'default',
+    max_retries: int = DEFAULT_MAX_RETRIES,
+    retry_interval: int = DEFAULT_RETRY_INTERVAL,
+    timeout: int = 600,
+    ca_file: str | None = None,
+    cert_file: str | None = None,
+    key_file: str | None = None,
+    insecure: bool | None = None,
+    **kwargs: Any,
+) -> SessionClient:
 
     kwargs.setdefault('service_type', 'baremetal')
     kwargs.setdefault('user_agent', 'python-ironicclient')

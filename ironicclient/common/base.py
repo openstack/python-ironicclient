@@ -208,6 +208,10 @@ class Manager(object, metaclass=abc.ABCMeta):
         limit_reached = False
         while url:
             resp, body = self.api.json_request('GET', url, **kwargs)
+            if not isinstance(body, dict):
+                raise exc.InvalidAttribute(
+                    'API response body must be a JSON object; got %s' %
+                    type(body).__name__)
             data = self._format_body_data(body, response_key)
             for obj in data:
                 item = obj_class(
@@ -226,7 +230,7 @@ class Manager(object, metaclass=abc.ABCMeta):
             if limit_reached:
                 break
 
-            url = body.get('next')
+            url = body.get('next', '')
             if url:
                 # NOTE(lucasagomes): We need to edit the URL to remove
                 # the scheme and netloc
@@ -256,6 +260,10 @@ class Manager(object, metaclass=abc.ABCMeta):
             kwargs["headers"]["X-Openstack-Request-Id"] = global_request_id
 
         _resp, json_body = self.api.json_request('GET', url, **kwargs)
+        if not isinstance(json_body, dict):
+            raise exc.InvalidAttribute(
+                'API response body must be a JSON object; got %s' %
+                type(json_body).__name__)
 
         data = self._format_body_data(json_body, response_key)
         return data

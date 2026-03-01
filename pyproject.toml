@@ -17,4 +17,5 @@ files = [
     "ironicclient/common/base.py",
     "ironicclient/exc.py",
     "ironicclient/common/utils.py",
+    "ironicclient/common/http.py",
 ]
