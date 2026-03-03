@@ -34,7 +34,7 @@ Project resources
 * Documentation: https://docs.openstack.org/python-ironicclient/latest/
 * Source: https://opendev.org/openstack/python-ironicclient
 * PyPi: https://pypi.org/project/python-ironicclient
-* Bugs: https://storyboard.openstack.org/#!/project/959
+* Bugs: https://bugs.launchpad.net/python-ironicclient
 * Release notes: https://docs.openstack.org/releasenotes/python-ironicclient/
 
 Python API

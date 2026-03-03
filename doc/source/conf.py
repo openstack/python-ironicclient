@@ -18,8 +18,8 @@ apidoc_separate_modules = True
 
 # openstackdocstheme options
 openstackdocs_repo_name = 'openstack/python-ironicclient'
+openstackdocs_bug_project = 'python-ironicclient'
 openstackdocs_pdf_link = True
-openstackdocs_use_storyboard = True
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.

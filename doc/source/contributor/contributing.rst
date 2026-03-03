@@ -39,7 +39,7 @@ Project Hosting Details
 -----------------------
 
 Bug tracker
-    https://storyboard.openstack.org/#!/project/959
+    https://bugs.launchpad.net/python-ironicclient
 
 Mailing list (prefix subjects with ``[ironic]`` for faster responses)
     http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-discuss
