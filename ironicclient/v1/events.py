@@ -14,16 +14,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
 
 from ironicclient.common import base
 
 
 class Event(base.Resource):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Event: %s>" % self.name
 
 
 class EventManager(base.CreateManager):
-    resource_class = Event
-    _creation_attributes = ['events']
-    _resource_name = 'events'
+    resource_class: type[Event] = Event
+    _creation_attributes: list[str] = ['events']
+    _resource_name: str = 'events'
