@@ -19,4 +19,5 @@ files = [
     "ironicclient/common/utils.py",
     "ironicclient/common/http.py",
     "ironicclient/v1/events.py",
+    "ironicclient/v1/shard.py",
 ]

@@ -10,19 +10,25 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import annotations
+
 from ironicclient.common import base
 
 
 class Shard(base.Resource):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Shard %s>" % self._info
 
 
 class ShardManager(base.Manager):
-    resource_class = Shard
-    _resource_name = 'shards'
+    resource_class: type[Shard] = Shard
+    _resource_name: str = 'shards'
 
-    def list(self, os_ironic_api_version=None, global_request_id=None):
+    def list(
+        self,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> list[base.Resource]:
         """Retrieve a list of shards.
 
         :param os_ironic_api_version: String version (e.g. "1.35") to use for
@@ -34,6 +40,9 @@ class ShardManager(base.Manager):
         :returns: A list of conductors.
 
         """
-        header_values = {"os_ironic_api_version": os_ironic_api_version,
-                         "global_request_id": global_request_id}
-        return self._list(self._path(None), "shards", **header_values)
+        return self._list(
+            self._path(None),
+            "shards",
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
