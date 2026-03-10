@@ -12,6 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
+from typing import Any
+
 from ironicclient.common import base
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
@@ -19,20 +23,70 @@ from ironicclient import exc
 
 
 class VolumeTarget(base.Resource):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<VolumeTarget %s>" % self._info
 
 
 class VolumeTargetManager(base.CreateManager):
-    resource_class = VolumeTarget
-    _creation_attributes = ['extra', 'node_uuid', 'volume_type',
-                            'properties', 'boot_index', 'volume_id',
-                            'uuid']
-    _resource_name = 'volume/targets'
+    resource_class: type[VolumeTarget] = VolumeTarget
+    _creation_attributes: list[str] = [
+        'extra', 'node_uuid', 'volume_type',
+        'properties', 'boot_index', 'volume_id', 'uuid',
+    ]
+    _resource_name: str = 'volume/targets'
 
-    def list(self, node=None, limit=None, marker=None, sort_key=None,
-             sort_dir=None, detail=False, fields=None,
-             os_ironic_api_version=None, global_request_id=None):
+    def get(
+        self,
+        volume_target_id: str,
+        fields: list[str] | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> base.Resource | None:
+        return self._get(
+            resource_id=volume_target_id,
+            fields=fields,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
+
+    def delete(
+        self,
+        volume_target_id: str,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> None:
+        return self._delete(
+            resource_id=volume_target_id,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
+
+    def update(
+        self,
+        volume_target_id: str,
+        patch: list[dict[str, Any]],
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> base.Resource | None:
+        return self._update(
+            resource_id=volume_target_id,
+            patch=patch,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
+
+    def list(
+        self,
+        node: str | None = None,
+        limit: int | None = None,
+        marker: str | None = None,
+        sort_key: str | None = None,
+        sort_dir: str | None = None,
+        detail: bool = False,
+        fields: list[str] | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> list[base.Resource]:
         """Retrieve a list of volume target.
 
         :param node:   Optional, UUID or name of a node, to get volume
@@ -74,40 +128,32 @@ class VolumeTargetManager(base.CreateManager):
             limit = int(limit)
 
         if detail and fields:
-            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
-                                         "with 'detail' set"))
+            raise exc.InvalidAttribute(
+                _("Can't fetch a subset of fields "
+                  "with 'detail' set"))
 
-        filters = utils.common_filters(marker=marker, limit=limit,
-                                       sort_key=sort_key, sort_dir=sort_dir,
-                                       fields=fields, detail=detail)
+        filters = utils.common_filters(
+            marker=marker, limit=limit,
+            sort_key=sort_key, sort_dir=sort_dir,
+            fields=fields, detail=detail)
         if node is not None:
             filters.append('node=%s' % node)
 
         path = ''
         if filters:
             path += '?' + '&'.join(filters)
-        header_values = {"os_ironic_api_version": os_ironic_api_version,
-                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "targets", **header_values)
+            return self._list(
+                self._path(path),
+                "targets",
+                os_ironic_api_version=os_ironic_api_version,
+                global_request_id=global_request_id,
+            )
         else:
-            return self._list_pagination(self._path(path), "targets",
-                                         limit=limit, **header_values)
-
-    def get(self, volume_target_id, fields=None, os_ironic_api_version=None,
-            global_request_id=None):
-        return self._get(resource_id=volume_target_id, fields=fields,
-                         os_ironic_api_version=os_ironic_api_version,
-                         global_request_id=global_request_id)
-
-    def delete(self, volume_target_id, os_ironic_api_version=None,
-               global_request_id=None):
-        return self._delete(resource_id=volume_target_id,
-                            os_ironic_api_version=os_ironic_api_version,
-                            global_request_id=global_request_id)
-
-    def update(self, volume_target_id, patch, os_ironic_api_version=None,
-               global_request_id=None):
-        return self._update(resource_id=volume_target_id, patch=patch,
-                            os_ironic_api_version=os_ironic_api_version,
-                            global_request_id=global_request_id)
+            return self._list_pagination(
+                self._path(path),
+                "targets",
+                limit=limit,
+                os_ironic_api_version=os_ironic_api_version,
+                global_request_id=global_request_id,
+            )
