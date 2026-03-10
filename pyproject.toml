@@ -23,4 +23,5 @@ files = [
     "ironicclient/v1/utils.py",
     "ironicclient/v1/conductor.py",
     "ironicclient/v1/deploy_template.py",
+    "ironicclient/v1/inspection_rule.py",
 ]
