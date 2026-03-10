@@ -13,16 +13,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-HTTP_METHODS = ['POST', 'PUT', 'GET', 'DELETE', 'PATCH']
+from __future__ import annotations
 
-BOOT_DEVICES = ['pxe', 'disk', 'cdrom', 'bios', 'safe', 'wanboot']
+HTTP_METHODS: list[str] = ['POST', 'PUT', 'GET', 'DELETE', 'PATCH']
+
+BOOT_DEVICES: list[str] = ['pxe', 'disk', 'cdrom', 'bios', 'safe', 'wanboot']
 
 # Polling intervals in seconds.
-_LONG_ACTION_POLL_INTERVAL = 10
-_SHORT_ACTION_POLL_INTERVAL = 2
+_LONG_ACTION_POLL_INTERVAL: int = 10
+_SHORT_ACTION_POLL_INTERVAL: int = 2
 # This dict acts as both list of possible provision actions and arguments for
 # wait_for_provision_state invocation.
-PROVISION_ACTIONS = {
+PROVISION_ACTIONS: dict[str, dict[str, str | int] | None] = {
     'active': {'expected_state': 'active',
                'poll_interval': _LONG_ACTION_POLL_INTERVAL},
     'deleted': {'expected_state': 'available',
@@ -51,4 +53,4 @@ PROVISION_ACTIONS = {
                 'poll_interval': _LONG_ACTION_POLL_INTERVAL},
 }
 
-PROVISION_STATES = list(PROVISION_ACTIONS)
+PROVISION_STATES: list[str] = list(PROVISION_ACTIONS)
