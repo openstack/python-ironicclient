@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import annotations
+
 from ironicclient.common import base
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
@@ -17,17 +19,39 @@ from ironicclient import exc
 
 
 class Conductor(base.Resource):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Conductor %s>" % self._info
 
 
 class ConductorManager(base.Manager):
-    resource_class = Conductor
-    _resource_name = 'conductors'
+    resource_class: type[Conductor] = Conductor
+    _resource_name: str = 'conductors'
 
-    def list(self, marker=None, limit=None, sort_key=None, sort_dir=None,
-             fields=None, detail=False, os_ironic_api_version=None,
-             global_request_id=None):
+    def get(
+        self,
+        hostname: str,
+        fields: list[str] | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> base.Resource | None:
+        return self._get(
+            resource_id=hostname,
+            fields=fields,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
+
+    def list(
+        self,
+        marker: str | None = None,
+        limit: int | None = None,
+        sort_key: str | None = None,
+        sort_dir: str | None = None,
+        fields: list[str] | None = None,
+        detail: bool = False,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> list[base.Resource]:
         """Retrieve a list of conductors.
 
         :param marker: Optional, the hostname of a conductor, eg the last
@@ -67,24 +91,28 @@ class ConductorManager(base.Manager):
             limit = int(limit)
 
         if detail and fields:
-            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
-                                         "with 'detail' set"))
+            raise exc.InvalidAttribute(
+                _("Can't fetch a subset of fields "
+                  "with 'detail' set"))
 
-        filters = utils.common_filters(marker, limit, sort_key, sort_dir,
-                                       fields, detail)
+        filters = utils.common_filters(
+            marker, limit, sort_key, sort_dir,
+            fields, detail)
         path = ''
         if filters:
             path += '?' + '&'.join(filters)
-        header_values = {"os_ironic_api_version": os_ironic_api_version,
-                         "global_request_id": global_request_id}
         if limit is None:
-            return self._list(self._path(path), "conductors", **header_values)
+            return self._list(
+                self._path(path),
+                "conductors",
+                os_ironic_api_version=os_ironic_api_version,
+                global_request_id=global_request_id,
+            )
         else:
-            return self._list_pagination(self._path(path), "conductors",
-                                         limit=limit, **header_values)
-
-    def get(self, hostname, fields=None, os_ironic_api_version=None,
-            global_request_id=None):
-        return self._get(resource_id=hostname, fields=fields,
-                         os_ironic_api_version=os_ironic_api_version,
-                         global_request_id=global_request_id)
+            return self._list_pagination(
+                self._path(path),
+                "conductors",
+                limit=limit,
+                os_ironic_api_version=os_ironic_api_version,
+                global_request_id=global_request_id,
+            )
