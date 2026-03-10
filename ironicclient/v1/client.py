@@ -13,7 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import logging
+from typing import Any
+from typing import cast
 
 from ironicclient.common import filecache
 from ironicclient.common import http
@@ -33,7 +37,7 @@ from ironicclient.v1 import shard
 from ironicclient.v1 import volume_connector
 from ironicclient.v1 import volume_target
 
-LOG = logging.getLogger(__name__)
+LOG: logging.Logger = logging.getLogger(__name__)
 
 
 class Client(object):
@@ -45,7 +49,12 @@ class Client(object):
         a keyword argument).
     """
 
-    def __init__(self, endpoint_override=None, *args, **kwargs):
+    def __init__(
+        self,
+        endpoint_override: str | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """Initialize a new client for the Ironic v1 API."""
         if not args and not kwargs.get('session'):
             raise TypeError("A session is required for creating a client, "
@@ -75,8 +84,9 @@ class Client(object):
                 # If the user didn't specify a version, use a cached version if
                 # one has been stored
                 host, netport = http.get_server(endpoint_override)
-                saved_version = filecache.retrieve_data(host=host,
-                                                        port=netport)
+                saved_version = filecache.retrieve_data(
+                    host=cast(str, host),
+                    port=cast(str, netport))
                 if saved_version:
                     kwargs['api_version_select_state'] = "cached"
                     kwargs['os_ironic_api_version'] = saved_version
@@ -113,7 +123,7 @@ class Client(object):
             self.http_client)
 
     @property
-    def current_api_version(self):
+    def current_api_version(self) -> str | list[str]:
         """Return the current API version in use.
 
         This returns the version of the REST API that the API client
@@ -123,11 +133,11 @@ class Client(object):
         return self.http_client.os_ironic_api_version
 
     @property
-    def is_api_version_negotiated(self):
+    def is_api_version_negotiated(self) -> bool:
         """Returns True if microversion negotiation has occurred."""
         return self.http_client.api_version_select_state == 'negotiated'
 
-    def negotiate_api_version(self):
+    def negotiate_api_version(self) -> str:
         """Triggers negotiation with the remote API endpoint.
 
         :returns: the negotiated API version.

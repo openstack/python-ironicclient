@@ -27,4 +27,5 @@ files = [
     "ironicclient/v1/runbook.py",
     "ironicclient/v1/volume_connector.py",
     "ironicclient/v1/volume_target.py",
+    "ironicclient/v1/client.py",
 ]
