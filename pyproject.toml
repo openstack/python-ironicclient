@@ -30,4 +30,5 @@ files = [
     "ironicclient/v1/client.py",
     "ironicclient/v1/port.py",
     "ironicclient/v1/driver.py",
+    "ironicclient/v1/allocation.py",
 ]
