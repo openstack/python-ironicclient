@@ -13,86 +13,85 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
+from typing import Any
+from typing import cast
+
 from ironicclient.common import base
 from ironicclient.common.i18n import _
 from ironicclient import exc
 
 
 class Driver(base.Resource):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Driver %s>" % self._info
 
 
 class DriverManager(base.Manager):
-    resource_class = Driver
-    _resource_name = 'drivers'
+    resource_class: type[Driver] = Driver
+    _resource_name: str = 'drivers'
 
-    def list(self, driver_type=None, detail=None, os_ironic_api_version=None,
-             global_request_id=None, fields=None):
-        """Retrieve a list of drivers.
+    def get(
+        self,
+        driver_name: str,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+        fields: list[str] | None = None,
+    ) -> base.Resource | None:
+        return self._get(
+            resource_id=driver_name,
+            fields=fields,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
 
-        :param driver_type: Optional, string to filter the drivers by type.
-                            Value should be 'classic' or 'dynamic'.
-        :param detail: Optional, flag whether to return detailed information
-                       about drivers. Default is None means not to send the arg
-                       to the server due to older versions of the server cannot
-                       handle filtering on detail.
-        :param os_ironic_api_version: String version (e.g. "1.35") to use for
-            the request.  If not specified, the client's default is used.
-        :param global_request_id: String containing global request ID header
-            value (in form "req-<UUID>") to use for the request.
-        :param fields: Optional, a list with a specified set of fields
-                       of the resource to be returned. Can not be used
-                       when 'detail' is set.
-        :returns: A list of drivers.
-        """
+    def update(
+        self,
+        driver_name: str,
+        patch: list[dict[str, Any]],
+        http_method: str = 'PATCH',
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> base.Resource | None:
+        return self._update(
+            resource_id=driver_name,
+            patch=patch,
+            method=http_method,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
 
-        filters = []
-        if detail and fields:
-            raise exc.InvalidAttribute(_("Can't fetch a subset of fields "
-                                         "with 'detail' set"))
-        if driver_type is not None:
-            filters.append('type=%s' % driver_type)
-        if detail is not None:
-            filters.append('detail=%s' % detail)
-        if fields is not None:
-            filters.append('fields=%s' % ','.join(fields))
+    def delete(
+        self,
+        driver_name: str,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> None:
+        return self._delete(
+            resource_id=driver_name,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
 
-        path = ''
-        if filters:
-            path = '?' + '&'.join(filters)
-        return self._list(self._path(path), self._resource_name,
-                          os_ironic_api_version=os_ironic_api_version,
-                          global_request_id=global_request_id)
+    def properties(
+        self,
+        driver_name: str,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> dict[str, str]:
+        return cast(dict[str, str], self._get_as_dict(
+            '%s/properties' % driver_name,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        ))
 
-    def get(self, driver_name, os_ironic_api_version=None,
-            global_request_id=None, fields=None):
-        return self._get(resource_id=driver_name, fields=fields,
-                         os_ironic_api_version=os_ironic_api_version,
-                         global_request_id=global_request_id)
-
-    def update(self, driver_name, patch, http_method='PATCH',
-               os_ironic_api_version=None, global_request_id=None):
-        return self._update(resource_id=driver_name, patch=patch,
-                            method=http_method,
-                            os_ironic_api_version=os_ironic_api_version,
-                            global_request_id=global_request_id)
-
-    def delete(self, driver_name, os_ironic_api_version=None,
-               global_request_id=None):
-        return self._delete(resource_id=driver_name,
-                            os_ironic_api_version=os_ironic_api_version,
-                            global_request_id=global_request_id)
-
-    def properties(self, driver_name, os_ironic_api_version=None,
-                   global_request_id=None):
-        return self._get_as_dict('%s/properties' % driver_name,
-                                 os_ironic_api_version=os_ironic_api_version,
-                                 global_request_id=global_request_id)
-
-    def raid_logical_disk_properties(self, driver_name,
-                                     os_ironic_api_version=None,
-                                     global_request_id=None):
+    def raid_logical_disk_properties(
+        self,
+        driver_name: str,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> dict[str, str]:
         """Returns the RAID logical disk properties for the driver.
 
         :param driver_name: Name of the driver.
@@ -107,19 +106,26 @@ class DriverManager(base.Manager):
         info = None
         try:
             info = self._list(
-                '/v1/drivers/%s/raid/logical_disk_properties' % driver_name,
+                '/v1/drivers/%s/raid/logical_disk_properties'
+                % driver_name,
                 os_ironic_api_version=os_ironic_api_version,
                 global_request_id=global_request_id)[0]
         except IndexError:
             pass
 
         if info:
-            return info.to_dict()
+            return cast(dict[str, str], info.to_dict())
         return {}
 
-    def vendor_passthru(self, driver_name, method, args=None,
-                        http_method=None, os_ironic_api_version=None,
-                        global_request_id=None):
+    def vendor_passthru(
+        self,
+        driver_name: str,
+        method: str,
+        args: dict[str, Any] | None = None,
+        http_method: str | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> base.Resource | None:
         """Issue requests for vendor-specific actions on a given driver.
 
         :param driver_name: The name of the driver.
@@ -140,24 +146,88 @@ class DriverManager(base.Manager):
 
         http_method = http_method.upper()
 
-        header_values = {"os_ironic_api_version": os_ironic_api_version,
-                         "global_request_id": global_request_id}
-
         path = "%s/vendor_passthru/%s" % (driver_name, method)
         if http_method in ('POST', 'PUT', 'PATCH'):
-            return self.update(path, args, http_method=http_method,
-                               **header_values)
+            return self.update(
+                path,
+                args,  # type: ignore[arg-type]
+                http_method=http_method,
+                os_ironic_api_version=os_ironic_api_version,
+                global_request_id=global_request_id,
+            )
         elif http_method == 'DELETE':
-            return self.delete(path, **header_values)
+            self.delete(
+                path,
+                os_ironic_api_version=os_ironic_api_version,
+                global_request_id=global_request_id,
+            )
+            return None
         elif http_method == 'GET':
-            return self.get(path, **header_values)
+            return self.get(
+                path,
+                os_ironic_api_version=os_ironic_api_version,
+                global_request_id=global_request_id,
+            )
         else:
             raise exc.InvalidAttribute(
                 _('Unknown HTTP method: %s') % http_method)
 
-    def get_vendor_passthru_methods(self, driver_name,
-                                    os_ironic_api_version=None,
-                                    global_request_id=None):
-        return self._get_as_dict("%s/vendor_passthru/methods" % driver_name,
-                                 os_ironic_api_version=os_ironic_api_version,
-                                 global_request_id=global_request_id)
+    def get_vendor_passthru_methods(
+        self,
+        driver_name: str,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> dict[str, Any]:
+        return self._get_as_dict(
+            "%s/vendor_passthru/methods" % driver_name,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
+
+    def list(
+        self,
+        driver_type: str | None = None,
+        detail: bool | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+        fields: list[str] | None = None,
+    ) -> list[base.Resource]:
+        """Retrieve a list of drivers.
+
+        :param driver_type: Optional, string to filter the drivers by type.
+                            Value should be 'classic' or 'dynamic'.
+        :param detail: Optional, flag whether to return detailed information
+                       about drivers. Default is None means not to send the arg
+                       to the server due to older versions of the server cannot
+                       handle filtering on detail.
+        :param os_ironic_api_version: String version (e.g. "1.35") to use for
+            the request.  If not specified, the client's default is used.
+        :param global_request_id: String containing global request ID header
+            value (in form "req-<UUID>") to use for the request.
+        :param fields: Optional, a list with a specified set of fields
+                       of the resource to be returned. Can not be used
+                       when 'detail' is set.
+        :returns: A list of drivers.
+        """
+
+        filters: list[str] = []
+        if detail and fields:
+            raise exc.InvalidAttribute(
+                _("Can't fetch a subset of fields "
+                  "with 'detail' set"))
+        if driver_type is not None:
+            filters.append('type=%s' % driver_type)
+        if detail is not None:
+            filters.append('detail=%s' % detail)
+        if fields is not None:
+            filters.append('fields=%s' % ','.join(fields))
+
+        path = ''
+        if filters:
+            path = '?' + '&'.join(filters)
+        return self._list(
+            self._path(path),
+            self._resource_name,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
