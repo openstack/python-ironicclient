@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import argparse
 import base64
 import contextlib
 import gzip
@@ -31,49 +30,6 @@ import yaml
 
 from ironicclient.common.i18n import _
 from ironicclient import exc
-
-
-class HelpFormatter(argparse.HelpFormatter):
-    def start_section(self, heading):
-        super(HelpFormatter, self).start_section(heading.capitalize())
-
-
-def define_command(subparsers, command, callback, cmd_mapper):
-    """Define a command in the subparsers collection.
-
-    :param subparsers: subparsers collection where the command will go
-    :param command: command name
-    :param callback: function that will be used to process the command
-    """
-    desc = callback.__doc__ or ''
-    help = desc.strip().split('\n')[0]
-    arguments = getattr(callback, 'arguments', [])
-
-    subparser = subparsers.add_parser(command, help=help,
-                                      description=desc,
-                                      add_help=False,
-                                      formatter_class=HelpFormatter)
-    subparser.add_argument('-h', '--help', action='help',
-                           help=argparse.SUPPRESS)
-    cmd_mapper[command] = subparser
-    required_args = subparser.add_argument_group(_("Required arguments"))
-
-    for (args, kwargs) in arguments:
-        if kwargs.get('required'):
-            required_args.add_argument(*args, **kwargs)
-        else:
-            subparser.add_argument(*args, **kwargs)
-    subparser.set_defaults(func=callback)
-
-
-def define_commands_from_module(subparsers, command_module, cmd_mapper):
-    """Add *do_* methods in a module and add as commands into a subparsers."""
-
-    for method_name in (a for a in dir(command_module) if a.startswith('do_')):
-        # Commands should be hypen-separated instead of underscores.
-        command = method_name[3:].replace('_', '-')
-        callback = getattr(command_module, method_name)
-        define_command(subparsers, command, callback, cmd_mapper)
 
 
 def split_and_deserialize(string):
