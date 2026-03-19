@@ -169,6 +169,14 @@ ignore-words-list = [
     "cna",
 ]
 
+[tool.coverage.run]
+branch = true
+source = ["ironicclient"]
+omit = ["ironicclient/tests/*"]
+
+[tool.coverage.report]
+ignore_errors = true
+
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true
