@@ -1,6 +1,173 @@
 [build-system]
-requires = ["pbr>=6.0.0", "setuptools>=64.0.0"]
+requires = ["pbr>=6.1.1"]
 build-backend = "pbr.build"
+
+[project]
+name = "python-ironicclient"
+description = "OpenStack Bare Metal Provisioning API Client Library"
+authors = [
+    {name = "OpenStack", email = "openstack-discuss@lists.openstack.org"},
+]
+readme = {file = "README.rst", content-type = "text/x-rst"}
+license = {text = "Apache-2.0"}
+dynamic = ["version", "dependencies"]
+requires-python = ">=3.10"
+classifiers = [
+  "Environment :: OpenStack",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+[project.optional-dependencies]
+cli = [
+  "python-openstackclient>=3.12.0", # Apache-2.0
+]
+
+[project.urls]
+Homepage = "https://docs.openstack.org/python-ironicclient/"
+Repository = "https://opendev.org/openstack/python-ironicclient/"
+
+[project.scripts]
+baremetal = "ironicclient.shell:main"
+
+[project.entry-points."openstack.cli.extension"]
+baremetal = "ironicclient.osc.plugin"
+
+[project.entry-points."openstack.baremetal.v1"]
+baremetal_allocation_create = "ironicclient.osc.v1.baremetal_allocation:CreateBaremetalAllocation"
+baremetal_allocation_delete = "ironicclient.osc.v1.baremetal_allocation:DeleteBaremetalAllocation"
+baremetal_allocation_list = "ironicclient.osc.v1.baremetal_allocation:ListBaremetalAllocation"
+baremetal_allocation_show = "ironicclient.osc.v1.baremetal_allocation:ShowBaremetalAllocation"
+baremetal_allocation_set = "ironicclient.osc.v1.baremetal_allocation:SetBaremetalAllocation"
+baremetal_allocation_unset = "ironicclient.osc.v1.baremetal_allocation:UnsetBaremetalAllocation"
+baremetal_chassis_create = "ironicclient.osc.v1.baremetal_chassis:CreateBaremetalChassis"
+baremetal_chassis_delete = "ironicclient.osc.v1.baremetal_chassis:DeleteBaremetalChassis"
+baremetal_chassis_list = "ironicclient.osc.v1.baremetal_chassis:ListBaremetalChassis"
+baremetal_chassis_set = "ironicclient.osc.v1.baremetal_chassis:SetBaremetalChassis"
+baremetal_chassis_show = "ironicclient.osc.v1.baremetal_chassis:ShowBaremetalChassis"
+baremetal_chassis_unset = "ironicclient.osc.v1.baremetal_chassis:UnsetBaremetalChassis"
+baremetal_create = "ironicclient.osc.v1.baremetal_create:CreateBaremetal"
+baremetal_deploy_template_create = "ironicclient.osc.v1.baremetal_deploy_template:CreateBaremetalDeployTemplate"
+baremetal_deploy_template_delete = "ironicclient.osc.v1.baremetal_deploy_template:DeleteBaremetalDeployTemplate"
+baremetal_deploy_template_list = "ironicclient.osc.v1.baremetal_deploy_template:ListBaremetalDeployTemplate"
+baremetal_deploy_template_set = "ironicclient.osc.v1.baremetal_deploy_template:SetBaremetalDeployTemplate"
+baremetal_deploy_template_unset = "ironicclient.osc.v1.baremetal_deploy_template:UnsetBaremetalDeployTemplate"
+baremetal_deploy_template_show = "ironicclient.osc.v1.baremetal_deploy_template:ShowBaremetalDeployTemplate"
+baremetal_driver_list = "ironicclient.osc.v1.baremetal_driver:ListBaremetalDriver"
+baremetal_driver_passthru_call = "ironicclient.osc.v1.baremetal_driver:PassthruCallBaremetalDriver"
+baremetal_driver_passthru_list = "ironicclient.osc.v1.baremetal_driver:PassthruListBaremetalDriver"
+baremetal_driver_property_list = "ironicclient.osc.v1.baremetal_driver:ListBaremetalDriverProperty"
+baremetal_driver_raid_property_list = "ironicclient.osc.v1.baremetal_driver:ListBaremetalDriverRaidProperty"
+baremetal_driver_show = "ironicclient.osc.v1.baremetal_driver:ShowBaremetalDriver"
+baremetal_node_abort = "ironicclient.osc.v1.baremetal_node:AbortBaremetalNode"
+# Replaced with baremetal node trait add in 2026.2; keeping these for backward compat
+baremetal_node_add_trait = "ironicclient.osc.v1.baremetal_node:AddTraitBaremetalNode"
+baremetal_node_adopt = "ironicclient.osc.v1.baremetal_node:AdoptBaremetalNode"
+baremetal_node_bios_setting_list = "ironicclient.osc.v1.baremetal_node:ListBIOSSettingBaremetalNode"
+baremetal_node_bios_setting_show = "ironicclient.osc.v1.baremetal_node:BIOSSettingShowBaremetalNode"
+baremetal_node_boot_device_set = "ironicclient.osc.v1.baremetal_node:BootdeviceSetBaremetalNode"
+baremetal_node_boot_device_show = "ironicclient.osc.v1.baremetal_node:BootdeviceShowBaremetalNode"
+baremetal_node_boot_mode_set = "ironicclient.osc.v1.baremetal_node:BootmodeSetBaremetalNode"
+baremetal_node_clean = "ironicclient.osc.v1.baremetal_node:CleanBaremetalNode"
+baremetal_node_children_list = "ironicclient.osc.v1.baremetal_node:NodeChildrenList"
+baremetal_node_console_disable = "ironicclient.osc.v1.baremetal_node:ConsoleDisableBaremetalNode"
+baremetal_node_console_enable = "ironicclient.osc.v1.baremetal_node:ConsoleEnableBaremetalNode"
+baremetal_node_console_show = "ironicclient.osc.v1.baremetal_node:ConsoleShowBaremetalNode"
+baremetal_node_create = "ironicclient.osc.v1.baremetal_node:CreateBaremetalNode"
+baremetal_node_delete = "ironicclient.osc.v1.baremetal_node:DeleteBaremetalNode"
+baremetal_node_deploy = "ironicclient.osc.v1.baremetal_node:DeployBaremetalNode"
+baremetal_node_firmware_list = "ironicclient.osc.v1.baremetal_node:ListFirmwareComponentBaremetalNode"
+baremetal_node_history_list = "ironicclient.osc.v1.baremetal_node:NodeHistoryList"
+baremetal_node_history_get = "ironicclient.osc.v1.baremetal_node:NodeHistoryEventGet"
+baremetal_node_inspect = "ironicclient.osc.v1.baremetal_node:InspectBaremetalNode"
+baremetal_node_inventory_save = "ironicclient.osc.v1.baremetal_node:NodeInventorySave"
+baremetal_node_list = "ironicclient.osc.v1.baremetal_node:ListBaremetalNode"
+baremetal_node_maintenance_set = "ironicclient.osc.v1.baremetal_node:MaintenanceSetBaremetalNode"
+baremetal_node_maintenance_unset = "ironicclient.osc.v1.baremetal_node:MaintenanceUnsetBaremetalNode"
+baremetal_node_manage = "ironicclient.osc.v1.baremetal_node:ManageBaremetalNode"
+baremetal_node_passthru_call = "ironicclient.osc.v1.baremetal_node:PassthruCallBaremetalNode"
+baremetal_node_passthru_list = "ironicclient.osc.v1.baremetal_node:PassthruListBaremetalNode"
+baremetal_node_power_off = "ironicclient.osc.v1.baremetal_node:PowerOffBaremetalNode"
+baremetal_node_power_on = "ironicclient.osc.v1.baremetal_node:PowerOnBaremetalNode"
+baremetal_node_provide = "ironicclient.osc.v1.baremetal_node:ProvideBaremetalNode"
+baremetal_node_reboot = "ironicclient.osc.v1.baremetal_node:RebootBaremetalNode"
+baremetal_node_rebuild = "ironicclient.osc.v1.baremetal_node:RebuildBaremetalNode"
+# Replaced with baremetal node trait add in 2026.2; keeping these for backward compat
+baremetal_node_remove_trait = "ironicclient.osc.v1.baremetal_node:RemoveTraitBaremetalNode"
+baremetal_node_rescue = "ironicclient.osc.v1.baremetal_node:RescueBaremetalNode"
+baremetal_node_secure_boot_on = "ironicclient.osc.v1.baremetal_node:SecurebootOnBaremetalNode"
+baremetal_node_secure_boot_off = "ironicclient.osc.v1.baremetal_node:SecurebootOffBaremetalNode"
+baremetal_node_service = "ironicclient.osc.v1.baremetal_node:ServiceBaremetalNode"
+baremetal_node_set = "ironicclient.osc.v1.baremetal_node:SetBaremetalNode"
+baremetal_node_show = "ironicclient.osc.v1.baremetal_node:ShowBaremetalNode"
+baremetal_node_trait_add = "ironicclient.osc.v1.baremetal_node:AddTraitBaremetalNode"
+baremetal_node_trait_list = "ironicclient.osc.v1.baremetal_node:ListTraitsBaremetalNode"
+baremetal_node_trait_remove = "ironicclient.osc.v1.baremetal_node:RemoveTraitBaremetalNode"
+baremetal_node_undeploy = "ironicclient.osc.v1.baremetal_node:UndeployBaremetalNode"
+baremetal_node_unhold = "ironicclient.osc.v1.baremetal_node:UnholdBaremetalNode"
+baremetal_node_unrescue = "ironicclient.osc.v1.baremetal_node:UnrescueBaremetalNode"
+baremetal_node_unset = "ironicclient.osc.v1.baremetal_node:UnsetBaremetalNode"
+baremetal_node_validate = "ironicclient.osc.v1.baremetal_node:ValidateBaremetalNode"
+baremetal_node_vif_attach = "ironicclient.osc.v1.baremetal_node:VifAttachBaremetalNode"
+baremetal_node_vif_detach = "ironicclient.osc.v1.baremetal_node:VifDetachBaremetalNode"
+baremetal_node_vif_list = "ironicclient.osc.v1.baremetal_node:VifListBaremetalNode"
+baremetal_node_inject_nmi = "ironicclient.osc.v1.baremetal_node:InjectNmiBaremetalNode"
+baremetal_port_create = "ironicclient.osc.v1.baremetal_port:CreateBaremetalPort"
+baremetal_port_delete = "ironicclient.osc.v1.baremetal_port:DeleteBaremetalPort"
+baremetal_port_list = "ironicclient.osc.v1.baremetal_port:ListBaremetalPort"
+baremetal_port_set = "ironicclient.osc.v1.baremetal_port:SetBaremetalPort"
+baremetal_port_show = "ironicclient.osc.v1.baremetal_port:ShowBaremetalPort"
+baremetal_port_unset = "ironicclient.osc.v1.baremetal_port:UnsetBaremetalPort"
+baremetal_port_group_create = "ironicclient.osc.v1.baremetal_portgroup:CreateBaremetalPortGroup"
+baremetal_port_group_delete = "ironicclient.osc.v1.baremetal_portgroup:DeleteBaremetalPortGroup"
+baremetal_port_group_list = "ironicclient.osc.v1.baremetal_portgroup:ListBaremetalPortGroup"
+baremetal_port_group_set = "ironicclient.osc.v1.baremetal_portgroup:SetBaremetalPortGroup"
+baremetal_port_group_show = "ironicclient.osc.v1.baremetal_portgroup:ShowBaremetalPortGroup"
+baremetal_port_group_unset = "ironicclient.osc.v1.baremetal_portgroup:UnsetBaremetalPortGroup"
+baremetal_shard_list = "ironicclient.osc.v1.baremetal_shard:ListBaremetalShard"
+baremetal_volume_connector_create = "ironicclient.osc.v1.baremetal_volume_connector:CreateBaremetalVolumeConnector"
+baremetal_volume_connector_delete = "ironicclient.osc.v1.baremetal_volume_connector:DeleteBaremetalVolumeConnector"
+baremetal_volume_connector_list = "ironicclient.osc.v1.baremetal_volume_connector:ListBaremetalVolumeConnector"
+baremetal_volume_connector_set = "ironicclient.osc.v1.baremetal_volume_connector:SetBaremetalVolumeConnector"
+baremetal_volume_connector_show = "ironicclient.osc.v1.baremetal_volume_connector:ShowBaremetalVolumeConnector"
+baremetal_volume_connector_unset = "ironicclient.osc.v1.baremetal_volume_connector:UnsetBaremetalVolumeConnector"
+baremetal_volume_target_create = "ironicclient.osc.v1.baremetal_volume_target:CreateBaremetalVolumeTarget"
+baremetal_volume_target_delete = "ironicclient.osc.v1.baremetal_volume_target:DeleteBaremetalVolumeTarget"
+baremetal_volume_target_list = "ironicclient.osc.v1.baremetal_volume_target:ListBaremetalVolumeTarget"
+baremetal_volume_target_set = "ironicclient.osc.v1.baremetal_volume_target:SetBaremetalVolumeTarget"
+baremetal_volume_target_show = "ironicclient.osc.v1.baremetal_volume_target:ShowBaremetalVolumeTarget"
+baremetal_volume_target_unset = "ironicclient.osc.v1.baremetal_volume_target:UnsetBaremetalVolumeTarget"
+baremetal_conductor_list = "ironicclient.osc.v1.baremetal_conductor:ListBaremetalConductor"
+baremetal_conductor_show = "ironicclient.osc.v1.baremetal_conductor:ShowBaremetalConductor"
+baremetal_runbook_create = "ironicclient.osc.v1.baremetal_runbook:CreateBaremetalRunbook"
+baremetal_runbook_delete = "ironicclient.osc.v1.baremetal_runbook:DeleteBaremetalRunbook"
+baremetal_runbook_list = "ironicclient.osc.v1.baremetal_runbook:ListBaremetalRunbook"
+baremetal_runbook_set = "ironicclient.osc.v1.baremetal_runbook:SetBaremetalRunbook"
+baremetal_runbook_unset = "ironicclient.osc.v1.baremetal_runbook:UnsetBaremetalRunbook"
+baremetal_runbook_show = "ironicclient.osc.v1.baremetal_runbook:ShowBaremetalRunbook"
+baremetal_inspection_rule_create = "ironicclient.osc.v1.baremetal_inspection_rule:CreateBaremetalInspectionRule"
+baremetal_inspection_rule_delete = "ironicclient.osc.v1.baremetal_inspection_rule:DeleteBaremetalInspectionRule"
+baremetal_inspection_rule_list = "ironicclient.osc.v1.baremetal_inspection_rule:ListBaremetalInspectionRule"
+baremetal_inspection_rule_set = "ironicclient.osc.v1.baremetal_inspection_rule:SetBaremetalInspectionRule"
+baremetal_inspection_rule_unset = "ironicclient.osc.v1.baremetal_inspection_rule:UnsetBaremetalInspectionRule"
+baremetal_inspection_rule_show = "ironicclient.osc.v1.baremetal_inspection_rule:ShowBaremetalInspectionRule"
+
+[tool.setuptools.packages.find]
+include = ["ironicclient"]
+
+[tool.codespell]
+quiet-level = 4
+ignore-words-list = [
+    # cna: Intel CNA card
+    "cna",
+]
 
 [tool.mypy]
 python_version = "3.10"
