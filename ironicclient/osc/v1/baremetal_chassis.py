@@ -14,25 +14,35 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
+import argparse
+from collections.abc import Iterable, Sequence
 import itertools
 import logging
+from typing import Any
+from typing import cast
 
-from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 
 
 class CreateBaremetalChassis(command.ShowOne):
     """Create a new chassis."""
 
-    log = logging.getLogger(__name__ + ".CreateBaremetalChassis")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".CreateBaremetalChassis")
 
-    def get_parser(self, prog_name):
-        parser = super(CreateBaremetalChassis, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--description',
@@ -55,12 +65,15 @@ class CreateBaremetalChassis(command.ShowOne):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        field_list = ['description', 'extra', 'uuid']
+        field_list: list[str] = ['description', 'extra', 'uuid']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'extra')
@@ -69,16 +82,23 @@ class CreateBaremetalChassis(command.ShowOne):
         chassis.pop('links', None)
         chassis.pop('nodes', None)
 
-        return self.dict2columns(chassis)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(chassis),
+        )
 
 
 class DeleteBaremetalChassis(command.Command):
     """Delete a chassis."""
 
-    log = logging.getLogger(__name__ + ".DeleteBaremetalChassis")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".DeleteBaremetalChassis")
 
-    def get_parser(self, prog_name):
-        parser = super(DeleteBaremetalChassis, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "chassis",
             metavar="<chassis>",
@@ -88,12 +108,13 @@ class DeleteBaremetalChassis(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        failures = []
+        failures: list[str] = []
         for chassis in parsed_args.chassis:
             try:
                 baremetal_client.chassis.delete(chassis)
@@ -110,10 +131,14 @@ class DeleteBaremetalChassis(command.Command):
 class ListBaremetalChassis(command.Lister):
     """List the chassis."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalChassis")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalChassis")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalChassis, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         display_group = parser.add_mutually_exclusive_group(required=False)
         display_group.add_argument(
             '--fields',
@@ -157,13 +182,16 @@ class ListBaremetalChassis(command.Lister):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        client = manager.baremetal
 
         columns = res_fields.CHASSIS_RESOURCE.fields
 
-        params = {}
+        params: dict[str, object] = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
             raise exc.CommandError(
                 _('Expected non-negative --limit, got %s') %
@@ -193,10 +221,14 @@ class ListBaremetalChassis(command.Lister):
 class SetBaremetalChassis(command.Command):
     """Set chassis properties."""
 
-    log = logging.getLogger(__name__ + ".SetBaremetalChassis")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".SetBaremetalChassis")
 
-    def get_parser(self, prog_name):
-        parser = super(SetBaremetalChassis, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'chassis',
@@ -217,12 +249,13 @@ class SetBaremetalChassis(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.description:
             description = ["description=%s" % parsed_args.description]
             properties.extend(utils.args_array_to_patch(
@@ -240,10 +273,14 @@ class SetBaremetalChassis(command.Command):
 class ShowBaremetalChassis(command.ShowOne):
     """Show chassis details."""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetalChassis")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ShowBaremetalChassis")
 
-    def get_parser(self, prog_name):
-        parser = super(ShowBaremetalChassis, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "chassis",
             metavar="<chassis>",
@@ -262,26 +299,39 @@ class ShowBaremetalChassis(command.ShowOne):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
-        fields = list(itertools.chain.from_iterable(parsed_args.fields))
-        fields = fields if fields else None
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
+        fields: list[str] | None
+        fields = (
+            list(itertools.chain.from_iterable(parsed_args.fields))
+            or None)
         chassis = baremetal_client.chassis.get(parsed_args.chassis,
                                                fields=fields)._info
         chassis.pop("links", None)
         chassis.pop("nodes", None)
 
-        return zip(*sorted(chassis.items()))
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(dict(sorted(chassis.items()))),
+        )
 
 
 class UnsetBaremetalChassis(command.Command):
     """Unset chassis properties."""
-    log = logging.getLogger(__name__ + ".UnsetBaremetalChassis")
 
-    def get_parser(self, prog_name):
-        parser = super(UnsetBaremetalChassis, self).get_parser(prog_name)
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UnsetBaremetalChassis")
+
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'chassis',
@@ -303,12 +353,13 @@ class UnsetBaremetalChassis(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.description:
             properties.extend(utils.args_array_to_patch('remove',
                               ['description']))
