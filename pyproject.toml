@@ -37,4 +37,5 @@ files = [
     "ironicclient/v1/create_resources.py",
     "ironicclient/v1/node.py",
     "ironicclient/client.py",
+    "ironicclient/shell.py",
 ]

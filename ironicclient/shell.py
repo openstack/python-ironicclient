@@ -10,6 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
+import argparse
 import logging
 import sys
 
@@ -17,6 +20,7 @@ from cliff import app
 from cliff import commandmanager
 import openstack
 from openstack import config as os_config
+from openstack.config import cloud_region as os_cloud_region
 from osc_lib import utils
 import pbr.version
 
@@ -26,34 +30,38 @@ from ironicclient import exc
 from ironicclient.v1 import client
 
 
-_DEFAULTS = {
+_DEFAULTS: dict[str, str] = {
     'auth_type': 'none',
 }
-_TYPE = 'baremetal'
-_DESCRIPTION = 'Bare Metal service (ironic) client'
-_NAMESPACE = 'openstack.baremetal.v1'
-_HELP = _("%(err)s.\n* Use --os-endpoint for standalone %(project)s.\n"
-          "* Use --os-auth-url and credentials for authentication.\n"
-          "* Use --os-cloud to load configuration from clouds.yaml\n"
-          "* See `%(cmd)s --help` for more details")
+_TYPE: str = 'baremetal'
+_DESCRIPTION: str = 'Bare Metal service (ironic) client'
+_NAMESPACE: str = 'openstack.baremetal.v1'
+_HELP: str = _("%(err)s.\n* Use --os-endpoint for standalone %(project)s.\n"
+               "* Use --os-auth-url and credentials for authentication.\n"
+               "* Use --os-cloud to load configuration from clouds.yaml\n"
+               "* See `%(cmd)s --help` for more details")
 
-LOG = logging.getLogger(__name__)
+LOG: logging.Logger = logging.getLogger(__name__)
 
 
 class ClientManager(object):
 
-    def __init__(self, cloud_region, options):
+    def __init__(
+        self,
+        cloud_region: os_cloud_region.CloudRegion,
+        options: argparse.Namespace,
+    ) -> None:
         self.cloud_region = cloud_region
         self.options = options
-        self._ironic = None
+        self._ironic: client.Client | None = None
 
     @property
-    def baremetal(self):
+    def baremetal(self) -> client.Client:
         if self._ironic is None:
             self._ironic = self._create_ironic_client()
         return self._ironic
 
-    def _create_ironic_client(self):
+    def _create_ironic_client(self) -> client.Client:
         api_version = self.options.os_baremetal_api_version
         allow_api_version_downgrade = False
         if not api_version:
@@ -86,20 +94,20 @@ class ClientManager(object):
 
 class CommandManager(commandmanager.CommandManager):
 
-    def load_commands(self, namespace):
+    def load_commands(self, namespace: str) -> None:
         super(CommandManager, self).load_commands(namespace)
         # Strip the 'baremetal' prefix used in OSC
         prefix = 'baremetal '
         prefix_len = len(prefix)
         self.commands = dict(
             (cmd[prefix_len:] if cmd.startswith(prefix) else cmd, ep)
-            for (cmd, ep) in self.commands.items()
+            for (cmd, ep) in self.commands.items()  # type: ignore[has-type]
         )
 
 
 class App(app.App):
 
-    def __init__(self):
+    def __init__(self) -> None:
         version_info = pbr.version.VersionInfo('python-ironicclient')
         mgr = CommandManager(_NAMESPACE)
         self.config = os_config.OpenStackConfig(override_defaults=_DEFAULTS)
@@ -108,7 +116,13 @@ class App(app.App):
                                   command_manager=mgr,
                                   deferred_help=True)
 
-    def build_option_parser(self, description, version, argparse_kwargs=None):
+    def build_option_parser(  # type: ignore[override]
+        self,
+        description: str | None,
+        version: str | None,
+        argparse_kwargs: dict[str, object] | None = None,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
         parser = super(App, self).build_option_parser(
             description, version, argparse_kwargs=argparse_kwargs)
         self.config.register_argparse_arguments(parser, sys.argv[1:])
@@ -139,9 +153,9 @@ class App(app.App):
         return parser
 
     # This is the openstacksdk default value
-    _STREAM_FORMAT = '%(asctime)s %(levelname)s: %(name)s %(message)s'
+    _STREAM_FORMAT: str = '%(asctime)s %(levelname)s: %(name)s %(message)s'
 
-    def _configure_ironic_logging(self):
+    def _configure_ironic_logging(self) -> None:
         debug_enabled = self.options.debug or self.options.verbose_level > 1
 
         openstack.enable_logging(debug=debug_enabled, stream=sys.stderr,
@@ -167,7 +181,7 @@ class App(app.App):
             logger.addHandler(handler)
             logger.propagate = False
 
-    def initialize_app(self, argv):
+    def initialize_app(self, argv: list[str]) -> None:
         super(App, self).initialize_app(argv)
         self._configure_ironic_logging()
         self.cloud_region = self.config.get_one(argparse=self.options)
@@ -175,5 +189,6 @@ class App(app.App):
         self.client_manager = ClientManager(self.cloud_region, self.options)
 
 
-def main(argv=sys.argv[1:]):
-    return App().run(argv)
+def main(argv: list[str] = sys.argv[1:]) -> int:
+    result: int = App().run(argv)
+    return result
