@@ -34,4 +34,5 @@ files = [
     "ironicclient/v1/allocation.py",
     "ironicclient/v1/chassis.py",
     "ironicclient/v1/resource_fields.py",
+    "ironicclient/v1/create_resources.py",
 ]

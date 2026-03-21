@@ -10,15 +10,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
+from collections.abc import Callable
 import functools
 import json
+from typing import Any
+from typing import cast
 
 import jsonschema
 import yaml
 
 from ironicclient import exc
+from ironicclient.v1 import client as v1_client
 
-_CREATE_SCHEMA = {
+_CREATE_SCHEMA: dict[str, object] = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "description": "Schema for ironic resources file",
     "type": "object",
@@ -40,7 +46,10 @@ _CREATE_SCHEMA = {
 }
 
 
-def create_resources(client, filenames):
+def create_resources(
+    client: v1_client.Client,
+    filenames: list[str],
+) -> None:
     """Create resources using their JSON or YAML descriptions.
 
     :param client: an instance of ironic client;
@@ -49,8 +58,8 @@ def create_resources(client, filenames):
     :raises: ClientException if any operation during files processing/resource
         creation fails.
     """
-    errors = []
-    resources = []
+    errors: list[Exception] = []
+    resources: list[dict[str, object]] = []
     for resource_file in filenames:
         try:
             resource = load_from_file(resource_file)
@@ -63,15 +72,19 @@ def create_resources(client, filenames):
                                   ' following error(s) were encountered:\n%s' %
                                   '\n'.join(str(e) for e in errors))
     for r in resources:
-        errors.extend(create_chassis(client, r.get('chassis', [])))
-        errors.extend(create_nodes(client, r.get('nodes', [])))
+        errors.extend(create_chassis(
+            client,
+            cast(list[dict[str, object]], r.get('chassis', []))))
+        errors.extend(create_nodes(
+            client,
+            cast(list[dict[str, object]], r.get('nodes', []))))
     if errors:
         raise exc.ClientException('During resources creation, the following '
                                   'error(s) were encountered:\n%s' %
                                   '\n'.join(str(e) for e in errors))
 
 
-def load_from_file(filename):
+def load_from_file(filename: str) -> dict[str, object]:
     """Deserialize JSON or YAML from file.
 
     :param filename: name of the file containing JSON or YAML.
@@ -82,9 +95,9 @@ def load_from_file(filename):
     try:
         with open(filename) as f:
             if filename.endswith('.yaml'):
-                return yaml.safe_load(f)
+                return cast(dict[str, object], yaml.safe_load(f))
             elif filename.endswith('.json'):
-                return json.load(f)
+                return cast(dict[str, object], json.load(f))
             else:
                 # The file is neither .json, nor .yaml, raise an exception
                 raise exc.ClientException(
@@ -100,7 +113,12 @@ def load_from_file(filename):
                                   '%(err)s' % {'err': e, 'file': filename})
 
 
-def create_single_handler(resource_type):
+def create_single_handler(
+    resource_type: str,
+) -> Callable[
+    [Callable[..., str]],
+    Callable[..., tuple[str | None, Exception | None]],
+]:
     """Catch errors of the creation of a single resource.
 
     This decorator appends an error (which is an instance of some client
@@ -112,11 +130,16 @@ def create_single_handler(resource_type):
         e.g. 'node', used purely for exception messages.
     """
 
-    def outer_wrapper(create_method):
+    def outer_wrapper(
+        create_method: Callable[..., str],
+    ) -> Callable[..., tuple[str | None, Exception | None]]:
         @functools.wraps(create_method)
-        def wrapper(client, **params):
-            uuid = None
-            error = None
+        def wrapper(
+            client: v1_client.Client,
+            **params: object,
+        ) -> tuple[str | None, Exception | None]:
+            uuid: str | None = None
+            error: Exception | None = None
             try:
                 uuid = create_method(client, **params)
             except exc.InvalidAttribute as e:
@@ -136,7 +159,9 @@ def create_single_handler(resource_type):
 
 
 @create_single_handler('node')
-def create_single_node(client, **params):
+def create_single_node(
+    client: v1_client.Client, **params: Any,
+) -> str:
     """Call the client to create a node.
 
     :param client: ironic client instance.
@@ -152,13 +177,19 @@ def create_single_node(client, **params):
     params.pop('portgroups', None)
     traits = params.pop('traits', None)
     ret = client.node.create(**params)
+    if ret is None:
+        raise exc.ClientException(
+            'Unable to create the node: '
+            'the API returned an empty response')
     if traits:
-        client.node.set_traits(ret.uuid, traits)
-    return ret.uuid
+        client.node.set_traits(ret.uuid, cast(list[str], traits))
+    return cast(str, ret.uuid)
 
 
 @create_single_handler('port')
-def create_single_port(client, **params):
+def create_single_port(
+    client: v1_client.Client, **params: Any,
+) -> str:
     """Call the client to create a port.
 
     :param client: ironic client instance.
@@ -170,11 +201,17 @@ def create_single_port(client, **params):
     :raises: ClientException, if the creation of the port fails.
     """
     ret = client.port.create(**params)
-    return ret.uuid
+    if ret is None:
+        raise exc.ClientException(
+            'Unable to create the port: '
+            'the API returned an empty response')
+    return cast(str, ret.uuid)
 
 
 @create_single_handler('port group')
-def create_single_portgroup(client, **params):
+def create_single_portgroup(
+    client: v1_client.Client, **params: Any,
+) -> str:
     """Call the client to create a port group.
 
     :param client: ironic client instance.
@@ -188,11 +225,17 @@ def create_single_portgroup(client, **params):
     """
     params.pop('ports', None)
     ret = client.portgroup.create(**params)
-    return ret.uuid
+    if ret is None:
+        raise exc.ClientException(
+            'Unable to create the port group: '
+            'the API returned an empty response')
+    return cast(str, ret.uuid)
 
 
 @create_single_handler('chassis')
-def create_single_chassis(client, **params):
+def create_single_chassis(
+    client: v1_client.Client, **params: Any,
+) -> str:
     """Call the client to create a chassis.
 
     :param client: ironic client instance.
@@ -206,10 +249,19 @@ def create_single_chassis(client, **params):
     """
     params.pop('nodes', None)
     ret = client.chassis.create(**params)
-    return ret.uuid
+    if ret is None:
+        raise exc.ClientException(
+            'Unable to create the chassis: '
+            'the API returned an empty response')
+    return cast(str, ret.uuid)
 
 
-def create_ports(client, port_list, node_uuid, portgroup_uuid=None):
+def create_ports(
+    client: v1_client.Client,
+    port_list: list[dict[str, object]],
+    node_uuid: str,
+    portgroup_uuid: str | None = None,
+) -> list[Exception]:
     """Create ports from dictionaries.
 
     :param client: ironic client instance.
@@ -220,7 +272,7 @@ def create_ports(client, port_list, node_uuid, portgroup_uuid=None):
         with, if they are its members.
     :returns: array of exceptions encountered during creation.
     """
-    errors = []
+    errors: list[Exception] = []
     for port in port_list:
         port_node_uuid = port.get('node_uuid')
         if port_node_uuid and port_node_uuid != node_uuid:
@@ -249,7 +301,11 @@ def create_ports(client, port_list, node_uuid, portgroup_uuid=None):
     return errors
 
 
-def create_portgroups(client, portgroup_list, node_uuid):
+def create_portgroups(
+    client: v1_client.Client,
+    portgroup_list: list[dict[str, object]],
+    node_uuid: str,
+) -> list[Exception]:
     """Create port groups from dictionaries.
 
     :param client: ironic client instance.
@@ -259,7 +315,7 @@ def create_portgroups(client, portgroup_list, node_uuid):
     :param node_uuid: UUID of a node the port groups should be associated with.
     :returns: array of exceptions encountered during creation.
     """
-    errors = []
+    errors: list[Exception] = []
     for portgroup in portgroup_list:
         portgroup_node_uuid = portgroup.get('node_uuid')
         if portgroup_node_uuid and portgroup_node_uuid != node_uuid:
@@ -278,12 +334,19 @@ def create_portgroups(client, portgroup_list, node_uuid):
         # Port group UUID == None means that port group creation failed, don't
         # create the ports inside it
         if ports is not None and portgroup_uuid is not None:
-            errors.extend(create_ports(client, ports, node_uuid,
-                                       portgroup_uuid=portgroup_uuid))
+            errors.extend(create_ports(
+                client,
+                cast(list[dict[str, object]], ports),
+                node_uuid,
+                portgroup_uuid=portgroup_uuid))
     return errors
 
 
-def create_nodes(client, node_list, chassis_uuid=None):
+def create_nodes(
+    client: v1_client.Client,
+    node_list: list[dict[str, object]],
+    chassis_uuid: str | None = None,
+) -> list[Exception]:
     """Create nodes from dictionaries.
 
     :param client: ironic client instance.
@@ -293,7 +356,7 @@ def create_nodes(client, node_list, chassis_uuid=None):
     :param chassis_uuid: UUID of a chassis the nodes should be associated with.
     :returns: array of exceptions encountered during creation.
     """
-    errors = []
+    errors: list[Exception] = []
     for node in node_list:
         if chassis_uuid is not None:
             node_chassis_uuid = node.get('chassis_uuid')
@@ -315,14 +378,22 @@ def create_nodes(client, node_list, chassis_uuid=None):
         # create the port(group)s inside it
         if node_uuid is not None:
             if portgroups is not None:
-                errors.extend(
-                    create_portgroups(client, portgroups, node_uuid))
+                errors.extend(create_portgroups(
+                    client,
+                    cast(list[dict[str, object]], portgroups),
+                    node_uuid))
             if ports is not None:
-                errors.extend(create_ports(client, ports, node_uuid))
+                errors.extend(create_ports(
+                    client,
+                    cast(list[dict[str, object]], ports),
+                    node_uuid))
     return errors
 
 
-def create_chassis(client, chassis_list):
+def create_chassis(
+    client: v1_client.Client,
+    chassis_list: list[dict[str, object]],
+) -> list[Exception]:
     """Create chassis from dictionaries.
 
     :param client: ironic client instance.
@@ -331,7 +402,7 @@ def create_chassis(client, chassis_list):
         separately to /nodes endpoint.
     :returns: array of exceptions encountered during creation.
     """
-    errors = []
+    errors: list[Exception] = []
     for chassis in chassis_list:
         chassis_uuid, error = create_single_chassis(client, **chassis)
         if error:
@@ -340,6 +411,8 @@ def create_chassis(client, chassis_list):
         # Chassis UUID == None means that chassis creation failed, don't
         # create the nodes inside it
         if nodes is not None and chassis_uuid is not None:
-            errors.extend(create_nodes(client, nodes,
-                                       chassis_uuid=chassis_uuid))
+            errors.extend(create_nodes(
+                client,
+                cast(list[dict[str, object]], nodes),
+                chassis_uuid=chassis_uuid))
     return errors
