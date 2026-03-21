@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
+from collections.abc import Iterable
+
 from ironicclient.common.i18n import _
 
 
@@ -30,7 +34,7 @@ class Resource(object):
     being used for sorting.
     """
 
-    FIELDS = {
+    FIELDS: dict[str, str] = {
         'address': 'Address',
         'alive': 'Alive',
         'allocation_uuid': 'Allocation UUID',
@@ -171,7 +175,12 @@ class Resource(object):
         'conditions': 'Conditions'
     }
 
-    def __init__(self, field_ids, sort_excluded=None, override_labels=None):
+    def __init__(
+        self,
+        field_ids: list[str],
+        sort_excluded: list[str] | None = None,
+        override_labels: dict[str, str] | None = None,
+    ) -> None:
         """Create a Resource object
 
         :param field_ids:  A list of strings that the Resource object will
@@ -187,7 +196,10 @@ class Resource(object):
         :raises: ValueError if sort_excluded or override_labels contains values
                  not in field_ids
         """
-        def check_param_fields(param_name, param_fields):
+        def check_param_fields(
+            param_name: str,
+            param_fields: Iterable[str],
+        ) -> None:
             not_existing = set(param_fields) - set(field_ids)
             if not_existing:
                 raise ValueError(
@@ -201,33 +213,35 @@ class Resource(object):
         else:
             check_param_fields('override_labels', override_labels.keys())
 
-        self._fields = tuple(field_ids)
-        self._labels = tuple([override_labels.get(x) or self.FIELDS[x]
-                             for x in field_ids])
+        self._fields: tuple[str, ...] = tuple(field_ids)
+        self._labels: tuple[str, ...] = tuple(
+            [override_labels.get(x) or self.FIELDS[x]
+             for x in field_ids])
 
         if sort_excluded is None:
             sort_excluded = []
         else:
             check_param_fields('sort_excluded', sort_excluded)
-        self._sort_fields = tuple(
+        self._sort_fields: tuple[str, ...] = tuple(
             [x for x in field_ids if x not in sort_excluded])
-        self._sort_labels = tuple([override_labels.get(x) or self.FIELDS[x]
-                                  for x in self._sort_fields])
+        self._sort_labels: tuple[str, ...] = tuple(
+            [override_labels.get(x) or self.FIELDS[x]
+             for x in self._sort_fields])
 
     @property
-    def fields(self):
+    def fields(self) -> tuple[str, ...]:
         return self._fields
 
     @property
-    def labels(self):
+    def labels(self) -> tuple[str, ...]:
         return self._labels
 
     @property
-    def sort_fields(self):
+    def sort_fields(self) -> tuple[str, ...]:
         return self._sort_fields
 
     @property
-    def sort_labels(self):
+    def sort_labels(self) -> tuple[str, ...]:
         return self._sort_labels
 
 
