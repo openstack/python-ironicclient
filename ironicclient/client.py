@@ -10,22 +10,39 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
+from __future__ import annotations
 
+import logging
+import types
+from typing import Any
+from typing import cast
+
+from keystoneauth1 import session as ks_session
 from openstack import config
 from oslo_utils import importutils
 
 from ironicclient.common.i18n import _
 from ironicclient import exc
+from ironicclient.v1 import client as v1_client
 
-LOG = logging.getLogger(__name__)
+LOG: logging.Logger = logging.getLogger(__name__)
 
 
-def get_client(api_version, auth_type=None, os_ironic_api_version=None,
-               max_retries=None, retry_interval=None, session=None,
-               valid_interfaces=None, interface=None, service_type=None,
-               region_name=None, additional_headers=None,
-               global_request_id=None, **kwargs):
+def get_client(
+    api_version: str,
+    auth_type: str | None = None,
+    os_ironic_api_version: str | None = None,
+    max_retries: int | None = None,
+    retry_interval: int | None = None,
+    session: ks_session.Session | None = None,
+    valid_interfaces: str | list[str] | None = None,
+    interface: str | list[str] | None = None,
+    service_type: str | None = None,
+    region_name: str | None = None,
+    additional_headers: dict[str, str] | None = None,
+    global_request_id: str | None = None,
+    **kwargs: Any,
+) -> v1_client.Client:
     """Get an authenticated client, based on the credentials.
 
     :param api_version: the API version to use. Valid value: '1'.
@@ -100,21 +117,28 @@ def get_client(api_version, auth_type=None, os_ironic_api_version=None,
                 _('Must provide Keystone credentials or user-defined '
                   'endpoint, error was: %s') % e)
 
-    ironicclient_kwargs = {
-        'os_ironic_api_version': os_ironic_api_version,
-        'additional_headers': additional_headers,
-        'global_request_id': global_request_id,
-        'max_retries': max_retries,
-        'retry_interval': retry_interval,
-        'session': session,
-        'endpoint_override': endpoint,
-        'interface': interface
-    }
+    return cast(
+        v1_client.Client,
+        Client(
+            api_version,
+            endpoint_override=endpoint,
+            session=session,
+            os_ironic_api_version=os_ironic_api_version,
+            additional_headers=additional_headers,
+            global_request_id=global_request_id,
+            max_retries=max_retries,
+            retry_interval=retry_interval,
+            interface=interface,
+        ))
 
-    return Client(api_version, **ironicclient_kwargs)
 
-
-def Client(version, endpoint_override=None, session=None, *args, **kwargs):
+def Client(
+    version: str,
+    endpoint_override: str | None = None,
+    session: ks_session.Session | None = None,
+    *args: Any,
+    **kwargs: Any,
+) -> v1_client.Client:
     """Create a client of an appropriate version.
 
     This call requires a session. If you want it to be created, use
@@ -128,8 +152,10 @@ def Client(version, endpoint_override=None, session=None, *args, **kwargs):
     :param kwargs: Other keyword arguments to pass to the HTTP client (e.g.
         ``insecure``).
     """
-    module = importutils.import_versioned_module('ironicclient',
-                                                 version, 'client')
+    module: types.ModuleType = importutils.import_versioned_module(
+        'ironicclient', version, 'client')
     client_class = getattr(module, 'Client')
-    return client_class(endpoint_override=endpoint_override, session=session,
-                        *args, **kwargs)
+    return cast(
+        v1_client.Client,
+        client_class(endpoint_override=endpoint_override, session=session,
+                     *args, **kwargs))
