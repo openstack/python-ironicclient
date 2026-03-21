@@ -13,26 +13,34 @@
 # under the License.
 
 
+from __future__ import annotations
+
+import argparse
+from collections.abc import Iterable, Sequence
 import itertools
 import logging
+from typing import Any, cast
 
-from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 
 
 class CreateBaremetalVolumeConnector(command.ShowOne):
     """Create a new baremetal volume connector."""
 
-    log = logging.getLogger(__name__ + ".CreateBaremetalVolumeConnector")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".CreateBaremetalVolumeConnector")
 
-    def get_parser(self, prog_name):
-        parser = (
-            super(CreateBaremetalVolumeConnector, self).get_parser(prog_name))
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--node',
@@ -71,11 +79,15 @@ class CreateBaremetalVolumeConnector(command.ShowOne):
 
         return parser
 
-    def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)" % parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
+        self.log.debug("take_action(%s)", parsed_args)
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        field_list = ['extra', 'type', 'connector_id', 'node_uuid', 'uuid']
+        field_list: list[str] = [
+            'extra', 'type', 'connector_id', 'node_uuid', 'uuid']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'extra')
@@ -83,17 +95,23 @@ class CreateBaremetalVolumeConnector(command.ShowOne):
 
         data = dict([(f, getattr(volume_connector, f, '')) for f in
                      res_fields.VOLUME_CONNECTOR_DETAILED_RESOURCE.fields])
-        return self.dict2columns(data)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(data),
+        )
 
 
 class ShowBaremetalVolumeConnector(command.ShowOne):
     """Show baremetal volume connector details."""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetalVolumeConnector")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ShowBaremetalVolumeConnector")
 
-    def get_parser(self, prog_name):
-        parser = (
-            super(ShowBaremetalVolumeConnector, self).get_parser(prog_name))
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'volume_connector',
@@ -111,28 +129,39 @@ class ShowBaremetalVolumeConnector(command.ShowOne):
                    "will be fetched from the server."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
-        fields = list(itertools.chain.from_iterable(parsed_args.fields))
-        fields = fields if fields else None
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
+        fields: list[str] | None
+        fields = (
+            list(itertools.chain.from_iterable(parsed_args.fields))
+            or None)
 
         volume_connector = baremetal_client.volume_connector.get(
             parsed_args.volume_connector, fields=fields)._info
 
         volume_connector.pop("links", None)
-        return zip(*sorted(volume_connector.items()))
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            zip(*sorted(volume_connector.items())),
+        )
 
 
 class ListBaremetalVolumeConnector(command.Lister):
     """List baremetal volume connectors."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalVolumeConnector")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalVolumeConnector")
 
-    def get_parser(self, prog_name):
-        parser = (
-            super(ListBaremetalVolumeConnector, self).get_parser(prog_name))
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--node',
@@ -182,13 +211,16 @@ class ListBaremetalVolumeConnector(command.Lister):
                    "'--long' is specified."))
         return parser
 
-    def take_action(self, parsed_args):
-        self.log.debug("take_action(%s)" % parsed_args)
-        client = self.app.client_manager.baremetal
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
+        self.log.debug("take_action(%s)", parsed_args)
+        manager = self.app.client_manager
+        client = manager.baremetal
 
         columns = res_fields.VOLUME_CONNECTOR_RESOURCE.fields
 
-        params = {}
+        params: dict[str, object] = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
             raise exc.CommandError(
                 _('Expected non-negative --limit, got %s') %
@@ -208,7 +240,7 @@ class ListBaremetalVolumeConnector(command.Lister):
             columns = resource.fields
             params['fields'] = columns
 
-        self.log.debug("params(%s)" % params)
+        self.log.debug("params(%s)", params)
         data = client.volume_connector.list(**params)
 
         data = oscutils.sort_items(data, parsed_args.sort)
@@ -221,11 +253,14 @@ class ListBaremetalVolumeConnector(command.Lister):
 class DeleteBaremetalVolumeConnector(command.Command):
     """Unregister baremetal volume connector(s)."""
 
-    log = logging.getLogger(__name__ + ".DeleteBaremetalVolumeConnector")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".DeleteBaremetalVolumeConnector")
 
-    def get_parser(self, prog_name):
-        parser = (
-            super(DeleteBaremetalVolumeConnector, self).get_parser(prog_name))
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             'volume_connectors',
             metavar='<volume connector>',
@@ -234,12 +269,13 @@ class DeleteBaremetalVolumeConnector(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        failures = []
+        failures: list[str] = []
         for volume_connector in parsed_args.volume_connectors:
             try:
                 baremetal_client.volume_connector.delete(volume_connector)
@@ -257,11 +293,14 @@ class DeleteBaremetalVolumeConnector(command.Command):
 class SetBaremetalVolumeConnector(command.Command):
     """Set baremetal volume connector properties."""
 
-    log = logging.getLogger(__name__ + ".SetBaremetalVolumeConnector")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".SetBaremetalVolumeConnector")
 
-    def get_parser(self, prog_name):
-        parser = (
-            super(SetBaremetalVolumeConnector, self).get_parser(prog_name))
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'volume_connector',
@@ -294,12 +333,13 @@ class SetBaremetalVolumeConnector(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.node_uuid:
             properties.extend(utils.args_array_to_patch(
                 'add', ["node_uuid=%s" % parsed_args.node_uuid]))
@@ -323,11 +363,15 @@ class SetBaremetalVolumeConnector(command.Command):
 
 class UnsetBaremetalVolumeConnector(command.Command):
     """Unset baremetal volume connector properties."""
-    log = logging.getLogger(__name__ + "UnsetBaremetalVolumeConnector")
 
-    def get_parser(self, prog_name):
-        parser = (
-            super(UnsetBaremetalVolumeConnector, self).get_parser(prog_name))
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UnsetBaremetalVolumeConnector")
+
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'volume_connector',
@@ -342,12 +386,13 @@ class UnsetBaremetalVolumeConnector(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch('remove',
                               ['extra/' + x for x in parsed_args.extra]))
