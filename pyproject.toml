@@ -39,4 +39,5 @@ files = [
     "ironicclient/client.py",
     "ironicclient/shell.py",
     "ironicclient/__init__.py",
+    "ironicclient/osc/plugin.py",
 ]
