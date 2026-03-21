@@ -11,22 +11,32 @@
 #   under the License.
 #
 
-import logging
+from __future__ import annotations
 
-from osc_lib.command import command
+import argparse
+from collections.abc import Iterable, Sequence
+import logging
+from typing import Any
+
 from osc_lib import utils as oscutils
 
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 
 
 class ListBaremetalShard(command.Lister):
     """List baremetal shards."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalShard")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalShard")
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self,
+        parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        client = manager.baremetal
 
         data = client.shard.list()
         columns = res_fields.SHARD_RESOURCE.fields
