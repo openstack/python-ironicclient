@@ -38,4 +38,5 @@ files = [
     "ironicclient/v1/node.py",
     "ironicclient/client.py",
     "ironicclient/shell.py",
+    "ironicclient/__init__.py",
 ]

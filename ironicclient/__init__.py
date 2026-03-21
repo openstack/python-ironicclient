@@ -13,15 +13,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import annotations
+
 import pbr.version
 
 from ironicclient import client
 from ironicclient import exc as exceptions
 
 
-__version__ = pbr.version.VersionInfo('python-ironicclient').version_string()
+__version__: str = pbr.version.VersionInfo(
+    'python-ironicclient').version_string()
 
-__all__ = (
+__all__: tuple[str, ...] = (
     'client',
     'exc',
     'exceptions',
