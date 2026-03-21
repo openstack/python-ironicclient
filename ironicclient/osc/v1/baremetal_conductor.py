@@ -14,25 +14,35 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
+import argparse
+from collections.abc import Iterable, Sequence
 import itertools
 import logging
+from typing import Any
+from typing import cast
 
-from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 
 
 class ListBaremetalConductor(command.Lister):
     """List baremetal conductors"""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalConductor")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalConductor, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             '--limit',
             metavar='<limit>',
@@ -74,13 +84,16 @@ class ListBaremetalConductor(command.Lister):
                    "is specified."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        client = manager.baremetal
 
         columns = res_fields.CONDUCTOR_RESOURCE.fields
 
-        params = {}
+        params: dict[str, object] = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
             raise exc.CommandError(
                 _('Expected non-negative --limit, got %s') %
@@ -110,10 +123,14 @@ class ListBaremetalConductor(command.Lister):
 class ShowBaremetalConductor(command.ShowOne):
     """Show baremetal conductor details"""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetalConductor")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ShowBaremetalConductor")
 
-    def get_parser(self, prog_name):
-        parser = super(ShowBaremetalConductor, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "conductor",
             metavar="<conductor>",
@@ -130,14 +147,22 @@ class ShowBaremetalConductor(command.ShowOne):
                    "fetched from the server."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
-        fields = list(itertools.chain.from_iterable(parsed_args.fields))
-        fields = fields if fields else None
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
+        fields: list[str] | None
+        fields = (
+            list(itertools.chain.from_iterable(parsed_args.fields))
+            or None)
         conductor = baremetal_client.conductor.get(
             parsed_args.conductor, fields=fields)._info
         conductor.pop("links", None)
 
-        return self.dict2columns(conductor)
+        return cast(
+            tuple[Sequence[str], Iterable[Any]],
+            self.dict2columns(conductor),
+        )
