@@ -12,14 +12,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
+from __future__ import annotations
+
+import argparse
+from collections.abc import Iterable, Sequence
 import itertools
 import logging
+from typing import Any
+from typing import cast
 
-from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 from ironicclient.v1 import utils as v1_utils
 
@@ -27,10 +33,14 @@ from ironicclient.v1 import utils as v1_utils
 class ListBaremetalDriver(command.Lister):
     """List the enabled drivers."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalDriver")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalDriver")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalDriver, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             '--type',
             metavar='<type>',
@@ -57,12 +67,17 @@ class ListBaremetalDriver(command.Lister):
                    "is specified."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        client = manager.baremetal
 
-        params = {'driver_type': parsed_args.type,
-                  'detail': parsed_args.long}
+        params: dict[str, object] = {
+            'driver_type': parsed_args.type,
+            'detail': parsed_args.long,
+        }
         if parsed_args.long:
             columns = res_fields.DRIVER_DETAILED_RESOURCE.fields
         elif parsed_args.fields:
@@ -88,19 +103,26 @@ class ListBaremetalDriver(command.Lister):
 class ListBaremetalDriverProperty(command.Lister):
     """List the driver properties."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalDriverProperty")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalDriverProperty")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalDriverProperty, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             'driver',
             metavar='<driver>',
             help='Name of the driver.')
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
         driver_properties = baremetal_client.driver.properties(
             parsed_args.driver)
@@ -111,20 +133,26 @@ class ListBaremetalDriverProperty(command.Lister):
 class ListBaremetalDriverRaidProperty(command.Lister):
     """List a driver's RAID logical disk properties."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalDriverRaidProperty")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalDriverRaidProperty")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalDriverRaidProperty, self).get_parser(
-            prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             'driver',
             metavar='<driver>',
             help='Name of the driver.')
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
         raid_props = baremetal_client.driver.raid_logical_disk_properties(
             parsed_args.driver)
@@ -135,10 +163,14 @@ class ListBaremetalDriverRaidProperty(command.Lister):
 class PassthruCallBaremetalDriver(command.ShowOne):
     """Call a vendor passthru method for a driver."""
 
-    log = logging.getLogger(__name__ + ".PassthruCallBaremetalDriver")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".PassthruCallBaremetalDriver")
 
-    def get_parser(self, prog_name):
-        parser = super(PassthruCallBaremetalDriver, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             'driver',
             metavar='<driver>',
@@ -168,9 +200,12 @@ class PassthruCallBaremetalDriver(command.ShowOne):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
         arguments = utils.key_value_pairs_to_dict(parsed_args.arg)
         response = (baremetal_client.driver.
@@ -179,32 +214,42 @@ class PassthruCallBaremetalDriver(command.ShowOne):
                                     http_method=parsed_args.http_method,
                                     args=arguments))
 
-        return self.dict2columns(response)
+        return cast(
+            tuple[Sequence[str], Iterable[Any]],
+            self.dict2columns(response),
+        )
 
 
 class PassthruListBaremetalDriver(command.Lister):
     """List available vendor passthru methods for a driver."""
 
-    log = logging.getLogger(__name__ + ".PassthruListBaremetalDriver")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".PassthruListBaremetalDriver")
 
-    def get_parser(self, prog_name):
-        parser = super(PassthruListBaremetalDriver, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             'driver',
             metavar='<driver>',
             help=_('Name of the driver.'))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
         columns = res_fields.VENDOR_PASSTHRU_METHOD_RESOURCE.fields
 
         methods = baremetal_client.driver.get_vendor_passthru_methods(
             parsed_args.driver)
 
-        params = []
+        params: list[dict[str, object]] = []
         for method, response in methods.items():
             response['name'] = method
             http_methods = ', '.join(response['http_methods'])
@@ -218,10 +263,14 @@ class PassthruListBaremetalDriver(command.Lister):
 class ShowBaremetalDriver(command.ShowOne):
     """Show information about a driver."""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetalDriver")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ShowBaremetalDriver")
 
-    def get_parser(self, prog_name):
-        parser = super(ShowBaremetalDriver, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             'driver',
             metavar='<driver>',
@@ -238,12 +287,17 @@ class ShowBaremetalDriver(command.ShowOne):
                    "fetched from the server."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        fields = list(itertools.chain.from_iterable(parsed_args.fields))
-        fields = fields if fields else None
+        fields: list[str] | None
+        fields = (
+            list(itertools.chain.from_iterable(parsed_args.fields))
+            or None)
         driver = baremetal_client.driver.get(parsed_args.driver,
                                              fields=fields)._info
         driver.pop("links", None)
@@ -251,4 +305,7 @@ class ShowBaremetalDriver(command.ShowOne):
         # For list-type properties, show the values as comma separated
         # strings. It's easier to read.
         driver = utils.convert_list_props_to_comma_separated(driver)
-        return zip(*sorted(driver.items()))
+        return cast(
+            tuple[Sequence[str], Iterable[Any]],
+            zip(*sorted(driver.items())),
+        )
