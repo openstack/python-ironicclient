@@ -47,4 +47,5 @@ files = [
     "ironicclient/osc/v1/baremetal_chassis.py",
     "ironicclient/osc/v1/baremetal_deploy_template.py",
     "ironicclient/osc/v1/baremetal_volume_connector.py",
+    "ironicclient/osc/v1/baremetal_allocation.py",
 ]
