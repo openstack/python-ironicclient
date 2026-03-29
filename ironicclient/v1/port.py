@@ -29,7 +29,7 @@ class Port(base.Resource):
         return "<Port %s>" % self._info
 
 
-class PortManager(base.CreateManager):
+class PortManager(base.CreateManager[Port]):
     resource_class: type[Port] = Port
     _creation_attributes: list[str] = [
         'address', 'extra', 'local_link_connection',
@@ -45,7 +45,7 @@ class PortManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> base.Resource | None:
+    ) -> Port | None:
         return self._get(
             resource_id=port_id,
             fields=fields,
@@ -59,7 +59,7 @@ class PortManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> base.Resource:
+    ) -> Port:
         path = '?address=%s' % address
         if fields is not None:
             path += '&fields=' + ','.join(fields)
@@ -96,7 +96,7 @@ class PortManager(base.CreateManager):
         patch: list[dict[str, Any]],
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> base.Resource | None:
+    ) -> Port | None:
         return self._update(
             resource_id=port_id,
             patch=patch,
@@ -117,7 +117,7 @@ class PortManager(base.CreateManager):
         portgroup: str | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Port]:
         """Retrieve a list of ports.
 
         :param address: Optional, MAC address of a port, to get

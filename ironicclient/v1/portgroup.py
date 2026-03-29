@@ -27,7 +27,7 @@ class Portgroup(base.Resource):
         return "<Portgroup %s>" % self._info
 
 
-class PortgroupManager(base.CreateManager):
+class PortgroupManager(base.CreateManager[Portgroup]):
     resource_class: type[Portgroup] = Portgroup
     _creation_attributes: list[str] = [
         'address', 'extra', 'name', 'node_uuid',
@@ -42,7 +42,7 @@ class PortgroupManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> base.Resource | None:
+    ) -> Portgroup | None:
         """Get a port group with the specified identifier.
 
         :param portgroup_id: The UUID or name of a portgroup.
@@ -70,7 +70,7 @@ class PortgroupManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> base.Resource:
+    ) -> Portgroup:
         """Get a port group with the specified MAC address.
 
         :param address: The MAC address of a portgroup.
@@ -130,7 +130,7 @@ class PortgroupManager(base.CreateManager):
         patch: list[dict[str, Any]],
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> base.Resource | None:
+    ) -> Portgroup | None:
         """Update the Portgroup.
 
         :param portgroup_id: The UUID or name of a portgroup.
@@ -158,7 +158,7 @@ class PortgroupManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Portgroup]:
         """List all the ports for a given portgroup.
 
         :param portgroup_id: Name or UUID of the portgroup.
@@ -241,7 +241,7 @@ class PortgroupManager(base.CreateManager):
         shards: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Portgroup]:
         """Retrieve a list of portgroups.
 
         :param node: Optional, UUID or name of a node, to get
