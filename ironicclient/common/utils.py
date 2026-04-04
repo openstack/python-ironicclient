@@ -25,16 +25,11 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import Any
-from typing import Callable
-from typing import cast
-from typing import Generator
-from typing import Iterator
-from typing import Protocol
+from typing import Any, Callable, Generator, Iterator, Protocol
 
 from cliff import columns
 from oslo_utils import strutils
-import yaml  # type: ignore[import-untyped]  # PyYAML has no type stubs
+import yaml
 
 from ironicclient.common.i18n import _
 from ironicclient import exc
@@ -249,16 +244,13 @@ def common_filters(
     return filters
 
 
-# NOTE(karan): *args/**kwargs can be narrowed to match tempfile.mkdtemp:
-# use keyword-only params (suffix: str | None, prefix: str | None,
-# dir: str | None) and call mkdtemp(suffix=..., prefix=..., dir=...) for
-# stricter typing.
 @contextlib.contextmanager
 def tempdir(
-    *args: Any,
-    **kwargs: Any,
+    suffix: str | None = None,
+    prefix: str | None = None,
+    dir: str | None = None,
 ) -> Generator[str, None, None]:
-    dirname = tempfile.mkdtemp(*args, **kwargs)
+    dirname = tempfile.mkdtemp(suffix=suffix, prefix=prefix, dir=dir)
     try:
         yield dirname
     finally:
@@ -357,7 +349,7 @@ def bool_argument_value(
     except ValueError as e:
         raise exc.CommandError(_("argument %(arg)s: %(err)s.")
                                % {'arg': arg_name, 'err': e})
-    return cast(bool, val)
+    return val
 
 
 def check_for_invalid_fields(
@@ -520,7 +512,7 @@ def format_hash(
     return output[:-2]
 
 
-class HashColumn(columns.FormattableColumn):
+class HashColumn(columns.FormattableColumn[Any]):
     # base returns Sequence; we return str | None
     def human_readable(self) -> str | None:  # type: ignore[override]
         return format_hash(self._value)

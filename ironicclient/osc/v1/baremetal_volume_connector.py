@@ -93,10 +93,7 @@ class CreateBaremetalVolumeConnector(command.ShowOne):
 
         data = dict([(f, getattr(volume_connector, f, '')) for f in
                      res_fields.VOLUME_CONNECTOR_DETAILED_RESOURCE.fields])
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(data),
-        )
+        return self.dict2columns(data)
 
 
 class ShowBaremetalVolumeConnector(command.ShowOne):
@@ -143,7 +140,7 @@ class ShowBaremetalVolumeConnector(command.ShowOne):
         volume_connector.pop("links", None)
         return cast(
             tuple[tuple[str, ...], tuple[Any, ...]],
-            zip(*sorted(volume_connector.items())),
+            tuple(zip(*sorted(volume_connector.items()))),
         )
 
 

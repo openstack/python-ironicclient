@@ -17,7 +17,7 @@ import argparse
 from collections.abc import Iterable, Sequence
 import itertools
 import logging
-from typing import Any, cast
+from typing import Any
 
 from osc_lib import utils as oscutils
 
@@ -119,10 +119,7 @@ class CreateBaremetalAllocation(command.ShowOne):
         data = dict([(f, getattr(allocation, f, '')) for f in
                      res_fields.ALLOCATION_DETAILED_RESOURCE.fields])
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(data),
-        )
+        return self.dict2columns(data)
 
 
 class ShowBaremetalAllocation(command.ShowOne):
@@ -166,10 +163,7 @@ class ShowBaremetalAllocation(command.ShowOne):
             parsed_args.allocation, fields=fields)._info
 
         allocation.pop("links", None)
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(dict(sorted(allocation.items()))),
-        )
+        return self.dict2columns(dict(sorted(allocation.items())))
 
 
 class ListBaremetalAllocation(command.Lister):

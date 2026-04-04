@@ -21,7 +21,6 @@ from collections.abc import Iterable, Sequence
 import itertools
 import logging
 from typing import Any
-from typing import cast
 
 from osc_lib import utils as oscutils
 
@@ -80,10 +79,7 @@ class CreateBaremetalChassis(command.ShowOne):
         chassis.pop('links', None)
         chassis.pop('nodes', None)
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(chassis),
-        )
+        return self.dict2columns(chassis)
 
 
 class DeleteBaremetalChassis(command.Command):
@@ -305,10 +301,7 @@ class ShowBaremetalChassis(command.ShowOne):
         chassis.pop("links", None)
         chassis.pop("nodes", None)
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(dict(sorted(chassis.items()))),
-        )
+        return self.dict2columns(dict(sorted(chassis.items())))
 
 
 class UnsetBaremetalChassis(command.Command):

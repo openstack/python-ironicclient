@@ -126,10 +126,7 @@ class CreateBaremetalPortGroup(command.ShowOne):
         data = dict([(f, getattr(portgroup, f, '')) for f in
                      res_fields.PORTGROUP_DETAILED_RESOURCE.fields])
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(data),
-        )
+        return self.dict2columns(data)
 
 
 class ShowBaremetalPortGroup(command.ShowOne):
@@ -188,7 +185,7 @@ class ShowBaremetalPortGroup(command.ShowOne):
         portgroup.pop("ports", None)
         return cast(
             tuple[tuple[str, ...], tuple[Any, ...]],
-            zip(*sorted(portgroup.items())),
+            tuple(zip(*sorted(portgroup.items()))),
         )
 
 

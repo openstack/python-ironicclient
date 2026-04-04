@@ -80,7 +80,7 @@ def make_client(
         # latest is too high for the server we're talking to.
         allow_api_version_downgrade=allow_api_version_downgrade,
         session=instance.session,
-        # TODO(karan): _region_name is a private attr on ClientManager;
+        # TODO(anandkaranubc): _region_name is a private attr on ClientManager;
         # osc-lib should expose this publicly. See also:
         # https://bugs.launchpad.net/python-ironicclient/+bug/2146739
         region_name=instance._region_name,  # type: ignore[attr-defined]
@@ -88,7 +88,8 @@ def make_client(
         # class will be able to do the version stripping if needed
         endpoint_override=instance.get_endpoint_for_service_type(
             API_NAME, interface=instance.interface,
-            # TODO(karan): same _region_name private attr access as above
+            # TODO(anandkaranubc): same _region_name private
+            # attr access as above
             region_name=instance._region_name  # type: ignore[attr-defined]
         )
     )

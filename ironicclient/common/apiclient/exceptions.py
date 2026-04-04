@@ -25,10 +25,9 @@ from __future__ import annotations
 from http import client as http_client
 import inspect
 import sys
-from typing import Any
-from typing import cast
+from typing import Any, cast
 
-import requests  # type: ignore[import-untyped]
+import requests
 
 from ironicclient.common.i18n import _
 

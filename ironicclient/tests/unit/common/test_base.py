@@ -79,7 +79,7 @@ class TestableResource(base.Resource):
         return "<TestableResource %s>" % self._info
 
 
-class TestableManager(base.CreateManager):
+class TestableManager(base.CreateManager[TestableResource]):
     resource_class = TestableResource
     _creation_attributes = ['attribute1', 'attribute2']
     _resource_name = 'testableresources'

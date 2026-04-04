@@ -15,8 +15,7 @@ from __future__ import annotations
 from collections.abc import Callable
 import functools
 import json
-from typing import Any
-from typing import cast
+from typing import Any, cast
 
 import jsonschema
 import yaml

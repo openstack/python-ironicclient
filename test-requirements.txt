@@ -10,3 +10,5 @@ python-openstackclient>=3.12.0 # Apache-2.0
 
 # Type checking
 mypy>=1.0.0 # MIT
+types-PyYAML # Apache-2.0
+types-requests # Apache-2.0

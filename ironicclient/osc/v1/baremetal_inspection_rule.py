@@ -18,7 +18,7 @@ from collections.abc import Iterable, Sequence
 import itertools
 import json
 import logging
-from typing import Any, cast
+from typing import Any
 
 from osc_lib import utils as oscutils
 
@@ -99,10 +99,7 @@ class CreateBaremetalInspectionRule(command.ShowOne):
         data = dict([(f, getattr(rule, f, '')) for f in
                      res_fields.INSPECTION_RULE_DETAILED_RESOURCE.fields])
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(data),
-        )
+        return self.dict2columns(data)
 
 
 class ShowBaremetalInspectionRule(command.ShowOne):
@@ -148,10 +145,7 @@ class ShowBaremetalInspectionRule(command.ShowOne):
             parsed_args.rule, fields=fields)._info
 
         rule.pop("links", None)
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(dict(sorted(rule.items()))),
-        )
+        return self.dict2columns(dict(sorted(rule.items())))
 
 
 class SetBaremetalInspectionRule(command.Command):

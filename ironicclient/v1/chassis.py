@@ -29,7 +29,7 @@ class Chassis(base.Resource):
         return "<Chassis %s>" % self._info
 
 
-class ChassisManager(base.CreateManager):
+class ChassisManager(base.CreateManager[Chassis]):
     resource_class: type[Chassis] = Chassis
     _resource_name: str = 'chassis'
     _creation_attributes: list[str] = [
@@ -90,7 +90,7 @@ class ChassisManager(base.CreateManager):
         provision_state: str | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Chassis]:
         """List all the nodes for a given chassis.
 
         :param chassis_id: The UUID of the chassis.
@@ -191,7 +191,7 @@ class ChassisManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Chassis]:
         """Retrieve a list of chassis.
 
         :param marker: Optional, the UUID of a chassis, eg the last

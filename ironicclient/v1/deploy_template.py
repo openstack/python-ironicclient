@@ -25,7 +25,7 @@ class DeployTemplate(base.Resource):
         return "<DeployTemplate %s>" % self._info
 
 
-class DeployTemplateManager(base.CreateManager):
+class DeployTemplateManager(base.CreateManager[DeployTemplate]):
     resource_class: type[DeployTemplate] = DeployTemplate
     _creation_attributes: list[str] = [
         'extra', 'name', 'steps', 'uuid',
@@ -82,7 +82,7 @@ class DeployTemplateManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[DeployTemplate]:
         """Retrieve a list of deploy templates.
 
         :param marker: Optional, the UUID of a deploy template, eg the last

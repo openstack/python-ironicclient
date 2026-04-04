@@ -33,7 +33,7 @@ from osc_lib import shell
 
 
 class _ClientManager(clientmanager.ClientManager):
-    # NOTE(karan): baremetal is injected dynamically by the plugin
+    # NOTE(anandkaranubc): baremetal is injected dynamically by the plugin
     # system (via setattr in osc-lib's get_plugin_modules). Typed as
     # Any because osc-lib's utility functions (e.g. get_item_properties)
     # have narrow type signatures that don't accept Resource objects.

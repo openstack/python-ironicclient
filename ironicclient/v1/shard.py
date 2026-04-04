@@ -20,7 +20,7 @@ class Shard(base.Resource):
         return "<Shard %s>" % self._info
 
 
-class ShardManager(base.Manager):
+class ShardManager(base.Manager[Shard]):
     resource_class: type[Shard] = Shard
     _resource_name: str = 'shards'
 
@@ -28,7 +28,7 @@ class ShardManager(base.Manager):
         self,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Shard]:
         """Retrieve a list of shards.
 
         :param os_ironic_api_version: String version (e.g. "1.35") to use for

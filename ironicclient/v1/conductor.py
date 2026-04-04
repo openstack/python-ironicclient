@@ -23,7 +23,7 @@ class Conductor(base.Resource):
         return "<Conductor %s>" % self._info
 
 
-class ConductorManager(base.Manager):
+class ConductorManager(base.Manager[Conductor]):
     resource_class: type[Conductor] = Conductor
     _resource_name: str = 'conductors'
 
@@ -51,7 +51,7 @@ class ConductorManager(base.Manager):
         detail: bool = False,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Conductor]:
         """Retrieve a list of conductors.
 
         :param marker: Optional, the hostname of a conductor, eg the last

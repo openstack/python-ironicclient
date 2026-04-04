@@ -27,7 +27,7 @@ class VolumeTarget(base.Resource):
         return "<VolumeTarget %s>" % self._info
 
 
-class VolumeTargetManager(base.CreateManager):
+class VolumeTargetManager(base.CreateManager[VolumeTarget]):
     resource_class: type[VolumeTarget] = VolumeTarget
     _creation_attributes: list[str] = [
         'extra', 'node_uuid', 'volume_type',
@@ -86,7 +86,7 @@ class VolumeTargetManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[VolumeTarget]:
         """Retrieve a list of volume target.
 
         :param node:   Optional, UUID or name of a node, to get volume

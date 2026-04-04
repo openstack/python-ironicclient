@@ -24,7 +24,7 @@ class Event(base.Resource):
         return "<Event: %s>" % self.name
 
 
-class EventManager(base.CreateManager):
+class EventManager(base.CreateManager[Event]):
     resource_class: type[Event] = Event
     _creation_attributes: list[str] = ['events']
     _resource_name: str = 'events'

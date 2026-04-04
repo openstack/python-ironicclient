@@ -18,7 +18,7 @@ from collections.abc import Iterable, Sequence
 import itertools
 import json
 import logging
-from typing import Any, cast
+from typing import Any
 
 from osc_lib import utils as oscutils
 
@@ -108,10 +108,7 @@ class CreateBaremetalRunbook(command.ShowOne):
         data = dict([(f, getattr(runbook, f, '')) for f in
                      res_fields.RUNBOOK_DETAILED_RESOURCE.fields])
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(data),
-        )
+        return self.dict2columns(data)
 
 
 class ShowBaremetalRunbook(command.ShowOne):
@@ -157,10 +154,7 @@ class ShowBaremetalRunbook(command.ShowOne):
             parsed_args.runbook, fields=fields)._info
 
         runbook.pop("links", None)
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(dict(sorted(runbook.items()))),
-        )
+        return self.dict2columns(dict(sorted(runbook.items())))
 
 
 class SetBaremetalRunbook(command.Command):

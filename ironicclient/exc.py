@@ -12,7 +12,7 @@
 
 from __future__ import annotations
 
-import requests  # type: ignore[import-untyped]
+import requests
 
 from ironicclient.common.apiclient import exceptions
 from ironicclient.common.apiclient.exceptions import *  # noqa
@@ -69,7 +69,7 @@ def from_response(  # type: ignore[no-redef]
         # ability to get all necessary information in method `from_response`
         # from common code, which expecting response object from `requests`
         # library instead of object from `httplib/httplib2` library.
-        response.status_code = response.status  # type: ignore[attr-defined]
+        response.status_code = response.status
         response.headers = {  # type: ignore[assignment]
             'Content-Type':
             response.getheader(  # type: ignore[attr-defined]

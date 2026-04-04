@@ -17,8 +17,7 @@ from __future__ import annotations
 from collections.abc import Callable
 import logging
 import os
-from typing import Any
-from typing import cast
+from typing import Any, cast
 
 from oslo_utils import strutils
 
@@ -205,23 +204,19 @@ class NodeManager(base.CreateManager[Node]):
         path = "%s/volume/connectors" % node_id
         if filters:
             path += '?' + '&'.join(filters)
-        # NOTE(karan): obj_class is VolumeConnector, not Node;
-        # Manager[Node]._list expects type[Node] for obj_class and
-        # returns list[Node], but at runtime produces VolumeConnector
-        # objects.
         vc = volume_connector.VolumeConnector
         if limit is None:
-            return self._list(  # type: ignore[return-value]
+            return self._list(
                 self._path(path), response_key="connectors",
-                obj_class=vc,  # type: ignore[arg-type]
+                obj_class=vc,
                 os_ironic_api_version=os_ironic_api_version,
                 global_request_id=global_request_id,
             )
         else:
-            return self._list_pagination(  # type: ignore[return-value]
+            return self._list_pagination(
                 self._path(path), response_key="connectors",
                 limit=limit,
-                obj_class=vc,  # type: ignore[arg-type]
+                obj_class=vc,
                 os_ironic_api_version=os_ironic_api_version,
                 global_request_id=global_request_id,
             )
@@ -288,21 +283,19 @@ class NodeManager(base.CreateManager[Node]):
         path = "%s/volume/targets" % node_id
         if filters:
             path += '?' + '&'.join(filters)
-        # NOTE(karan): obj_class is VolumeTarget, not Node;
-        # same cross-type mismatch as list_volume_connectors above.
         vt = volume_target.VolumeTarget
         if limit is None:
-            return self._list(  # type: ignore[return-value]
+            return self._list(
                 self._path(path), response_key="targets",
-                obj_class=vt,  # type: ignore[arg-type]
+                obj_class=vt,
                 os_ironic_api_version=os_ironic_api_version,
                 global_request_id=global_request_id,
             )
         else:
-            return self._list_pagination(  # type: ignore[return-value]
+            return self._list_pagination(
                 self._path(path), response_key="targets",
                 limit=limit,
-                obj_class=vt,  # type: ignore[arg-type]
+                obj_class=vt,
                 os_ironic_api_version=os_ironic_api_version,
                 global_request_id=global_request_id,
             )
@@ -772,7 +765,7 @@ class NodeManager(base.CreateManager[Node]):
             'priority', and optional key 'args'. This is optional and is
             only valid when setting provision-state to 'active' or 'rebuild'.
         :param servicesteps: The service steps as list of service-step
-            dictionaries; each dictonary should have keys 'interface', 'step',
+            dictionaries; each dictionary should have keys 'interface', 'step',
             and optional key 'args' when setting an 'active' nodes to
             'service'.
         :param runbook: The identifier of a predefined runbook to use for

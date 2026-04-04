@@ -27,7 +27,7 @@ class VolumeConnector(base.Resource):
         return "<VolumeConnector %s>" % self._info
 
 
-class VolumeConnectorManager(base.CreateManager):
+class VolumeConnectorManager(base.CreateManager[VolumeConnector]):
     resource_class: type[VolumeConnector] = VolumeConnector
     _creation_attributes: list[str] = [
         'extra', 'node_uuid', 'type', 'connector_id', 'uuid',
@@ -85,7 +85,7 @@ class VolumeConnectorManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[VolumeConnector]:
         """Retrieve a list of volume connector.
 
         :param node:   Optional, UUID or name of a node, to get volume

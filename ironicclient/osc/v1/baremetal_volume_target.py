@@ -19,7 +19,7 @@ import argparse
 from collections.abc import Iterable, Sequence
 import itertools
 import logging
-from typing import Any, cast
+from typing import Any
 
 from osc_lib import utils as oscutils
 
@@ -112,10 +112,7 @@ class CreateBaremetalVolumeTarget(command.ShowOne):
 
         data = dict([(f, getattr(volume_target, f, '')) for f in
                      res_fields.VOLUME_TARGET_DETAILED_RESOURCE.fields])
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(data),
-        )
+        return self.dict2columns(data)
 
 
 class ShowBaremetalVolumeTarget(command.ShowOne):
@@ -160,10 +157,8 @@ class ShowBaremetalVolumeTarget(command.ShowOne):
             parsed_args.volume_target, fields=fields)._info
 
         volume_target.pop("links", None)
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            zip(*sorted(volume_target.items())),
-        )
+        columns, data = zip(*sorted(volume_target.items()))
+        return columns, data
 
 
 class ListBaremetalVolumeTarget(command.Lister):

@@ -30,7 +30,7 @@ class Allocation(base.Resource):
         return "<Allocation %s>" % self._info
 
 
-class AllocationManager(base.CreateManager):
+class AllocationManager(base.CreateManager[Allocation]):
     resource_class: type[Allocation] = Allocation
     _resource_name: str = 'allocations'
     _creation_attributes: list[str] = [
@@ -181,7 +181,7 @@ class AllocationManager(base.CreateManager):
         owner: str | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Allocation]:
         """Retrieve a list of allocations.
 
         :param resource_class: Optional, get allocations with this resource

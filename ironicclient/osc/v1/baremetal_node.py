@@ -142,7 +142,8 @@ class ProvisionStateWithWait(ProvisionStateBaremetalNode):
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
-        # NOTE(karan): ProvisionStateWithWait is only used by subclasses whose
+        # NOTE(anandkaranubc): ProvisionStateWithWait is only
+        # used by subclasses whose
         # PROVISION_STATE maps to a non-None entry in PROVISION_ACTIONS
         # (e.g. 'abort' maps to None and uses ProvisionStateBaremetalNode
         # directly). Guard here to satisfy mypy and make the failure explicit.
@@ -287,7 +288,7 @@ class BootdeviceShowBaremetalNode(command.ShowOne):
             info = baremetal_client.node.get_boot_device(parsed_args.node)
         return cast(
             tuple[tuple[str, ...], tuple[Any, ...]],
-            zip(*sorted(info.items())),
+            tuple(zip(*sorted(info.items()))),
         )
 
 
@@ -474,7 +475,7 @@ class ConsoleShowBaremetalNode(command.ShowOne):
         info = baremetal_client.node.get_console(parsed_args.node)
         return cast(
             tuple[tuple[str, ...], tuple[Any, ...]],
-            zip(*sorted(info.items())),
+            tuple(zip(*sorted(info.items()))),
         )
 
 
@@ -690,10 +691,7 @@ class CreateBaremetalNode(command.ShowOne):
 
         node.setdefault('chassis_uuid', '')
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(node),
-        )
+        return self.dict2columns(node)
 
 
 class DeleteBaremetalNode(command.Command):
@@ -1806,10 +1804,7 @@ class ShowBaremetalNode(command.ShowOne):
         if not fields or 'chassis_uuid' in fields:
             node.setdefault('chassis_uuid', '')
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(node),
-        )
+        return self.dict2columns(node)
 
 
 class UndeployBaremetalNode(ProvisionStateWithWait):
@@ -2491,10 +2486,7 @@ class BIOSSettingShowBaremetalNode(command.ShowOne):
         setting = baremetal_client.node.get_bios_setting(
             parsed_args.node, parsed_args.setting_name)
         setting.pop("links", None)
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(setting),
-        )
+        return self.dict2columns(setting)
 
 
 class NodeHistoryList(command.Lister):
@@ -2574,10 +2566,7 @@ class NodeHistoryEventGet(command.ShowOne):
             parsed_args.event)
         data.pop('links')
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(data),
-        )
+        return self.dict2columns(data)
 
 
 class NodeInventorySave(command.Command):

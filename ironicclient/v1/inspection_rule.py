@@ -25,7 +25,7 @@ class InspectionRule(base.Resource):
         return "<InspectionRule %s>" % self._info
 
 
-class InspectionRuleManager(base.CreateManager):
+class InspectionRuleManager(base.CreateManager[InspectionRule]):
     resource_class: type[InspectionRule] = InspectionRule
     _creation_attributes: list[str] = [
         'uuid', 'description', 'priority', 'sensitive',
@@ -83,7 +83,7 @@ class InspectionRuleManager(base.CreateManager):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[InspectionRule]:
         """Retrieve a list of rules.
 
         :param marker: Optional, the UUID of a deploy template, eg the last

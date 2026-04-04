@@ -23,15 +23,13 @@ import re
 import textwrap
 import threading
 import time
-from typing import Any
-from typing import Callable
-from typing import TypeVar
+from typing import Any, Callable, TypeVar
 from urllib import parse as urlparse
 
 from keystoneauth1 import adapter
 from keystoneauth1 import exceptions as kexc
 from keystoneauth1 import session as ks_session
-import requests  # type: ignore[import-untyped]  # no upstream type stubs
+import requests
 
 from ironicclient.common import filecache
 from ironicclient.common.i18n import _

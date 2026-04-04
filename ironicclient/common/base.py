@@ -21,10 +21,7 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import Any
-from typing import cast
-from typing import Generic
-from typing import TypeVar
+from typing import Any, cast, Generic, overload, TypeVar
 from urllib import parse as urlparse
 
 from ironicclient.common.apiclient import base
@@ -43,6 +40,7 @@ class Resource(base.Resource):
 
 
 ResourceT = TypeVar('ResourceT', bound=Resource)
+ResourceAltT = TypeVar('ResourceAltT', bound=Resource)
 
 
 def getid(obj: str | Resource) -> str:
@@ -64,6 +62,7 @@ class Manager(Generic[ResourceT], metaclass=abc.ABCMeta):
 
     def __init__(self, api: SessionClient) -> None:
         self.api = api
+        self.client = api
 
     def _path(self, resource_id: str | None = None) -> str:
         """Returns a request path for a given resource identifier.
@@ -163,15 +162,39 @@ class Manager(Generic[ResourceT], metaclass=abc.ABCMeta):
 
         return data
 
+    @overload
     def _list_pagination(
         self,
         url: str,
         response_key: str | None = None,
-        obj_class: type[ResourceT] | None = None,
+        obj_class: None = None,
         limit: int | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
     ) -> list[ResourceT]:
+        ...
+
+    @overload
+    def _list_pagination(
+        self,
+        url: str,
+        response_key: str | None = None,
+        obj_class: type[ResourceAltT] = ...,
+        limit: int | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> list[ResourceAltT]:
+        ...
+
+    def _list_pagination(
+        self,
+        url: str,
+        response_key: str | None = None,
+        obj_class: type[Resource] | None = None,
+        limit: int | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> list[Any]:
         """Retrieve a list of items.
 
         The Ironic API is configured to return a maximum number of
@@ -218,7 +241,7 @@ class Manager(Generic[ResourceT], metaclass=abc.ABCMeta):
         endpoint_parts = urlparse.urlparse(self.api.endpoint_trimmed)
         url_path_prefix = endpoint_parts[2]
 
-        object_list: list[ResourceT] = []
+        object_list: list[Resource] = []
         object_count = 0
         limit_reached = False
         while url:
@@ -230,12 +253,8 @@ class Manager(Generic[ResourceT], metaclass=abc.ABCMeta):
                     type(body).__name__)
             data = self._format_body_data(body, response_key)
             for obj in data:
-                # NOTE(karan): Manager does not inherit from
-                # apiclient.base.BaseManager, so passing self where
-                # Resource.__init__ expects BaseManager is a structural
-                # mismatch between the two class hierarchies.
                 item = obj_class(
-                    self,  # type: ignore[arg-type]
+                    self,
                     obj,
                     loaded=True,
                 )
@@ -289,15 +308,39 @@ class Manager(Generic[ResourceT], metaclass=abc.ABCMeta):
         data = self._format_body_data(json_body, response_key)
         return data
 
+    @overload
     def _list(
         self,
         url: str,
         response_key: str | None = None,
-        obj_class: type[ResourceT] | None = None,
+        obj_class: None = None,
         body: dict[str, Any] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
     ) -> list[ResourceT]:
+        ...
+
+    @overload
+    def _list(
+        self,
+        url: str,
+        response_key: str | None = None,
+        obj_class: type[ResourceAltT] = ...,
+        body: dict[str, Any] | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> list[ResourceAltT]:
+        ...
+
+    def _list(
+        self,
+        url: str,
+        response_key: str | None = None,
+        obj_class: type[Resource] | None = None,
+        body: dict[str, Any] | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> list[Any]:
         if obj_class is None:
             obj_class = self.resource_class
 
@@ -308,10 +351,8 @@ class Manager(Generic[ResourceT], metaclass=abc.ABCMeta):
             os_ironic_api_version=os_ironic_api_version,
             global_request_id=global_request_id,
         )
-        # NOTE(karan): same Manager/BaseManager mismatch as in
-        # _list_pagination above.
         return [
-            obj_class(self, res, loaded=True)  # type: ignore[arg-type]
+            obj_class(self, res, loaded=True)
             for res in data
             if res
         ]
@@ -362,9 +403,9 @@ class Manager(Generic[ResourceT], metaclass=abc.ABCMeta):
             method, url, body=patch, headers=headers, params=params)
         # PATCH/PUT requests may not return a body
         if body:
-            # NOTE(karan): Manager/BaseManager mismatch (self) and
-            # json_request returns dict | list | bytes, not just dict.
-            return self.resource_class(self, body)  # type: ignore[arg-type]
+            return self.resource_class(
+                self, cast(dict[str, Any], body),
+            )
         return None
 
     def _delete(
@@ -439,7 +480,7 @@ class CreateManager(Manager[ResourceT], metaclass=abc.ABCMeta):
             'POST', url, body=new, headers=headers,
         )
         if body:
-            # NOTE(karan): same Manager/BaseManager + body type
-            # mismatch as in _update above.
-            return self.resource_class(self, body)  # type: ignore[arg-type]
+            return self.resource_class(
+                self, cast(dict[str, Any], body),
+            )
         return None

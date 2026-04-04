@@ -21,7 +21,6 @@ from collections.abc import Iterable, Sequence
 import itertools
 import logging
 from typing import Any
-from typing import cast
 
 from osc_lib import utils as oscutils
 
@@ -158,7 +157,4 @@ class ShowBaremetalConductor(command.ShowOne):
             parsed_args.conductor, fields=fields)._info
         conductor.pop("links", None)
 
-        return cast(
-            tuple[Sequence[str], Iterable[Any]],
-            self.dict2columns(conductor),
-        )
+        return self.dict2columns(conductor)

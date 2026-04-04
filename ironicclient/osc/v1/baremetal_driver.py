@@ -18,8 +18,7 @@ import argparse
 from collections.abc import Iterable, Sequence
 import itertools
 import logging
-from typing import Any
-from typing import cast
+from typing import Any, cast
 
 from osc_lib import utils as oscutils
 
@@ -206,10 +205,7 @@ class PassthruCallBaremetalDriver(command.ShowOne):
                                     http_method=parsed_args.http_method,
                                     args=arguments))
 
-        return cast(
-            tuple[Sequence[str], Iterable[Any]],
-            self.dict2columns(response),
-        )
+        return self.dict2columns(response)
 
 
 class PassthruListBaremetalDriver(command.Lister):
@@ -295,5 +291,5 @@ class ShowBaremetalDriver(command.ShowOne):
         driver = utils.convert_list_props_to_comma_separated(driver)
         return cast(
             tuple[Sequence[str], Iterable[Any]],
-            zip(*sorted(driver.items())),
+            tuple(zip(*sorted(driver.items()))),
         )

@@ -15,8 +15,7 @@
 
 from __future__ import annotations
 
-from typing import Any
-from typing import cast
+from typing import Any, cast
 
 from ironicclient.common import base
 from ironicclient.common.i18n import _
@@ -28,7 +27,7 @@ class Driver(base.Resource):
         return "<Driver %s>" % self._info
 
 
-class DriverManager(base.Manager):
+class DriverManager(base.Manager[Driver]):
     resource_class: type[Driver] = Driver
     _resource_name: str = 'drivers'
 
@@ -191,7 +190,7 @@ class DriverManager(base.Manager):
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
         fields: list[str] | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Driver]:
         """Retrieve a list of drivers.
 
         :param driver_type: Optional, string to filter the drivers by type.

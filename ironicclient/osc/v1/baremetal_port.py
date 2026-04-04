@@ -151,10 +151,7 @@ class CreateBaremetalPort(command.ShowOne):
         data = dict([(f, getattr(port, f, '')) for f in
                      res_fields.PORT_DETAILED_RESOURCE.fields])
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(data),
-        )
+        return self.dict2columns(data)
 
 
 class ShowBaremetalPort(command.ShowOne):
@@ -215,7 +212,7 @@ class ShowBaremetalPort(command.ShowOne):
         port.pop("links", None)
         return cast(
             tuple[tuple[str, ...], tuple[Any, ...]],
-            zip(*sorted(port.items())),
+            tuple(zip(*sorted(port.items()))),
         )
 
 

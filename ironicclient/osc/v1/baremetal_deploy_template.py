@@ -18,7 +18,7 @@ from collections.abc import Iterable, Sequence
 import itertools
 import json
 import logging
-from typing import Any, cast
+from typing import Any
 
 from osc_lib import utils as oscutils
 
@@ -91,10 +91,7 @@ class CreateBaremetalDeployTemplate(command.ShowOne):
         data = dict([(f, getattr(template, f, '')) for f in
                      res_fields.DEPLOY_TEMPLATE_DETAILED_RESOURCE.fields])
 
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(data),
-        )
+        return self.dict2columns(data)
 
 
 class ShowBaremetalDeployTemplate(command.ShowOne):
@@ -140,10 +137,7 @@ class ShowBaremetalDeployTemplate(command.ShowOne):
             parsed_args.template, fields=fields)._info
 
         template.pop("links", None)
-        return cast(
-            tuple[tuple[str, ...], tuple[Any, ...]],
-            self.dict2columns(dict(sorted(template.items()))),
-        )
+        return self.dict2columns(dict(sorted(template.items())))
 
 
 class SetBaremetalDeployTemplate(command.Command):

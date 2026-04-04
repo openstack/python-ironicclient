@@ -25,7 +25,7 @@ class Runbook(base.Resource):
         return "<Runbook %s>" % self._info
 
 
-class RunbookManager(base.CreateManager):
+class RunbookManager(base.CreateManager[Runbook]):
     resource_class: type[Runbook] = Runbook
     _creation_attributes: list[str] = [
         'extra', 'name', 'owner', 'public', 'steps', 'uuid',
@@ -84,7 +84,7 @@ class RunbookManager(base.CreateManager):
         global_request_id: str | None = None,
         project: str | None = None,
         public: bool | None = None,
-    ) -> list[base.Resource]:
+    ) -> list[Runbook]:
         """Retrieve a list of runbooks.
 
         :param marker: Optional, the UUID of a deploy template, eg the last

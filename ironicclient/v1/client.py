@@ -16,8 +16,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
-from typing import cast
+from typing import Any, cast
 
 from ironicclient.common import filecache
 from ironicclient.common import http

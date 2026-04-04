@@ -14,8 +14,7 @@ from __future__ import annotations
 
 import logging
 import types
-from typing import Any
-from typing import cast
+from typing import Any, cast
 
 from keystoneauth1 import session as ks_session
 from openstack import config
@@ -117,19 +116,17 @@ def get_client(
                 _('Must provide Keystone credentials or user-defined '
                   'endpoint, error was: %s') % e)
 
-    return cast(
-        v1_client.Client,
-        Client(
-            api_version,
-            endpoint_override=endpoint,
-            session=session,
-            os_ironic_api_version=os_ironic_api_version,
-            additional_headers=additional_headers,
-            global_request_id=global_request_id,
-            max_retries=max_retries,
-            retry_interval=retry_interval,
-            interface=interface,
-        ))
+    return Client(
+        api_version,
+        endpoint_override=endpoint,
+        session=session,
+        os_ironic_api_version=os_ironic_api_version,
+        additional_headers=additional_headers,
+        global_request_id=global_request_id,
+        max_retries=max_retries,
+        retry_interval=retry_interval,
+        interface=interface,
+    )
 
 
 def Client(

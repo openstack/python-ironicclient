@@ -29,10 +29,7 @@ import abc
 from collections.abc import Sequence
 import copy
 from http import client as http_client
-from typing import Any
-from typing import Callable
-from typing import cast
-from typing import ClassVar
+from typing import Any, Callable, cast, ClassVar, Protocol
 from urllib import parse as urlparse
 
 from oslo_utils import strutils
@@ -89,6 +86,12 @@ class HookableMixin(object):
         hook_funcs = cls._hooks_map.get(hook_type) or []
         for hook_func in hook_funcs:
             hook_func(*args, **kwargs)
+
+
+class ManagerProtocol(Protocol):
+    """Minimal protocol for Resource's manager dependency."""
+
+    client: Any
 
 
 class BaseManager(HookableMixin):
@@ -502,7 +505,10 @@ class Resource(object):
     NAME_ATTR: str = "name"
 
     def __init__(
-        self, manager: BaseManager, info: dict[str, Any], loaded: bool = False
+        self,
+        manager: ManagerProtocol,
+        info: dict[str, Any],
+        loaded: bool = False,
     ) -> None:
         """Populate and bind to a manager.
 
@@ -559,10 +565,13 @@ class Resource(object):
         """
         # set_loaded() first ... so if we have to bail, we know we tried.
         self.set_loaded(True)
-        if not hasattr(self.manager, "get"):
+        get_fn: Callable[..., Resource] | None = getattr(
+            self.manager, "get", None,
+        )
+        if get_fn is None:
             return
 
-        new = self.manager.get(self.id)
+        new = get_fn(self.id)
         if new:
             self._add_details(new._info)
             self._add_details(

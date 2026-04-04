@@ -101,7 +101,7 @@ class CommandManager(commandmanager.CommandManager):
         prefix_len = len(prefix)
         self.commands = dict(
             (cmd[prefix_len:] if cmd.startswith(prefix) else cmd, ep)
-            for (cmd, ep) in self.commands.items()  # type: ignore[has-type]
+            for (cmd, ep) in self.commands.items()
         )
 
 
