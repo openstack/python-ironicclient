@@ -43,9 +43,7 @@ class CreateBaremetalDeployTemplate(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".CreateBaremetalDeployTemplate")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -105,9 +103,7 @@ class ShowBaremetalDeployTemplate(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ShowBaremetalDeployTemplate")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -156,9 +152,7 @@ class SetBaremetalDeployTemplate(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".SetBaremetalDeployTemplate")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -218,9 +212,7 @@ class UnsetBaremetalDeployTemplate(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".UnsetBaremetalDeployTemplate")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -263,9 +255,7 @@ class DeleteBaremetalDeployTemplate(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".DeleteBaremetalDeployTemplate")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -303,9 +293,7 @@ class ListBaremetalDeployTemplate(command.Lister):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ListBaremetalDeployTemplate")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(

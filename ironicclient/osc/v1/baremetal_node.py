@@ -14,18 +14,22 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 import argparse
+from collections.abc import Iterable, Sequence
 import itertools
 import json
 import logging
 import sys
+from typing import Any, cast
 
-from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 from ironicclient.v1 import utils as v1_utils
 
@@ -48,18 +52,23 @@ NETWORK_DATA_ARG_HELP = _(
     "being used, network configuration may or may not been served to the "
     "node for offline network configuration.")
 
-SUPPORTED_INTERFACES = ['bios', 'boot', 'console', 'deploy', 'firmware',
-                        'inspect', 'management', 'network', 'power', 'raid',
-                        'rescue', 'storage', 'vendor']
+SUPPORTED_INTERFACES: list[str] = [
+    'bios', 'boot', 'console', 'deploy', 'firmware',
+    'inspect', 'management', 'network', 'power', 'raid',
+    'rescue', 'storage', 'vendor']
 
 
 class ProvisionStateBaremetalNode(command.Command):
     """Base provision state class"""
 
-    log = logging.getLogger(__name__ + ".ProvisionStateBaremetalNode")
+    PROVISION_STATE: str
 
-    def get_parser(self, prog_name):
-        parser = super(ProvisionStateBaremetalNode, self).get_parser(prog_name)
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ProvisionStateBaremetalNode")
+
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -75,7 +84,7 @@ class ProvisionStateBaremetalNode(command.Command):
             help=argparse.SUPPRESS)
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -126,13 +135,23 @@ class ProvisionStateBaremetalNode(command.Command):
 class ProvisionStateWithWait(ProvisionStateBaremetalNode):
     """Provision state class adding --wait flag."""
 
-    log = logging.getLogger(__name__ + ".ProvisionStateWithWait")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ProvisionStateWithWait")
 
-    def get_parser(self, prog_name):
-        parser = super(ProvisionStateWithWait, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
-        desired_state = v1_utils.PROVISION_ACTIONS.get(
-            self.PROVISION_STATE)['expected_state']
+        # NOTE(karan): ProvisionStateWithWait is only used by subclasses whose
+        # PROVISION_STATE maps to a non-None entry in PROVISION_ACTIONS
+        # (e.g. 'abort' maps to None and uses ProvisionStateBaremetalNode
+        # directly). Guard here to satisfy mypy and make the failure explicit.
+        action = v1_utils.PROVISION_ACTIONS.get(self.PROVISION_STATE)
+        if action is None:
+            raise exc.CommandError(
+                _("'--wait' is not supported for provision state '%s'")
+                % self.PROVISION_STATE)
+        desired_state = action['expected_state']
         parser.add_argument(
             '--wait',
             type=int,
@@ -147,8 +166,8 @@ class ProvisionStateWithWait(ProvisionStateBaremetalNode):
             {'state': desired_state})
         return parser
 
-    def take_action(self, parsed_args):
-        super(ProvisionStateWithWait, self).take_action(parsed_args)
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
+        super().take_action(parsed_args)
         self.log.debug("take_action(%s)", parsed_args)
 
         if (parsed_args.wait_timeout is None):
@@ -160,7 +179,7 @@ class ProvisionStateWithWait(ProvisionStateBaremetalNode):
         if wait_args is None:
             # This should never happen in reality, but checking just in case
             raise exc.CommandError(
-                _("'--wait is not supported for provision state '%s'")
+                _("'--wait' is not supported for provision state '%s'")
                 % parsed_args.provision_state)
 
         print(_('Waiting for provision state %(state)s on node(s) %(node)s') %
@@ -176,24 +195,28 @@ class ProvisionStateWithWait(ProvisionStateBaremetalNode):
 class AbortBaremetalNode(ProvisionStateBaremetalNode):
     """Set provision state of baremetal node to 'abort'"""
 
-    log = logging.getLogger(__name__ + ".AbortBaremetalNode")
-    PROVISION_STATE = 'abort'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".AbortBaremetalNode")
+    PROVISION_STATE: str = 'abort'
 
 
 class AdoptBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'adopt'"""
 
-    log = logging.getLogger(__name__ + ".AdoptBaremetalNode")
-    PROVISION_STATE = 'adopt'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".AdoptBaremetalNode")
+    PROVISION_STATE: str = 'adopt'
 
 
 class BootdeviceSetBaremetalNode(command.Command):
     """Set the boot device for a node"""
 
-    log = logging.getLogger(__name__ + ".BootdeviceSetBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".BootdeviceSetBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(BootdeviceSetBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -216,7 +239,7 @@ class BootdeviceSetBaremetalNode(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -228,10 +251,12 @@ class BootdeviceSetBaremetalNode(command.Command):
 class BootdeviceShowBaremetalNode(command.ShowOne):
     """Show the boot device information for a node"""
 
-    log = logging.getLogger(__name__ + ".BootdeviceShowBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".BootdeviceShowBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(BootdeviceShowBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -247,7 +272,9 @@ class BootdeviceShowBaremetalNode(command.ShowOne):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -258,16 +285,21 @@ class BootdeviceShowBaremetalNode(command.ShowOne):
             info['supported_boot_devices'] = ', '.join(boot_device_list)
         else:
             info = baremetal_client.node.get_boot_device(parsed_args.node)
-        return zip(*sorted(info.items()))
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            zip(*sorted(info.items())),
+        )
 
 
 class BootmodeSetBaremetalNode(command.Command):
     """Set the boot mode for the next baremetal node deployment"""
 
-    log = logging.getLogger(__name__ + ".BootmodeSetBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".BootmodeSetBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(BootmodeSetBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -284,7 +316,7 @@ class BootmodeSetBaremetalNode(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -295,11 +327,13 @@ class BootmodeSetBaremetalNode(command.Command):
 class CleanBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'clean'"""
 
-    log = logging.getLogger(__name__ + ".CleanBaremetalNode")
-    PROVISION_STATE = 'clean'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".CleanBaremetalNode")
+    PROVISION_STATE: str = 'clean'
 
-    def get_parser(self, prog_name):
-        parser = super(CleanBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         clean_group = parser.add_mutually_exclusive_group(required=True)
 
         clean_group.add_argument(
@@ -329,11 +363,13 @@ class CleanBaremetalNode(ProvisionStateWithWait):
 class ServiceBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'service'"""
 
-    log = logging.getLogger(__name__ + ".ServiceBaremetalNode")
-    PROVISION_STATE = 'service'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ServiceBaremetalNode")
+    PROVISION_STATE: str = 'service'
 
-    def get_parser(self, prog_name):
-        parser = super(ServiceBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         service_group = parser.add_mutually_exclusive_group(required=True)
 
         service_group.add_argument(
@@ -363,10 +399,12 @@ class ServiceBaremetalNode(ProvisionStateWithWait):
 class ConsoleDisableBaremetalNode(command.Command):
     """Disable console access for a node"""
 
-    log = logging.getLogger(__name__ + ".ConsoleDisableBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ConsoleDisableBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(ConsoleDisableBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -376,7 +414,7 @@ class ConsoleDisableBaremetalNode(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -387,10 +425,12 @@ class ConsoleDisableBaremetalNode(command.Command):
 class ConsoleEnableBaremetalNode(command.Command):
     """Enable console access for a node"""
 
-    log = logging.getLogger(__name__ + ".ConsoleEnableBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ConsoleEnableBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(ConsoleEnableBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -400,7 +440,7 @@ class ConsoleEnableBaremetalNode(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -411,10 +451,12 @@ class ConsoleEnableBaremetalNode(command.Command):
 class ConsoleShowBaremetalNode(command.ShowOne):
     """Show console information for a node"""
 
-    log = logging.getLogger(__name__ + ".ConsoleShowBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ConsoleShowBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(ConsoleShowBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -423,21 +465,28 @@ class ConsoleShowBaremetalNode(command.ShowOne):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
         info = baremetal_client.node.get_console(parsed_args.node)
-        return zip(*sorted(info.items()))
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            zip(*sorted(info.items())),
+        )
 
 
 class CreateBaremetalNode(command.ShowOne):
     """Register a new node with the baremetal service"""
 
-    log = logging.getLogger(__name__ + ".CreateBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".CreateBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(CreateBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--chassis-uuid',
@@ -609,17 +658,20 @@ class CreateBaremetalNode(command.ShowOne):
             help=_('Explicitly disable power off actions on the node'))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
         baremetal_client = self.app.client_manager.baremetal
 
-        field_list = ['automated_clean', 'chassis_uuid', 'disable_power_off',
-                      'driver', 'driver_info', 'properties', 'extra', 'uuid',
-                      'name', 'instance_name', 'conductor_group', 'owner',
-                      'description', 'lessee', 'shard', 'resource_class',
-                      'parent_node',
-                      ] + ['%s_interface' % iface
-                           for iface in SUPPORTED_INTERFACES]
+        field_list: list[str] = [
+            'automated_clean', 'chassis_uuid', 'disable_power_off',
+            'driver', 'driver_info', 'properties', 'extra', 'uuid',
+            'name', 'instance_name', 'conductor_group', 'owner',
+            'description', 'lessee', 'shard', 'resource_class',
+            'parent_node',
+        ] + ['%s_interface' % iface
+             for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and not (v is None))
         fields = utils.args_array_to_dict(fields, 'driver_info')
@@ -638,16 +690,21 @@ class CreateBaremetalNode(command.ShowOne):
 
         node.setdefault('chassis_uuid', '')
 
-        return self.dict2columns(node)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(node),
+        )
 
 
 class DeleteBaremetalNode(command.Command):
     """Unregister baremetal node(s)"""
 
-    log = logging.getLogger(__name__ + ".DeleteBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".DeleteBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(DeleteBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "nodes",
             metavar="<node>",
@@ -656,12 +713,12 @@ class DeleteBaremetalNode(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
 
-        failures = []
+        failures: list[str] = []
         for node in parsed_args.nodes:
             try:
                 baremetal_client.node.delete(node)
@@ -677,11 +734,13 @@ class DeleteBaremetalNode(command.Command):
 class DeployBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'deploy'"""
 
-    log = logging.getLogger(__name__ + ".DeployBaremetalNode")
-    PROVISION_STATE = 'active'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".DeployBaremetalNode")
+    PROVISION_STATE: str = 'active'
 
-    def get_parser(self, prog_name):
-        parser = super(DeployBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--config-drive',
@@ -706,20 +765,24 @@ class DeployBaremetalNode(ProvisionStateWithWait):
 class InspectBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'inspect'"""
 
-    log = logging.getLogger(__name__ + ".InspectBaremetalNode")
-    PROVISION_STATE = 'inspect'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".InspectBaremetalNode")
+    PROVISION_STATE: str = 'inspect'
 
 
 class ListBaremetalNode(command.Lister):
     """List baremetal nodes"""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalNode")
 
-    PROVISION_STATES = ['active', 'deleted', 'rebuild', 'inspect', 'provide',
-                        'manage', 'clean', 'adopt', 'abort']
+    PROVISION_STATES: list[str] = [
+        'active', 'deleted', 'rebuild', 'inspect', 'provide',
+        'manage', 'clean', 'adopt', 'abort']
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             '--limit',
             metavar='<limit>',
@@ -885,13 +948,15 @@ class ListBaremetalNode(command.Lister):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
         client = self.app.client_manager.baremetal
 
         columns = res_fields.NODE_RESOURCE.fields
 
-        params = {}
+        params: dict[str, object] = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
             raise exc.CommandError(
                 _('Expected non-negative --limit, got %s') %
@@ -938,10 +1003,12 @@ class ListBaremetalNode(command.Lister):
 class MaintenanceSetBaremetalNode(command.Command):
     """Set baremetal node to maintenance mode"""
 
-    log = logging.getLogger(__name__ + ".MaintenanceSetBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".MaintenanceSetBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(MaintenanceSetBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -957,7 +1024,7 @@ class MaintenanceSetBaremetalNode(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -970,11 +1037,12 @@ class MaintenanceSetBaremetalNode(command.Command):
 class MaintenanceUnsetBaremetalNode(command.Command):
     """Unset baremetal node from maintenance mode"""
 
-    log = logging.getLogger(__name__ + ".MaintenanceUnsetBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".MaintenanceUnsetBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(MaintenanceUnsetBaremetalNode,
-                       self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -984,7 +1052,7 @@ class MaintenanceUnsetBaremetalNode(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -996,24 +1064,28 @@ class MaintenanceUnsetBaremetalNode(command.Command):
 class ManageBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'manage'"""
 
-    log = logging.getLogger(__name__ + ".ManageBaremetalNode")
-    PROVISION_STATE = 'manage'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ManageBaremetalNode")
+    PROVISION_STATE: str = 'manage'
 
 
 class UnholdBaremetalNode(ProvisionStateBaremetalNode):
     """Set provision state of baremetal node to 'unhold'"""
 
-    log = logging.getLogger(__name__ + ".UnholdBaremetalNode")
-    PROVISION_STATE = 'unhold'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UnholdBaremetalNode")
+    PROVISION_STATE: str = 'unhold'
 
 
 class PassthruCallBaremetalNode(command.Command):
     """Call a vendor passthru method for a node"""
 
-    log = logging.getLogger(__name__ + ".PassthruCallBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".PassthruCallBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(PassthruCallBaremetalNode, self).get_parser(
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(
             prog_name)
 
         parser.add_argument(
@@ -1044,7 +1116,7 @@ class PassthruCallBaremetalNode(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -1063,10 +1135,12 @@ class PassthruCallBaremetalNode(command.Command):
 class PassthruListBaremetalNode(command.Lister):
     """List vendor passthru methods for a node"""
 
-    log = logging.getLogger(__name__ + ".PassthruListBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".PassthruListBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(PassthruListBaremetalNode, self).get_parser(
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(
             prog_name)
 
         parser.add_argument(
@@ -1076,7 +1150,9 @@ class PassthruListBaremetalNode(command.Lister):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -1099,10 +1175,14 @@ class PassthruListBaremetalNode(command.Lister):
 class PowerBaremetalNode(command.Command):
     """Base power state class, for setting the power of a node"""
 
-    log = logging.getLogger(__name__ + ".PowerBaremetalNode")
+    POWER_STATE: str
 
-    def get_parser(self, prog_name):
-        parser = super(PowerBaremetalNode, self).get_parser(prog_name)
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".PowerBaremetalNode")
+
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -1120,7 +1200,7 @@ class PowerBaremetalNode(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -1136,11 +1216,13 @@ class PowerBaremetalNode(command.Command):
 class PowerOffBaremetalNode(PowerBaremetalNode):
     """Power off a node"""
 
-    log = logging.getLogger(__name__ + ".PowerOffBaremetalNode")
-    POWER_STATE = 'off'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".PowerOffBaremetalNode")
+    POWER_STATE: str = 'off'
 
-    def get_parser(self, prog_name):
-        parser = super(PowerOffBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             '--soft',
             dest='soft',
@@ -1154,24 +1236,28 @@ class PowerOffBaremetalNode(PowerBaremetalNode):
 class PowerOnBaremetalNode(PowerBaremetalNode):
     """Power on a node"""
 
-    log = logging.getLogger(__name__ + ".PowerOnBaremetalNode")
-    POWER_STATE = 'on'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".PowerOnBaremetalNode")
+    POWER_STATE: str = 'on'
 
 
 class ProvideBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'provide'"""
 
-    log = logging.getLogger(__name__ + ".ProvideBaremetalNode")
-    PROVISION_STATE = 'provide'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ProvideBaremetalNode")
+    PROVISION_STATE: str = 'provide'
 
 
 class RebootBaremetalNode(command.Command):
     """Reboot baremetal node"""
 
-    log = logging.getLogger(__name__ + ".RebootBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".RebootBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(RebootBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -1197,7 +1283,7 @@ class RebootBaremetalNode(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -1211,11 +1297,13 @@ class RebootBaremetalNode(command.Command):
 class RebuildBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'rebuild'"""
 
-    log = logging.getLogger(__name__ + ".RebuildBaremetalNode")
-    PROVISION_STATE = 'rebuild'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".RebuildBaremetalNode")
+    PROVISION_STATE: str = 'rebuild'
 
-    def get_parser(self, prog_name):
-        parser = super(RebuildBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--config-drive',
@@ -1240,11 +1328,13 @@ class RebuildBaremetalNode(ProvisionStateWithWait):
 class RescueBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'rescue'"""
 
-    log = logging.getLogger(__name__ + ".RescueBaremetalNode")
-    PROVISION_STATE = 'rescue'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".RescueBaremetalNode")
+    PROVISION_STATE: str = 'rescue'
 
-    def get_parser(self, prog_name):
-        parser = super(RescueBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--rescue-password',
@@ -1259,10 +1349,12 @@ class RescueBaremetalNode(ProvisionStateWithWait):
 class SecurebootOnBaremetalNode(command.Command):
     """Turn secure boot on"""
 
-    log = logging.getLogger(__name__ + ".SecurebootOnBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".SecurebootOnBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(SecurebootOnBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -1272,7 +1364,7 @@ class SecurebootOnBaremetalNode(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -1283,10 +1375,12 @@ class SecurebootOnBaremetalNode(command.Command):
 class SecurebootOffBaremetalNode(command.Command):
     """Turn secure boot off"""
 
-    log = logging.getLogger(__name__ + ".SecurebootOffBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".SecurebootOffBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(SecurebootOffBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -1296,7 +1390,7 @@ class SecurebootOffBaremetalNode(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -1307,9 +1401,16 @@ class SecurebootOffBaremetalNode(command.Command):
 class SetBaremetalNode(command.Command):
     """Set baremetal properties"""
 
-    log = logging.getLogger(__name__ + ".SetBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".SetBaremetalNode")
 
-    def _add_interface_args(self, parser, iface, set_help, reset_help):
+    def _add_interface_args(
+        self,
+        parser: argparse.ArgumentParser,
+        iface: str,
+        set_help: str,
+        reset_help: str,
+    ) -> None:
         grp = parser.add_mutually_exclusive_group()
         grp.add_argument(
             '--%s-interface' % iface,
@@ -1322,8 +1423,9 @@ class SetBaremetalNode(command.Command):
             help=reset_help
         )
 
-    def get_parser(self, prog_name):
-        parser = super(SetBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -1563,7 +1665,7 @@ class SetBaremetalNode(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         if parsed_args.name and len(parsed_args.nodes) > 1:
@@ -1585,7 +1687,7 @@ class SetBaremetalNode(command.Command):
             for node in parsed_args.nodes:
                 baremetal_client.node.set_target_raid_config(node, raid_config)
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         for field in ['instance_uuid', 'instance_name', 'name',
                       'chassis_uuid', 'driver', 'resource_class',
                       'conductor_group', 'protected', 'protected_reason',
@@ -1651,10 +1753,12 @@ class SetBaremetalNode(command.Command):
 class ShowBaremetalNode(command.ShowOne):
     """Show baremetal node details"""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ShowBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(ShowBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "node",
             metavar="<node>",
@@ -1678,12 +1782,15 @@ class ShowBaremetalNode(command.ShowOne):
                    "fetched from the server."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-        fields = list(itertools.chain.from_iterable(parsed_args.fields))
-        fields = fields if fields else None
+        fields: list[str] | None = (
+            list(itertools.chain.from_iterable(parsed_args.fields))
+            or None)
         if parsed_args.instance_uuid:
             node = baremetal_client.node.get_by_instance_uuid(
                 parsed_args.node, fields=fields)._info
@@ -1699,29 +1806,36 @@ class ShowBaremetalNode(command.ShowOne):
         if not fields or 'chassis_uuid' in fields:
             node.setdefault('chassis_uuid', '')
 
-        return self.dict2columns(node)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(node),
+        )
 
 
 class UndeployBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'deleted'"""
 
-    log = logging.getLogger(__name__ + ".UndeployBaremetalNode")
-    PROVISION_STATE = 'deleted'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UndeployBaremetalNode")
+    PROVISION_STATE: str = 'deleted'
 
 
 class UnrescueBaremetalNode(ProvisionStateWithWait):
     """Set provision state of baremetal node to 'unrescue'"""
 
-    log = logging.getLogger(__name__ + ".UnrescueBaremetalNode")
-    PROVISION_STATE = 'unrescue'
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UnrescueBaremetalNode")
+    PROVISION_STATE: str = 'unrescue'
 
 
 class UnsetBaremetalNode(command.Command):
     """Unset baremetal properties"""
-    log = logging.getLogger(__name__ + ".UnsetBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UnsetBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(UnsetBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -1937,7 +2051,7 @@ class UnsetBaremetalNode(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -1949,7 +2063,7 @@ class UnsetBaremetalNode(command.Command):
             for node in parsed_args.nodes:
                 baremetal_client.node.set_target_raid_config(node, {})
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         for field in ['instance_uuid', 'instance_name', 'name', 'chassis_uuid',
                       'resource_class', 'conductor_group', 'automated_clean',
                       'bios_interface', 'boot_interface', 'console_interface',
@@ -1993,10 +2107,12 @@ class UnsetBaremetalNode(command.Command):
 class ValidateBaremetalNode(command.Lister):
     """Validate a node's driver interfaces"""
 
-    log = logging.getLogger(__name__ + ".ValidateBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ValidateBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(ValidateBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2005,20 +2121,22 @@ class ValidateBaremetalNode(command.Lister):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
 
         interfaces = baremetal_client.node.validate(parsed_args.node)._info
-        data = []
+        data: list[dict[str, Any]] = []
         for key, value in interfaces.items():
-            interface = {'interface': key}
+            interface: dict[str, Any] = {'interface': key}
             interface.update(value)
             data.append(interface)
         field_labels = ['Interface', 'Result', 'Reason']
         fields = ['interface', 'result', 'reason']
-        data = oscutils.sort_items(data, 'interface')
+        data = list(oscutils.sort_items(data, 'interface'))
         return (field_labels,
                 (oscutils.get_dict_properties(s, fields) for s in data))
 
@@ -2026,10 +2144,12 @@ class ValidateBaremetalNode(command.Lister):
 class VifListBaremetalNode(command.Lister):
     """Show attached VIFs for a node"""
 
-    log = logging.getLogger(__name__ + ".VifListBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".VifListBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(VifListBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2038,7 +2158,9 @@ class VifListBaremetalNode(command.Lister):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         columns = res_fields.VIF_RESOURCE.fields
@@ -2053,10 +2175,12 @@ class VifListBaremetalNode(command.Lister):
 class VifAttachBaremetalNode(command.Command):
     """Attach VIF to a given node"""
 
-    log = logging.getLogger(__name__ + ".VifAttachBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".VifAttachBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(VifAttachBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2082,7 +2206,7 @@ class VifAttachBaremetalNode(command.Command):
                    "parameter cannot be specified as a key."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -2097,10 +2221,12 @@ class VifAttachBaremetalNode(command.Command):
 class VifDetachBaremetalNode(command.Command):
     """Detach VIF from a given node"""
 
-    log = logging.getLogger(__name__ + ".VifDetachBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".VifDetachBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(VifDetachBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2114,7 +2240,7 @@ class VifDetachBaremetalNode(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -2124,10 +2250,12 @@ class VifDetachBaremetalNode(command.Command):
 class InjectNmiBaremetalNode(command.Command):
     """Inject NMI to baremetal node"""
 
-    log = logging.getLogger(__name__ + ".InjectNmiBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".InjectNmiBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(InjectNmiBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'nodes',
@@ -2138,7 +2266,7 @@ class InjectNmiBaremetalNode(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -2149,10 +2277,12 @@ class InjectNmiBaremetalNode(command.Command):
 class ListTraitsBaremetalNode(command.Lister):
     """List a node's traits."""
 
-    log = logging.getLogger(__name__ + ".ListTraitsBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListTraitsBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(ListTraitsBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2161,7 +2291,9 @@ class ListTraitsBaremetalNode(command.Lister):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         columns = res_fields.TRAIT_RESOURCE.fields
@@ -2175,10 +2307,12 @@ class ListTraitsBaremetalNode(command.Lister):
 class AddTraitBaremetalNode(command.Command):
     """Add traits to a node."""
 
-    log = logging.getLogger(__name__ + ".AddTraitBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".AddTraitBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(AddTraitBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2192,12 +2326,12 @@ class AddTraitBaremetalNode(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
 
-        failures = []
+        failures: list[str] = []
         for trait in parsed_args.traits:
             try:
                 baremetal_client.node.add_trait(parsed_args.node, trait)
@@ -2213,10 +2347,12 @@ class AddTraitBaremetalNode(command.Command):
 class RemoveTraitBaremetalNode(command.Command):
     """Remove trait(s) from a node."""
 
-    log = logging.getLogger(__name__ + ".RemoveTraitBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".RemoveTraitBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(RemoveTraitBaremetalNode, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2237,12 +2373,12 @@ class RemoveTraitBaremetalNode(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
 
-        failures = []
+        failures: list[str] = []
         if parsed_args.remove_all:
             baremetal_client.node.remove_all_traits(parsed_args.node)
         else:
@@ -2262,10 +2398,12 @@ class RemoveTraitBaremetalNode(command.Command):
 class ListBIOSSettingBaremetalNode(command.Lister):
     """List a node's BIOS settings."""
 
-    log = logging.getLogger(__name__ + ".ListBIOSSettingBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBIOSSettingBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBIOSSettingBaremetalNode, self).get_parser(
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(
             prog_name)
 
         parser.add_argument(
@@ -2292,19 +2430,22 @@ class ListBIOSSettingBaremetalNode(command.Lister):
                    "is specified."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         fields = res_fields.BIOS_RESOURCE.fields
 
-        params = {}
+        params: dict[str, object] = {}
         if parsed_args.long:
             params['detail'] = parsed_args.long
             fields = res_fields.BIOS_DETAILED_RESOURCE.fields
         elif parsed_args.fields:
             params['detail'] = False
-            fields = itertools.chain.from_iterable(parsed_args.fields)
-            resource = res_fields.Resource(list(fields))
+            fields_iter = itertools.chain.from_iterable(
+                parsed_args.fields)
+            resource = res_fields.Resource(list(fields_iter))
             fields = resource.fields
             params['fields'] = fields
 
@@ -2321,10 +2462,12 @@ class ListBIOSSettingBaremetalNode(command.Lister):
 class BIOSSettingShowBaremetalNode(command.ShowOne):
     """Show a specific BIOS setting for a node."""
 
-    log = logging.getLogger(__name__ + ".BIOSSettingShowBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".BIOSSettingShowBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(BIOSSettingShowBaremetalNode, self).get_parser(
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(
             prog_name)
 
         parser.add_argument(
@@ -2339,23 +2482,30 @@ class BIOSSettingShowBaremetalNode(command.ShowOne):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
         setting = baremetal_client.node.get_bios_setting(
             parsed_args.node, parsed_args.setting_name)
         setting.pop("links", None)
-        return self.dict2columns(setting)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(setting),
+        )
 
 
 class NodeHistoryList(command.Lister):
     """Get history events for a baremetal node."""
 
-    log = logging.getLogger(__name__ + ".NodeHistoryList")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".NodeHistoryList")
 
-    def get_parser(self, prog_name):
-        parser = super(NodeHistoryList, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2369,7 +2519,9 @@ class NodeHistoryList(command.Lister):
             action='store_true')
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -2389,10 +2541,12 @@ class NodeHistoryList(command.Lister):
 class NodeHistoryEventGet(command.ShowOne):
     """Get history event for a baremetal node."""
 
-    log = logging.getLogger(__name__ + ".NodeHistoryEventGet")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".NodeHistoryEventGet")
 
-    def get_parser(self, prog_name):
-        parser = super(NodeHistoryEventGet, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2408,7 +2562,9 @@ class NodeHistoryEventGet(command.ShowOne):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -2418,16 +2574,21 @@ class NodeHistoryEventGet(command.ShowOne):
             parsed_args.event)
         data.pop('links')
 
-        return self.dict2columns(data)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(data),
+        )
 
 
 class NodeInventorySave(command.Command):
     """Get hardware inventory of a node (in JSON format) or save it to file."""
 
-    log = logging.getLogger(__name__ + ".NodeInventorySave")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".NodeInventorySave")
 
-    def get_parser(self, prog_name):
-        parser = super(NodeInventorySave, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "node",
             metavar="<node>",
@@ -2438,7 +2599,7 @@ class NodeInventorySave(command.Command):
                             "(default: stdout).")
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -2454,10 +2615,12 @@ class NodeInventorySave(command.Command):
 class NodeChildrenList(command.ShowOne):
     """Get a list of nodes associated as children."""
 
-    log = logging.getLogger(__name__ + ".NodeChildrenList")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".NodeChildrenList")
 
-    def get_parser(self, prog_name):
-        parser = super(NodeChildrenList, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'node',
@@ -2467,7 +2630,9 @@ class NodeChildrenList(command.ShowOne):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
@@ -2476,16 +2641,21 @@ class NodeChildrenList(command.ShowOne):
 
         data = baremetal_client.node.list_children_of_node(
             parsed_args.node)
-        return (columns, [[node] for node in data])
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            (columns, [[node] for node in data]),
+        )
 
 
 class ListFirmwareComponentBaremetalNode(command.Lister):
     """List all Firmware Components of a node"""
 
-    log = logging.getLogger(__name__ + ".ListFirmwareComponentBaremetalNode")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListFirmwareComponentBaremetalNode")
 
-    def get_parser(self, prog_name):
-        parser = super(ListFirmwareComponentBaremetalNode, self).get_parser(
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(
             prog_name)
 
         parser.add_argument(
@@ -2495,7 +2665,9 @@ class ListFirmwareComponentBaremetalNode(command.Lister):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
 
         fields = res_fields.FIRMWARE_RESOURCE.fields

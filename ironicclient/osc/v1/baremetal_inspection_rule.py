@@ -35,9 +35,7 @@ class CreateBaremetalInspectionRule(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".CreateBaremetalInspectionRule")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -113,9 +111,7 @@ class ShowBaremetalInspectionRule(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ShowBaremetalInspectionRule")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -164,9 +160,7 @@ class SetBaremetalInspectionRule(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".SetBaremetalInspectionRule")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -242,9 +236,7 @@ class UnsetBaremetalInspectionRule(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".UnsetBaremetalInspectionRule")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -321,9 +313,7 @@ class DeleteBaremetalInspectionRule(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".DeleteBaremetalInspectionRule")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -369,9 +359,7 @@ class ListBaremetalInspectionRule(command.Lister):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ListBaremetalInspectionRule")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(

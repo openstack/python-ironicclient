@@ -13,25 +13,32 @@
 # under the License.
 
 
+from __future__ import annotations
+
+import argparse
+from collections.abc import Iterable, Sequence
 import itertools
 import logging
+from typing import Any, cast
 
-from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 
 
 class CreateBaremetalVolumeTarget(command.ShowOne):
     """Create a new baremetal volume target."""
 
-    log = logging.getLogger(__name__ + ".CreateBaremetalVolumeTarget")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".CreateBaremetalVolumeTarget")
 
-    def get_parser(self, prog_name):
-        parser = super(CreateBaremetalVolumeTarget, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--node',
@@ -82,17 +89,21 @@ class CreateBaremetalVolumeTarget(command.ShowOne):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)" % parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
         if parsed_args.boot_index < 0:
             raise exc.CommandError(
                 _('Expected non-negative --boot-index, got %s') %
                 parsed_args.boot_index)
 
-        field_list = ['extra', 'volume_type', 'properties',
-                      'boot_index', 'node_uuid', 'volume_id', 'uuid']
+        field_list: list[str] = [
+            'extra', 'volume_type', 'properties',
+            'boot_index', 'node_uuid', 'volume_id', 'uuid']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'properties')
@@ -101,16 +112,21 @@ class CreateBaremetalVolumeTarget(command.ShowOne):
 
         data = dict([(f, getattr(volume_target, f, '')) for f in
                      res_fields.VOLUME_TARGET_DETAILED_RESOURCE.fields])
-        return self.dict2columns(data)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(data),
+        )
 
 
 class ShowBaremetalVolumeTarget(command.ShowOne):
     """Show baremetal volume target details."""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetalVolumeTarget")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ShowBaremetalVolumeTarget")
 
-    def get_parser(self, prog_name):
-        parser = super(ShowBaremetalVolumeTarget, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'volume_target',
@@ -128,27 +144,37 @@ class ShowBaremetalVolumeTarget(command.ShowOne):
                    "be fetched from the server."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
-        fields = list(itertools.chain.from_iterable(parsed_args.fields))
-        fields = fields if fields else None
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
+        fields: list[str] | None
+        fields = (
+            list(itertools.chain.from_iterable(parsed_args.fields))
+            or None)
 
         volume_target = baremetal_client.volume_target.get(
             parsed_args.volume_target, fields=fields)._info
 
         volume_target.pop("links", None)
-        return zip(*sorted(volume_target.items()))
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            zip(*sorted(volume_target.items())),
+        )
 
 
 class ListBaremetalVolumeTarget(command.Lister):
     """List baremetal volume targets."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalVolumeTarget")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalVolumeTarget")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalVolumeTarget, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--node',
@@ -198,13 +224,16 @@ class ListBaremetalVolumeTarget(command.Lister):
                    "'--long' is specified."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)" % parsed_args)
-        client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        client = manager.baremetal
 
         columns = res_fields.VOLUME_TARGET_RESOURCE.fields
 
-        params = {}
+        params: dict[str, object] = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
             raise exc.CommandError(
                 _('Expected non-negative --limit, got %s') %
@@ -237,11 +266,12 @@ class ListBaremetalVolumeTarget(command.Lister):
 class DeleteBaremetalVolumeTarget(command.Command):
     """Unregister baremetal volume target(s)."""
 
-    log = logging.getLogger(__name__ + ".DeleteBaremetalVolumeTarget")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".DeleteBaremetalVolumeTarget")
 
-    def get_parser(self, prog_name):
-        parser = (
-            super(DeleteBaremetalVolumeTarget, self).get_parser(prog_name))
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             'volume_targets',
             metavar='<volume target>',
@@ -250,12 +280,13 @@ class DeleteBaremetalVolumeTarget(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        failures = []
+        failures: list[str] = []
         for volume_target in parsed_args.volume_targets:
             try:
                 baremetal_client.volume_target.delete(volume_target)
@@ -273,11 +304,12 @@ class DeleteBaremetalVolumeTarget(command.Command):
 class SetBaremetalVolumeTarget(command.Command):
     """Set baremetal volume target properties."""
 
-    log = logging.getLogger(__name__ + ".SetBaremetalVolumeTarget")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".SetBaremetalVolumeTarget")
 
-    def get_parser(self, prog_name):
-        parser = (
-            super(SetBaremetalVolumeTarget, self).get_parser(prog_name))
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'volume_target',
@@ -322,17 +354,18 @@ class SetBaremetalVolumeTarget(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
         if parsed_args.boot_index is not None and parsed_args.boot_index < 0:
             raise exc.CommandError(
                 _('Expected non-negative --boot-index, got %s') %
                 parsed_args.boot_index)
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.node_uuid:
             properties.extend(utils.args_array_to_patch(
                 'add', ["node_uuid=%s" % parsed_args.node_uuid]))
@@ -362,11 +395,13 @@ class SetBaremetalVolumeTarget(command.Command):
 
 class UnsetBaremetalVolumeTarget(command.Command):
     """Unset baremetal volume target properties."""
-    log = logging.getLogger(__name__ + "UnsetBaremetalVolumeTarget")
 
-    def get_parser(self, prog_name):
-        parser = (
-            super(UnsetBaremetalVolumeTarget, self).get_parser(prog_name))
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UnsetBaremetalVolumeTarget")
+
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'volume_target',
@@ -389,12 +424,13 @@ class UnsetBaremetalVolumeTarget(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch('remove',
                               ['extra/' + x for x in parsed_args.extra]))

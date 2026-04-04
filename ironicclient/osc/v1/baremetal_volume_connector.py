@@ -36,9 +36,7 @@ class CreateBaremetalVolumeConnector(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".CreateBaremetalVolumeConnector")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -107,9 +105,7 @@ class ShowBaremetalVolumeConnector(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ShowBaremetalVolumeConnector")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -157,9 +153,7 @@ class ListBaremetalVolumeConnector(command.Lister):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ListBaremetalVolumeConnector")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -256,9 +250,7 @@ class DeleteBaremetalVolumeConnector(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".DeleteBaremetalVolumeConnector")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -296,9 +288,7 @@ class SetBaremetalVolumeConnector(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".SetBaremetalVolumeConnector")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -367,9 +357,7 @@ class UnsetBaremetalVolumeConnector(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".UnsetBaremetalVolumeConnector")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 

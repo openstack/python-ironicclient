@@ -11,16 +11,21 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
+import argparse
+from collections.abc import Iterable, Sequence
 import itertools
 import json
 import logging
+from typing import Any, cast
 
-from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 
 
@@ -35,11 +40,12 @@ _RUNBOOK_STEPS_HELP = _(
 class CreateBaremetalRunbook(command.ShowOne):
     """Create a new runbook"""
 
-    log = logging.getLogger(__name__ + ".CreateBaremetalRunbook")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".CreateBaremetalRunbook")
 
-    def get_parser(self, prog_name):
-        parser = super(CreateBaremetalRunbook, self).get_parser(
-            prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--name',
@@ -80,13 +86,16 @@ class CreateBaremetalRunbook(command.ShowOne):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
         steps = utils.handle_json_arg(parsed_args.steps, 'runbook steps')
 
-        field_list = ['name', 'uuid', 'owner', 'public', 'extra']
+        field_list: list[str] = ['name', 'uuid', 'owner', 'public', 'extra']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         if parsed_args.public is not None:
@@ -99,16 +108,21 @@ class CreateBaremetalRunbook(command.ShowOne):
         data = dict([(f, getattr(runbook, f, '')) for f in
                      res_fields.RUNBOOK_DETAILED_RESOURCE.fields])
 
-        return self.dict2columns(data)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(data),
+        )
 
 
 class ShowBaremetalRunbook(command.ShowOne):
     """Show baremetal runbook details."""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetalRunbook")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ShowBaremetalRunbook")
 
-    def get_parser(self, prog_name):
-        parser = super(ShowBaremetalRunbook, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "runbook",
             metavar="<runbook>",
@@ -127,27 +141,37 @@ class ShowBaremetalRunbook(command.ShowOne):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
-        fields = list(itertools.chain.from_iterable(parsed_args.fields))
-        fields = fields if fields else None
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
+        fields: list[str] | None
+        fields = (
+            list(itertools.chain.from_iterable(parsed_args.fields))
+            or None)
 
         runbook = baremetal_client.runbook.get(
             parsed_args.runbook, fields=fields)._info
 
         runbook.pop("links", None)
-        return zip(*sorted(runbook.items()))
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(dict(sorted(runbook.items()))),
+        )
 
 
 class SetBaremetalRunbook(command.Command):
     """Set baremetal runbook properties."""
 
-    log = logging.getLogger(__name__ + ".SetBaremetalRunbook")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".SetBaremetalRunbook")
 
-    def get_parser(self, prog_name):
-        parser = super(SetBaremetalRunbook, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'runbook',
@@ -187,12 +211,13 @@ class SetBaremetalRunbook(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.name:
             name = ["name=%s" % parsed_args.name]
             properties.extend(utils.args_array_to_patch('add', name))
@@ -221,11 +246,12 @@ class SetBaremetalRunbook(command.Command):
 
 class UnsetBaremetalRunbook(command.Command):
     """Unset baremetal runbook properties."""
-    log = logging.getLogger(__name__ + ".UnsetBaremetalRunbook")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UnsetBaremetalRunbook")
 
-    def get_parser(self, prog_name):
-        parser = super(UnsetBaremetalRunbook, self).get_parser(
-            prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'runbook',
@@ -266,12 +292,13 @@ class UnsetBaremetalRunbook(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         for field in ['name', 'owner', 'public']:
             if getattr(parsed_args, field):
                 properties.extend(utils.args_array_to_patch('remove', [field]))
@@ -293,11 +320,12 @@ class UnsetBaremetalRunbook(command.Command):
 class DeleteBaremetalRunbook(command.Command):
     """Delete runbook(s)."""
 
-    log = logging.getLogger(__name__ + ".DeleteBaremetalRunbook")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".DeleteBaremetalRunbook")
 
-    def get_parser(self, prog_name):
-        parser = super(DeleteBaremetalRunbook, self).get_parser(
-            prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "runbooks",
             metavar="<runbook>",
@@ -307,12 +335,13 @@ class DeleteBaremetalRunbook(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        failures = []
+        failures: list[str] = []
         for runbook in parsed_args.runbooks:
             try:
                 baremetal_client.runbook.delete(runbook)
@@ -329,10 +358,12 @@ class DeleteBaremetalRunbook(command.Command):
 class ListBaremetalRunbook(command.Lister):
     """List baremetal runbooks."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalRunbook")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalRunbook")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalRunbook, self).get_parser(prog_name)
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             '--limit',
             metavar='<limit>',
@@ -377,13 +408,16 @@ class ListBaremetalRunbook(command.Lister):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        client = manager.baremetal
 
         columns = res_fields.RUNBOOK_RESOURCE.fields
 
-        params = {}
+        params: dict[str, object] = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
             raise exc.CommandError(
                 _('Expected non-negative --limit, got %s') %

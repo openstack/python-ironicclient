@@ -36,9 +36,7 @@ class ListBaremetalDriver(command.Lister):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ListBaremetalDriver")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -106,9 +104,7 @@ class ListBaremetalDriverProperty(command.Lister):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ListBaremetalDriverProperty")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -136,9 +132,7 @@ class ListBaremetalDriverRaidProperty(command.Lister):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ListBaremetalDriverRaidProperty")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -166,9 +160,7 @@ class PassthruCallBaremetalDriver(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".PassthruCallBaremetalDriver")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -226,9 +218,7 @@ class PassthruListBaremetalDriver(command.Lister):
     log: logging.Logger = logging.getLogger(
         __name__ + ".PassthruListBaremetalDriver")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -266,9 +256,7 @@ class ShowBaremetalDriver(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ShowBaremetalDriver")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(

@@ -223,6 +223,11 @@ files = [
     "ironicclient/osc/v1/baremetal_chassis.py",
     "ironicclient/osc/v1/baremetal_deploy_template.py",
     "ironicclient/osc/v1/baremetal_volume_connector.py",
+    "ironicclient/osc/v1/baremetal_volume_target.py",
     "ironicclient/osc/v1/baremetal_allocation.py",
     "ironicclient/osc/v1/baremetal_inspection_rule.py",
+    "ironicclient/osc/v1/baremetal_port.py",
+    "ironicclient/osc/v1/baremetal_portgroup.py",
+    "ironicclient/osc/v1/baremetal_runbook.py",
+    "ironicclient/osc/v1/baremetal_node.py",
 ]

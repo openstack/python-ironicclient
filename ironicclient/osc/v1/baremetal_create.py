@@ -26,9 +26,7 @@ class CreateBaremetal(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".CreateBaremetal")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser = super().get_parser(prog_name)
 
         parser.add_argument(

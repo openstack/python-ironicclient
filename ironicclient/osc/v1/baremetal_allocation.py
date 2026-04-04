@@ -34,9 +34,7 @@ class CreateBaremetalAllocation(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".CreateBaremetalAllocation")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -133,9 +131,7 @@ class ShowBaremetalAllocation(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ShowBaremetalAllocation")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -182,9 +178,7 @@ class ListBaremetalAllocation(command.Lister):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ListBaremetalAllocation")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -289,9 +283,7 @@ class DeleteBaremetalAllocation(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".DeleteBaremetalAllocation")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -328,9 +320,7 @@ class SetBaremetalAllocation(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".SetBaremetalAllocation")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -380,9 +370,7 @@ class UnsetBaremetalAllocation(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".UnsetBaremetalAllocation")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 

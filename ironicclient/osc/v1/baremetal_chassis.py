@@ -38,9 +38,7 @@ class CreateBaremetalChassis(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".CreateBaremetalChassis")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -94,9 +92,7 @@ class DeleteBaremetalChassis(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".DeleteBaremetalChassis")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -134,9 +130,7 @@ class ListBaremetalChassis(command.Lister):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ListBaremetalChassis")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         display_group = parser.add_mutually_exclusive_group(required=False)
@@ -224,9 +218,7 @@ class SetBaremetalChassis(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".SetBaremetalChassis")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 
@@ -276,9 +268,7 @@ class ShowBaremetalChassis(command.ShowOne):
     log: logging.Logger = logging.getLogger(
         __name__ + ".ShowBaremetalChassis")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -327,9 +317,7 @@ class UnsetBaremetalChassis(command.Command):
     log: logging.Logger = logging.getLogger(
         __name__ + ".UnsetBaremetalChassis")
 
-    def get_parser(  # type: ignore[override]
-        self, prog_name: str,
-    ) -> argparse.ArgumentParser:
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser: argparse.ArgumentParser
         parser = super().get_parser(prog_name)
 

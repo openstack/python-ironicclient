@@ -454,7 +454,7 @@ def poll(
 
 
 def handle_json_arg(
-    json_arg: str,
+    json_arg: str | None,
     info_desc: str,
 ) -> list[Any] | dict[str, Any] | None:
     """Read a JSON argument from stdin, file or string.

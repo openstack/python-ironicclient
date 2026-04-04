@@ -116,7 +116,7 @@ class App(app.App):
                                   command_manager=mgr,
                                   deferred_help=True)
 
-    def build_option_parser(  # type: ignore[override]
+    def build_option_parser(
         self,
         description: str | None,
         version: str | None,
