@@ -39,6 +39,7 @@ files = [
     "ironicclient/client.py",
     "ironicclient/shell.py",
     "ironicclient/__init__.py",
+    "ironicclient/osc/command.py",
     "ironicclient/osc/plugin.py",
     "ironicclient/osc/v1/baremetal_shard.py",
     "ironicclient/osc/v1/baremetal_create.py",
