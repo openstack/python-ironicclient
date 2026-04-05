@@ -13,7 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import copy
+from typing import Any
 from unittest import mock
 
 import testtools
@@ -75,7 +78,7 @@ fake_responses = {
 
 
 class TestableResource(base.Resource):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<TestableResource %s>" % self._info
 
 
@@ -84,30 +87,59 @@ class TestableManager(base.CreateManager[TestableResource]):
     _creation_attributes = ['attribute1', 'attribute2']
     _resource_name = 'testableresources'
 
-    def _path(self, id=None):
+    def _path(self, id: str | None = None) -> str:
         return ('/v1/testableresources/%s' % id if id
                 else '/v1/testableresources')
 
-    def get(self, testable_resource_id, fields=None, **kwargs):
-        return self._get(resource_id=testable_resource_id,
-                         fields=fields, **kwargs)
+    def get(
+        self,
+        testable_resource_id: str,
+        fields: list[str] | None = None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> TestableResource | None:
+        return self._get(
+            resource_id=testable_resource_id,
+            fields=fields,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
 
-    def delete(self, testable_resource_id, **kwargs):
-        return self._delete(resource_id=testable_resource_id, **kwargs)
+    def delete(
+        self,
+        testable_resource_id: str,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> None:
+        return self._delete(
+            resource_id=testable_resource_id,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
 
-    def update(self, testable_resource_id, patch, **kwargs):
-        return self._update(resource_id=testable_resource_id,
-                            patch=patch, **kwargs)
+    def update(
+        self,
+        testable_resource_id: str,
+        patch: list[dict[str, Any]] | None,
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+    ) -> TestableResource | None:
+        return self._update(
+            resource_id=testable_resource_id,
+            patch=patch,
+            os_ironic_api_version=os_ironic_api_version,
+            global_request_id=global_request_id,
+        )
 
 
 class ManagerTestCase(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(ManagerTestCase, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
         self.manager = TestableManager(self.api)
 
-    def test_create(self):
+    def test_create(self) -> None:
         resource = self.manager.create(**CREATE_TESTABLE_RESOURCE)
         expect = [
             ('POST', '/v1/testableresources', {}, CREATE_TESTABLE_RESOURCE),
@@ -116,7 +148,9 @@ class ManagerTestCase(testtools.TestCase):
         self.assertTrue(resource)
         self.assertIsInstance(resource, TestableResource)
 
-    def test_create_microversion_and_global_request_id_override(self):
+    def test_create_microversion_and_global_request_id_override(
+        self,
+    ) -> None:
         resource = self.manager.create(
             **CREATE_TESTABLE_RESOURCE,
             os_ironic_api_version="1.22", global_request_id=REQ_ID)
@@ -129,12 +163,14 @@ class ManagerTestCase(testtools.TestCase):
         self.assertTrue(resource)
         self.assertIsInstance(resource, TestableResource)
 
-    def test_create_with_invalid_attribute(self):
+    def test_create_with_invalid_attribute(self) -> None:
         self.assertRaisesRegex(exc.InvalidAttribute, "non-existent-attribute",
                                self.manager.create,
                                **INVALID_ATTRIBUTE_TESTABLE_RESOURCE)
 
-    def test__get_microversion_and_global_request_id_override(self):
+    def test__get_microversion_and_global_request_id_override(
+        self,
+    ) -> None:
         resource_id = TESTABLE_RESOURCE['uuid']
         resource = self.manager._get(
             resource_id, os_ironic_api_version='1.22',
@@ -148,13 +184,13 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(resource_id, resource.uuid)
         self.assertEqual(TESTABLE_RESOURCE['attribute1'], resource.attribute1)
 
-    def test__get_invalid_resource_id_raises(self):
+    def test__get_invalid_resource_id_raises(self) -> None:
         resource_ids = [[], {}, False, '', 0, None, ()]
         for resource_id in resource_ids:
             self.assertRaises(exc.ValidationError, self.manager._get,
                               resource_id=resource_id)
 
-    def test__get_as_dict(self):
+    def test__get_as_dict(self) -> None:
         resource_id = TESTABLE_RESOURCE['uuid']
         resource = self.manager._get_as_dict(resource_id)
         expect = [
@@ -164,7 +200,9 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(TESTABLE_RESOURCE, resource)
 
-    def test__get_as_dict_microversion_and_global_request_id_override(self):
+    def test__get_as_dict_microversion_and_global_request_id_override(
+        self,
+    ) -> None:
         resource_id = TESTABLE_RESOURCE['uuid']
         resource = self.manager._get_as_dict(
             resource_id, os_ironic_api_version='1.21',
@@ -178,7 +216,9 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(TESTABLE_RESOURCE, resource)
 
     @mock.patch.object(base.Manager, '_get', autospec=True)
-    def test__get_as_dict_empty(self, mock_get):
+    def test__get_as_dict_empty(self,
+                                mock_get: mock.MagicMock,
+                                ) -> None:
         mock_get.return_value = None
         resource_id = TESTABLE_RESOURCE['uuid']
         resource = self.manager._get_as_dict(resource_id)
@@ -187,7 +227,7 @@ class ManagerTestCase(testtools.TestCase):
             os_ironic_api_version=None, global_request_id=None)
         self.assertEqual({}, resource)
 
-    def test_get(self):
+    def test_get(self) -> None:
         resource = self.manager.get(TESTABLE_RESOURCE['uuid'])
         expect = [
             ('GET', '/v1/testableresources/%s' % TESTABLE_RESOURCE['uuid'],
@@ -197,7 +237,9 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(TESTABLE_RESOURCE['uuid'], resource.uuid)
         self.assertEqual(TESTABLE_RESOURCE['attribute1'], resource.attribute1)
 
-    def test_get_microversion_and_global_request_id_override(self):
+    def test_get_microversion_and_global_request_id_override(
+        self,
+    ) -> None:
         resource = self.manager.get(
             TESTABLE_RESOURCE['uuid'], os_ironic_api_version='1.10',
             global_request_id=REQ_ID)
@@ -210,7 +252,7 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(TESTABLE_RESOURCE['uuid'], resource.uuid)
         self.assertEqual(TESTABLE_RESOURCE['attribute1'], resource.attribute1)
 
-    def test_update(self):
+    def test_update(self) -> None:
         patch = {'op': 'replace',
                  'value': NEW_ATTRIBUTE_VALUE,
                  'path': '/attribute1'}
@@ -225,7 +267,9 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_ATTRIBUTE_VALUE, resource.attribute1)
 
-    def test_update_microversion_and_global_request_id_override(self):
+    def test_update_microversion_and_global_request_id_override(
+        self,
+    ) -> None:
         patch = {'op': 'replace',
                  'value': NEW_ATTRIBUTE_VALUE,
                  'path': '/attribute1'}
@@ -241,7 +285,7 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_ATTRIBUTE_VALUE, resource.attribute1)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         resource = self.manager.delete(
             testable_resource_id=TESTABLE_RESOURCE['uuid']
         )
@@ -252,7 +296,9 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(resource)
 
-    def test_delete_microversion_and_global_request_id_override(self):
+    def test_delete_microversion_and_global_request_id_override(
+        self,
+    ) -> None:
         resource = self.manager.delete(
             testable_resource_id=TESTABLE_RESOURCE['uuid'],
             os_ironic_api_version="1.9", global_request_id=REQ_ID

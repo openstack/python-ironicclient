@@ -13,9 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 from http import client as http_client
 import json
 import time
+from typing import Any
 from unittest import mock
 
 from keystoneauth1 import exceptions as kexc
@@ -32,7 +35,11 @@ DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '1234'
 
 
-def _get_error_body(faultstring=None, debuginfo=None, description=None):
+def _get_error_body(
+    faultstring: str | None = None,
+    debuginfo: str | None = None,
+    description: str | None = None,
+) -> str:
     if description:
         error_body = {'description': description}
     else:
@@ -45,7 +52,7 @@ def _get_error_body(faultstring=None, debuginfo=None, description=None):
     return json.dumps(body)
 
 
-def _session_client(**kwargs):
+def _session_client(**kwargs: Any) -> http.SessionClient:
     return http.SessionClient(os_ironic_api_version='1.6',
                               api_version_select_state='default',
                               max_retries=5,
@@ -61,7 +68,7 @@ def _session_client(**kwargs):
 
 class VersionNegotiationMixinTest(utils.BaseTestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(VersionNegotiationMixinTest, self).setUp()
         self.test_object = http.VersionNegotiationMixin()
         self.test_object.os_ironic_api_version = '1.6'
@@ -74,7 +81,7 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         self.test_object.get_server = mock.MagicMock(
             return_value=('localhost', '1234'))
 
-    def test__generic_parse_version_headers_has_headers(self):
+    def test__generic_parse_version_headers_has_headers(self) -> None:
         response = {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
                     'X-OpenStack-Ironic-API-Maximum-Version': '1.6',
                     }
@@ -82,14 +89,16 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         result = self.test_object._generic_parse_version_headers(response.get)
         self.assertEqual(expected, result)
 
-    def test__generic_parse_version_headers_missing_headers(self):
+    def test__generic_parse_version_headers_missing_headers(self) -> None:
         response = {}
         expected = (None, None)
         result = self.test_object._generic_parse_version_headers(response.get)
         self.assertEqual(expected, result)
 
     @mock.patch.object(filecache, 'save_data', autospec=True)
-    def test_negotiate_version_bad_state(self, mock_save_data):
+    def test_negotiate_version_bad_state(
+        self, mock_save_data: mock.MagicMock,
+    ) -> None:
         # Test if bad api_version_select_state value
         self.test_object.api_version_select_state = 'word of the day: augur'
         self.assertRaises(
@@ -101,7 +110,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
-    def test_negotiate_version_server_older(self, mock_pvh, mock_save_data):
+    def test_negotiate_version_server_older(
+        self,
+        mock_pvh: mock.MagicMock,
+        mock_save_data: mock.MagicMock,
+    ) -> None:
         # Test newer client and older server
         latest_ver = '1.5'
         mock_pvh.return_value = ('1.1', latest_ver)
@@ -116,7 +129,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
-    def test_negotiate_version_server_newer(self, mock_pvh, mock_save_data):
+    def test_negotiate_version_server_newer(
+        self,
+        mock_pvh: mock.MagicMock,
+        mock_save_data: mock.MagicMock,
+    ) -> None:
         # Test newer server and older client
         mock_pvh.return_value = ('1.1', '1.10')
         mock_conn = mock.MagicMock()
@@ -133,7 +150,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
     def test_negotiate_version_server_no_version_on_error(
-            self, mock_pvh, mock_msr, mock_save_data):
+            self,
+            mock_pvh: mock.MagicMock,
+            mock_msr: mock.MagicMock,
+            mock_save_data: mock.MagicMock,
+    ) -> None:
         # Test older Ironic version which errored with no version number and
         # have to retry with simple get
         mock_pvh.side_effect = iter([(None, None), ('1.1', '1.2')])
@@ -147,8 +168,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
-    def test_negotiate_version_server_explicit_too_high(self, mock_pvh,
-                                                        mock_save_data):
+    def test_negotiate_version_server_explicit_too_high(
+        self,
+        mock_pvh: mock.MagicMock,
+        mock_save_data: mock.MagicMock,
+    ) -> None:
         # requested version is not supported because it is too large
         mock_pvh.return_value = ('1.1', '1.6')
         mock_conn = mock.MagicMock()
@@ -164,8 +188,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
-    def test_negotiate_version_server_explicit_not_supported(self, mock_pvh,
-                                                             mock_save_data):
+    def test_negotiate_version_server_explicit_not_supported(
+        self,
+        mock_pvh: mock.MagicMock,
+        mock_save_data: mock.MagicMock,
+    ) -> None:
         # requested version is supported by the server but the server returned
         # 406 because the requested operation is not supported with the
         # requested version
@@ -183,8 +210,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(filecache, 'save_data', autospec=True)
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
-    def test_negotiate_version_strict_version_comparison(self, mock_pvh,
-                                                         mock_save_data):
+    def test_negotiate_version_strict_version_comparison(
+        self,
+        mock_pvh: mock.MagicMock,
+        mock_save_data: mock.MagicMock,
+    ) -> None:
         # Test version comparison with StrictVersion
         max_ver = '1.10'
         mock_pvh.return_value = ('1.2', max_ver)
@@ -203,7 +233,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
     def test_negotiate_version_server_user_latest(
-            self, mock_pvh, mock_msr, mock_save_data):
+            self,
+            mock_pvh: mock.MagicMock,
+            mock_msr: mock.MagicMock,
+            mock_save_data: mock.MagicMock,
+    ) -> None:
         # For the test to work we need to have the mock reply
         # with a version range that exceeds the client version
         # otherwise we are not confirming that the client is
@@ -234,7 +268,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
     def test_negotiate_version_server_user_list(
-            self, mock_pvh, mock_msr, mock_save_data):
+            self,
+            mock_pvh: mock.MagicMock,
+            mock_msr: mock.MagicMock,
+            mock_save_data: mock.MagicMock,
+    ) -> None:
         # have to retry with simple get
         mock_pvh.side_effect = [(None, None), ('1.1', '1.26')]
         mock_conn = mock.MagicMock()
@@ -259,7 +297,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
     def test_negotiate_version_server_user_list_fails_nomatch(
-            self, mock_pvh, mock_msr, mock_save_data):
+            self,
+            mock_pvh: mock.MagicMock,
+            mock_msr: mock.MagicMock,
+            mock_save_data: mock.MagicMock,
+    ) -> None:
         # have to retry with simple get
         mock_pvh.side_effect = iter([(None, None), ('1.2', '1.26')])
         mock_conn = mock.MagicMock()
@@ -282,7 +324,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
     def test_negotiate_version_server_user_list_single_value(
-            self, mock_pvh, mock_msr, mock_save_data):
+            self,
+            mock_pvh: mock.MagicMock,
+            mock_msr: mock.MagicMock,
+            mock_save_data: mock.MagicMock,
+    ) -> None:
         # have to retry with simple get
         mock_pvh.side_effect = iter([(None, None), ('1.1', '1.26')])
         mock_conn = mock.MagicMock()
@@ -306,7 +352,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
     def test_negotiate_version_server_user_list_fails_latest(
-            self, mock_pvh, mock_msr, mock_save_data):
+            self,
+            mock_pvh: mock.MagicMock,
+            mock_msr: mock.MagicMock,
+            mock_save_data: mock.MagicMock,
+    ) -> None:
         # have to retry with simple get
         mock_pvh.side_effect = iter([(None, None), ('1.1', '1.2')])
         mock_conn = mock.MagicMock()
@@ -329,7 +379,11 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
     @mock.patch.object(http.VersionNegotiationMixin, '_parse_version_headers',
                        autospec=True)
     def test_negotiate_version_explicit_version_request(
-            self, mock_pvh, mock_msr, mock_save_data):
+            self,
+            mock_pvh: mock.MagicMock,
+            mock_msr: mock.MagicMock,
+            mock_save_data: mock.MagicMock,
+    ) -> None:
         mock_pvh.side_effect = iter([(None, None), ('1.1', '1.99')])
         mock_conn = mock.MagicMock()
         self.test_object.api_version_select_state = 'negotiated'
@@ -346,7 +400,7 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
         self.assertEqual(2, mock_pvh.call_count)
         self.assertFalse(mock_save_data.called)
 
-    def test_get_server(self):
+    def test_get_server(self) -> None:
         host = 'ironic-host'
         port = '6385'
         endpoint_override = 'http://%s:%s/ironic/v1/' % (host, port)
@@ -354,7 +408,7 @@ class VersionNegotiationMixinTest(utils.BaseTestCase):
 
 
 class SessionClientTest(utils.BaseTestCase):
-    def test_server_exception_empty_body(self):
+    def test_server_exception_empty_body(self) -> None:
         error_body = _get_error_body()
 
         fake_session = utils.mockSession({'Content-Type': 'application/json'},
@@ -367,7 +421,7 @@ class SessionClientTest(utils.BaseTestCase):
                           client.json_request,
                           'GET', '/v1/resources')
 
-    def test_server_exception_description_only(self):
+    def test_server_exception_description_only(self) -> None:
         error_msg = 'test error msg'
         error_body = _get_error_body(description=error_msg)
         fake_session = utils.mockSession(
@@ -379,7 +433,7 @@ class SessionClientTest(utils.BaseTestCase):
                                client.json_request,
                                'GET', '/v1/resources')
 
-    def test__parse_version_headers(self):
+    def test__parse_version_headers(self) -> None:
         # Test parsing of version headers from SessionClient
         fake_session = utils.mockSession(
             {'X-OpenStack-Ironic-API-Minimum-Version': '1.1',
@@ -393,7 +447,7 @@ class SessionClientTest(utils.BaseTestCase):
         result = client._parse_version_headers(fake_session.request())
         self.assertEqual(expected_result, result)
 
-    def test_make_simple_request(self):
+    def test_make_simple_request(self) -> None:
         session = utils.mockSession({})
 
         client = _session_client(session=session)
@@ -411,13 +465,15 @@ class SessionClientTest(utils.BaseTestCase):
         self.assertEqual(res, session.request.return_value)
 
     @mock.patch.object(http.SessionClient, 'get_endpoint', autospec=True)
-    def test_endpoint_not_found(self, mock_get_endpoint):
+    def test_endpoint_not_found(
+        self, mock_get_endpoint: mock.MagicMock,
+    ) -> None:
         mock_get_endpoint.return_value = None
 
         self.assertRaises(exc.EndpointNotFound, _session_client,
                           session=utils.mockSession({}))
 
-    def test_json_request(self):
+    def test_json_request(self) -> None:
         session = utils.mockSession({}, status_code=200)
         req_id = "req-7b081d28-8272-45f4-9cf6-89649c1c7a1a"
         client = _session_client(
@@ -447,7 +503,7 @@ class SessionClientTest(utils.BaseTestCase):
 @mock.patch.object(time, 'sleep', lambda *_: None)
 class RetriesTestCase(utils.BaseTestCase):
 
-    def test_session_retry(self):
+    def test_session_retry(self) -> None:
         error_body = _get_error_body()
 
         fake_resp = utils.mockSessionResponse(
@@ -465,7 +521,7 @@ class RetriesTestCase(utils.BaseTestCase):
         client.json_request('GET', '/v1/resources')
         self.assertEqual(2, fake_session.request.call_count)
 
-    def test_session_retry_503(self):
+    def test_session_retry_503(self) -> None:
         error_body = _get_error_body()
 
         fake_resp = utils.mockSessionResponse(
@@ -483,7 +539,7 @@ class RetriesTestCase(utils.BaseTestCase):
         client.json_request('GET', '/v1/resources')
         self.assertEqual(2, fake_session.request.call_count)
 
-    def test_session_retry_connection_refused(self):
+    def test_session_retry_connection_refused(self) -> None:
         ok_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
@@ -496,7 +552,9 @@ class RetriesTestCase(utils.BaseTestCase):
         client.json_request('GET', '/v1/resources')
         self.assertEqual(2, fake_session.request.call_count)
 
-    def test_session_retry_retriable_connection_failure(self):
+    def test_session_retry_retriable_connection_failure(
+        self,
+    ) -> None:
         ok_resp = utils.mockSessionResponse(
             {'Content-Type': 'application/json'},
             b"OK",
@@ -509,7 +567,7 @@ class RetriesTestCase(utils.BaseTestCase):
         client.json_request('GET', '/v1/resources')
         self.assertEqual(2, fake_session.request.call_count)
 
-    def test_session_retry_fail(self):
+    def test_session_retry_fail(self) -> None:
         error_body = _get_error_body()
 
         fake_resp = utils.mockSessionResponse(
@@ -526,7 +584,7 @@ class RetriesTestCase(utils.BaseTestCase):
         self.assertEqual(http.DEFAULT_MAX_RETRIES + 1,
                          fake_session.request.call_count)
 
-    def test_session_max_retries_none(self):
+    def test_session_max_retries_none(self) -> None:
         error_body = _get_error_body()
 
         fake_resp = utils.mockSessionResponse(
@@ -544,7 +602,7 @@ class RetriesTestCase(utils.BaseTestCase):
         self.assertEqual(http.DEFAULT_MAX_RETRIES + 1,
                          fake_session.request.call_count)
 
-    def test_session_change_max_retries(self):
+    def test_session_change_max_retries(self) -> None:
         error_body = _get_error_body()
 
         fake_resp = utils.mockSessionResponse(

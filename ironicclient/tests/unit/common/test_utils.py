@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import builtins
 import json
 import os
@@ -29,7 +31,7 @@ from ironicclient.tests.unit import utils as test_utils
 
 class UtilsTest(test_utils.BaseTestCase):
 
-    def test_key_value_pairs_to_dict(self):
+    def test_key_value_pairs_to_dict(self) -> None:
         kv_list = ['str=foo', 'int=1', 'bool=true',
                    'list=[1, 2, 3]', 'dict={"foo": "bar"}']
 
@@ -39,11 +41,11 @@ class UtilsTest(test_utils.BaseTestCase):
              'list': [1, 2, 3], 'dict': {'foo': 'bar'}},
             d)
 
-    def test_key_value_pairs_to_dict_nothing(self):
+    def test_key_value_pairs_to_dict_nothing(self) -> None:
         self.assertEqual({}, utils.key_value_pairs_to_dict(None))
         self.assertEqual({}, utils.key_value_pairs_to_dict([]))
 
-    def test_args_array_to_dict(self):
+    def test_args_array_to_dict(self) -> None:
         my_args = {
             'matching_metadata': ['str=foo', 'int=1', 'bool=true',
                                   'list=[1, 2, 3]', 'dict={"foo": "bar"}'],
@@ -57,7 +59,7 @@ class UtilsTest(test_utils.BaseTestCase):
             'other': 'value'
         }, cleaned_dict)
 
-    def test_args_array_to_patch(self):
+    def test_args_array_to_patch(self) -> None:
         my_args = {
             'attributes': ['str=foo', 'int=1', 'bool=true',
                            'list=[1, 2, 3]', 'dict={"foo": "bar"}'],
@@ -72,7 +74,7 @@ class UtilsTest(test_utils.BaseTestCase):
                           {'op': 'add', 'value': {"foo": "bar"},
                            'path': '/dict'}], patch)
 
-    def test_args_array_to_patch_format_error(self):
+    def test_args_array_to_patch_format_error(self) -> None:
         my_args = {
             'attributes': ['foobar'],
             'op': 'add',
@@ -80,7 +82,7 @@ class UtilsTest(test_utils.BaseTestCase):
         self.assertRaises(exc.CommandError, utils.args_array_to_patch,
                           my_args['op'], my_args['attributes'])
 
-    def test_args_array_to_patch_remove(self):
+    def test_args_array_to_patch_remove(self) -> None:
         my_args = {
             'attributes': ['/foo', 'extra/bar'],
             'op': 'remove',
@@ -90,7 +92,7 @@ class UtilsTest(test_utils.BaseTestCase):
         self.assertEqual([{'op': 'remove', 'path': '/foo'},
                           {'op': 'remove', 'path': '/extra/bar'}], patch)
 
-    def test_split_and_deserialize(self):
+    def test_split_and_deserialize(self) -> None:
         ret = utils.split_and_deserialize('str=foo')
         self.assertEqual(('str', 'foo'), ret)
 
@@ -109,11 +111,11 @@ class UtilsTest(test_utils.BaseTestCase):
         ret = utils.split_and_deserialize('str_int="1"')
         self.assertEqual(('str_int', "1"), ret)
 
-    def test_split_and_deserialize_fail(self):
+    def test_split_and_deserialize_fail(self) -> None:
         self.assertRaises(exc.CommandError,
                           utils.split_and_deserialize, 'foo:bar')
 
-    def test_bool_arg_value(self):
+    def test_bool_arg_value(self) -> None:
         self.assertTrue(utils.bool_argument_value('arg', 'y', strict=True))
         self.assertTrue(utils.bool_argument_value('arg', 'TrUe', strict=True))
         self.assertTrue(utils.bool_argument_value('arg', '1', strict=True))
@@ -132,28 +134,34 @@ class UtilsTest(test_utils.BaseTestCase):
         self.assertEqual('foo', utils.bool_argument_value('arg', 'ee',
                          strict=False, default='foo'))
 
-    def test_check_for_invalid_fields(self):
+    def test_check_for_invalid_fields(self) -> None:
         self.assertIsNone(utils.check_for_invalid_fields(
                           ['a', 'b'], ['a', 'b', 'c']))
         # 'd' is not a valid field
         self.assertRaises(exc.CommandError, utils.check_for_invalid_fields,
                           ['a', 'd'], ['a', 'b', 'c'])
 
-    def test_convert_list_props_to_comma_separated_strings(self):
+    def test_convert_list_props_to_comma_separated_strings(
+        self,
+    ) -> None:
         data = {'prop1': 'val1',
                 'prop2': ['item1', 'item2', 'item3']}
         result = utils.convert_list_props_to_comma_separated(data)
         self.assertEqual('val1', result['prop1'])
         self.assertEqual('item1, item2, item3', result['prop2'])
 
-    def test_convert_list_props_to_comma_separated_mix(self):
+    def test_convert_list_props_to_comma_separated_mix(
+        self,
+    ) -> None:
         data = {'prop1': 'val1',
                 'prop2': [1, 2.5, 'item3']}
         result = utils.convert_list_props_to_comma_separated(data)
         self.assertEqual('val1', result['prop1'])
         self.assertEqual('1, 2.5, item3', result['prop2'])
 
-    def test_convert_list_props_to_comma_separated_partial(self):
+    def test_convert_list_props_to_comma_separated_partial(
+        self,
+    ) -> None:
         data = {'prop1': [1, 2, 3],
                 'prop2': [1, 2.5, 'item3']}
         result = utils.convert_list_props_to_comma_separated(
@@ -163,31 +171,31 @@ class UtilsTest(test_utils.BaseTestCase):
 
 
 class CommonParamsForListTest(test_utils.BaseTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         super(CommonParamsForListTest, self).setUp()
         self.args = mock.Mock(marker=None, limit=None, sort_key=None,
                               sort_dir=None, detail=False, fields=None,
                               spec=True)
         self.expected_params = {'detail': False}
 
-    def test_nothing_set(self):
+    def test_nothing_set(self) -> None:
         self.assertEqual(self.expected_params,
                          utils.common_params_for_list(self.args, [], []))
 
-    def test_marker_and_limit(self):
+    def test_marker_and_limit(self) -> None:
         self.args.marker = 'foo'
         self.args.limit = 42
         self.expected_params.update({'marker': 'foo', 'limit': 42})
         self.assertEqual(self.expected_params,
                          utils.common_params_for_list(self.args, [], []))
 
-    def test_invalid_limit(self):
+    def test_invalid_limit(self) -> None:
         self.args.limit = -42
         self.assertRaises(exc.CommandError,
                           utils.common_params_for_list,
                           self.args, [], [])
 
-    def test_sort_key_and_sort_dir(self):
+    def test_sort_key_and_sort_dir(self) -> None:
         self.args.sort_key = 'field'
         self.args.sort_dir = 'desc'
         self.expected_params.update({'sort_key': 'field', 'sort_dir': 'desc'})
@@ -196,7 +204,7 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
                                                       ['field'],
                                                       []))
 
-    def test_sort_key_allows_label(self):
+    def test_sort_key_allows_label(self) -> None:
         self.args.sort_key = 'Label'
         self.expected_params.update({'sort_key': 'field'})
         self.assertEqual(self.expected_params,
@@ -204,7 +212,7 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
                                                       ['field', 'field2'],
                                                       ['Label', 'Label2']))
 
-    def test_sort_key_invalid(self):
+    def test_sort_key_invalid(self) -> None:
         self.args.sort_key = 'something'
         self.assertRaises(exc.CommandError,
                           utils.common_params_for_list,
@@ -212,7 +220,7 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
                           ['field', 'field2'],
                           [])
 
-    def test_sort_dir_invalid(self):
+    def test_sort_dir_invalid(self) -> None:
         self.args.sort_dir = 'something'
         self.assertRaises(exc.CommandError,
                           utils.common_params_for_list,
@@ -220,13 +228,13 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
                           [],
                           [])
 
-    def test_detail(self):
+    def test_detail(self) -> None:
         self.args.detail = True
         self.expected_params['detail'] = True
         self.assertEqual(self.expected_params,
                          utils.common_params_for_list(self.args, [], []))
 
-    def test_fields(self):
+    def test_fields(self) -> None:
         self.args.fields = [['a', 'b', 'c']]
         self.expected_params.update({'fields': ['a', 'b', 'c']})
         self.assertEqual(self.expected_params,
@@ -234,20 +242,20 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
 
 
 class CommonFiltersTest(test_utils.BaseTestCase):
-    def test_limit(self):
+    def test_limit(self) -> None:
         result = utils.common_filters(limit=42)
         self.assertEqual(['limit=42'], result)
 
-    def test_limit_0(self):
+    def test_limit_0(self) -> None:
         result = utils.common_filters(limit=0)
         self.assertEqual([], result)
 
-    def test_other(self):
+    def test_other(self) -> None:
         for key in ('marker', 'sort_key', 'sort_dir'):
             result = utils.common_filters(**{key: 'test'})
             self.assertEqual(['%s=test' % key], result)
 
-    def test_fields(self):
+    def test_fields(self) -> None:
         result = utils.common_filters(fields=['a', 'b', 'c'])
         self.assertEqual(['fields=a,b,c'], result)
 
@@ -255,7 +263,7 @@ class CommonFiltersTest(test_utils.BaseTestCase):
 @mock.patch.object(subprocess, 'Popen', autospec=True)
 class MakeConfigDriveTest(test_utils.BaseTestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(MakeConfigDriveTest, self).setUp()
         # expected genisoimage cmd
         self.genisoimage_cmd = ['genisoimage', '-o', mock.ANY,
@@ -279,7 +287,9 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
                               '-quiet', '-J', '-r', '-V',
                               'config-2', mock.ANY]
 
-    def test_make_configdrive(self, mock_popen):
+    def test_make_configdrive(self,
+                              mock_popen: mock.MagicMock,
+                              ) -> None:
         fake_process = mock.Mock(returncode=0)
         fake_process.communicate.return_value = ('', '')
         mock_popen.return_value = fake_process
@@ -292,7 +302,9 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
                                            stdout=subprocess.PIPE)
         fake_process.communicate.assert_called_once_with()
 
-    def test_make_configdrive_fallsback(self, mock_popen):
+    def test_make_configdrive_fallsback(self,
+                                        mock_popen: mock.MagicMock,
+                                        ) -> None:
         fake_process = mock.Mock(returncode=0)
         fake_process.communicate.return_value = ('', '')
         mock_popen.side_effect = iter([OSError('boom'),
@@ -311,14 +323,22 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
         fake_process.communicate.assert_called_once_with()
 
     @mock.patch.object(os, 'access', autospec=True)
-    def test_make_configdrive_non_readable_dir(self, mock_access, mock_popen):
+    def test_make_configdrive_non_readable_dir(
+        self,
+        mock_access: mock.MagicMock,
+        mock_popen: mock.MagicMock,
+    ) -> None:
         mock_access.return_value = False
         self.assertRaises(exc.CommandError, utils.make_configdrive, 'fake-dir')
         mock_access.assert_called_once_with('fake-dir', os.R_OK)
         self.assertFalse(mock_popen.called)
 
     @mock.patch.object(os, 'access', autospec=True)
-    def test_make_configdrive_oserror(self, mock_access, mock_popen):
+    def test_make_configdrive_oserror(
+        self,
+        mock_access: mock.MagicMock,
+        mock_popen: mock.MagicMock,
+    ) -> None:
         mock_access.return_value = True
         mock_popen.side_effect = OSError('boom')
 
@@ -334,8 +354,11 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
         ])
 
     @mock.patch.object(os, 'access', autospec=True)
-    def test_make_configdrive_non_zero_returncode(self, mock_access,
-                                                  mock_popen):
+    def test_make_configdrive_non_zero_returncode(
+        self,
+        mock_access: mock.MagicMock,
+        mock_popen: mock.MagicMock,
+    ) -> None:
         fake_process = mock.Mock(returncode=123)
         fake_process.communicate.return_value = ('', '')
         mock_popen.return_value = fake_process
@@ -351,7 +374,9 @@ class MakeConfigDriveTest(test_utils.BaseTestCase):
 class GetFromStdinTest(test_utils.BaseTestCase):
 
     @mock.patch.object(sys, 'stdin', autospec=True)
-    def test_get_from_stdin(self, mock_stdin):
+    def test_get_from_stdin(self,
+                            mock_stdin: mock.MagicMock,
+                            ) -> None:
         contents = '[{"step": "upgrade", "interface": "deploy"}]'
         mock_stdin.read.return_value = contents
         desc = 'something'
@@ -361,7 +386,9 @@ class GetFromStdinTest(test_utils.BaseTestCase):
         mock_stdin.read.assert_called_once_with()
 
     @mock.patch.object(sys, 'stdin', autospec=True)
-    def test_get_from_stdin_fail(self, mock_stdin):
+    def test_get_from_stdin_fail(self,
+                                 mock_stdin: mock.MagicMock,
+                                 ) -> None:
         mock_stdin.read.side_effect = IOError
         desc = 'something'
 
@@ -371,18 +398,18 @@ class GetFromStdinTest(test_utils.BaseTestCase):
 
 class HandleJsonFileTest(test_utils.BaseTestCase):
 
-    def test_handle_json_or_file_arg(self):
+    def test_handle_json_or_file_arg(self) -> None:
         cleansteps = '[{"step": "upgrade", "interface": "deploy"}]'
         steps = utils.handle_json_or_file_arg(cleansteps)
         self.assertEqual(json.loads(cleansteps), steps)
 
-    def test_handle_json_or_file_arg_bad_json(self):
+    def test_handle_json_or_file_arg_bad_json(self) -> None:
         cleansteps = '{foo invalid: json{'
         self.assertRaisesRegex(exc.InvalidAttribute,
                                'is not a file and cannot be parsed as JSON',
                                utils.handle_json_or_file_arg, cleansteps)
 
-    def test_handle_json_or_file_arg_file(self):
+    def test_handle_json_or_file_arg_file(self) -> None:
         contents = '[{"step": "upgrade", "interface": "deploy"}]'
 
         with tempfile.NamedTemporaryFile(mode='w') as f:
@@ -392,7 +419,7 @@ class HandleJsonFileTest(test_utils.BaseTestCase):
 
         self.assertEqual(json.loads(contents), steps)
 
-    def test_handle_yaml_or_file_arg_file(self):
+    def test_handle_yaml_or_file_arg_file(self) -> None:
         contents = '''---
 - step: upgrade
   interface: deploy'''
@@ -405,7 +432,10 @@ class HandleJsonFileTest(test_utils.BaseTestCase):
         self.assertEqual([{"step": "upgrade", "interface": "deploy"}], steps)
 
     @mock.patch.object(builtins, 'open', autospec=True)
-    def test_handle_json_or_file_arg_file_fail(self, mock_open):
+    def test_handle_json_or_file_arg_file_fail(
+        self,
+        mock_open: mock.MagicMock,
+    ) -> None:
         mock_open.return_value.__enter__.side_effect = IOError
 
         with tempfile.NamedTemporaryFile(mode='w') as f:
@@ -417,12 +447,12 @@ class HandleJsonFileTest(test_utils.BaseTestCase):
 
 class GetJsonDataTest(test_utils.BaseTestCase):
 
-    def test_success(self):
+    def test_success(self) -> None:
         result = utils.get_json_data(b'\n{"answer": 42}')
         self.assertEqual({"answer": 42}, result)
 
-    def test_definitely_not_json(self):
+    def test_definitely_not_json(self) -> None:
         self.assertIsNone(utils.get_json_data(b'0x010x020x03'))
 
-    def test_could_be_json(self):
+    def test_could_be_json(self) -> None:
         self.assertIsNone(utils.get_json_data(b'{"hahaha, just kidding\x00'))

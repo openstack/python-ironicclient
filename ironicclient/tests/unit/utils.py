@@ -13,9 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import copy
 import io
 import os
+from collections.abc import ItemsView, Iterator
+from typing import Any
 from unittest import mock
 
 import fixtures
@@ -25,7 +29,7 @@ import testtools
 
 
 class BaseTestCase(testtools.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         super(BaseTestCase, self).setUp()
         self.useFixture(fixtures.FakeLogger())
 
@@ -40,13 +44,27 @@ class BaseTestCase(testtools.TestCase):
 
 
 class FakeAPI(object):
-    def __init__(self, responses, path_prefix=None):
+    def __init__(
+        self,
+        responses: dict[
+            str, dict[str, tuple[dict[str, str], Any]]
+        ],
+        path_prefix: str | None = None,
+    ) -> None:
         self.responses = responses
-        self.calls = []
+        self.calls: list[tuple[Any, ...]] = []
         self.path_prefix = path_prefix or ''
-        self.endpoint_trimmed = 'http://127.0.0.1:6385' + self.path_prefix
+        self.endpoint_trimmed = (
+            'http://127.0.0.1:6385' + self.path_prefix)
 
-    def _request(self, method, url, headers=None, body=None, params=None):
+    def _request(
+        self,
+        method: str,
+        url: str,
+        headers: dict[str, str] | None = None,
+        body: Any = None,
+        params: dict[str, Any] | None = None,
+    ) -> tuple[dict[str, str], Any]:
         # url should always just be a path here, e.g. /v1/nodes
         url = self.path_prefix + url
 
@@ -56,37 +74,50 @@ class FakeAPI(object):
         self.calls.append(call)
         return self.responses[url][method]
 
-    def raw_request(self, *args, **kwargs):
+    def raw_request(
+        self, *args: Any, **kwargs: Any,
+    ) -> tuple[FakeResponse, Iterator[str]]:
         response = self._request(*args, **kwargs)
         body_iter = iter(io.StringIO(response[1]))
         return FakeResponse(response[0]), body_iter
 
-    def json_request(self, *args, **kwargs):
+    def json_request(
+        self, *args: Any, **kwargs: Any,
+    ) -> tuple[FakeResponse, Any]:
         response = self._request(*args, **kwargs)
         return FakeResponse(response[0]), response[1]
 
 
 class FakeConnection(object):
-    def __init__(self, response=None, path_prefix=None):
+    def __init__(self, response: Any = None,
+                 path_prefix: str | None = None) -> None:
         self._response = response
-        self._last_request = None
+        self._last_request: tuple[str, str, dict[str, Any]] | None = None
 
-    def request(self, method, conn_url, **kwargs):
+    def request(self, method: str, conn_url: str,
+                **kwargs: Any) -> None:
         self._last_request = (method, conn_url, kwargs)
 
-    def setresponse(self, response):
+    def setresponse(self, response: Any) -> None:
         self._response = response
 
-    def getresponse(self):
+    def getresponse(self) -> Any:
         return self._response
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return ("FakeConnection(response=%s)" % (self._response))
 
 
 class FakeResponse(object):
-    def __init__(self, headers, body=None, version=None, status=None,
-                 reason=None, request_headers={}):
+    def __init__(
+        self,
+        headers: dict[str, str],
+        body: io.StringIO | None = None,
+        version: str | None = None,
+        status: int | None = None,
+        reason: str | None = None,
+        request_headers: dict[str, str] | None = None,
+    ) -> None:
         """Fake object to help testing.
 
         :param headers: dict representing HTTP response headers
@@ -99,30 +130,35 @@ class FakeResponse(object):
         self.status_code = status
         self.reason = reason
         self.request = mock.Mock()
-        self.request.headers = request_headers
+        self.request.headers = request_headers or {}
 
-    def getheaders(self):
+    def getheaders(self) -> ItemsView[str, str]:
         return copy.deepcopy(self.headers).items()
 
-    def getheader(self, key, default):
+    def getheader(self, key: str, default: str) -> str:
         return self.headers.get(key, default)
 
-    def read(self, amt):
+    def read(self, amt: int) -> str:
         return self.body.read(amt)
 
-    def __repr__(self):
-        return ("FakeResponse(%s, body=%s, version=%s, status=%s, reason=%s, "
-                "request_headers=%s)" %
+    def __repr__(self) -> str:
+        return ("FakeResponse(%s, body=%s, version=%s, status=%s, "
+                "reason=%s, request_headers=%s)" %
                 (self.headers, self.body, self.raw.version, self.status_code,
                  self.reason, self.request.headers))
 
 
-def mockSessionResponse(headers, content=None, status_code=None, version=None,
-                        request_headers={}):
+def mockSessionResponse(
+    headers: dict[str, str],
+    content: str | None = None,
+    status_code: int | None = None,
+    version: str | None = None,
+    request_headers: dict[str, str] | None = None,
+) -> mock.Mock:
     raw = mock.Mock()
     raw.version = version
     request = mock.Mock()
-    request.headers = request_headers
+    request.headers = request_headers or {}
     response = mock.Mock(spec=requests.Response,
                          headers=headers,
                          content=content,
@@ -136,7 +172,12 @@ def mockSessionResponse(headers, content=None, status_code=None, version=None,
     return response
 
 
-def mockSession(headers, content=None, status_code=None, version=None):
+def mockSession(
+    headers: dict[str, str],
+    content: str | None = None,
+    status_code: int | None = None,
+    version: str | None = None,
+) -> mock.Mock:
     session = mock.Mock(spec=requests.Session,
                         verify=False,
                         cert=('test_cert', 'test_key'))

@@ -207,3 +207,10 @@ disable_error_code = [
     "union-attr",
     "var-annotated",
 ]
+
+[[tool.mypy.overrides]]
+module = ["ironicclient.tests.unit.common.*", "ironicclient.tests.unit.utils"]
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_subclassing_any = false
+disable_error_code = ["import-untyped"]

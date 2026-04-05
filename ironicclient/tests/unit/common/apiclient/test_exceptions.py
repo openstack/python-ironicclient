@@ -13,7 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 from http import client as http_client
+from typing import Any
 
 from oslotest import base as test_base
 
@@ -21,21 +24,38 @@ from ironicclient.common.apiclient import exceptions
 
 
 class FakeResponse(object):
-    json_data = {}
+    def __init__(
+        self,
+        *,
+        status_code: int,
+        headers: dict[str, str],
+        json_data: dict[str, Any] | None = None,
+        text: str | None = None,
+    ) -> None:
+        self.status_code = status_code
+        self.headers = headers
+        self.json_data: dict[str, Any] = (
+            json_data if json_data is not None else {})
+        if text is not None:
+            self.text = text
 
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-    def json(self):
+    def json(self) -> dict[str, Any]:
         return self.json_data
 
 
 class ExceptionsArgsTest(test_base.BaseTestCase):
 
-    def assert_exception(self, ex_cls, method, url, status_code, json_data,
-                         error_msg=None, error_details=None,
-                         check_description=True):
+    def assert_exception(
+        self,
+        ex_cls: type[exceptions.HttpError],
+        method: str,
+        url: str,
+        status_code: int,
+        json_data: dict[str, Any],
+        error_msg: str | None = None,
+        error_details: str | None = None,
+        check_description: bool = True,
+    ) -> None:
         ex = exceptions.from_response(
             FakeResponse(status_code=status_code,
                          headers={"Content-Type": "application/json"},
@@ -52,7 +72,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
         self.assertEqual(url, ex.url)
         self.assertEqual(status_code, ex.http_status)
 
-    def test_from_response_known(self):
+    def test_from_response_known(self) -> None:
         method = "GET"
         url = "/fake"
         status_code = http_client.BAD_REQUEST
@@ -61,7 +81,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
         self.assert_exception(
             exceptions.BadRequest, method, url, status_code, json_data)
 
-    def test_from_response_unknown(self):
+    def test_from_response_unknown(self) -> None:
         method = "POST"
         url = "/fake-unknown"
         status_code = 499
@@ -73,7 +93,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
         self.assert_exception(
             exceptions.HttpError, method, url, status_code, json_data)
 
-    def test_from_response_non_openstack(self):
+    def test_from_response_non_openstack(self) -> None:
         method = "POST"
         url = "/fake-unknown"
         status_code = http_client.BAD_REQUEST
@@ -82,7 +102,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
             exceptions.BadRequest, method, url, status_code, json_data,
             check_description=False)
 
-    def test_from_response_with_different_response_format(self):
+    def test_from_response_with_different_response_format(self) -> None:
         method = "GET"
         url = "/fake-wsme"
         status_code = http_client.BAD_REQUEST
@@ -104,7 +124,7 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
             exceptions.BadRequest, method, url, status_code, json_data2,
             message, details)
 
-    def test_from_response_with_text_response_format(self):
+    def test_from_response_with_text_response_format(self) -> None:
         method = "GET"
         url = "/fake-wsme"
         status_code = http_client.BAD_REQUEST
@@ -122,7 +142,9 @@ class ExceptionsArgsTest(test_base.BaseTestCase):
         self.assertEqual(url, ex.url)
         self.assertEqual(status_code, ex.http_status)
 
-    def test_from_response_with_text_response_format_with_no_body(self):
+    def test_from_response_with_text_response_format_with_no_body(
+        self,
+    ) -> None:
         method = "GET"
         url = "/fake-wsme"
         status_code = http_client.UNAUTHORIZED

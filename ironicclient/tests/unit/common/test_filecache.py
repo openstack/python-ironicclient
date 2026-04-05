@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import os
 from unittest import mock
 
@@ -21,11 +23,11 @@ from ironicclient.tests.unit import utils
 
 class FileCacheTest(utils.BaseTestCase):
 
-    def test__build_key_ok(self):
+    def test__build_key_ok(self) -> None:
         result = filecache._build_key('localhost', '5000')
         self.assertEqual('localhost:5000', result)
 
-    def test__build_key_none(self):
+    def test__build_key_none(self) -> None:
         result = filecache._build_key(None, None)
         self.assertEqual('None:None', result)
 
@@ -34,8 +36,10 @@ class FileCacheTest(utils.BaseTestCase):
     @mock.patch.object(os.path, 'exists', autospec=True)
     @mock.patch.object(os, 'makedirs', autospec=True)
     @mock.patch.object(dogpile.cache, 'make_region', autospec=True)
-    def test__get_cache_mkdir(self, mock_makeregion, mock_makedirs,
-                              mock_exists, mock_get):
+    def test__get_cache_mkdir(self, mock_makeregion: mock.MagicMock,
+                              mock_makedirs: mock.MagicMock,
+                              mock_exists: mock.MagicMock,
+                              mock_get: mock.MagicMock) -> None:
         cache_val = 6
         # If not present in the env, get will return the defaulted value
         mock_get.return_value = filecache.DEFAULT_EXPIRY
@@ -59,8 +63,10 @@ class FileCacheTest(utils.BaseTestCase):
     @mock.patch.object(os.path, 'exists', autospec=True)
     @mock.patch.object(os, 'makedirs', autospec=True)
     @mock.patch.object(dogpile.cache, 'make_region', autospec=True)
-    def test__get_cache_expiry_set(self, mock_makeregion, mock_makedirs,
-                                   mock_exists, mock_get):
+    def test__get_cache_expiry_set(self, mock_makeregion: mock.MagicMock,
+                                   mock_makedirs: mock.MagicMock,
+                                   mock_exists: mock.MagicMock,
+                                   mock_get: mock.MagicMock) -> None:
         cache_val = 5643
         cache_expiry = '78'
         mock_get.return_value = cache_expiry
@@ -83,9 +89,14 @@ class FileCacheTest(utils.BaseTestCase):
     @mock.patch.object(os.path, 'exists', autospec=True)
     @mock.patch.object(os, 'makedirs', autospec=True)
     @mock.patch.object(dogpile.cache, 'make_region', autospec=True)
-    def test__get_cache_expiry_set_invalid(self, mock_makeregion,
-                                           mock_makedirs, mock_exists,
-                                           mock_get, mock_log):
+    def test__get_cache_expiry_set_invalid(
+        self,
+        mock_makeregion: mock.MagicMock,
+        mock_makedirs: mock.MagicMock,
+        mock_exists: mock.MagicMock,
+        mock_get: mock.MagicMock,
+        mock_log: mock.MagicMock,
+    ) -> None:
         cache_val = 5643
         cache_expiry = 'Rollenhagen'
         mock_get.return_value = cache_expiry
@@ -109,7 +120,10 @@ class FileCacheTest(utils.BaseTestCase):
     @mock.patch.object(filecache, 'CACHE', 5552368)
     @mock.patch.object(os.path, 'exists', autospec=True)
     @mock.patch.object(os, 'makedirs', autospec=True)
-    def test__get_cache_dir_already_exists(self, mock_makedirs, mock_exists):
+    def test__get_cache_dir_already_exists(self,
+                                           mock_makedirs: mock.MagicMock,
+                                           mock_exists: mock.MagicMock,
+                                           ) -> None:
         mock_exists.return_value = True
         self.assertEqual(5552368, filecache._get_cache())
         self.assertEqual(5552368, filecache.CACHE)
@@ -118,7 +132,8 @@ class FileCacheTest(utils.BaseTestCase):
 
     @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
     @mock.patch.object(filecache, '_get_cache', autospec=True)
-    def test_save_data_ok(self, mock_get_cache, mock_cache):
+    def test_save_data_ok(self, mock_get_cache: mock.MagicMock,
+                          mock_cache: mock.MagicMock) -> None:
         mock_get_cache.return_value = mock_cache
         host = 'fred'
         port = '1234'
@@ -130,7 +145,9 @@ class FileCacheTest(utils.BaseTestCase):
     @mock.patch.object(os.path, 'isfile', autospec=True)
     @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
     @mock.patch.object(filecache, '_get_cache', autospec=True)
-    def test_retrieve_data_ok(self, mock_get_cache, mock_cache, mock_isfile):
+    def test_retrieve_data_ok(self, mock_get_cache: mock.MagicMock,
+                              mock_cache: mock.MagicMock,
+                              mock_isfile: mock.MagicMock) -> None:
         s = 'spam'
         mock_isfile.return_value = True
         mock_cache.get.return_value = s
@@ -145,8 +162,11 @@ class FileCacheTest(utils.BaseTestCase):
     @mock.patch.object(os.path, 'isfile', autospec=True)
     @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
     @mock.patch.object(filecache, '_get_cache', autospec=True)
-    def test_retrieve_data_ok_with_expiry(self, mock_get_cache, mock_cache,
-                                          mock_isfile):
+    def test_retrieve_data_ok_with_expiry(self,
+                                          mock_get_cache: mock.MagicMock,
+                                          mock_cache: mock.MagicMock,
+                                          mock_isfile: mock.MagicMock,
+                                          ) -> None:
         s = 'spam'
         mock_isfile.return_value = True
         mock_cache.get.return_value = s
@@ -163,8 +183,11 @@ class FileCacheTest(utils.BaseTestCase):
     @mock.patch.object(os.path, 'isfile', autospec=True)
     @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
     @mock.patch.object(filecache, '_get_cache', autospec=True)
-    def test_retrieve_data_not_found(self, mock_get_cache, mock_cache,
-                                     mock_isfile):
+    def test_retrieve_data_not_found(self,
+                                     mock_get_cache: mock.MagicMock,
+                                     mock_cache: mock.MagicMock,
+                                     mock_isfile: mock.MagicMock,
+                                     ) -> None:
         mock_isfile.return_value = True
         mock_cache.get.return_value = dogpile.cache.api.NO_VALUE
         mock_get_cache.return_value = mock_cache
@@ -176,6 +199,8 @@ class FileCacheTest(utils.BaseTestCase):
         self.assertIsNone(result)
 
     @mock.patch.object(os.path, 'isfile', autospec=True)
-    def test_retrieve_data_no_cache_file(self, mock_isfile):
+    def test_retrieve_data_no_cache_file(self,
+                                         mock_isfile: mock.MagicMock,
+                                         ) -> None:
         mock_isfile.return_value = False
         self.assertIsNone(filecache.retrieve_data(host='spam', port='eggs'))
