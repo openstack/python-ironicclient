@@ -11,25 +11,34 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
+import argparse
+from collections.abc import Iterable, Sequence
 import itertools
 import logging
+from typing import Any, cast
 
-from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 
 
 class CreateBaremetalAllocation(command.ShowOne):
     """Create a new baremetal allocation."""
 
-    log = logging.getLogger(__name__ + ".CreateBaremetalAllocation")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".CreateBaremetalAllocation")
 
-    def get_parser(self, prog_name):
-        parser = super(CreateBaremetalAllocation, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             '--resource-class',
@@ -86,16 +95,20 @@ class CreateBaremetalAllocation(command.ShowOne):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
         if not parsed_args.node and not parsed_args.resource_class:
             raise exc.ClientException(
                 _('--resource-class is required except when --node is used'))
 
-        field_list = ['name', 'uuid', 'extra', 'resource_class', 'traits',
-                      'candidate_nodes', 'node', 'owner']
+        field_list: list[str] = [
+            'name', 'uuid', 'extra', 'resource_class', 'traits',
+            'candidate_nodes', 'node', 'owner']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
 
@@ -108,16 +121,23 @@ class CreateBaremetalAllocation(command.ShowOne):
         data = dict([(f, getattr(allocation, f, '')) for f in
                      res_fields.ALLOCATION_DETAILED_RESOURCE.fields])
 
-        return self.dict2columns(data)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(data),
+        )
 
 
 class ShowBaremetalAllocation(command.ShowOne):
     """Show baremetal allocation details."""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetalAllocation")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ShowBaremetalAllocation")
 
-    def get_parser(self, prog_name):
-        parser = super(ShowBaremetalAllocation, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "allocation",
             metavar="<id>",
@@ -134,27 +154,39 @@ class ShowBaremetalAllocation(command.ShowOne):
                    "fetched from the server."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
-        fields = list(itertools.chain.from_iterable(parsed_args.fields))
-        fields = fields if fields else None
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
+        fields: list[str] | None
+        fields = (
+            list(itertools.chain.from_iterable(parsed_args.fields))
+            or None)
 
         allocation = baremetal_client.allocation.get(
             parsed_args.allocation, fields=fields)._info
 
         allocation.pop("links", None)
-        return zip(*sorted(allocation.items()))
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(dict(sorted(allocation.items()))),
+        )
 
 
 class ListBaremetalAllocation(command.Lister):
     """List baremetal allocations."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalAllocation")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalAllocation")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalAllocation, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             '--limit',
             metavar='<limit>',
@@ -213,11 +245,14 @@ class ListBaremetalAllocation(command.Lister):
                    "is specified."))
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        client = manager.baremetal
 
-        params = {}
+        params: dict[str, object] = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
             raise exc.CommandError(
                 _('Expected non-negative --limit, got %s') %
@@ -251,10 +286,14 @@ class ListBaremetalAllocation(command.Lister):
 class DeleteBaremetalAllocation(command.Command):
     """Unregister baremetal allocation(s)."""
 
-    log = logging.getLogger(__name__ + ".DeleteBaremetalAllocation")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".DeleteBaremetalAllocation")
 
-    def get_parser(self, prog_name):
-        parser = super(DeleteBaremetalAllocation, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "allocations",
             metavar="<allocation>",
@@ -263,12 +302,13 @@ class DeleteBaremetalAllocation(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        failures = []
+        failures: list[str] = []
         for allocation in parsed_args.allocations:
             try:
                 baremetal_client.allocation.delete(allocation)
@@ -285,10 +325,14 @@ class DeleteBaremetalAllocation(command.Command):
 class SetBaremetalAllocation(command.Command):
     """Set baremetal allocation properties."""
 
-    log = logging.getLogger(__name__ + ".SetBaremetalAllocation")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".SetBaremetalAllocation")
 
-    def get_parser(self, prog_name):
-        parser = super(SetBaremetalAllocation, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             "allocation",
@@ -309,12 +353,13 @@ class SetBaremetalAllocation(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.name:
             properties.extend(utils.args_array_to_patch(
                 'add', ["name=%s" % parsed_args.name]))
@@ -331,11 +376,15 @@ class SetBaremetalAllocation(command.Command):
 
 class UnsetBaremetalAllocation(command.Command):
     """Unset baremetal allocation properties."""
-    log = logging.getLogger(__name__ + ".UnsetBaremetalAllocation")
 
-    def get_parser(self, prog_name):
-        parser = super(UnsetBaremetalAllocation, self).get_parser(
-            prog_name)
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UnsetBaremetalAllocation")
+
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             "allocation",
@@ -358,12 +407,13 @@ class UnsetBaremetalAllocation(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.name:
             properties.extend(utils.args_array_to_patch('remove',
                               ['name']))
