@@ -11,16 +11,21 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
+import argparse
+from collections.abc import Iterable, Sequence
 import itertools
 import json
 import logging
+from typing import Any, cast
 
-from osc_lib.command import command
 from osc_lib import utils as oscutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.osc import command
 from ironicclient.v1 import resource_fields as res_fields
 
 
@@ -35,11 +40,14 @@ _DEPLOY_STEPS_HELP = _(
 class CreateBaremetalDeployTemplate(command.ShowOne):
     """Create a new deploy template"""
 
-    log = logging.getLogger(__name__ + ".CreateBaremetalDeployTemplate")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".CreateBaremetalDeployTemplate")
 
-    def get_parser(self, prog_name):
-        parser = super(CreateBaremetalDeployTemplate, self).get_parser(
-            prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'name',
@@ -66,13 +74,16 @@ class CreateBaremetalDeployTemplate(command.ShowOne):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
         steps = utils.handle_json_arg(parsed_args.steps, 'deploy steps')
 
-        field_list = ['name', 'uuid', 'extra']
+        field_list: list[str] = ['name', 'uuid', 'extra']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'extra')
@@ -82,16 +93,23 @@ class CreateBaremetalDeployTemplate(command.ShowOne):
         data = dict([(f, getattr(template, f, '')) for f in
                      res_fields.DEPLOY_TEMPLATE_DETAILED_RESOURCE.fields])
 
-        return self.dict2columns(data)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(data),
+        )
 
 
 class ShowBaremetalDeployTemplate(command.ShowOne):
     """Show baremetal deploy template details."""
 
-    log = logging.getLogger(__name__ + ".ShowBaremetalDeployTemplate")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ShowBaremetalDeployTemplate")
 
-    def get_parser(self, prog_name):
-        parser = super(ShowBaremetalDeployTemplate, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "template",
             metavar="<template>",
@@ -110,27 +128,39 @@ class ShowBaremetalDeployTemplate(command.ShowOne):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
-        fields = list(itertools.chain.from_iterable(parsed_args.fields))
-        fields = fields if fields else None
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
+        fields: list[str] | None
+        fields = (
+            list(itertools.chain.from_iterable(parsed_args.fields))
+            or None)
 
         template = baremetal_client.deploy_template.get(
             parsed_args.template, fields=fields)._info
 
         template.pop("links", None)
-        return zip(*sorted(template.items()))
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            self.dict2columns(dict(sorted(template.items()))),
+        )
 
 
 class SetBaremetalDeployTemplate(command.Command):
     """Set baremetal deploy template properties."""
 
-    log = logging.getLogger(__name__ + ".SetBaremetalDeployTemplate")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".SetBaremetalDeployTemplate")
 
-    def get_parser(self, prog_name):
-        parser = super(SetBaremetalDeployTemplate, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'template',
@@ -157,12 +187,13 @@ class SetBaremetalDeployTemplate(command.Command):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.name:
             name = ["name=%s" % parsed_args.name]
             properties.extend(utils.args_array_to_patch('add', name))
@@ -183,11 +214,15 @@ class SetBaremetalDeployTemplate(command.Command):
 
 class UnsetBaremetalDeployTemplate(command.Command):
     """Unset baremetal deploy template properties."""
-    log = logging.getLogger(__name__ + ".UnsetBaremetalDeployTemplate")
 
-    def get_parser(self, prog_name):
-        parser = super(UnsetBaremetalDeployTemplate, self).get_parser(
-            prog_name)
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".UnsetBaremetalDeployTemplate")
+
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
 
         parser.add_argument(
             'template',
@@ -204,12 +239,13 @@ class UnsetBaremetalDeployTemplate(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        properties = []
+        properties: list[dict[str, Any]] = []
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch('remove',
                               ['extra/' + x for x in parsed_args.extra]))
@@ -224,11 +260,14 @@ class UnsetBaremetalDeployTemplate(command.Command):
 class DeleteBaremetalDeployTemplate(command.Command):
     """Delete deploy template(s)."""
 
-    log = logging.getLogger(__name__ + ".DeleteBaremetalDeployTemplate")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".DeleteBaremetalDeployTemplate")
 
-    def get_parser(self, prog_name):
-        parser = super(DeleteBaremetalDeployTemplate, self).get_parser(
-            prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             "templates",
             metavar="<template>",
@@ -238,12 +277,13 @@ class DeleteBaremetalDeployTemplate(command.Command):
 
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.debug("take_action(%s)", parsed_args)
 
-        baremetal_client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        baremetal_client = manager.baremetal
 
-        failures = []
+        failures: list[str] = []
         for template in parsed_args.templates:
             try:
                 baremetal_client.deploy_template.delete(template)
@@ -260,10 +300,14 @@ class DeleteBaremetalDeployTemplate(command.Command):
 class ListBaremetalDeployTemplate(command.Lister):
     """List baremetal deploy templates."""
 
-    log = logging.getLogger(__name__ + ".ListBaremetalDeployTemplate")
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ListBaremetalDeployTemplate")
 
-    def get_parser(self, prog_name):
-        parser = super(ListBaremetalDeployTemplate, self).get_parser(prog_name)
+    def get_parser(  # type: ignore[override]
+        self, prog_name: str,
+    ) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
         parser.add_argument(
             '--limit',
             metavar='<limit>',
@@ -308,13 +352,16 @@ class ListBaremetalDeployTemplate(command.Lister):
         )
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
-        client = self.app.client_manager.baremetal
+        manager = self.app.client_manager
+        client = manager.baremetal
 
         columns = res_fields.DEPLOY_TEMPLATE_RESOURCE.fields
 
-        params = {}
+        params: dict[str, object] = {}
         if parsed_args.limit is not None and parsed_args.limit < 0:
             raise exc.CommandError(
                 _('Expected non-negative --limit, got %s') %
