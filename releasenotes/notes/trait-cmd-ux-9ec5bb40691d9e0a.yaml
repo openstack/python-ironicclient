@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Provide ``openstack baremetal node trait add`` and ``openstack baremetal node trait remove``
+    commands. To make the user experience of the CLI consistent with other commands.
+deprecations:
+  - |
+    Deprecate ``openstack baremetal node add trait`` and ``openstack baremetal node remove trait``
+    commands.
