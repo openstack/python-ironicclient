@@ -252,9 +252,13 @@ baremetal_runbook_steps = json.dumps([{
     'order': 1
 }])
 baremetal_runbook_extra = {'key1': 'value1', 'key2': 'value2'}
+baremetal_runbook_description = ''
+baremetal_runbook_traits = []
 RUNBOOK = {
     'uuid': baremetal_runbook_uuid,
     'name': baremetal_runbook_name,
+    'description': baremetal_runbook_description,
+    'traits': baremetal_runbook_traits,
     'owner': baremetal_runbook_owner,
     'public': baremetal_runbook_public,
     'steps': baremetal_runbook_steps,

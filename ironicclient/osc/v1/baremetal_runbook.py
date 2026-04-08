@@ -51,8 +51,18 @@ class CreateBaremetalRunbook(command.ShowOne):
             '--name',
             metavar='<name>',
             required=True,
-            help=_('Unique name for this runbook. Must be a valid '
-                   'trait name')
+            help=_('Unique name for this runbook.')
+        )
+        parser.add_argument(
+            '--description',
+            metavar='<description>',
+            help=_('Description of the runbook.')
+        )
+        parser.add_argument(
+            '--traits',
+            metavar='<trait>',
+            action='append',
+            help=_('Trait for this runbook. Can be specified multiple times.')
         )
         parser.add_argument(
             '--uuid',
@@ -96,6 +106,19 @@ class CreateBaremetalRunbook(command.ShowOne):
         steps = utils.handle_json_arg(parsed_args.steps, 'runbook steps')
 
         field_list: list[str] = ['name', 'uuid', 'owner', 'public', 'extra']
+
+        # Check if API version supports new fields (description and traits)
+        if utils.check_api_version_support(
+                baremetal_client.current_api_version, "1.112"):
+            field_list.extend(['description', 'traits'])
+        else:
+            if parsed_args.description is not None:
+                raise exc.UnsupportedVersion(
+                    _("--description requires API version 1.112 or later"))
+            if parsed_args.traits is not None:
+                raise exc.UnsupportedVersion(
+                    _("--traits requires API version 1.112 or later"))
+
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)
         if parsed_args.public is not None:
@@ -175,8 +198,12 @@ class SetBaremetalRunbook(command.Command):
         parser.add_argument(
             '--name',
             metavar='<name>',
-            help=_('Set unique name of the runbook. Must be a valid '
-                   'trait name.')
+            help=_('Set unique name of the runbook.')
+        )
+        parser.add_argument(
+            '--description',
+            metavar='<description>',
+            help=_('Set description of the runbook.')
         )
         parser.add_argument(
             '--public',
@@ -212,9 +239,19 @@ class SetBaremetalRunbook(command.Command):
         baremetal_client = manager.baremetal
 
         properties: list[dict[str, Any]] = []
+        # Check if API version supports description field
+        supports_new_fields = utils.check_api_version_support(
+            baremetal_client.current_api_version, "1.112")
+
         if parsed_args.name:
             name = ["name=%s" % parsed_args.name]
             properties.extend(utils.args_array_to_patch('add', name))
+        if parsed_args.description:
+            if not supports_new_fields:
+                raise exc.UnsupportedVersion(
+                    _("--description requires API version 1.112 or later"))
+            description = ["description=%s" % parsed_args.description]
+            properties.extend(utils.args_array_to_patch('add', description))
         if parsed_args.owner:
             owner = ["owner=%s" % parsed_args.owner]
             properties.extend(utils.args_array_to_patch('add', owner))
@@ -258,6 +295,11 @@ class UnsetBaremetalRunbook(command.Command):
             help=_('Unset the name of the runbook.')
         )
         parser.add_argument(
+            '--description',
+            action='store_true',
+            help=_('Unset the description of the runbook.')
+        )
+        parser.add_argument(
             '--public',
             dest='public',
             action='store_true',
@@ -293,9 +335,21 @@ class UnsetBaremetalRunbook(command.Command):
         baremetal_client = manager.baremetal
 
         properties: list[dict[str, Any]] = []
+        # Check if API version supports description field
+        supports_new_fields = utils.check_api_version_support(
+            baremetal_client.current_api_version, "1.112")
+
         for field in ['name', 'owner', 'public']:
             if getattr(parsed_args, field):
                 properties.extend(utils.args_array_to_patch('remove', [field]))
+
+        # Handle description field separately with version check
+        if getattr(parsed_args, 'description', False):
+            if not supports_new_fields:
+                raise exc.UnsupportedVersion(
+                    _("--description requires API version 1.112 or later"))
+            properties.extend(
+                utils.args_array_to_patch('remove', ['description']))
 
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch('remove',
@@ -437,3 +491,121 @@ class ListBaremetalRunbook(command.Lister):
 
         return (columns,
                 (oscutils.get_item_properties(s, columns) for s in data))
+
+
+class ListTraitsBaremetalRunbook(command.Lister):
+    """List a runbook's traits."""
+
+    log = logging.getLogger(__name__ + ".ListTraitsBaremetalRunbook")
+
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser = super(ListTraitsBaremetalRunbook, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'runbook',
+            metavar='<runbook>',
+            help=_("Name or UUID of the runbook"))
+
+        return parser
+
+    def take_action(
+        self, parsed_args: argparse.Namespace
+    ) -> tuple[tuple[str, ...], list[list[str]]]:
+        self.log.debug("take_action(%s)", parsed_args)
+
+        columns = res_fields.TRAIT_RESOURCE.fields
+
+        baremetal_client = self.app.client_manager.baremetal
+        traits = baremetal_client.runbook.get_traits(parsed_args.runbook)
+
+        return (columns, [[trait] for trait in traits])
+
+
+class AddTraitBaremetalRunbook(command.Command):
+    """Add traits to a runbook."""
+
+    log = logging.getLogger(__name__ + ".AddTraitBaremetalRunbook")
+
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser = super(AddTraitBaremetalRunbook, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'runbook',
+            metavar='<runbook>',
+            help=_("Name or UUID of the runbook"))
+        parser.add_argument(
+            'traits',
+            nargs='+',
+            metavar='<trait>',
+            help=_("Trait(s) to add"))
+
+        return parser
+
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        failures = []
+        for trait in parsed_args.traits:
+            try:
+                baremetal_client.runbook.add_trait(parsed_args.runbook, trait)
+                print(_('Added trait %s') % trait)
+            except exc.ClientException as e:
+                failures.append(_("Failed to add trait %(trait)s: %(error)s")
+                                % {'trait': trait, 'error': e})
+
+        if failures:
+            raise exc.ClientException("\n".join(failures))
+
+
+class RemoveTraitBaremetalRunbook(command.Command):
+    """Remove trait(s) from a runbook."""
+
+    log = logging.getLogger(__name__ + ".RemoveTraitBaremetalRunbook")
+
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser = super(RemoveTraitBaremetalRunbook, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'runbook',
+            metavar='<runbook>',
+            help=_("Name or UUID of the runbook"))
+        all_or_trait = parser.add_mutually_exclusive_group(required=True)
+        all_or_trait.add_argument(
+            '--all',
+            dest='remove_all',
+            action='store_true',
+            help=_("Remove all traits"))
+        all_or_trait.add_argument(
+            'traits',
+            metavar='<trait>',
+            nargs='*',
+            default=[],
+            help=_("Trait(s) to remove"))
+
+        return parser
+
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+
+        failures = []
+        if parsed_args.remove_all:
+            baremetal_client.runbook.remove_all_traits(parsed_args.runbook)
+            print(_('Removed all traits from runbook %s')
+                  % parsed_args.runbook)
+        else:
+            for trait in parsed_args.traits:
+                try:
+                    baremetal_client.runbook.remove_trait(
+                        parsed_args.runbook, trait)
+                    print(_('Removed trait %s') % trait)
+                except exc.ClientException as e:
+                    failures.append(_("Failed to remove trait %(trait)s: "
+                                      "%(error)s")
+                                    % {'trait': trait, 'error': e})
+
+        if failures:
+            raise exc.ClientException("\n".join(failures))

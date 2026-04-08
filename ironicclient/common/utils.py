@@ -31,6 +31,7 @@ from cliff import columns
 from oslo_utils import strutils
 import yaml
 
+from ironicclient.common.http import _Version
 from ironicclient.common.i18n import _
 from ironicclient import exc
 
@@ -516,3 +517,25 @@ class HashColumn(columns.FormattableColumn[Any]):
     # base returns Sequence; we return str | None
     def human_readable(self) -> str | None:  # type: ignore[override]
         return format_hash(self._value)
+
+
+def check_api_version_support(
+    current_version: str | list[str],
+    required_version: str,
+) -> bool:
+    """Check if the current API version supports a required version.
+
+    :param current_version: Current API version being used (e.g. "1.112")
+    :param required_version: Minimum API version required (e.g. "1.112")
+    :returns: True if the current version meets the requirement, False
+        otherwise. Also returns True if the version format is invalid
+        (let the server decide).
+    """
+    version = (current_version[0] if isinstance(current_version, list)
+               else current_version)
+
+    try:
+        return _Version(version) >= _Version(required_version)
+    except ValueError:
+        # Invalid version format - let the server handle it
+        return True
