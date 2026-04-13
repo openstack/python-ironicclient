@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import copy
 
 import testtools
@@ -175,12 +177,12 @@ fake_responses_shards = {
 
 class PortgroupManagerTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(PortgroupManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
         self.mgr = ironicclient.v1.portgroup.PortgroupManager(self.api)
 
-    def test_portgroups_list(self):
+    def test_portgroups_list(self) -> None:
         portgroups = self.mgr.list()
         expect = [
             ('GET', '/v1/portgroups', {}, None),
@@ -192,7 +194,7 @@ class PortgroupManagerTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/portgroups']['GET'])
 
-    def test_portgroups_list_by_address(self):
+    def test_portgroups_list_by_address(self) -> None:
         portgroups = self.mgr.list(address=PORTGROUP['address'])
         expect = [
             ('GET', '/v1/portgroups/?address=%s' % PORTGROUP['address'], {},
@@ -205,7 +207,7 @@ class PortgroupManagerTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/portgroups']['GET'])
 
-    def test_portgroups_list_by_address_detail(self):
+    def test_portgroups_list_by_address_detail(self) -> None:
         portgroups = self.mgr.list(address=PORTGROUP['address'], detail=True)
         expect = [
             ('GET', '/v1/portgroups/detail?address=%s' % PORTGROUP['address'],
@@ -218,7 +220,7 @@ class PortgroupManagerTest(testtools.TestCase):
             PORTGROUP,
             self.api.responses['/v1/portgroups']['GET'][1]['portgroups'])
 
-    def test_portgroups_list_detail(self):
+    def test_portgroups_list_detail(self) -> None:
         portgroups = self.mgr.list(detail=True)
         expect = [
             ('GET', '/v1/portgroups/detail', {}, None),
@@ -230,7 +232,7 @@ class PortgroupManagerTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/portgroups']['GET'])
 
-    def test_portgroups_show(self):
+    def test_portgroups_show(self) -> None:
         portgroup = self.mgr.get(PORTGROUP['uuid'])
         expect = [
             ('GET', '/v1/portgroups/%s' % PORTGROUP['uuid'], {}, None),
@@ -247,7 +249,7 @@ class PortgroupManagerTest(testtools.TestCase):
             self.api.responses['/v1/portgroups/%s'
                                % PORTGROUP['uuid']]['GET'])
 
-    def test_portgroups_show_by_address(self):
+    def test_portgroups_show_by_address(self) -> None:
         portgroup = self.mgr.get_by_address(PORTGROUP['address'])
         expect = [
             ('GET', '/v1/portgroups/detail?address=%s' % PORTGROUP['address'],
@@ -265,7 +267,7 @@ class PortgroupManagerTest(testtools.TestCase):
             self.api.responses['/v1/portgroups/detail?address=%s'
                                % PORTGROUP['address']]['GET'])
 
-    def test_create(self):
+    def test_create(self) -> None:
         portgroup = self.mgr.create(**CREATE_PORTGROUP)
         expect = [
             ('POST', '/v1/portgroups', {}, CREATE_PORTGROUP),
@@ -277,7 +279,7 @@ class PortgroupManagerTest(testtools.TestCase):
             PORTGROUP,
             self.api.responses['/v1/portgroups']['GET'][1]['portgroups'])
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         portgroup = self.mgr.delete(portgroup_id=PORTGROUP['uuid'])
         expect = [
             ('DELETE', '/v1/portgroups/%s' % PORTGROUP['uuid'], {}, None),
@@ -291,7 +293,7 @@ class PortgroupManagerTest(testtools.TestCase):
             self.api.responses['/v1/portgroups/%s'
                                % PORTGROUP['uuid']]['GET'])
 
-    def test_update(self):
+    def test_update(self) -> None:
         patch = {'op': 'replace',
                  'value': NEW_ADDR,
                  'path': '/address'}
@@ -310,7 +312,7 @@ class PortgroupManagerTest(testtools.TestCase):
             self.api.responses['/v1/portgroups/%s'
                                % PORTGROUP['uuid']]['GET'])
 
-    def test_portgroup_port_list_with_uuid(self):
+    def test_portgroup_port_list_with_uuid(self) -> None:
         ports = self.mgr.list_ports(PORTGROUP['uuid'])
         expect = [
             ('GET', '/v1/portgroups/%s/ports' % PORTGROUP['uuid'], {}, None),
@@ -326,7 +328,7 @@ class PortgroupManagerTest(testtools.TestCase):
             self.api.responses['/v1/portgroups/%s/ports'
                                % PORTGROUP['uuid']]['GET'])
 
-    def test_portgroup_port_list_with_name(self):
+    def test_portgroup_port_list_with_name(self) -> None:
         ports = self.mgr.list_ports(PORTGROUP['name'])
         expect = [
             ('GET', '/v1/portgroups/%s/ports' % PORTGROUP['name'], {}, None),
@@ -345,12 +347,12 @@ class PortgroupManagerTest(testtools.TestCase):
 
 class PortgroupManagerPaginationTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(PortgroupManagerPaginationTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.portgroup.PortgroupManager(self.api)
 
-    def test_portgroups_list_limit(self):
+    def test_portgroups_list_limit(self) -> None:
         portgroups = self.mgr.list(limit=1)
         expect = [
             ('GET', '/v1/portgroups/?limit=1', {}, None),
@@ -364,7 +366,7 @@ class PortgroupManagerPaginationTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/portgroups']['GET'])
 
-    def test_portgroups_list_marker(self):
+    def test_portgroups_list_marker(self) -> None:
         portgroups = self.mgr.list(marker=PORTGROUP['uuid'])
         expect = [
             ('GET', '/v1/portgroups/?marker=%s' % PORTGROUP['uuid'], {}, None),
@@ -378,7 +380,7 @@ class PortgroupManagerPaginationTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/portgroups']['GET'])
 
-    def test_portgroups_list_pagination_no_limit(self):
+    def test_portgroups_list_pagination_no_limit(self) -> None:
         portgroups = self.mgr.list(limit=0)
         expect = [
             ('GET', '/v1/portgroups', {}, None),
@@ -396,12 +398,12 @@ class PortgroupManagerPaginationTest(testtools.TestCase):
 
 class PortgroupManagerSortingTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(PortgroupManagerSortingTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = ironicclient.v1.portgroup.PortgroupManager(self.api)
 
-    def test_portgroups_list_sort_key(self):
+    def test_portgroups_list_sort_key(self) -> None:
         portgroups = self.mgr.list(sort_key='updated_at')
         expect = [
             ('GET', '/v1/portgroups/?sort_key=updated_at', {}, None)
@@ -414,7 +416,7 @@ class PortgroupManagerSortingTest(testtools.TestCase):
             expected_resp,
             self.api.responses['/v1/portgroups/?sort_key=updated_at']['GET'])
 
-    def test_portgroups_list_sort_dir(self):
+    def test_portgroups_list_sort_dir(self) -> None:
         portgroups = self.mgr.list(sort_dir='desc')
         expect = [
             ('GET', '/v1/portgroups/?sort_dir=desc', {}, None)
@@ -430,12 +432,12 @@ class PortgroupManagerSortingTest(testtools.TestCase):
 
 class PortgroupManagerShardsTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(PortgroupManagerShardsTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses_shards)
         self.mgr = ironicclient.v1.portgroup.PortgroupManager(self.api)
 
-    def test_portgroups_list_by_shards(self):
+    def test_portgroups_list_by_shards(self) -> None:
         portgroups = self.mgr.list(shards=['shard1', 'shard2'])
         expect = [
             ('GET', '/v1/portgroups/?shard=shard1,shard2', {}, None)

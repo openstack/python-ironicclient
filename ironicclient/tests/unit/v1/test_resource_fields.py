@@ -12,13 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import testtools
 
 from ironicclient.v1 import resource_fields
 
 
 class ResourceTest(testtools.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         super(ResourceTest, self).setUp()
         self._saved_ids = resource_fields.Resource.FIELDS
         resource_fields.Resource.FIELDS = {
@@ -27,11 +29,11 @@ class ResourceTest(testtools.TestCase):
             'item_3': 'Third item',
         }
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         super(ResourceTest, self).tearDown()
         resource_fields.Resource.FIELDS = self._saved_ids
 
-    def test_fields_single_value(self):
+    def test_fields_single_value(self) -> None:
         # Make sure single value is what we expect
         foo = resource_fields.Resource(['item1'])
         self.assertEqual(('item1',), foo.fields)
@@ -39,7 +41,7 @@ class ResourceTest(testtools.TestCase):
         self.assertEqual(('item1',), foo.sort_fields)
         self.assertEqual(('ITEM1',), foo.sort_labels)
 
-    def test_fields_multiple_value_order(self):
+    def test_fields_multiple_value_order(self) -> None:
         # Make sure order is maintained
         foo = resource_fields.Resource(['2nd_item', 'item1'])
         self.assertEqual(('2nd_item', 'item1'), foo.fields)
@@ -47,14 +49,14 @@ class ResourceTest(testtools.TestCase):
         self.assertEqual(('2nd_item', 'item1'), foo.sort_fields)
         self.assertEqual(('A second item', 'ITEM1'), foo.sort_labels)
 
-    def test_sort_excluded(self):
+    def test_sort_excluded(self) -> None:
         # Test excluding of fields for sort purposes
         foo = resource_fields.Resource(['item_3', 'item1', '2nd_item'],
                                        sort_excluded=['item1'])
         self.assertEqual(('item_3', '2nd_item'), foo.sort_fields)
         self.assertEqual(('Third item', 'A second item'), foo.sort_labels)
 
-    def test_sort_excluded_unknown(self):
+    def test_sort_excluded_unknown(self) -> None:
         # Test sort_excluded value not in the field_ids
         self.assertRaises(
             ValueError,
@@ -62,7 +64,7 @@ class ResourceTest(testtools.TestCase):
             ['item_3', 'item1', '2nd_item'],
             sort_excluded=['item1', 'foo'])
 
-    def test_override_labels(self):
+    def test_override_labels(self) -> None:
         # Test overriding labels
         foo = resource_fields.Resource(['item_3', 'item1', '2nd_item'],
                                        override_labels={'item1': 'One'})
@@ -70,7 +72,7 @@ class ResourceTest(testtools.TestCase):
         self.assertEqual(('Third item', 'One', 'A second item'),
                          foo.sort_labels)
 
-    def test_override_labels_unknown(self):
+    def test_override_labels_unknown(self) -> None:
         # Test overriding labels with key not in field_ids
         self.assertRaises(
             ValueError,
@@ -78,7 +80,7 @@ class ResourceTest(testtools.TestCase):
             ['item_3', 'item1', '2nd_item'],
             override_labels={'foo': 'One'})
 
-    def test_sort_excluded_override_labels(self):
+    def test_sort_excluded_override_labels(self) -> None:
         # Test excluding of fields for sort purposes and overriding labels
         foo = resource_fields.Resource(['item_3', 'item1', '2nd_item'],
                                        sort_excluded=['item1'],
@@ -87,7 +89,7 @@ class ResourceTest(testtools.TestCase):
         self.assertEqual(('item_3', '2nd_item'), foo.sort_fields)
         self.assertEqual(('Three', 'A second item'), foo.sort_labels)
 
-    def test_unknown_field_id(self):
+    def test_unknown_field_id(self) -> None:
         self.assertRaises(
             KeyError,
             resource_fields.Resource,

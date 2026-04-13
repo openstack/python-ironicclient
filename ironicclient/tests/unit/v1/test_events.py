@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import testtools
 
 from ironicclient.tests.unit import utils
@@ -40,18 +42,18 @@ fake_responses = {
 
 
 class EventManagerTest(testtools.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         super(EventManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
         self.mgr = events.EventManager(self.api)
 
-    def test_event(self):
+    def test_event(self) -> None:
         evts = self.mgr.create(**FAKE_EVENTS)
         expect = [('POST', '/v1/events', {}, FAKE_EVENTS)]
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(evts)
 
-    def test_network_port_event(self):
+    def test_network_port_event(self) -> None:
         evts = self.mgr.create(**FAKE_NETWORK_PORT_EVENTS)
         expect = [('POST', '/v1/events', {}, FAKE_NETWORK_PORT_EVENTS)]
         self.assertEqual(expect, self.api.calls)

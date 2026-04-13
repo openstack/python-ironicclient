@@ -10,6 +10,8 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
+from __future__ import annotations
+
 import builtins
 from unittest import mock
 
@@ -75,7 +77,7 @@ schema_pov_invalid_json = {"meow": "woof!"}
 
 class CreateSchemaTest(utils.BaseTestCase):
 
-    def test_schema(self):
+    def test_schema(self) -> None:
         schema = create_resources._CREATE_SCHEMA
         jsonschema.validate(valid_json, schema)
         jsonschema.validate(ironic_pov_invalid_json, schema)
@@ -85,7 +87,7 @@ class CreateSchemaTest(utils.BaseTestCase):
 
 class CreateResourcesTest(utils.BaseTestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(CreateResourcesTest, self).setUp()
         self.client = mock.MagicMock()
 
@@ -95,7 +97,12 @@ class CreateResourcesTest(utils.BaseTestCase):
     @mock.patch.object(create_resources, 'load_from_file',
                        side_effect=[valid_json], autospec=True)
     def test_create_resources(
-            self, mock_load, mock_validate, mock_chassis, mock_nodes):
+            self,
+            mock_load: mock.MagicMock,
+            mock_validate: mock.MagicMock,
+            mock_chassis: mock.MagicMock,
+            mock_nodes: mock.MagicMock,
+    ) -> None:
         resources_files = ['file.json']
         create_resources.create_resources(self.client, resources_files)
         mock_load.assert_has_calls([
@@ -113,7 +120,12 @@ class CreateResourcesTest(utils.BaseTestCase):
     @mock.patch.object(create_resources, 'load_from_file',
                        side_effect=exc.ClientException, autospec=True)
     def test_create_resources_cannot_read_schema(
-            self, mock_load, mock_validate, mock_chassis, mock_nodes):
+            self,
+            mock_load: mock.MagicMock,
+            mock_validate: mock.MagicMock,
+            mock_chassis: mock.MagicMock,
+            mock_nodes: mock.MagicMock,
+    ) -> None:
         resources_files = ['file.json']
         self.assertRaises(exc.ClientException,
                           create_resources.create_resources,
@@ -131,7 +143,12 @@ class CreateResourcesTest(utils.BaseTestCase):
     @mock.patch.object(create_resources, 'load_from_file',
                        side_effect=[schema_pov_invalid_json], autospec=True)
     def test_create_resources_validation_fails(
-            self, mock_load, mock_validate, mock_chassis, mock_nodes):
+            self,
+            mock_load: mock.MagicMock,
+            mock_validate: mock.MagicMock,
+            mock_chassis: mock.MagicMock,
+            mock_nodes: mock.MagicMock,
+    ) -> None:
         resources_files = ['file.json']
         self.assertRaises(exc.ClientException,
                           create_resources.create_resources,
@@ -153,7 +170,12 @@ class CreateResourcesTest(utils.BaseTestCase):
                        side_effect=[valid_json, schema_pov_invalid_json],
                        autospec=True)
     def test_create_resources_validation_fails_multiple(
-            self, mock_load, mock_validate, mock_chassis, mock_nodes):
+            self,
+            mock_load: mock.MagicMock,
+            mock_validate: mock.MagicMock,
+            mock_chassis: mock.MagicMock,
+            mock_nodes: mock.MagicMock,
+    ) -> None:
         resources_files = ['file.json', 'file2.json']
         self.assertRaises(exc.ClientException,
                           create_resources.create_resources,
@@ -174,7 +196,12 @@ class CreateResourcesTest(utils.BaseTestCase):
     @mock.patch.object(create_resources, 'load_from_file',
                        side_effect=[ironic_pov_invalid_json], autospec=True)
     def test_create_resources_ironic_fails_to_create(
-            self, mock_load, mock_validate, mock_chassis, mock_nodes):
+            self,
+            mock_load: mock.MagicMock,
+            mock_validate: mock.MagicMock,
+            mock_chassis: mock.MagicMock,
+            mock_nodes: mock.MagicMock,
+    ) -> None:
         mock_nodes.return_value = [exc.ClientException('cannot create that')]
         mock_chassis.return_value = []
         resources_files = ['file.json']
@@ -195,21 +222,21 @@ class LoadFromFileTest(utils.BaseTestCase):
 
     @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='{"a": "b"}'))
-    def test_load_json(self):
+    def test_load_json(self) -> None:
         fname = 'abc.json'
         res = create_resources.load_from_file(fname)
         self.assertEqual({'a': 'b'}, res)
 
     @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='{"a": "b"}'))
-    def test_load_unknown_extension(self):
+    def test_load_unknown_extension(self) -> None:
         fname = 'abc'
         self.assertRaisesRegex(exc.ClientException,
                                'must have .json or .yaml extension',
                                create_resources.load_from_file, fname)
 
     @mock.patch.object(builtins, 'open', autospec=True)
-    def test_load_ioerror(self, mock_open):
+    def test_load_ioerror(self, mock_open: mock.MagicMock) -> None:
         mock_open.side_effect = IOError('file does not exist')
         fname = 'abc.json'
         self.assertRaisesRegex(exc.ClientException,
@@ -218,7 +245,7 @@ class LoadFromFileTest(utils.BaseTestCase):
 
     @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='{{bbb'))
-    def test_load_incorrect_json(self):
+    def test_load_incorrect_json(self) -> None:
         fname = 'abc.json'
         self.assertRaisesRegex(
             exc.ClientException, 'File "%s" is invalid' % fname,
@@ -226,14 +253,14 @@ class LoadFromFileTest(utils.BaseTestCase):
 
     @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='---\na: b'))
-    def test_load_yaml(self):
+    def test_load_yaml(self) -> None:
         fname = 'abc.yaml'
         res = create_resources.load_from_file(fname)
         self.assertEqual({'a': 'b'}, res)
 
     @mock.patch.object(builtins, 'open',
                        mock.mock_open(read_data='---\na-: - b'))
-    def test_load_incorrect_yaml(self):
+    def test_load_incorrect_yaml(self) -> None:
         fname = 'abc.yaml'
         self.assertRaisesRegex(
             exc.ClientException, 'File "%s" is invalid' % fname,
@@ -242,11 +269,11 @@ class LoadFromFileTest(utils.BaseTestCase):
 
 class CreateMethodsTest(utils.BaseTestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(CreateMethodsTest, self).setUp()
         self.client = mock.MagicMock()
 
-    def test_create_single_node(self):
+    def test_create_single_node(self) -> None:
         params = {'driver': 'fake'}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual(
@@ -255,7 +282,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.node.create.assert_called_once_with(driver='fake')
 
-    def test_create_single_node_with_traits(self):
+    def test_create_single_node_with_traits(self) -> None:
         params = {'driver': 'fake', 'traits': ['CUSTOM_PERFORMANCE']}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual(
@@ -266,7 +293,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.client.node.set_traits.assert_called_once_with(
             mock.ANY, ['CUSTOM_PERFORMANCE'])
 
-    def test_create_single_node_with_ports(self):
+    def test_create_single_node_with_ports(self) -> None:
         params = {'driver': 'fake', 'ports': ['some ports here']}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual(
@@ -275,7 +302,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.node.create.assert_called_once_with(driver='fake')
 
-    def test_create_single_node_with_portgroups(self):
+    def test_create_single_node_with_portgroups(self) -> None:
         params = {'driver': 'fake', 'portgroups': ['some portgroups']}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual(
@@ -284,7 +311,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.node.create.assert_called_once_with(driver='fake')
 
-    def test_create_single_node_raises_client_exception(self):
+    def test_create_single_node_raises_client_exception(self) -> None:
         params = {'driver': 'fake'}
         e = exc.ClientException('foo')
         self.client.node.create.side_effect = e
@@ -294,7 +321,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertIn('Unable to create the node', str(err))
         self.client.node.create.assert_called_once_with(driver='fake')
 
-    def test_create_single_node_raises_invalid_exception(self):
+    def test_create_single_node_raises_invalid_exception(self) -> None:
         params = {'driver': 'fake'}
         e = exc.InvalidAttribute('foo')
         self.client.node.create.side_effect = e
@@ -304,7 +331,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertIn('Cannot create the node with attributes', str(err))
         self.client.node.create.assert_called_once_with(driver='fake')
 
-    def test_create_single_port(self):
+    def test_create_single_port(self) -> None:
         params = {'address': 'fake-address', 'node_uuid': 'fake-node-uuid'}
         self.client.port.create.return_value = mock.Mock(uuid='fake-port-uuid')
         self.assertEqual(
@@ -313,7 +340,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.port.create.assert_called_once_with(**params)
 
-    def test_create_single_portgroup(self):
+    def test_create_single_portgroup(self) -> None:
         params = {'address': 'fake-address', 'node_uuid': 'fake-node-uuid'}
         self.client.portgroup.create.return_value = mock.Mock(
             uuid='fake-portgroup-uuid')
@@ -323,7 +350,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.portgroup.create.assert_called_once_with(**params)
 
-    def test_create_single_portgroup_with_ports(self):
+    def test_create_single_portgroup_with_ports(self) -> None:
         params = {'ports': ['some ports'], 'node_uuid': 'fake-node-uuid'}
         self.client.portgroup.create.return_value = mock.Mock(
             uuid='fake-portgroup-uuid')
@@ -335,7 +362,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.client.portgroup.create.assert_called_once_with(
             node_uuid='fake-node-uuid')
 
-    def test_create_single_chassis(self):
+    def test_create_single_chassis(self) -> None:
         self.client.chassis.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual(
             ('uuid', None),
@@ -343,7 +370,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.chassis.create.assert_called_once_with()
 
-    def test_create_single_chassis_with_nodes(self):
+    def test_create_single_chassis_with_nodes(self) -> None:
         params = {'nodes': ['some nodes here']}
         self.client.chassis.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual(
@@ -352,7 +379,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         )
         self.client.chassis.create.assert_called_once_with()
 
-    def test_create_ports(self):
+    def test_create_ports(self) -> None:
         port = {'address': 'fake-address'}
         port_with_node_uuid = port.copy()
         port_with_node_uuid.update(node_uuid='fake-node-uuid')
@@ -361,7 +388,7 @@ class CreateMethodsTest(utils.BaseTestCase):
                                                            'fake-node-uuid'))
         self.client.port.create.assert_called_once_with(**port_with_node_uuid)
 
-    def test_create_ports_two_node_uuids(self):
+    def test_create_ports_two_node_uuids(self) -> None:
         port = {'address': 'fake-address', 'node_uuid': 'node-uuid-1'}
         errs = create_resources.create_ports(self.client, [port],
                                              'node-uuid-2')
@@ -369,7 +396,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertEqual(1, len(errs))
         self.assertFalse(self.client.port.create.called)
 
-    def test_create_ports_two_portgroup_uuids(self):
+    def test_create_ports_two_portgroup_uuids(self) -> None:
         port = {'address': 'fake-address', 'node_uuid': 'node-uuid-1',
                 'portgroup_uuid': 'pg-uuid-1'}
         errs = create_resources.create_ports(self.client, [port],
@@ -381,7 +408,11 @@ class CreateMethodsTest(utils.BaseTestCase):
 
     @mock.patch.object(create_resources, 'create_portgroups', autospec=True)
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_nodes(self, mock_create_ports, mock_create_portgroups):
+    def test_create_nodes(
+            self,
+            mock_create_ports: mock.MagicMock,
+            mock_create_portgroups: mock.MagicMock,
+    ) -> None:
         node = {'driver': 'fake', 'ports': ['list of ports'],
                 'portgroups': ['list of portgroups']}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
@@ -395,8 +426,11 @@ class CreateMethodsTest(utils.BaseTestCase):
 
     @mock.patch.object(create_resources, 'create_portgroups', autospec=True)
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_nodes_exception(self, mock_create_ports,
-                                    mock_create_portgroups):
+    def test_create_nodes_exception(
+            self,
+            mock_create_ports: mock.MagicMock,
+            mock_create_portgroups: mock.MagicMock,
+    ) -> None:
         node = {'driver': 'fake', 'ports': ['list of ports'],
                 'portgroups': ['list of portgroups']}
         self.client.node.create.side_effect = exc.ClientException('bar')
@@ -408,7 +442,10 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertFalse(mock_create_portgroups.called)
 
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_nodes_two_chassis_uuids(self, mock_create_ports):
+    def test_create_nodes_two_chassis_uuids(
+            self,
+            mock_create_ports: mock.MagicMock,
+    ) -> None:
         node = {'driver': 'fake', 'ports': ['list of ports'],
                 'chassis_uuid': 'chassis-uuid-1'}
         errs = create_resources.create_nodes(self.client, [node],
@@ -420,8 +457,11 @@ class CreateMethodsTest(utils.BaseTestCase):
 
     @mock.patch.object(create_resources, 'create_portgroups', autospec=True)
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_nodes_no_ports_portgroups(self, mock_create_ports,
-                                              mock_create_portgroups):
+    def test_create_nodes_no_ports_portgroups(
+            self,
+            mock_create_ports: mock.MagicMock,
+            mock_create_portgroups: mock.MagicMock,
+    ) -> None:
         node = {'driver': 'fake'}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_nodes(self.client,
@@ -431,7 +471,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertFalse(mock_create_portgroups.called)
 
     @mock.patch.object(create_resources, 'create_nodes', autospec=True)
-    def test_create_chassis(self, mock_create_nodes):
+    def test_create_chassis(self, mock_create_nodes: mock.MagicMock) -> None:
         chassis = {'description': 'fake', 'nodes': ['list of nodes']}
         self.client.chassis.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_chassis(self.client,
@@ -441,7 +481,10 @@ class CreateMethodsTest(utils.BaseTestCase):
             self.client, ['list of nodes'], chassis_uuid='uuid')
 
     @mock.patch.object(create_resources, 'create_nodes', autospec=True)
-    def test_create_chassis_exception(self, mock_create_nodes):
+    def test_create_chassis_exception(
+            self,
+            mock_create_nodes: mock.MagicMock,
+    ) -> None:
         chassis = {'description': 'fake', 'nodes': ['list of nodes']}
         self.client.chassis.create.side_effect = exc.ClientException('bar')
         errs = create_resources.create_chassis(self.client, [chassis])
@@ -451,7 +494,10 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertIsInstance(errs[0], exc.ClientException)
 
     @mock.patch.object(create_resources, 'create_nodes', autospec=True)
-    def test_create_chassis_no_nodes(self, mock_create_nodes):
+    def test_create_chassis_no_nodes(
+            self,
+            mock_create_nodes: mock.MagicMock,
+    ) -> None:
         chassis = {'description': 'fake'}
         self.client.chassis.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_chassis(self.client,
@@ -460,7 +506,10 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertFalse(mock_create_nodes.called)
 
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_portgroups(self, mock_create_ports):
+    def test_create_portgroups(
+            self,
+            mock_create_ports: mock.MagicMock,
+    ) -> None:
         portgroup = {'name': 'fake', 'ports': ['list of ports']}
         portgroup_posted = {'name': 'fake', 'node_uuid': 'fake-node-uuid'}
         self.client.portgroup.create.return_value = mock.Mock(uuid='uuid')
@@ -473,7 +522,10 @@ class CreateMethodsTest(utils.BaseTestCase):
             portgroup_uuid='uuid')
 
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_portgroups_exception(self, mock_create_ports):
+    def test_create_portgroups_exception(
+            self,
+            mock_create_ports: mock.MagicMock,
+    ) -> None:
         portgroup = {'name': 'fake', 'ports': ['list of ports']}
         portgroup_posted = {'name': 'fake', 'node_uuid': 'fake-node-uuid'}
         self.client.portgroup.create.side_effect = exc.ClientException('bar')
@@ -486,7 +538,10 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertIsInstance(errs[0], exc.ClientException)
 
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_portgroups_two_node_uuids(self, mock_create_ports):
+    def test_create_portgroups_two_node_uuids(
+            self,
+            mock_create_ports: mock.MagicMock,
+    ) -> None:
         portgroup = {'name': 'fake', 'node_uuid': 'fake-node-uuid-1',
                      'ports': ['list of ports']}
         self.client.portgroup.create.side_effect = exc.ClientException('bar')
@@ -498,7 +553,10 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertIsInstance(errs[0], exc.ClientException)
 
     @mock.patch.object(create_resources, 'create_ports', autospec=True)
-    def test_create_portgroups_no_ports(self, mock_create_ports):
+    def test_create_portgroups_no_ports(
+            self,
+            mock_create_ports: mock.MagicMock,
+    ) -> None:
         portgroup = {'name': 'fake'}
         portgroup_posted = {'name': 'fake', 'node_uuid': 'fake-node-uuid'}
         self.client.portgroup.create.return_value = mock.Mock(uuid='uuid')

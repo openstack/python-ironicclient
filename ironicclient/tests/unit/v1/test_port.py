@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import copy
 
 import testtools
@@ -176,12 +178,12 @@ fake_responses_sorting = {
 
 class PortManagerTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(PortManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
         self.mgr = ironicclient.v1.port.PortManager(self.api)
 
-    def test_ports_list(self):
+    def test_ports_list(self) -> None:
         ports = self.mgr.list()
         expect = [
             ('GET', '/v1/ports', {}, None),
@@ -189,7 +191,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
 
-    def test_ports_list_by_address(self):
+    def test_ports_list_by_address(self) -> None:
         ports = self.mgr.list(address=PORT['address'])
         expect = [
             ('GET', '/v1/ports/?address=%s' % PORT['address'], {}, None),
@@ -197,7 +199,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
 
-    def test_ports_list_by_address_detail(self):
+    def test_ports_list_by_address_detail(self) -> None:
         ports = self.mgr.list(address=PORT['address'], detail=True)
         expect = [
             ('GET', '/v1/ports/detail?address=%s' % PORT['address'], {}, None),
@@ -205,7 +207,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
 
-    def test_ports_list_by_node(self):
+    def test_ports_list_by_node(self) -> None:
         ports = self.mgr.list(node=PORT['node_uuid'])
         expect = [
             ('GET', '/v1/ports/?node=%s' % PORT['node_uuid'], {}, None),
@@ -213,7 +215,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
 
-    def test_ports_list_by_portgroup(self):
+    def test_ports_list_by_portgroup(self) -> None:
         ports = self.mgr.list(portgroup=PORT['portgroup_uuid'])
         expect = [
             ('GET', '/v1/ports/?portgroup=%s' % PORT['portgroup_uuid'],
@@ -222,7 +224,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
 
-    def test_ports_list_detail(self):
+    def test_ports_list_detail(self) -> None:
         ports = self.mgr.list(detail=True)
         expect = [
             ('GET', '/v1/ports/detail', {}, None),
@@ -230,7 +232,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
 
-    def test_port_list_fields(self):
+    def test_port_list_fields(self) -> None:
         ports = self.mgr.list(fields=['uuid', 'address'])
         expect = [
             ('GET', '/v1/ports/?fields=uuid,address', {}, None),
@@ -238,11 +240,11 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(ports))
 
-    def test_port_list_detail_and_fields_fail(self):
+    def test_port_list_detail_and_fields_fail(self) -> None:
         self.assertRaises(exc.InvalidAttribute, self.mgr.list,
                           detail=True, fields=['uuid', 'address'])
 
-    def test_ports_list_limit(self):
+    def test_ports_list_limit(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.port.PortManager(self.api)
         ports = self.mgr.list(limit=1)
@@ -252,7 +254,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(ports, HasLength(1))
 
-    def test_ports_list_marker(self):
+    def test_ports_list_marker(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.port.PortManager(self.api)
         ports = self.mgr.list(marker=PORT['uuid'])
@@ -262,7 +264,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(ports, HasLength(1))
 
-    def test_ports_list_pagination_no_limit(self):
+    def test_ports_list_pagination_no_limit(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.port.PortManager(self.api)
         ports = self.mgr.list(limit=0)
@@ -273,7 +275,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(ports, HasLength(2))
 
-    def test_ports_list_sort_key(self):
+    def test_ports_list_sort_key(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = ironicclient.v1.port.PortManager(self.api)
         ports = self.mgr.list(sort_key='updated_at')
@@ -283,7 +285,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(ports))
 
-    def test_ports_list_sort_dir(self):
+    def test_ports_list_sort_dir(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = ironicclient.v1.port.PortManager(self.api)
         ports = self.mgr.list(sort_dir='desc')
@@ -293,7 +295,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(ports))
 
-    def test_ports_show(self):
+    def test_ports_show(self) -> None:
         port = self.mgr.get(PORT['uuid'])
         expect = [
             ('GET', '/v1/ports/%s' % PORT['uuid'], {}, None),
@@ -310,7 +312,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(PORT['is_smartnic'], port.is_smartnic)
         self.assertEqual(PORT['name'], port.name)
 
-    def test_ports_show_by_address(self):
+    def test_ports_show_by_address(self) -> None:
         port = self.mgr.get_by_address(PORT['address'])
         expect = [
             ('GET', '/v1/ports/detail?address=%s' % PORT['address'],
@@ -327,7 +329,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(PORT['physical_network'], port.physical_network)
         self.assertEqual(PORT['is_smartnic'], port.is_smartnic)
 
-    def test_port_show_fields(self):
+    def test_port_show_fields(self) -> None:
         port = self.mgr.get(PORT['uuid'], fields=['uuid', 'address'])
         expect = [
             ('GET', '/v1/ports/%s?fields=uuid,address' %
@@ -337,7 +339,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(PORT['uuid'], port.uuid)
         self.assertEqual(PORT['address'], port.address)
 
-    def test_create(self):
+    def test_create(self) -> None:
         port = self.mgr.create(**CREATE_PORT)
         expect = [
             ('POST', '/v1/ports', {}, CREATE_PORT),
@@ -345,7 +347,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(port)
 
-    def test_create_with_uuid(self):
+    def test_create_with_uuid(self) -> None:
         port = self.mgr.create(**CREATE_PORT_WITH_UUID)
         expect = [
             ('POST', '/v1/ports', {}, CREATE_PORT_WITH_UUID),
@@ -353,7 +355,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(port)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         port = self.mgr.delete(port_id=PORT['uuid'])
         expect = [
             ('DELETE', '/v1/ports/%s' % PORT['uuid'], {}, None),
@@ -361,7 +363,7 @@ class PortManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(port)
 
-    def test_update(self):
+    def test_update(self) -> None:
         patch = {'op': 'replace',
                  'value': NEW_ADDR,
                  'path': '/address'}

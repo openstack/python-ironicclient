@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import copy
 
 import testtools
@@ -19,6 +21,7 @@ import testtools
 from ironicclient import exc
 from ironicclient.tests.unit import utils
 import ironicclient.v1.port
+import ironicclient.v1.volume_target
 
 NODE_UUID = '55555555-4444-3333-2222-111111111111'
 TARGET1 = {'uuid': '11111111-2222-3333-4444-555555555555',
@@ -165,15 +168,17 @@ fake_responses_sorting = {
 
 class VolumeTargetManagerTestBase(testtools.TestCase):
 
-    def _validate_obj(self, expect, obj):
+    def _validate_obj(self, expect: dict[str, object],
+                      obj: object) -> None:
         self.assertEqual(expect['uuid'], obj.uuid)
         self.assertEqual(expect['volume_type'], obj.volume_type)
         self.assertEqual(expect['boot_index'], obj.boot_index)
         self.assertEqual(expect['volume_id'], obj.volume_id)
         self.assertEqual(expect['node_uuid'], obj.node_uuid)
 
-    def _validate_list(self, expect_request,
-                       expect_targets, actual_targets):
+    def _validate_list(self, expect_request: list[object],
+                       expect_targets: list[dict[str, object]],
+                       actual_targets: list[object]) -> None:
         self.assertEqual(expect_request, self.api.calls)
         self.assertEqual(len(expect_targets), len(actual_targets))
         for expect, obj in zip(expect_targets, actual_targets):
@@ -182,12 +187,12 @@ class VolumeTargetManagerTestBase(testtools.TestCase):
 
 class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(VolumeTargetManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
         self.mgr = ironicclient.v1.volume_target.VolumeTargetManager(self.api)
 
-    def test_volume_targets_list(self):
+    def test_volume_targets_list(self) -> None:
         volume_targets = self.mgr.list()
         expect = [
             ('GET', '/v1/volume/targets', {}, None),
@@ -195,7 +200,7 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         expect_targets = [TARGET1]
         self._validate_list(expect, expect_targets, volume_targets)
 
-    def test_volume_targets_list_by_node(self):
+    def test_volume_targets_list_by_node(self) -> None:
         volume_targets = self.mgr.list(node=NODE_UUID)
         expect = [
             ('GET', '/v1/volume/targets/?node=%s' % NODE_UUID, {}, None),
@@ -203,7 +208,7 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         expect_targets = [TARGET1]
         self._validate_list(expect, expect_targets, volume_targets)
 
-    def test_volume_targets_list_by_node_detail(self):
+    def test_volume_targets_list_by_node_detail(self) -> None:
         volume_targets = self.mgr.list(node=NODE_UUID, detail=True)
         expect = [
             ('GET', '/v1/volume/targets/?detail=True&node=%s' % NODE_UUID,
@@ -212,7 +217,7 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         expect_targets = [TARGET1]
         self._validate_list(expect, expect_targets, volume_targets)
 
-    def test_volume_targets_list_detail(self):
+    def test_volume_targets_list_detail(self) -> None:
         volume_targets = self.mgr.list(detail=True)
         expect = [
             ('GET', '/v1/volume/targets/?detail=True', {}, None),
@@ -220,7 +225,7 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         expect_targets = [TARGET1]
         self._validate_list(expect, expect_targets, volume_targets)
 
-    def test_volume_target_list_fields(self):
+    def test_volume_target_list_fields(self) -> None:
         volume_targets = self.mgr.list(fields=['uuid', 'boot_index'])
         expect = [
             ('GET', '/v1/volume/targets/?fields=uuid,boot_index', {}, None),
@@ -228,11 +233,11 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         expect_targets = [TARGET1]
         self._validate_list(expect, expect_targets, volume_targets)
 
-    def test_volume_target_list_detail_and_fields_fail(self):
+    def test_volume_target_list_detail_and_fields_fail(self) -> None:
         self.assertRaises(exc.InvalidAttribute, self.mgr.list,
                           detail=True, fields=['uuid', 'boot_index'])
 
-    def test_volume_targets_show(self):
+    def test_volume_targets_show(self) -> None:
         volume_target = self.mgr.get(TARGET1['uuid'])
         expect = [
             ('GET', '/v1/volume/targets/%s' % TARGET1['uuid'], {}, None),
@@ -240,7 +245,7 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         self.assertEqual(expect, self.api.calls)
         self._validate_obj(TARGET1, volume_target)
 
-    def test_volume_target_show_fields(self):
+    def test_volume_target_show_fields(self) -> None:
         volume_target = self.mgr.get(TARGET1['uuid'],
                                      fields=['uuid', 'boot_index'])
         expect = [
@@ -251,7 +256,7 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         self.assertEqual(TARGET1['uuid'], volume_target.uuid)
         self.assertEqual(TARGET1['boot_index'], volume_target.boot_index)
 
-    def test_create(self):
+    def test_create(self) -> None:
         volume_target = self.mgr.create(**CREATE_TARGET)
         expect = [
             ('POST', '/v1/volume/targets', {}, CREATE_TARGET),
@@ -259,7 +264,7 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         self.assertEqual(expect, self.api.calls)
         self._validate_obj(TARGET1, volume_target)
 
-    def test_create_with_uuid(self):
+    def test_create_with_uuid(self) -> None:
         volume_target = self.mgr.create(**CREATE_TARGET_WITH_UUID)
         expect = [
             ('POST', '/v1/volume/targets', {}, CREATE_TARGET_WITH_UUID),
@@ -267,7 +272,7 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         self.assertEqual(expect, self.api.calls)
         self._validate_obj(TARGET1, volume_target)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         volume_target = self.mgr.delete(TARGET1['uuid'])
         expect = [
             ('DELETE', '/v1/volume/targets/%s' % TARGET1['uuid'],
@@ -276,7 +281,7 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(volume_target)
 
-    def test_update(self):
+    def test_update(self) -> None:
         patch = {'op': 'replace',
                  'value': NEW_VALUE,
                  'path': '/boot_index'}
@@ -292,12 +297,12 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
 
 class VolumeTargetManagerPaginationTest(VolumeTargetManagerTestBase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(VolumeTargetManagerPaginationTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.volume_target.VolumeTargetManager(self.api)
 
-    def test_volume_targets_list_limit(self):
+    def test_volume_targets_list_limit(self) -> None:
         volume_targets = self.mgr.list(limit=1)
         expect = [
             ('GET', '/v1/volume/targets/?limit=1', {}, None),
@@ -305,7 +310,7 @@ class VolumeTargetManagerPaginationTest(VolumeTargetManagerTestBase):
         expect_targets = [TARGET1]
         self._validate_list(expect, expect_targets, volume_targets)
 
-    def test_volume_targets_list_marker(self):
+    def test_volume_targets_list_marker(self) -> None:
         volume_targets = self.mgr.list(marker=TARGET1['uuid'])
         expect = [
             ('GET', '/v1/volume/targets/?marker=%s' % TARGET1['uuid'],
@@ -314,7 +319,7 @@ class VolumeTargetManagerPaginationTest(VolumeTargetManagerTestBase):
         expect_targets = [TARGET2]
         self._validate_list(expect, expect_targets, volume_targets)
 
-    def test_volume_targets_list_pagination_no_limit(self):
+    def test_volume_targets_list_pagination_no_limit(self) -> None:
         volume_targets = self.mgr.list(limit=0)
         expect = [
             ('GET', '/v1/volume/targets', {}, None),
@@ -327,12 +332,12 @@ class VolumeTargetManagerPaginationTest(VolumeTargetManagerTestBase):
 
 class VolumeTargetManagerSortingTest(VolumeTargetManagerTestBase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(VolumeTargetManagerSortingTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = ironicclient.v1.volume_target.VolumeTargetManager(self.api)
 
-    def test_volume_targets_list_sort_key(self):
+    def test_volume_targets_list_sort_key(self) -> None:
         volume_targets = self.mgr.list(sort_key='updated_at')
         expect = [
             ('GET', '/v1/volume/targets/?sort_key=updated_at', {}, None)
@@ -340,7 +345,7 @@ class VolumeTargetManagerSortingTest(VolumeTargetManagerTestBase):
         expect_targets = [TARGET2, TARGET1]
         self._validate_list(expect, expect_targets, volume_targets)
 
-    def test_volume_targets_list_sort_dir(self):
+    def test_volume_targets_list_sort_dir(self) -> None:
         volume_targets = self.mgr.list(sort_dir='desc')
         expect = [
             ('GET', '/v1/volume/targets/?sort_dir=desc', {}, None)

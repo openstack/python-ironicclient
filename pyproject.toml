@@ -215,6 +215,7 @@ module = [
     "ironicclient.tests.unit.test_client",
     "ironicclient.tests.unit.test_exc",
     "ironicclient.tests.unit.test_import",
+    "ironicclient.tests.unit.v1.*",
 ]
 disallow_untyped_calls = true
 disallow_untyped_defs = true

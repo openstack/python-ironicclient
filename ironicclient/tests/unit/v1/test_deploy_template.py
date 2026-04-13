@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import copy
 
 import testtools
@@ -135,13 +137,13 @@ fake_responses_sorting = {
 
 class DeployTemplateManagerTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(DeployTemplateManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
         self.mgr = ironicclient.v1.deploy_template.DeployTemplateManager(
             self.api)
 
-    def test_deploy_templates_list(self):
+    def test_deploy_templates_list(self) -> None:
         deploy_templates = self.mgr.list()
         expect = [
             ('GET', '/v1/deploy_templates', {}, None),
@@ -149,7 +151,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(deploy_templates))
 
-    def test_deploy_templates_list_detail(self):
+    def test_deploy_templates_list_detail(self) -> None:
         deploy_templates = self.mgr.list(detail=True)
         expect = [
             ('GET', '/v1/deploy_templates/?detail=True', {}, None),
@@ -157,7 +159,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(deploy_templates))
 
-    def test_deploy_template_list_fields(self):
+    def test_deploy_template_list_fields(self) -> None:
         deploy_templates = self.mgr.list(fields=['uuid', 'name'])
         expect = [
             ('GET', '/v1/deploy_templates/?fields=uuid,name', {}, None),
@@ -165,11 +167,11 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(deploy_templates))
 
-    def test_deploy_template_list_detail_and_fields_fail(self):
+    def test_deploy_template_list_detail_and_fields_fail(self) -> None:
         self.assertRaises(exc.InvalidAttribute, self.mgr.list,
                           detail=True, fields=['uuid', 'name'])
 
-    def test_deploy_templates_list_limit(self):
+    def test_deploy_templates_list_limit(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.deploy_template.DeployTemplateManager(
             self.api)
@@ -180,7 +182,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(deploy_templates, HasLength(1))
 
-    def test_deploy_templates_list_marker(self):
+    def test_deploy_templates_list_marker(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.deploy_template.DeployTemplateManager(
             self.api)
@@ -193,7 +195,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(deploy_templates, HasLength(1))
 
-    def test_deploy_templates_list_pagination_no_limit(self):
+    def test_deploy_templates_list_pagination_no_limit(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.deploy_template.DeployTemplateManager(
             self.api)
@@ -205,7 +207,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(deploy_templates, HasLength(2))
 
-    def test_deploy_templates_list_sort_key(self):
+    def test_deploy_templates_list_sort_key(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = ironicclient.v1.deploy_template.DeployTemplateManager(
             self.api)
@@ -216,7 +218,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(deploy_templates))
 
-    def test_deploy_templates_list_sort_dir(self):
+    def test_deploy_templates_list_sort_dir(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = ironicclient.v1.deploy_template.DeployTemplateManager(
             self.api)
@@ -227,7 +229,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(deploy_templates))
 
-    def test_deploy_templates_show(self):
+    def test_deploy_templates_show(self) -> None:
         deploy_template = self.mgr.get(DEPLOY_TEMPLATE['uuid'])
         expect = [
             ('GET', '/v1/deploy_templates/%s' % DEPLOY_TEMPLATE['uuid'], {},
@@ -239,7 +241,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(DEPLOY_TEMPLATE['steps'], deploy_template.steps)
         self.assertEqual(DEPLOY_TEMPLATE['extra'], deploy_template.extra)
 
-    def test_deploy_template_show_fields(self):
+    def test_deploy_template_show_fields(self) -> None:
         deploy_template = self.mgr.get(DEPLOY_TEMPLATE['uuid'],
                                        fields=['uuid', 'name'])
         expect = [
@@ -250,7 +252,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(DEPLOY_TEMPLATE['uuid'], deploy_template.uuid)
         self.assertEqual(DEPLOY_TEMPLATE['name'], deploy_template.name)
 
-    def test_create(self):
+    def test_create(self) -> None:
         deploy_template = self.mgr.create(**CREATE_DEPLOY_TEMPLATE)
         expect = [
             ('POST', '/v1/deploy_templates', {}, CREATE_DEPLOY_TEMPLATE),
@@ -258,7 +260,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(deploy_template)
 
-    def test_create_with_uuid(self):
+    def test_create_with_uuid(self) -> None:
         deploy_template = self.mgr.create(**CREATE_DEPLOY_TEMPLATE_WITH_UUID)
         expect = [
             ('POST', '/v1/deploy_templates', {},
@@ -267,7 +269,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(deploy_template)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         deploy_template = self.mgr.delete(
             template_id=DEPLOY_TEMPLATE['uuid'])
         expect = [
@@ -277,7 +279,7 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(deploy_template)
 
-    def test_update(self):
+    def test_update(self) -> None:
         patch = {'op': 'replace',
                  'value': NEW_NAME,
                  'path': '/name'}

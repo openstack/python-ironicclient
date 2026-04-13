@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 from unittest import mock
 
 from ironicclient.common import filecache
@@ -23,7 +25,9 @@ class ClientTest(utils.BaseTestCase):
 
     session = mock.sentinel.session
 
-    def test_client_user_api_version(self, http_client_mock):
+    def test_client_user_api_version(
+        self, http_client_mock: mock.MagicMock,
+    ) -> None:
         endpoint = 'http://ironic:6385'
         os_ironic_api_version = '1.15'
 
@@ -35,7 +39,9 @@ class ClientTest(utils.BaseTestCase):
             os_ironic_api_version=os_ironic_api_version,
             api_version_select_state='user')
 
-    def test_client_user_api_version_with_downgrade(self, http_client_mock):
+    def test_client_user_api_version_with_downgrade(
+        self, http_client_mock: mock.MagicMock,
+    ) -> None:
         endpoint = 'http://ironic:6385'
         os_ironic_api_version = '1.15'
 
@@ -48,8 +54,10 @@ class ClientTest(utils.BaseTestCase):
             os_ironic_api_version=os_ironic_api_version,
             api_version_select_state='default')
 
-    def test_client_user_api_version_latest_with_downgrade(self,
-                                                           http_client_mock):
+    def test_client_user_api_version_latest_with_downgrade(
+        self,
+        http_client_mock: mock.MagicMock,
+    ) -> None:
         endpoint = 'http://ironic:6385'
         os_ironic_api_version = 'latest'
 
@@ -59,7 +67,11 @@ class ClientTest(utils.BaseTestCase):
                           os_ironic_api_version=os_ironic_api_version)
 
     @mock.patch.object(filecache, 'retrieve_data', autospec=True)
-    def test_client_cache_api_version(self, cache_mock, http_client_mock):
+    def test_client_cache_api_version(
+        self,
+        cache_mock: mock.MagicMock,
+        http_client_mock: mock.MagicMock,
+    ) -> None:
         endpoint = 'http://ironic:6385'
         os_ironic_api_version = '1.15'
         cache_mock.return_value = os_ironic_api_version
@@ -73,7 +85,11 @@ class ClientTest(utils.BaseTestCase):
             api_version_select_state='cached')
 
     @mock.patch.object(filecache, 'retrieve_data', autospec=True)
-    def test_client_default_api_version(self, cache_mock, http_client_mock):
+    def test_client_default_api_version(
+        self,
+        cache_mock: mock.MagicMock,
+        http_client_mock: mock.MagicMock,
+    ) -> None:
         endpoint = 'http://ironic:6385'
         cache_mock.return_value = None
 
@@ -85,14 +101,18 @@ class ClientTest(utils.BaseTestCase):
             os_ironic_api_version=client.DEFAULT_VER,
             api_version_select_state='default')
 
-    def test_client_cache_version_no_endpoint_as_arg(self, http_client_mock):
+    def test_client_cache_version_no_endpoint_as_arg(
+        self, http_client_mock: mock.MagicMock,
+    ) -> None:
         client.Client(session='fake_session', insecure=True)
         http_client_mock.assert_called_once_with(
             session='fake_session', insecure=True,
             os_ironic_api_version=client.DEFAULT_VER,
             api_version_select_state='default')
 
-    def test_client_initialized_managers(self, http_client_mock):
+    def test_client_initialized_managers(
+        self, http_client_mock: mock.MagicMock,
+    ) -> None:
         cl = client.Client('http://ironic:6385', session=self.session,
                            os_ironic_api_version='1.15')
 
@@ -101,7 +121,9 @@ class ClientTest(utils.BaseTestCase):
         self.assertIsInstance(cl.driver, client.driver.DriverManager)
         self.assertIsInstance(cl.chassis, client.chassis.ChassisManager)
 
-    def test_negotiate_api_version(self, http_client_mock):
+    def test_negotiate_api_version(
+        self, http_client_mock: mock.MagicMock,
+    ) -> None:
         endpoint = 'http://ironic:6385'
         os_ironic_api_version = 'latest'
         cl = client.Client(endpoint, session=self.session,
@@ -116,13 +138,17 @@ class ClientTest(utils.BaseTestCase):
         # although mocking might need to be restrutured to
         # properly achieve that.
 
-    def test_client_no_session(self, http_client_mock):
+    def test_client_no_session(
+        self, http_client_mock: mock.MagicMock,
+    ) -> None:
         self.assertRaisesRegex(TypeError,
                                "session is required",
                                client.Client,
                                "http://example.com")
 
-    def test_client_session_via_posargs(self, http_client_mock):
+    def test_client_session_via_posargs(
+        self, http_client_mock: mock.MagicMock,
+    ) -> None:
         session = mock.Mock()
         client.Client("http://example.com", session)
         http_client_mock.assert_called_once_with(
@@ -130,7 +156,9 @@ class ClientTest(utils.BaseTestCase):
             endpoint_override="http://example.com",
             os_ironic_api_version=client.DEFAULT_VER)
 
-    def test_client_session_via_kwargs(self, http_client_mock):
+    def test_client_session_via_kwargs(
+        self, http_client_mock: mock.MagicMock,
+    ) -> None:
         session = mock.Mock()
         client.Client(session=session, endpoint_override="http://example.com")
         http_client_mock.assert_called_once_with(

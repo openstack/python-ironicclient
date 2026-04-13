@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 from unittest import mock
 
 import testtools
@@ -126,12 +128,12 @@ fake_responses = {
 
 class DriverManagerTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(DriverManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
         self.mgr = driver.DriverManager(self.api)
 
-    def test_driver_list(self):
+    def test_driver_list(self) -> None:
         drivers = self.mgr.list()
         expect = [
             ('GET', '/v1/drivers', {}, None),
@@ -139,7 +141,7 @@ class DriverManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(drivers, matchers.HasLength(1))
 
-    def test_driver_show(self):
+    def test_driver_show(self) -> None:
         driver_ = self.mgr.get(DRIVER1['name'])
         expect = [
             ('GET', '/v1/drivers/%s' % DRIVER1['name'], {}, None)
@@ -152,7 +154,7 @@ class DriverManagerTest(testtools.TestCase):
 
         self.assertEqual(DRIVER1, driver_attr)
 
-    def test_driver_list_fields(self):
+    def test_driver_list_fields(self) -> None:
         drivers = self.mgr.list(fields=['name', 'hosts'])
         expect = [
             ('GET', '/v1/drivers/?fields=name,hosts', {}, None),
@@ -160,7 +162,7 @@ class DriverManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(drivers, matchers.HasLength(1))
 
-    def test_driver_show_fields(self):
+    def test_driver_show_fields(self) -> None:
         driver_ = self.mgr.get(DRIVER1['name'], fields=['name', 'hosts'])
         expect = [
             ('GET', '/v1/drivers/%s?fields=name,hosts' %
@@ -170,7 +172,7 @@ class DriverManagerTest(testtools.TestCase):
         self.assertEqual(DRIVER1['name'], driver_.name)
         self.assertEqual(DRIVER1['hosts'], driver_.hosts)
 
-    def test_driver_properties(self):
+    def test_driver_properties(self) -> None:
         properties = self.mgr.properties(DRIVER2['name'])
         expect = [
             ('GET', '/v1/drivers/%s/properties' % DRIVER2['name'], {}, None),
@@ -178,7 +180,7 @@ class DriverManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(DRIVER2_PROPERTIES, properties)
 
-    def test_driver_raid_logical_disk_properties(self):
+    def test_driver_raid_logical_disk_properties(self) -> None:
         properties = self.mgr.raid_logical_disk_properties(DRIVER2['name'])
         expect = [
             ('GET',
@@ -188,7 +190,9 @@ class DriverManagerTest(testtools.TestCase):
         self.assertEqual(DRIVER2_RAID_LOGICAL_DISK_PROPERTIES, properties)
 
     @mock.patch.object(driver.DriverManager, '_list', autospec=True)
-    def test_driver_raid_logical_disk_properties_indexerror(self, _list_mock):
+    def test_driver_raid_logical_disk_properties_indexerror(
+        self, _list_mock: mock.MagicMock,
+    ) -> None:
         _list_mock.side_effect = IndexError
 
         properties = self.mgr.raid_logical_disk_properties(DRIVER2['name'])
@@ -200,7 +204,9 @@ class DriverManagerTest(testtools.TestCase):
         self.assertEqual({}, properties)
 
     @mock.patch.object(driver.DriverManager, 'update', autospec=True)
-    def test_vendor_passthru_update(self, update_mock):
+    def test_vendor_passthru_update(
+        self, update_mock: mock.MagicMock,
+    ) -> None:
         # For now just mock the tests because vendor-passthru doesn't return
         # anything to verify.
         vendor_passthru_args = {'arg1': 'val1'}
@@ -221,7 +227,9 @@ class DriverManagerTest(testtools.TestCase):
             update_mock.reset_mock()
 
     @mock.patch.object(driver.DriverManager, 'get', autospec=True)
-    def test_vendor_passthru_get(self, get_mock):
+    def test_vendor_passthru_get(
+        self, get_mock: mock.MagicMock,
+    ) -> None:
         kwargs = {
             'driver_name': 'driver_name',
             'method': 'method',
@@ -235,7 +243,9 @@ class DriverManagerTest(testtools.TestCase):
             global_request_id=None)
 
     @mock.patch.object(driver.DriverManager, 'delete', autospec=True)
-    def test_vendor_passthru_delete(self, delete_mock):
+    def test_vendor_passthru_delete(
+        self, delete_mock: mock.MagicMock,
+    ) -> None:
         kwargs = {
             'driver_name': 'driver_name',
             'method': 'method',
@@ -249,7 +259,9 @@ class DriverManagerTest(testtools.TestCase):
             global_request_id=None)
 
     @mock.patch.object(driver.DriverManager, 'delete', autospec=True)
-    def test_vendor_passthru_unknown_http_method(self, delete_mock):
+    def test_vendor_passthru_unknown_http_method(
+        self, delete_mock: mock.MagicMock,
+    ) -> None:
         kwargs = {
             'driver_name': 'driver_name',
             'method': 'method',
@@ -258,7 +270,7 @@ class DriverManagerTest(testtools.TestCase):
         self.assertRaises(exc.InvalidAttribute, self.mgr.vendor_passthru,
                           **kwargs)
 
-    def test_vendor_passthru_methods(self):
+    def test_vendor_passthru_methods(self) -> None:
         vendor_methods = self.mgr.get_vendor_passthru_methods(DRIVER1['name'])
         expect = [
             ('GET', '/v1/drivers/%s/vendor_passthru/methods' % DRIVER1['name'],

@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import copy
 import tempfile
 import time
@@ -782,12 +784,12 @@ fake_responses_sorting = {
 
 class NodeManagerTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(NodeManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
         self.mgr = node.NodeManager(self.api)
 
-    def test_node_list(self):
+    def test_node_list(self) -> None:
         nodes = self.mgr.list()
         expect = [
             ('GET', '/v1/nodes', {}, None),
@@ -795,11 +797,11 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(nodes))
 
-    def test_node_list_shows_name(self):
+    def test_node_list_shows_name(self) -> None:
         nodes = self.mgr.list()
         self.assertIsNotNone(getattr(nodes[0], 'name'))
 
-    def test_node_list_limit(self):
+    def test_node_list_limit(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
         nodes = self.mgr.list(limit=1)
@@ -809,7 +811,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
 
-    def test_node_list_marker(self):
+    def test_node_list_marker(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
         nodes = self.mgr.list(marker=NODE1['uuid'])
@@ -819,7 +821,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(nodes, HasLength(1))
 
-    def test_node_list_pagination_no_limit(self):
+    def test_node_list_pagination_no_limit(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
         nodes = self.mgr.list(limit=0)
@@ -830,7 +832,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(nodes))
 
-    def test_node_list_pagination_no_limit_path_prefix(self):
+    def test_node_list_pagination_no_limit_path_prefix(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination_path_prefix,
                                  path_prefix='/baremetal')
         self.mgr = node.NodeManager(self.api)
@@ -842,7 +844,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(nodes))
 
-    def test_node_list_sort_key(self):
+    def test_node_list_sort_key(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = node.NodeManager(self.api)
         nodes = self.mgr.list(sort_key='updated_at')
@@ -852,7 +854,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(nodes))
 
-    def test_node_list_sort_dir(self):
+    def test_node_list_sort_dir(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = node.NodeManager(self.api)
         nodes = self.mgr.list(sort_dir='desc')
@@ -862,7 +864,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(2, len(nodes))
 
-    def test_node_list_associated(self):
+    def test_node_list_associated(self) -> None:
         nodes = self.mgr.list(associated=True)
         expect = [
             ('GET', '/v1/nodes/?associated=True', {}, None),
@@ -871,7 +873,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_unassociated(self):
+    def test_node_list_unassociated(self) -> None:
         nodes = self.mgr.list(associated=False)
         expect = [
             ('GET', '/v1/nodes/?associated=False', {}, None),
@@ -880,7 +882,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_unassociated_string(self):
+    def test_node_list_unassociated_string(self) -> None:
         nodes = self.mgr.list(associated="False")
         expect = [
             ('GET', '/v1/nodes/?associated=False', {}, None),
@@ -889,7 +891,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_maintenance(self):
+    def test_node_list_maintenance(self) -> None:
         nodes = self.mgr.list(maintenance=True)
         expect = [
             ('GET', '/v1/nodes/?maintenance=True', {}, None),
@@ -898,7 +900,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_maintenance_string(self):
+    def test_node_list_maintenance_string(self) -> None:
         nodes = self.mgr.list(maintenance="True")
         expect = [
             ('GET', '/v1/nodes/?maintenance=True', {}, None),
@@ -907,7 +909,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_retired(self):
+    def test_node_list_retired(self) -> None:
         nodes = self.mgr.list(retired=True)
         expect = [
             ('GET', '/v1/nodes/?retired=True', {}, None),
@@ -916,7 +918,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_not_retired(self):
+    def test_node_list_not_retired(self) -> None:
         nodes = self.mgr.list(retired=False)
         expect = [
             ('GET', '/v1/nodes/?retired=False', {}, None),
@@ -925,7 +927,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_provision_state(self):
+    def test_node_list_provision_state(self) -> None:
         nodes = self.mgr.list(provision_state="available")
         expect = [
             ('GET', '/v1/nodes/?provision_state=available', {}, None),
@@ -934,7 +936,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_owner(self):
+    def test_node_list_owner(self) -> None:
         nodes = self.mgr.list(owner=NODE2['owner'])
         expect = [
             ('GET', '/v1/nodes/?owner=%s' % NODE2['owner'], {}, None),
@@ -943,7 +945,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['owner'], getattr(nodes[0], 'owner'))
 
-    def test_node_list_lessee(self):
+    def test_node_list_lessee(self) -> None:
         nodes = self.mgr.list(lessee=NODE2['lessee'])
         expect = [
             ('GET', '/v1/nodes/?lessee=%s' % NODE2['lessee'], {}, None),
@@ -952,11 +954,11 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['lessee'], getattr(nodes[0], 'lessee'))
 
-    def test_node_list_provision_state_fail(self):
+    def test_node_list_provision_state_fail(self) -> None:
         self.assertRaises(KeyError, self.mgr.list,
                           provision_state="test")
 
-    def test_node_list_driver(self):
+    def test_node_list_driver(self) -> None:
         nodes = self.mgr.list(driver="fake")
         expect = [
             ('GET', '/v1/nodes/?driver=fake', {}, None),
@@ -965,7 +967,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_resource_class(self):
+    def test_node_list_resource_class(self) -> None:
         nodes = self.mgr.list(resource_class="foo")
         expect = [
             ('GET', '/v1/nodes/?resource_class=foo', {}, None),
@@ -974,7 +976,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_conductor_group(self):
+    def test_node_list_conductor_group(self) -> None:
         nodes = self.mgr.list(conductor_group='foo')
         expect = [
             ('GET', '/v1/nodes/?conductor_group=foo', {}, None),
@@ -983,7 +985,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_chassis(self):
+    def test_node_list_chassis(self) -> None:
         ch2 = NODE2['chassis_uuid']
         nodes = self.mgr.list(chassis=ch2)
         expect = [
@@ -993,7 +995,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_no_maintenance(self):
+    def test_node_list_no_maintenance(self) -> None:
         nodes = self.mgr.list(maintenance=False)
         expect = [
             ('GET', '/v1/nodes/?maintenance=False', {}, None),
@@ -1002,7 +1004,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_associated_and_maintenance(self):
+    def test_node_list_associated_and_maintenance(self) -> None:
         nodes = self.mgr.list(associated=True, maintenance=True)
         expect = [
             ('GET', '/v1/nodes/?associated=True&maintenance=True', {}, None),
@@ -1011,7 +1013,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_associated_and_retired(self):
+    def test_node_list_associated_and_retired(self) -> None:
         nodes = self.mgr.list(associated=True, retired=True)
         expect = [
             ('GET', '/v1/nodes/?associated=True&retired=True', {}, None),
@@ -1020,7 +1022,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_with_conductor(self):
+    def test_node_list_with_conductor(self) -> None:
         nodes = self.mgr.list(conductor='fake-conductor')
         expect = [
             ('GET', '/v1/nodes/?conductor=fake-conductor', {}, None),
@@ -1029,7 +1031,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_not_sharded(self):
+    def test_node_list_not_sharded(self) -> None:
         nodes = self.mgr.list(sharded=False)
         expect = [
             ('GET', '/v1/nodes/?sharded=False', {}, None),
@@ -1038,7 +1040,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_by_shard(self):
+    def test_node_list_by_shard(self) -> None:
         nodes = self.mgr.list(shards=["myshard"])
         expect = [
             ('GET', '/v1/nodes/?shard=myshard', {}, None),
@@ -1047,7 +1049,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_include_chidlren(self):
+    def test_node_list_include_chidlren(self) -> None:
         nodes = self.mgr.list(include_children=True)
         expect = [
             ('GET', '/v1/nodes/?include_children=True', {}, None),
@@ -1057,7 +1059,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(NODE1['uuid'], getattr(nodes[0], 'uuid'))
         self.assertEqual(NODE2['uuid'], getattr(nodes[1], 'uuid'))
 
-    def test_node_list_nodes_by_parent_node(self):
+    def test_node_list_nodes_by_parent_node(self) -> None:
         nodes = self.mgr.list(parent_node=NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/?parent_node=%s' % NODE1['uuid'],
@@ -1067,7 +1069,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['uuid'], getattr(nodes[0], 'uuid'))
 
-    def test_node_list_children_of_node(self):
+    def test_node_list_children_of_node(self) -> None:
         children = self.mgr.list_children_of_node(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/children' % NODE1['uuid'], {}, None),
@@ -1076,7 +1078,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(1, len(children))
         self.assertEqual(NODE2['uuid'], children[0])
 
-    def test_node_list_by_description(self):
+    def test_node_list_by_description(self) -> None:
         nodes = self.mgr.list(description_contains='foo')
         expect = [
             ('GET', '/v1/nodes/?description_contains=foo', {}, None),
@@ -1086,7 +1088,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(NODE2['description'],
                          getattr(nodes[0], 'description'))
 
-    def test_node_list_detail(self):
+    def test_node_list_detail(self) -> None:
         nodes = self.mgr.list(detail=True)
         expect = [
             ('GET', '/v1/nodes/detail', {}, None),
@@ -1095,7 +1097,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(2, len(nodes))
         self.assertEqual(nodes[0].extra, {})
 
-    def test_node_list_detail_microversion_override(self):
+    def test_node_list_detail_microversion_override(self) -> None:
         nodes = self.mgr.list(detail=True, os_ironic_api_version='1.30')
         expect = [
             ('GET', '/v1/nodes/detail',
@@ -1105,7 +1107,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(2, len(nodes))
         self.assertEqual(nodes[0].extra, {})
 
-    def test_node_list_fields(self):
+    def test_node_list_fields(self) -> None:
         nodes = self.mgr.list(fields=['uuid', 'extra'])
         expect = [
             ('GET', '/v1/nodes/?fields=uuid,extra', {}, None),
@@ -1113,11 +1115,11 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(nodes))
 
-    def test_node_list_detail_and_fields_fail(self):
+    def test_node_list_detail_and_fields_fail(self) -> None:
         self.assertRaises(exc.InvalidAttribute, self.mgr.list,
                           detail=True, fields=['uuid', 'extra'])
 
-    def test_node_show(self):
+    def test_node_show(self) -> None:
         node = self.mgr.get(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s' % NODE1['uuid'], {}, None),
@@ -1125,7 +1127,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NODE1['uuid'], node.uuid)
 
-    def test_node_show_by_instance(self):
+    def test_node_show_by_instance(self) -> None:
         node = self.mgr.get_by_instance_uuid(NODE2['instance_uuid'])
         expect = [
             ('GET', '/v1/nodes/detail?instance_uuid=%s' %
@@ -1134,7 +1136,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NODE2['uuid'], node.uuid)
 
-    def test_node_show_by_name(self):
+    def test_node_show_by_name(self) -> None:
         node = self.mgr.get(NODE1['name'])
         expect = [
             ('GET', '/v1/nodes/%s' % NODE1['name'], {}, None),
@@ -1142,7 +1144,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NODE1['uuid'], node.uuid)
 
-    def test_node_show_fields(self):
+    def test_node_show_fields(self) -> None:
         node = self.mgr.get(NODE1['uuid'], fields=['uuid', 'extra'])
         expect = [
             ('GET', '/v1/nodes/%s?fields=uuid,extra' %
@@ -1151,7 +1153,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NODE1['uuid'], node.uuid)
 
-    def test_create(self):
+    def test_create(self) -> None:
         node = self.mgr.create(**CREATE_NODE)
         expect = [
             ('POST', '/v1/nodes', {}, CREATE_NODE),
@@ -1159,7 +1161,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(node)
 
-    def test_create_with_uuid(self):
+    def test_create_with_uuid(self) -> None:
         node = self.mgr.create(**CREATE_WITH_UUID)
         expect = [
             ('POST', '/v1/nodes', {}, CREATE_WITH_UUID),
@@ -1167,7 +1169,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(node)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         node = self.mgr.delete(node_id=NODE1['uuid'])
         expect = [
             ('DELETE', '/v1/nodes/%s' % NODE1['uuid'], {}, None),
@@ -1175,7 +1177,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(node)
 
-    def test_update(self):
+    def test_update(self) -> None:
         patch = {'op': 'replace',
                  'value': NEW_DRIVER,
                  'path': '/driver'}
@@ -1186,7 +1188,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_DRIVER, node.driver)
 
-    def test_update_with_reset_interfaces(self):
+    def test_update_with_reset_interfaces(self) -> None:
         patch = {'op': 'replace',
                  'value': NEW_DRIVER,
                  'path': '/driver'}
@@ -1199,7 +1201,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_DRIVER, node.driver)
 
-    def test_update_microversion_override(self):
+    def test_update_microversion_override(self) -> None:
         patch = {'op': 'replace',
                  'value': NEW_DRIVER,
                  'path': '/driver'}
@@ -1212,7 +1214,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_DRIVER, node.driver)
 
-    def test_node_port_list_with_uuid(self):
+    def test_node_port_list_with_uuid(self) -> None:
         ports = self.mgr.list_ports(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/ports' % NODE1['uuid'], {}, None),
@@ -1222,7 +1224,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(PORT['uuid'], ports[0].uuid)
         self.assertEqual(PORT['address'], ports[0].address)
 
-    def test_node_port_list_with_name(self):
+    def test_node_port_list_with_name(self) -> None:
         ports = self.mgr.list_ports(NODE1['name'])
         expect = [
             ('GET', '/v1/nodes/%s/ports' % NODE1['name'], {}, None),
@@ -1232,7 +1234,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(PORT['uuid'], ports[0].uuid)
         self.assertEqual(PORT['address'], ports[0].address)
 
-    def test_node_port_list_limit(self):
+    def test_node_port_list_limit(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
         ports = self.mgr.list_ports(NODE1['uuid'], limit=1)
@@ -1244,7 +1246,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(PORT['uuid'], ports[0].uuid)
         self.assertEqual(PORT['address'], ports[0].address)
 
-    def test_node_port_list_marker(self):
+    def test_node_port_list_marker(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
         ports = self.mgr.list_ports(NODE1['uuid'], marker=PORT['uuid'])
@@ -1255,7 +1257,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(ports, HasLength(1))
 
-    def test_node_port_list_sort_key(self):
+    def test_node_port_list_sort_key(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = node.NodeManager(self.api)
         ports = self.mgr.list_ports(NODE1['uuid'], sort_key='updated_at')
@@ -1268,7 +1270,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(PORT['uuid'], ports[0].uuid)
         self.assertEqual(PORT['address'], ports[0].address)
 
-    def test_node_port_list_sort_dir(self):
+    def test_node_port_list_sort_dir(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = node.NodeManager(self.api)
         ports = self.mgr.list_ports(NODE1['uuid'], sort_dir='desc')
@@ -1281,7 +1283,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(PORT['uuid'], ports[0].uuid)
         self.assertEqual(PORT['address'], ports[0].address)
 
-    def test_node_port_list_detail_with_uuid(self):
+    def test_node_port_list_detail_with_uuid(self) -> None:
         ports = self.mgr.list_ports(NODE1['uuid'], detail=True)
         expect = [
             ('GET', '/v1/nodes/%s/ports/detail' % NODE1['uuid'], {}, None),
@@ -1289,7 +1291,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(ports, HasLength(1))
 
-    def test_node_port_list_detail_with_name(self):
+    def test_node_port_list_detail_with_name(self) -> None:
         ports = self.mgr.list_ports(NODE1['name'], detail=True)
         expect = [
             ('GET', '/v1/nodes/%s/ports/detail' % NODE1['name'], {}, None),
@@ -1297,7 +1299,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(ports, HasLength(1))
 
-    def test_node_port_list_fields(self):
+    def test_node_port_list_fields(self) -> None:
         ports = self.mgr.list_ports(NODE1['uuid'], fields=['uuid', 'address'])
         expect = [
             ('GET', '/v1/nodes/%s/ports?fields=uuid,address' %
@@ -1306,11 +1308,15 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertThat(ports, HasLength(1))
 
-    def test_node_port_list_detail_and_fields_fail(self):
+    def test_node_port_list_detail_and_fields_fail(self) -> None:
         self.assertRaises(exc.InvalidAttribute, self.mgr.list_ports,
                           NODE1['uuid'], detail=True, fields=['uuid', 'extra'])
 
-    def _validate_node_volume_connector_list(self, expect, volume_connectors):
+    def _validate_node_volume_connector_list(
+            self,
+            expect: list[object],
+            volume_connectors: list[object],
+    ) -> None:
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(volume_connectors))
         self.assertIsInstance(volume_connectors[0],
@@ -1320,7 +1326,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(CONNECTOR['connector_id'],
                          volume_connectors[0].connector_id)
 
-    def test_node_volume_connector_list(self):
+    def test_node_volume_connector_list(self) -> None:
         volume_connectors = self.mgr.list_volume_connectors(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/volume/connectors' % NODE1['uuid'],
@@ -1328,7 +1334,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_connector_list(expect, volume_connectors)
 
-    def test_node_volume_connector_list_limit(self):
+    def test_node_volume_connector_list_limit(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
         volume_connectors = self.mgr.list_volume_connectors(NODE1['uuid'],
@@ -1339,7 +1345,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_connector_list(expect, volume_connectors)
 
-    def test_node_volume_connector_list_marker(self):
+    def test_node_volume_connector_list_marker(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
         volume_connectors = self.mgr.list_volume_connectors(
@@ -1350,7 +1356,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_connector_list(expect, volume_connectors)
 
-    def test_node_volume_connector_list_sort_key(self):
+    def test_node_volume_connector_list_sort_key(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = node.NodeManager(self.api)
         volume_connectors = self.mgr.list_volume_connectors(
@@ -1361,7 +1367,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_connector_list(expect, volume_connectors)
 
-    def test_node_volume_connector_list_sort_dir(self):
+    def test_node_volume_connector_list_sort_dir(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = node.NodeManager(self.api)
         volume_connectors = self.mgr.list_volume_connectors(NODE1['uuid'],
@@ -1372,7 +1378,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_connector_list(expect, volume_connectors)
 
-    def test_node_volume_connector_list_detail(self):
+    def test_node_volume_connector_list_detail(self) -> None:
         volume_connectors = self.mgr.list_volume_connectors(NODE1['uuid'],
                                                             detail=True)
         expect = [
@@ -1382,7 +1388,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_connector_list(expect, volume_connectors)
 
-    def test_node_volume_connector_list_fields(self):
+    def test_node_volume_connector_list_fields(self) -> None:
         volume_connectors = self.mgr.list_volume_connectors(
             NODE1['uuid'], fields=['uuid', 'connector_id'])
         expect = [
@@ -1391,12 +1397,16 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_connector_list(expect, volume_connectors)
 
-    def test_node_volume_connector_list_detail_and_fields_fail(self):
+    def test_node_volume_connector_list_detail_and_fields_fail(self) -> None:
         self.assertRaises(exc.InvalidAttribute,
                           self.mgr.list_volume_connectors,
                           NODE1['uuid'], detail=True, fields=['uuid', 'extra'])
 
-    def _validate_node_volume_target_list(self, expect, volume_targets):
+    def _validate_node_volume_target_list(
+            self,
+            expect: list[object],
+            volume_targets: list[object],
+    ) -> None:
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(1, len(volume_targets))
         self.assertIsInstance(volume_targets[0],
@@ -1407,7 +1417,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(TARGET['volume_id'], volume_targets[0].volume_id)
         self.assertEqual(TARGET['node_uuid'], volume_targets[0].node_uuid)
 
-    def test_node_volume_target_list(self):
+    def test_node_volume_target_list(self) -> None:
         volume_targets = self.mgr.list_volume_targets(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/volume/targets' % NODE1['uuid'],
@@ -1415,7 +1425,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_target_list(expect, volume_targets)
 
-    def test_node_volume_target_list_limit(self):
+    def test_node_volume_target_list_limit(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
         volume_targets = self.mgr.list_volume_targets(NODE1['uuid'], limit=1)
@@ -1425,7 +1435,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_target_list(expect, volume_targets)
 
-    def test_node_volume_target_list_marker(self):
+    def test_node_volume_target_list_marker(self) -> None:
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = node.NodeManager(self.api)
         volume_targets = self.mgr.list_volume_targets(
@@ -1436,7 +1446,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_target_list(expect, volume_targets)
 
-    def test_node_volume_target_list_sort_key(self):
+    def test_node_volume_target_list_sort_key(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = node.NodeManager(self.api)
         volume_targets = self.mgr.list_volume_targets(
@@ -1447,7 +1457,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_target_list(expect, volume_targets)
 
-    def test_node_volume_target_list_sort_dir(self):
+    def test_node_volume_target_list_sort_dir(self) -> None:
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = node.NodeManager(self.api)
         volume_targets = self.mgr.list_volume_targets(NODE1['uuid'],
@@ -1458,7 +1468,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_target_list(expect, volume_targets)
 
-    def test_node_volume_target_list_detail(self):
+    def test_node_volume_target_list_detail(self) -> None:
         volume_targets = self.mgr.list_volume_targets(NODE1['uuid'],
                                                       detail=True)
         expect = [
@@ -1467,7 +1477,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_target_list(expect, volume_targets)
 
-    def test_node_volume_target_list_fields(self):
+    def test_node_volume_target_list_fields(self) -> None:
         volume_targets = self.mgr.list_volume_targets(
             NODE1['uuid'], fields=['uuid', 'value'])
         expect = [
@@ -1476,12 +1486,12 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self._validate_node_volume_target_list(expect, volume_targets)
 
-    def test_node_volume_target_list_detail_and_fields_fail(self):
+    def test_node_volume_target_list_detail_and_fields_fail(self) -> None:
         self.assertRaises(exc.InvalidAttribute,
                           self.mgr.list_volume_targets,
                           NODE1['uuid'], detail=True, fields=['uuid', 'extra'])
 
-    def test_node_set_maintenance_true(self):
+    def test_node_set_maintenance_true(self) -> None:
         maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'true',
                                                maint_reason='reason')
         body = {'reason': 'reason'}
@@ -1491,7 +1501,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(maintenance)
 
-    def test_node_set_maintenance_false(self):
+    def test_node_set_maintenance_false(self) -> None:
         maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'false')
         expect = [
             ('DELETE', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, None),
@@ -1499,7 +1509,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(maintenance)
 
-    def test_node_set_maintenance_on(self):
+    def test_node_set_maintenance_on(self) -> None:
         maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'on',
                                                maint_reason='reason')
         body = {'reason': 'reason'}
@@ -1509,7 +1519,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(maintenance)
 
-    def test_node_set_maintenance_off(self):
+    def test_node_set_maintenance_off(self) -> None:
         maintenance = self.mgr.set_maintenance(NODE1['uuid'], 'off')
         expect = [
             ('DELETE', '/v1/nodes/%s/maintenance' % NODE1['uuid'], {}, None),
@@ -1517,11 +1527,11 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(maintenance)
 
-    def test_node_set_maintenance_bad(self):
+    def test_node_set_maintenance_bad(self) -> None:
         self.assertRaises(exc.InvalidAttribute, self.mgr.set_maintenance,
                           NODE1['uuid'], 'bad')
 
-    def test_node_set_maintenance_bool(self):
+    def test_node_set_maintenance_bool(self) -> None:
         maintenance = self.mgr.set_maintenance(NODE1['uuid'], True,
                                                maint_reason='reason')
         body = {'reason': 'reason'}
@@ -1531,7 +1541,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(maintenance)
 
-    def test_node_set_power_state(self):
+    def test_node_set_power_state(self) -> None:
         power_state = self.mgr.set_power_state(NODE1['uuid'], "off")
         body = {'target': 'power off'}
         expect = [
@@ -1540,7 +1550,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual('power off', power_state.target_power_state)
 
-    def test_node_set_power_timeout(self):
+    def test_node_set_power_timeout(self) -> None:
         power_state = self.mgr.set_power_state(NODE1['uuid'], "off", timeout=2)
         body = {'target': 'power off', 'timeout': 2}
         expect = [
@@ -1549,7 +1559,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual('power off', power_state.target_power_state)
 
-    def test_node_set_power_timeout_str(self):
+    def test_node_set_power_timeout_str(self) -> None:
         power_state = self.mgr.set_power_state(NODE1['uuid'], "off",
                                                timeout="2")
         body = {'target': 'power off', 'timeout': 2}
@@ -1559,7 +1569,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual('power off', power_state.target_power_state)
 
-    def test_node_set_power_state_soft(self):
+    def test_node_set_power_state_soft(self) -> None:
         power_state = self.mgr.set_power_state(NODE1['uuid'], "off", soft=True)
         body = {'target': 'soft power off'}
         expect = [
@@ -1568,22 +1578,22 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual('power off', power_state.target_power_state)
 
-    def test_node_set_power_state_soft_fail(self):
+    def test_node_set_power_state_soft_fail(self) -> None:
         self.assertRaises(ValueError,
                           self.mgr.set_power_state,
                           NODE1['uuid'], 'on', soft=True)
 
-    def test_node_set_power_state_on_timeout_fail(self):
+    def test_node_set_power_state_on_timeout_fail(self) -> None:
         self.assertRaises(ValueError,
                           self.mgr.set_power_state,
                           NODE1['uuid'], 'off', soft=False, timeout=0)
 
-    def test_node_set_power_state_on_timeout_type_error(self):
+    def test_node_set_power_state_on_timeout_type_error(self) -> None:
         self.assertRaises(ValueError,
                           self.mgr.set_power_state,
                           NODE1['uuid'], 'off', soft=False, timeout='a')
 
-    def test_node_set_boot_mode_bios(self):
+    def test_node_set_boot_mode_bios(self) -> None:
         target_state = 'bios'
         self.mgr.set_boot_mode(NODE1['uuid'], target_state)
         body = {'target': target_state}
@@ -1592,11 +1602,11 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_boot_mode_invalid(self):
+    def test_node_set_boot_mode_invalid(self) -> None:
         self.assertRaises(ValueError, self.mgr.set_boot_mode,
                           NODE1['uuid'], 'ancient-bios')
 
-    def test_node_set_secure_boot_bool(self):
+    def test_node_set_secure_boot_bool(self) -> None:
         secure_boot = self.mgr.set_secure_boot(NODE1['uuid'], True)
         body = {'target': True}
         expect = [
@@ -1606,7 +1616,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(secure_boot)
 
-    def test_node_set_secure_boot_on(self):
+    def test_node_set_secure_boot_on(self) -> None:
         secure_boot = self.mgr.set_secure_boot(NODE1['uuid'], 'on')
         body = {'target': True}
         expect = [
@@ -1616,7 +1626,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(secure_boot)
 
-    def test_node_set_secure_boot_off(self):
+    def test_node_set_secure_boot_off(self) -> None:
         secure_boot = self.mgr.set_secure_boot(NODE1['uuid'], 'off')
         body = {'target': False}
         expect = [
@@ -1626,11 +1636,11 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(secure_boot)
 
-    def test_node_set_secure_boot_bad(self):
+    def test_node_set_secure_boot_bad(self) -> None:
         self.assertRaises(exc.InvalidAttribute, self.mgr.set_secure_boot,
                           NODE1['uuid'], 'band')
 
-    def test_set_target_raid_config(self):
+    def test_set_target_raid_config(self) -> None:
         self.mgr.set_target_raid_config(
             NODE1['uuid'], {'fake': 'config'})
 
@@ -1639,7 +1649,7 @@ class NodeManagerTest(testtools.TestCase):
                   {'fake': 'config'})]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_validate(self):
+    def test_node_validate(self) -> None:
         ifaces = self.mgr.validate(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/validate' % NODE1['uuid'], {}, None),
@@ -1650,7 +1660,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(DRIVER_IFACES['rescue'], ifaces.rescue)
         self.assertEqual(DRIVER_IFACES['console'], ifaces.console)
 
-    def test_node_set_provision_state(self):
+    def test_node_set_provision_state(self) -> None:
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state)
         body = {'target': target_state}
@@ -1659,7 +1669,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_microversion_override(self):
+    def test_node_set_provision_state_microversion_override(self) -> None:
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
                                      os_ironic_api_version="1.35")
@@ -1670,7 +1680,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_configdrive(self):
+    def test_node_set_provision_state_with_configdrive(self) -> None:
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
                                      configdrive=b'foo')
@@ -1680,7 +1690,9 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_configdrive_invalid_bytes(self):
+    def test_node_set_provision_state_with_configdrive_invalid_bytes(
+            self,
+    ) -> None:
         invalid_utf8 = b"\xc3\x28"
         target_state = 'active'
         self.assertRaisesRegex(ValueError,
@@ -1689,7 +1701,7 @@ class NodeManagerTest(testtools.TestCase):
                                NODE1['uuid'], target_state,
                                configdrive=invalid_utf8)
 
-    def test_node_set_provision_state_with_configdrive_as_dict(self):
+    def test_node_set_provision_state_with_configdrive_as_dict(self) -> None:
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
                                      configdrive={'user_data': ''})
@@ -1699,7 +1711,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_configdrive_file(self):
+    def test_node_set_provision_state_with_configdrive_file(self) -> None:
         target_state = 'active'
         file_content = b'foo bar cat meow dog bark'
 
@@ -1716,7 +1728,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_configdrive_json_file(self):
+    def test_node_set_provision_state_with_configdrive_json_file(self) -> None:
         target_state = 'active'
         file_content = b'{"user_data": "foo bar"}'
 
@@ -1734,8 +1746,10 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
 
     @mock.patch.object(common_utils, 'make_configdrive', autospec=True)
-    def test_node_set_provision_state_with_configdrive_dir(self,
-                                                           mock_configdrive):
+    def test_node_set_provision_state_with_configdrive_dir(
+            self,
+            mock_configdrive: mock.MagicMock,
+    ) -> None:
         mock_configdrive.return_value = 'fake-configdrive'
         target_state = 'active'
 
@@ -1750,7 +1764,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_fails_missing_dir_or_file(self):
+    def test_node_set_provision_state_fails_missing_dir_or_file(self) -> None:
         target_state = 'active'
 
         with common_utils.tempdir() as dirname:
@@ -1760,7 +1774,7 @@ class NodeManagerTest(testtools.TestCase):
                                    NODE1['uuid'], target_state,
                                    configdrive=dirname + "/thisdoesnotexist")
 
-    def test_node_set_provision_state_with_cleansteps(self):
+    def test_node_set_provision_state_with_cleansteps(self) -> None:
         cleansteps = [{"step": "upgrade", "interface": "deploy"}]
         target_state = 'clean'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
@@ -1771,7 +1785,9 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_cleansteps_disable_ramdisk(self):
+    def test_node_set_provision_state_with_cleansteps_disable_ramdisk(
+            self,
+    ) -> None:
         cleansteps = [{"step": "delete_configuration", "interface": "raid"}]
         target_state = 'clean'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
@@ -1785,7 +1801,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_deploysteps(self):
+    def test_node_set_provision_state_with_deploysteps(self) -> None:
         deploysteps = [{"step": "upgrade", "interface": "deploy"}]
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
@@ -1796,7 +1812,9 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_configdrive_and_deploysteps(self):
+    def test_node_set_provision_state_with_configdrive_and_deploysteps(
+            self,
+    ) -> None:
         deploysteps = [{"step": "upgrade", "interface": "deploy"}]
         target_state = 'active'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
@@ -1810,7 +1828,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_servicesteps(self):
+    def test_node_set_provision_state_with_servicesteps(self) -> None:
         servicesteps = [{"step": "magic", "interface": "deploy"}]
         target_state = 'service'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
@@ -1821,7 +1839,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_provision_state_with_rescue_password(self):
+    def test_node_set_provision_state_with_rescue_password(self) -> None:
         rescue_password = 'supersecret'
         target_state = 'rescue'
         self.mgr.set_provision_state(NODE1['uuid'], target_state,
@@ -1832,7 +1850,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_states(self):
+    def test_node_states(self) -> None:
         states = self.mgr.states(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/states' % NODE1['uuid'], {}, None),
@@ -1844,7 +1862,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(sorted(expected_fields),
                          sorted(states.to_dict().keys()))
 
-    def test_node_set_console_mode(self):
+    def test_node_set_console_mode(self) -> None:
         global ENABLE
         for enabled in ['true', True, 'False', False]:
             self.api.calls = []
@@ -1857,7 +1875,7 @@ class NodeManagerTest(testtools.TestCase):
             ]
             self.assertEqual(expect, self.api.calls)
 
-    def test_node_get_console(self):
+    def test_node_get_console(self) -> None:
         info = self.mgr.get_console(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/states/console' % NODE1['uuid'], {}, None),
@@ -1865,7 +1883,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(CONSOLE_DATA_ENABLED, info)
 
-    def test_node_get_console_disabled(self):
+    def test_node_get_console_disabled(self) -> None:
         info = self.mgr.get_console(NODE2['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/states/console' % NODE2['uuid'], {}, None),
@@ -1874,7 +1892,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(CONSOLE_DATA_DISABLED, info)
 
     @mock.patch.object(node.NodeManager, 'update', autospec=True)
-    def test_vendor_passthru_update(self, update_mock):
+    def test_vendor_passthru_update(self, update_mock: mock.MagicMock) -> None:
         # For now just mock the tests because vendor-passthru doesn't return
         # anything to verify.
         vendor_passthru_args = {'arg1': 'val1'}
@@ -1895,7 +1913,7 @@ class NodeManagerTest(testtools.TestCase):
             update_mock.reset_mock()
 
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
-    def test_vendor_passthru_get(self, get_mock):
+    def test_vendor_passthru_get(self, get_mock: mock.MagicMock) -> None:
         kwargs = {
             'node_id': 'node_uuid',
             'method': 'method',
@@ -1909,7 +1927,7 @@ class NodeManagerTest(testtools.TestCase):
             os_ironic_api_version=None, global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'delete', autospec=True)
-    def test_vendor_passthru_delete(self, delete_mock):
+    def test_vendor_passthru_delete(self, delete_mock: mock.MagicMock) -> None:
         kwargs = {
             'node_id': 'node_uuid',
             'method': 'method',
@@ -1923,7 +1941,10 @@ class NodeManagerTest(testtools.TestCase):
             global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'delete', autospec=True)
-    def test_vendor_passthru_unknown_http_method(self, delete_mock):
+    def test_vendor_passthru_unknown_http_method(
+            self,
+            delete_mock: mock.MagicMock,
+    ) -> None:
         kwargs = {
             'node_id': 'node_uuid',
             'method': 'method',
@@ -1933,7 +1954,7 @@ class NodeManagerTest(testtools.TestCase):
                           **kwargs)
 
     @mock.patch.object(node.NodeManager, '_list', autospec=True)
-    def test_vif_list(self, _list_mock):
+    def test_vif_list(self, _list_mock: mock.MagicMock) -> None:
         kwargs = {
             'node_ident': NODE1['uuid'],
         }
@@ -1945,7 +1966,7 @@ class NodeManagerTest(testtools.TestCase):
             os_ironic_api_version=None, global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'update', autospec=True)
-    def test_vif_attach(self, update_mock):
+    def test_vif_attach(self, update_mock: mock.MagicMock) -> None:
         kwargs = {
             'node_ident': NODE1['uuid'],
             'vif_id': 'vif_id',
@@ -1958,7 +1979,10 @@ class NodeManagerTest(testtools.TestCase):
             os_ironic_api_version=None, global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'update', autospec=True)
-    def test_vif_attach_custom_fields(self, update_mock):
+    def test_vif_attach_custom_fields(
+            self,
+            update_mock: mock.MagicMock,
+    ) -> None:
         kwargs = {
             'node_ident': NODE1['uuid'],
             'vif_id': 'vif_id',
@@ -1974,7 +1998,10 @@ class NodeManagerTest(testtools.TestCase):
             global_request_id=None)
 
     @mock.patch.object(node.NodeManager, 'update', autospec=True)
-    def test_vif_attach_custom_fields_id(self, update_mock):
+    def test_vif_attach_custom_fields_id(
+            self,
+            update_mock: mock.MagicMock,
+    ) -> None:
         kwargs = {
             'node_ident': NODE1['uuid'],
             'vif_id': 'vif_id',
@@ -1985,7 +2012,7 @@ class NodeManagerTest(testtools.TestCase):
             self.mgr.vif_attach, **kwargs)
 
     @mock.patch.object(node.NodeManager, 'delete', autospec=True)
-    def test_vif_detach(self, delete_mock):
+    def test_vif_detach(self, delete_mock: mock.MagicMock) -> None:
         kwargs = {
             'node_ident': NODE1['uuid'],
             'vif_id': 'vif_id',
@@ -1997,7 +2024,11 @@ class NodeManagerTest(testtools.TestCase):
             mock.ANY, final_path,
             os_ironic_api_version=None, global_request_id=None)
 
-    def _test_node_set_boot_device(self, boot_device, persistent=False):
+    def _test_node_set_boot_device(
+            self,
+            boot_device: str,
+            persistent: bool = False,
+    ) -> None:
         self.mgr.set_boot_device(NODE1['uuid'], boot_device, persistent)
         body = {'boot_device': boot_device, 'persistent': persistent}
         expect = [
@@ -2006,13 +2037,13 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_set_boot_device(self):
+    def test_node_set_boot_device(self) -> None:
         self._test_node_set_boot_device('pxe')
 
-    def test_node_set_boot_device_persistent(self):
+    def test_node_set_boot_device_persistent(self) -> None:
         self._test_node_set_boot_device('pxe', persistent=True)
 
-    def test_node_get_boot_device(self):
+    def test_node_get_boot_device(self) -> None:
         boot_device = self.mgr.get_boot_device(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/management/boot_device' % NODE1['uuid'],
@@ -2021,7 +2052,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(BOOT_DEVICE, boot_device)
 
-    def test_node_inject_nmi(self):
+    def test_node_inject_nmi(self) -> None:
         self.mgr.inject_nmi(NODE1['uuid'])
         expect = [
             ('PUT', '/v1/nodes/%s/management/inject_nmi' % NODE1['uuid'],
@@ -2029,7 +2060,7 @@ class NodeManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
 
-    def test_node_get_supported_boot_devices(self):
+    def test_node_get_supported_boot_devices(self) -> None:
         boot_device = self.mgr.get_supported_boot_devices(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/management/boot_device/supported' %
@@ -2038,7 +2069,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(SUPPORTED_BOOT_DEVICE, boot_device)
 
-    def test_node_get_vendor_passthru_methods(self):
+    def test_node_get_vendor_passthru_methods(self) -> None:
         vendor_methods = self.mgr.get_vendor_passthru_methods(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/vendor_passthru/methods' % NODE1['uuid'],
@@ -2047,7 +2078,12 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NODE_VENDOR_PASSTHRU_METHOD, vendor_methods)
 
-    def _fake_node_for_wait(self, state, error=None, target=None):
+    def _fake_node_for_wait(
+            self,
+            state: str,
+            error: str | None = None,
+            target: str | None = None,
+    ) -> mock.Mock:
         spec = ['provision_state', 'last_error', 'target_provision_state']
         return mock.Mock(provision_state=state,
                          last_error=error,
@@ -2056,7 +2092,11 @@ class NodeManagerTest(testtools.TestCase):
 
     @mock.patch.object(time, 'sleep', autospec=True)
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
-    def test_wait_for_provision_state(self, mock_get, mock_sleep):
+    def test_wait_for_provision_state(
+            self,
+            mock_get: mock.MagicMock,
+            mock_sleep: mock.MagicMock,
+    ) -> None:
         mock_get.side_effect = [
             self._fake_node_for_wait('deploying', target='active'),
             # Sometimes non-fatal errors can be recorded in last_error
@@ -2076,7 +2116,11 @@ class NodeManagerTest(testtools.TestCase):
 
     @mock.patch.object(time, 'sleep', autospec=True)
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
-    def test_wait_for_provision_state_timeout(self, mock_get, mock_sleep):
+    def test_wait_for_provision_state_timeout(
+            self,
+            mock_get: mock.MagicMock,
+            mock_sleep: mock.MagicMock,
+    ) -> None:
         mock_get.return_value = self._fake_node_for_wait(
             'deploying', target='active')
 
@@ -2086,7 +2130,11 @@ class NodeManagerTest(testtools.TestCase):
 
     @mock.patch.object(time, 'sleep', autospec=True)
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
-    def test_wait_for_provision_state_error(self, mock_get, mock_sleep):
+    def test_wait_for_provision_state_error(
+            self,
+            mock_get: mock.MagicMock,
+            mock_sleep: mock.MagicMock,
+    ) -> None:
         mock_get.side_effect = [
             self._fake_node_for_wait('deploying', target='active'),
             self._fake_node_for_wait('deploy failed', error='boom'),
@@ -2105,7 +2153,10 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(1, mock_sleep.call_count)
 
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
-    def test_wait_for_provision_state_custom_delay(self, mock_get):
+    def test_wait_for_provision_state_custom_delay(
+            self,
+            mock_get: mock.MagicMock,
+    ) -> None:
         mock_get.side_effect = [
             self._fake_node_for_wait('deploying', target='active'),
             self._fake_node_for_wait('active')
@@ -2122,7 +2173,7 @@ class NodeManagerTest(testtools.TestCase):
         delay_mock.assert_called_with(node._DEFAULT_POLL_INTERVAL)
         self.assertEqual(1, delay_mock.call_count)
 
-    def test_wait_for_provision_state_wrong_input(self):
+    def test_wait_for_provision_state_wrong_input(self) -> None:
         self.assertRaises(ValueError, self.mgr.wait_for_provision_state,
                           'node', 'active', timeout='42')
         self.assertRaises(ValueError, self.mgr.wait_for_provision_state,
@@ -2133,7 +2184,10 @@ class NodeManagerTest(testtools.TestCase):
     @mock.patch.object(time, 'sleep', autospec=True)
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
     def test_wait_for_provision_state_unexpected_stable_state(
-            self, mock_get, mock_sleep):
+            self,
+            mock_get: mock.MagicMock,
+            mock_sleep: mock.MagicMock,
+    ) -> None:
         # This simulates aborted deployment
         mock_get.side_effect = [
             self._fake_node_for_wait('deploying', target='active'),
@@ -2155,7 +2209,10 @@ class NodeManagerTest(testtools.TestCase):
     @mock.patch.object(time, 'sleep', autospec=True)
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
     def test_wait_for_provision_state_unexpected_stable_state_allowed(
-            self, mock_get, mock_sleep):
+            self,
+            mock_get: mock.MagicMock,
+            mock_sleep: mock.MagicMock,
+    ) -> None:
         mock_get.side_effect = [
             self._fake_node_for_wait('deploying', target='active'),
             self._fake_node_for_wait('available'),
@@ -2175,7 +2232,11 @@ class NodeManagerTest(testtools.TestCase):
 
     @mock.patch.object(time, 'sleep', autospec=True)
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
-    def test_wait_for_provision_state_several(self, mock_get, mock_sleep):
+    def test_wait_for_provision_state_several(
+            self,
+            mock_get: mock.MagicMock,
+            mock_sleep: mock.MagicMock,
+    ) -> None:
         mock_get.side_effect = [
             self._fake_node_for_wait('deploying', target='active'),
             # Sometimes non-fatal errors can be recorded in last_error
@@ -2201,7 +2262,11 @@ class NodeManagerTest(testtools.TestCase):
 
     @mock.patch.object(time, 'sleep', autospec=True)
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
-    def test_wait_for_provision_state_one_failed(self, mock_get, mock_sleep):
+    def test_wait_for_provision_state_one_failed(
+            self,
+            mock_get: mock.MagicMock,
+            mock_sleep: mock.MagicMock,
+    ) -> None:
         mock_get.side_effect = [
             self._fake_node_for_wait('deploying', target='active'),
             self._fake_node_for_wait('deploying', target='active'),
@@ -2226,12 +2291,21 @@ class NodeManagerTest(testtools.TestCase):
 
     @mock.patch.object(time, 'sleep', autospec=True)
     @mock.patch.object(node.NodeManager, 'get', autospec=True)
-    def test_wait_for_provision_state_one_timeout(self, mock_get, mock_sleep):
+    def test_wait_for_provision_state_one_timeout(
+            self,
+            mock_get: mock.MagicMock,
+            mock_sleep: mock.MagicMock,
+    ) -> None:
         fake_waiting_node = self._fake_node_for_wait(
             'deploying', target='active')
         fake_success_node = self._fake_node_for_wait('active')
 
-        def side_effect(node_manager, node_ident, *args, **kwargs):
+        def side_effect(
+                node_manager: object,
+                node_ident: str,
+                *args: object,
+                **kwargs: object,
+        ) -> mock.Mock:
             if node_ident == 'node1':
                 return fake_success_node
             else:
@@ -2245,7 +2319,7 @@ class NodeManagerTest(testtools.TestCase):
                                ['node1', 'node2'], 'active',
                                timeout=0.001)
 
-    def test_node_get_traits(self):
+    def test_node_get_traits(self) -> None:
         traits = self.mgr.get_traits(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/traits' % NODE1['uuid'], {}, None),
@@ -2253,7 +2327,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(TRAITS['traits'], traits)
 
-    def test_node_add_trait(self):
+    def test_node_add_trait(self) -> None:
         trait = 'CUSTOM_FOO'
         resp = self.mgr.add_trait(NODE1['uuid'], trait)
         expect = [
@@ -2263,7 +2337,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(resp)
 
-    def test_node_set_traits(self):
+    def test_node_set_traits(self) -> None:
         traits = ['CUSTOM_FOO', 'CUSTOM_BAR']
         resp = self.mgr.set_traits(NODE1['uuid'], traits)
         expect = [
@@ -2273,7 +2347,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(resp)
 
-    def test_node_remove_all_traits(self):
+    def test_node_remove_all_traits(self) -> None:
         resp = self.mgr.remove_all_traits(NODE1['uuid'])
         expect = [
             ('DELETE', '/v1/nodes/%s/traits' % NODE1['uuid'], {}, None),
@@ -2281,7 +2355,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(resp)
 
-    def test_node_remove_trait(self):
+    def test_node_remove_trait(self) -> None:
         trait = 'CUSTOM_FOO'
         resp = self.mgr.remove_trait(NODE1['uuid'], trait)
         expect = [
@@ -2291,7 +2365,7 @@ class NodeManagerTest(testtools.TestCase):
         self.assertEqual(expect, self.api.calls)
         self.assertIsNone(resp)
 
-    def test_node_get_inventory(self):
+    def test_node_get_inventory(self) -> None:
         inventory = self.mgr.get_inventory(NODE1['uuid'])
         expect = [
             ('GET', '/v1/nodes/%s/inventory' % NODE1['uuid'], {}, None),

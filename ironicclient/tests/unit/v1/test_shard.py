@@ -10,7 +10,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import annotations
+
 import unittest
+from unittest import mock
 from unittest.mock import patch
 
 from ironicclient.v1.shard import ShardManager
@@ -19,7 +22,7 @@ from ironicclient.v1.shard import ShardManager
 class TestShardManager(unittest.TestCase):
 
     @patch('ironicclient.common.base.Manager._list')
-    def test_list_shards(self, mock_list):
+    def test_list_shards(self, mock_list: mock.MagicMock) -> None:
         # Mock response for the list of shards
         mock_response = [
             {'name': 'example_shard1', 'count': 47},
@@ -52,7 +55,7 @@ class TestShardManager(unittest.TestCase):
         self.assertEqual(result[2]['count'], 3)
 
     @patch('ironicclient.common.base.Manager._list')
-    def test_list_shards_empty(self, mock_list):
+    def test_list_shards_empty(self, mock_list: mock.MagicMock) -> None:
         # Test when the shards list is empty
         mock_list.return_value = []
 
@@ -72,7 +75,9 @@ class TestShardManager(unittest.TestCase):
         self.assertEqual(result, [])
 
     @patch('ironicclient.common.base.Manager._list')
-    def test_list_shards_with_global_request_id(self, mock_list):
+    def test_list_shards_with_global_request_id(
+        self, mock_list: mock.MagicMock,
+    ) -> None:
         # Test with global request ID
         mock_response = [
             {'name': 'example_shard1', 'count': 47},
@@ -99,7 +104,9 @@ class TestShardManager(unittest.TestCase):
         self.assertEqual(result, mock_response)
 
     @patch('ironicclient.common.base.Manager._list')
-    def test_list_shards_api_version_mismatch(self, mock_list):
+    def test_list_shards_api_version_mismatch(
+        self, mock_list: mock.MagicMock,
+    ) -> None:
         # Simulate a 404 error for an unsupported API version
         mock_list.side_effect = ValueError(
             "404 Not Found: The requested version is not supported"

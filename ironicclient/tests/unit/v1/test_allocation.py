@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
 import copy
 from unittest import mock
 
@@ -129,12 +131,12 @@ fake_responses_sorting = {
 
 class AllocationManagerTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(AllocationManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
         self.mgr = ironicclient.v1.allocation.AllocationManager(self.api)
 
-    def test_allocations_list(self):
+    def test_allocations_list(self) -> None:
         allocations = self.mgr.list()
         expect = [
             ('GET', '/v1/allocations', {}, None),
@@ -146,7 +148,7 @@ class AllocationManagerTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/allocations']['GET'])
 
-    def test_allocations_list_by_node(self):
+    def test_allocations_list_by_node(self) -> None:
         allocations = self.mgr.list(node=ALLOCATION['node_uuid'])
         expect = [
             ('GET', '/v1/allocations/?node=%s' % ALLOCATION['node_uuid'], {},
@@ -159,7 +161,7 @@ class AllocationManagerTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/allocations']['GET'])
 
-    def test_allocations_list_by_owner(self):
+    def test_allocations_list_by_owner(self) -> None:
         allocations = self.mgr.list(owner=ALLOCATION2['owner'])
         expect = [
             ('GET', '/v1/allocations/?owner=%s' % ALLOCATION2['owner'], {},
@@ -172,7 +174,7 @@ class AllocationManagerTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/allocations']['GET'])
 
-    def test_allocations_show(self):
+    def test_allocations_show(self) -> None:
         allocation = self.mgr.get(ALLOCATION['uuid'])
         expect = [
             ('GET', '/v1/allocations/%s' % ALLOCATION['uuid'], {}, None),
@@ -192,7 +194,7 @@ class AllocationManagerTest(testtools.TestCase):
             self.api.responses['/v1/allocations/%s'
                                % ALLOCATION['uuid']]['GET'])
 
-    def test_create(self):
+    def test_create(self) -> None:
         allocation = self.mgr.create(**CREATE_ALLOCATION)
         expect = [
             ('POST', '/v1/allocations', {}, CREATE_ALLOCATION),
@@ -204,7 +206,7 @@ class AllocationManagerTest(testtools.TestCase):
             ALLOCATION,
             self.api.responses['/v1/allocations']['GET'][1]['allocations'])
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         allocation = self.mgr.delete(allocation_id=ALLOCATION['uuid'])
         expect = [
             ('DELETE', '/v1/allocations/%s' % ALLOCATION['uuid'], {}, None),
@@ -221,12 +223,12 @@ class AllocationManagerTest(testtools.TestCase):
 
 class AllocationManagerPaginationTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(AllocationManagerPaginationTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses_pagination)
         self.mgr = ironicclient.v1.allocation.AllocationManager(self.api)
 
-    def test_allocations_list_limit(self):
+    def test_allocations_list_limit(self) -> None:
         allocations = self.mgr.list(limit=1)
         expect = [
             ('GET', '/v1/allocations/?limit=1', {}, None),
@@ -240,7 +242,7 @@ class AllocationManagerPaginationTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/allocations']['GET'])
 
-    def test_allocations_list_marker(self):
+    def test_allocations_list_marker(self) -> None:
         allocations = self.mgr.list(marker=ALLOCATION['uuid'])
         expect = [
             ('GET', '/v1/allocations/?marker=%s' % ALLOCATION['uuid'],
@@ -255,7 +257,7 @@ class AllocationManagerPaginationTest(testtools.TestCase):
         self.assertEqual(expected_resp,
                          self.api.responses['/v1/allocations']['GET'])
 
-    def test_allocations_list_pagination_no_limit(self):
+    def test_allocations_list_pagination_no_limit(self) -> None:
         allocations = self.mgr.list(limit=0)
         expect = [
             ('GET', '/v1/allocations', {}, None),
@@ -273,12 +275,12 @@ class AllocationManagerPaginationTest(testtools.TestCase):
 
 class AllocationManagerSortingTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(AllocationManagerSortingTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses_sorting)
         self.mgr = ironicclient.v1.allocation.AllocationManager(self.api)
 
-    def test_allocations_list_sort_key(self):
+    def test_allocations_list_sort_key(self) -> None:
         allocations = self.mgr.list(sort_key='updated_at')
         expect = [
             ('GET', '/v1/allocations/?sort_key=updated_at', {}, None)
@@ -291,7 +293,7 @@ class AllocationManagerSortingTest(testtools.TestCase):
             expected_resp,
             self.api.responses['/v1/allocations/?sort_key=updated_at']['GET'])
 
-    def test_allocations_list_sort_dir(self):
+    def test_allocations_list_sort_dir(self) -> None:
         allocations = self.mgr.list(sort_dir='desc')
         expect = [
             ('GET', '/v1/allocations/?sort_dir=desc', {}, None)
@@ -309,14 +311,18 @@ class AllocationManagerSortingTest(testtools.TestCase):
 @mock.patch('ironicclient.v1.allocation.AllocationManager.get', autospec=True)
 class AllocationWaitTest(testtools.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(AllocationWaitTest, self).setUp()
         self.mgr = ironicclient.v1.allocation.AllocationManager(mock.Mock())
 
-    def _fake_allocation(self, state, error=None):
+    def _fake_allocation(
+        self, state: str, error: str | None = None,
+    ) -> mock.Mock:
         return mock.Mock(state=state, last_error=error)
 
-    def test_success(self, mock_get, mock_sleep):
+    def test_success(
+        self, mock_get: mock.MagicMock, mock_sleep: mock.MagicMock,
+    ) -> None:
         allocations = [
             self._fake_allocation('allocating'),
             self._fake_allocation('allocating'),
@@ -332,7 +338,9 @@ class AllocationWaitTest(testtools.TestCase):
             self.mgr, 'alloc1', os_ironic_api_version=None,
             global_request_id=None)
 
-    def test_error(self, mock_get, mock_sleep):
+    def test_error(
+        self, mock_get: mock.MagicMock, mock_sleep: mock.MagicMock,
+    ) -> None:
         allocations = [
             self._fake_allocation('allocating'),
             self._fake_allocation('error'),
@@ -348,7 +356,9 @@ class AllocationWaitTest(testtools.TestCase):
             self.mgr, 'alloc1', os_ironic_api_version=None,
             global_request_id=None)
 
-    def test_timeout(self, mock_get, mock_sleep):
+    def test_timeout(
+        self, mock_get: mock.MagicMock, mock_sleep: mock.MagicMock,
+    ) -> None:
         mock_get.return_value = self._fake_allocation('allocating')
 
         self.assertRaises(exc.StateTransitionTimeout,
