@@ -209,7 +209,13 @@ disable_error_code = [
 ]
 
 [[tool.mypy.overrides]]
-module = ["ironicclient.tests.unit.common.*", "ironicclient.tests.unit.utils"]
+module = [
+    "ironicclient.tests.unit.common.*",
+    "ironicclient.tests.unit.utils",
+    "ironicclient.tests.unit.test_client",
+    "ironicclient.tests.unit.test_exc",
+    "ironicclient.tests.unit.test_import",
+]
 disallow_untyped_calls = true
 disallow_untyped_defs = true
 disallow_subclassing_any = false

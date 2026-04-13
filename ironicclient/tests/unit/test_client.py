@@ -10,6 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import annotations
+
+from typing import Any
 from unittest import mock
 
 from openstack import config
@@ -26,10 +29,17 @@ class ClientTest(utils.BaseTestCase):
 
     @mock.patch.object(filecache, 'retrieve_data', autospec=True)
     @mock.patch.object(config, 'get_cloud_region', autospec=True)
-    def _test_get_client(self, mock_cloud_region, mock_retrieve_data,
-                         version=None, auth='password',
-                         expected_interface=None, additional_headers=None,
-                         global_request_id=None, **kwargs):
+    def _test_get_client(
+        self,
+        mock_cloud_region: mock.MagicMock,
+        mock_retrieve_data: mock.MagicMock,
+        version: str | None = None,
+        auth: str = 'password',
+        expected_interface: str | list[str] | None = None,
+        additional_headers: dict[str, str] | None = None,
+        global_request_id: str | None = None,
+        **kwargs: Any,
+    ) -> v1.Client:
         session = mock_cloud_region.return_value.get_session.return_value
         session.get_endpoint.return_value = 'http://localhost:6385/v1/f14b4123'
         mock_retrieve_data.return_value = version
@@ -76,14 +86,16 @@ class ClientTest(utils.BaseTestCase):
 
         return client
 
-    def test_get_client_only_endpoint(self):
+    def test_get_client_only_endpoint(self) -> None:
         kwargs = {'endpoint': 'http://localhost:6385/v1'}
         client = self._test_get_client(auth='none', **kwargs)
         self.assertIsInstance(client.http_client, http.SessionClient)
         self.assertEqual('http://localhost:6385',
                          client.http_client.endpoint_override)
 
-    def test_get_client_additional_headers_and_global_request(self):
+    def test_get_client_additional_headers_and_global_request(
+        self,
+    ) -> None:
         req_id = 'req-7b081d28-8272-45f4-9cf6-89649c1c7a1a'
         kwargs = {
             'endpoint': 'http://localhost:6385/v1',
@@ -97,7 +109,7 @@ class ClientTest(utils.BaseTestCase):
         self.assertEqual(req_id, client.http_client.global_request_id)
         self.assertEqual({'foo': 'bar'}, client.http_client.additional_headers)
 
-    def test_get_client_with_auth_token_endpoint(self):
+    def test_get_client_with_auth_token_endpoint(self) -> None:
         kwargs = {
             'endpoint': 'http://localhost:6385/v1',
             'token': 'USER_AUTH_TOKEN',
@@ -109,7 +121,7 @@ class ClientTest(utils.BaseTestCase):
         self.assertEqual('http://localhost:6385',
                          client.http_client.endpoint_override)
 
-    def test_get_client_no_auth_token(self):
+    def test_get_client_no_auth_token(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -118,7 +130,7 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(**kwargs)
 
-    def test_get_client_service_and_interface_defaults(self):
+    def test_get_client_service_and_interface_defaults(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -128,7 +140,7 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(**kwargs)
 
-    def test_get_client_and_interface_adminurl(self):
+    def test_get_client_and_interface_adminurl(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -139,7 +151,7 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(expected_interface='adminURL', **kwargs)
 
-    def test_get_client_and_interface_internal(self):
+    def test_get_client_and_interface_internal(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -150,7 +162,7 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(expected_interface='internal', **kwargs)
 
-    def test_get_client_and_valid_interfaces(self):
+    def test_get_client_and_valid_interfaces(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -162,7 +174,7 @@ class ClientTest(utils.BaseTestCase):
         self._test_get_client(expected_interface=['internal', 'public'],
                               **kwargs)
 
-    def test_get_client_and_interface_and_valid_interfaces(self):
+    def test_get_client_and_interface_and_valid_interfaces(self) -> None:
         """Ensure 'valid_interfaces' takes precedence over 'interface'."""
         kwargs = {
             'project_name': 'PROJECT_NAME',
@@ -176,7 +188,7 @@ class ClientTest(utils.BaseTestCase):
         self._test_get_client(expected_interface=['internal', 'public'],
                               **kwargs)
 
-    def test_get_client_with_region_no_auth_token(self):
+    def test_get_client_with_region_no_auth_token(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -186,7 +198,7 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(**kwargs)
 
-    def test_get_client_incorrect_auth_params(self):
+    def test_get_client_incorrect_auth_params(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -195,7 +207,7 @@ class ClientTest(utils.BaseTestCase):
         self.assertRaises(exc.AmbiguousAuthSystem, iroclient.get_client,
                           '1', **kwargs)
 
-    def test_get_client_with_api_version_latest(self):
+    def test_get_client_with_api_version_latest(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -205,7 +217,7 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(**kwargs)
 
-    def test_get_client_with_api_version_list(self):
+    def test_get_client_with_api_version_list(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -215,7 +227,7 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(**kwargs)
 
-    def test_get_client_with_api_version_numeric(self):
+    def test_get_client_with_api_version_numeric(self) -> None:
         kwargs = {
             'project_name': 'PROJECT_NAME',
             'username': 'USERNAME',
@@ -225,7 +237,7 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(**kwargs)
 
-    def test_get_client_default_version_set_cached(self):
+    def test_get_client_default_version_set_cached(self) -> None:
         version = '1.3'
         # Make sure we don't coincidentally succeed
         self.assertNotEqual(v1.DEFAULT_VER, version)
@@ -237,14 +249,14 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(version=version, **kwargs)
 
-    def test_get_client_with_auth_token(self):
+    def test_get_client_with_auth_token(self) -> None:
         kwargs = {
             'auth_url': 'http://localhost:35357/v2.0',
             'token': 'USER_AUTH_TOKEN',
         }
         self._test_get_client(auth='token', **kwargs)
 
-    def test_get_client_with_region_name_auth_token(self):
+    def test_get_client_with_region_name_auth_token(self) -> None:
         kwargs = {
             'auth_url': 'http://localhost:35357/v2.0',
             'region_name': 'REGIONONE',
@@ -252,7 +264,7 @@ class ClientTest(utils.BaseTestCase):
         }
         self._test_get_client(auth='token', **kwargs)
 
-    def test_get_client_only_session_passed(self):
+    def test_get_client_only_session_passed(self) -> None:
         session = mock.Mock()
         session.get_endpoint.return_value = 'http://localhost:35357/v2.0'
         kwargs = {
@@ -263,7 +275,7 @@ class ClientTest(utils.BaseTestCase):
                                                      interface=None,
                                                      region_name=None)
 
-    def test_get_client_incorrect_session_passed(self):
+    def test_get_client_incorrect_session_passed(self) -> None:
         session = mock.Mock()
         session.get_endpoint.side_effect = Exception('boo')
         kwargs = {
@@ -272,19 +284,19 @@ class ClientTest(utils.BaseTestCase):
         self.assertRaises(exc.AmbiguousAuthSystem, iroclient.get_client,
                           '1', **kwargs)
 
-    def test_client_no_session(self):
+    def test_client_no_session(self) -> None:
         # get_client can create a session, all other calls require it
         self.assertRaisesRegex(TypeError,
                                "session is required",
                                iroclient.Client,
                                1, "http://example.com")
 
-    def test_client_session_via_posargs(self):
+    def test_client_session_via_posargs(self) -> None:
         session = mock.Mock()
         session.get_endpoint.return_value = 'http://localhost:35357/v2.0'
         iroclient.Client('1', "http://example.com", session)
 
-    def test_client_session_via_kwargs(self):
+    def test_client_session_via_kwargs(self) -> None:
         session = mock.Mock()
         session.get_endpoint.return_value = 'http://localhost:35357/v2.0'
         iroclient.Client('1', session=session,

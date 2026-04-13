@@ -10,28 +10,34 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
+from __future__ import annotations
+
+from collections.abc import Sequence
+
 from ironicclient.tests.unit import utils
 
-module_str = 'ironicclient'
+module_str: str = 'ironicclient'
 
 
 class ImportTest(utils.BaseTestCase):
 
-    def check_exported_symbols(self, exported_symbols):
+    def check_exported_symbols(
+        self, exported_symbols: Sequence[str],
+    ) -> None:
         self.assertIn('client', exported_symbols)
         self.assertIn('exc', exported_symbols)
         self.assertIn('exceptions', exported_symbols)
 
-    def test_import_objects(self):
+    def test_import_objects(self) -> None:
         module = __import__(module_str)
         exported_symbols = dir(module)
         self.check_exported_symbols(exported_symbols)
 
-    def test_default_import(self):
+    def test_default_import(self) -> None:
         default_imports = __import__(module_str, globals(), locals(), ['*'])
         exported_symbols = dir(default_imports)
         self.check_exported_symbols(exported_symbols)
 
-    def test_import__all__(self):
+    def test_import__all__(self) -> None:
         module = __import__(module_str)
         self.check_exported_symbols(module.__all__)
