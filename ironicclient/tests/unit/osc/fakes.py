@@ -14,6 +14,8 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 import sys
 
 
@@ -23,7 +25,7 @@ API_VERSION = '1.6'
 
 
 class FakeApp(object):
-    def __init__(self):
+    def __init__(self) -> None:
         _stdout = None
         self.client_manager = None
         self.stdin = sys.stdin
@@ -33,7 +35,7 @@ class FakeApp(object):
 
 
 class FakeClientManager(object):
-    def __init__(self):
+    def __init__(self) -> None:
         self.identity = None
         self.auth_ref = None
         self.interface = 'public'
@@ -43,18 +45,23 @@ class FakeClientManager(object):
 
 
 class FakeResource(object):
-    def __init__(self, manager, info, loaded=False):
+    def __init__(
+            self,
+            manager: object | None,
+            info: dict[str, object],
+            loaded: bool = False,
+    ) -> None:
         self.__name__ = type(self).__name__
         self.manager = manager
         self._info = info
         self._add_details(info)
         self._loaded = loaded
 
-    def _add_details(self, info):
+    def _add_details(self, info: dict[str, object]) -> None:
         for (k, v) in info.items():
             setattr(self, k, v)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         reprkeys = sorted(k for k in self.__dict__.keys()
                           if k[0] != '_' and k != 'manager')
         info = ", ".join("%s=%s" % (k, getattr(self, k)) for k in reprkeys)

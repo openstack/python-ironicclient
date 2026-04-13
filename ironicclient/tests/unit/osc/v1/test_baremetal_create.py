@@ -11,6 +11,8 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 from unittest import mock
 
 from osc_lib.tests import utils as oscutils
@@ -21,18 +23,19 @@ from ironicclient.v1 import create_resources
 
 
 class TestBaremetalCreate(baremetal_fakes.TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalCreate, self).setUp()
         self.cmd = baremetal_create.CreateBaremetal(self.app, None)
 
-    def test_baremetal_create_no_args(self):
+    def test_baremetal_create_no_args(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(oscutils.ParserException, self.check_parser,
                           self.cmd, arglist, verifylist)
 
     @mock.patch.object(create_resources, 'create_resources', autospec=True)
-    def test_baremetal_create_resource_files(self, mock_create):
+    def test_baremetal_create_resource_files(
+            self, mock_create: mock.Mock) -> None:
         arglist = ['file.yaml', 'file.json']
         verifylist = [('resource_files', ['file.yaml', 'file.json'])]
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)

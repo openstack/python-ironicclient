@@ -10,6 +10,8 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
+from __future__ import annotations
+
 import argparse
 from unittest import mock
 
@@ -24,7 +26,8 @@ class MakeClientTest(testtools.TestCase):
 
     @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=False)
     @mock.patch.object(client, 'Client', autospec=True)
-    def test_make_client_explicit_version(self, mock_client):
+    def test_make_client_explicit_version(
+            self, mock_client: mock.Mock) -> None:
         instance = fakes.FakeClientManager()
         instance.get_endpoint_for_service_type = mock.Mock(
             return_value='endpoint')
@@ -41,7 +44,7 @@ class MakeClientTest(testtools.TestCase):
 
     @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=True)
     @mock.patch.object(client, 'Client', autospec=True)
-    def test_make_client_latest(self, mock_client):
+    def test_make_client_latest(self, mock_client: mock.Mock) -> None:
         instance = fakes.FakeClientManager()
         instance.get_endpoint_for_service_type = mock.Mock(
             return_value='endpoint')
@@ -61,7 +64,7 @@ class MakeClientTest(testtools.TestCase):
 
     @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=False)
     @mock.patch.object(client, 'Client', autospec=True)
-    def test_make_client_v1(self, mock_client):
+    def test_make_client_v1(self, mock_client: mock.Mock) -> None:
         instance = fakes.FakeClientManager()
         instance.get_endpoint_for_service_type = mock.Mock(
             return_value='endpoint')
@@ -83,7 +86,7 @@ class MakeClientTest(testtools.TestCase):
 class BuildOptionParserTest(testtools.TestCase):
 
     @mock.patch.object(plugin.utils, 'env', lambda x: None)
-    def test_build_option_parser(self, mock_add_argument):
+    def test_build_option_parser(self, mock_add_argument: mock.Mock) -> None:
         parser = argparse.ArgumentParser()
         mock_add_argument.reset_mock()
         plugin.build_option_parser(parser)
@@ -97,7 +100,8 @@ class BuildOptionParserTest(testtools.TestCase):
         self.assertTrue(plugin.OS_BAREMETAL_API_LATEST)
 
     @mock.patch.object(plugin.utils, 'env', lambda x: "latest")
-    def test_build_option_parser_env_latest(self, mock_add_argument):
+    def test_build_option_parser_env_latest(
+            self, mock_add_argument: mock.Mock) -> None:
         parser = argparse.ArgumentParser()
         mock_add_argument.reset_mock()
         plugin.build_option_parser(parser)
@@ -111,7 +115,8 @@ class BuildOptionParserTest(testtools.TestCase):
         self.assertTrue(plugin.OS_BAREMETAL_API_LATEST)
 
     @mock.patch.object(plugin.utils, 'env', lambda x: "1.1")
-    def test_build_option_parser_env(self, mock_add_argument):
+    def test_build_option_parser_env(
+            self, mock_add_argument: mock.Mock) -> None:
         parser = argparse.ArgumentParser()
         mock_add_argument.reset_mock()
         plugin.build_option_parser(parser)
@@ -129,7 +134,7 @@ class BuildOptionParserTest(testtools.TestCase):
 class ReplaceLatestVersionTest(testtools.TestCase):
 
     @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=False)
-    def test___call___latest(self):
+    def test___call___latest(self) -> None:
         parser = argparse.ArgumentParser()
         plugin.build_option_parser(parser)
         namespace = argparse.Namespace()
@@ -140,7 +145,7 @@ class ReplaceLatestVersionTest(testtools.TestCase):
         self.assertTrue(plugin.OS_BAREMETAL_API_LATEST)
 
     @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=True)
-    def test___call___specific_version(self):
+    def test___call___specific_version(self) -> None:
         parser = argparse.ArgumentParser()
         plugin.build_option_parser(parser)
         namespace = argparse.Namespace()
@@ -150,7 +155,7 @@ class ReplaceLatestVersionTest(testtools.TestCase):
         self.assertFalse(plugin.OS_BAREMETAL_API_LATEST)
 
     @mock.patch.object(plugin, 'OS_BAREMETAL_API_LATEST', new=True)
-    def test___call___default(self):
+    def test___call___default(self) -> None:
         parser = argparse.ArgumentParser()
         plugin.build_option_parser(parser)
         namespace = argparse.Namespace()

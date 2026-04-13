@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import annotations
+
 import copy
 from unittest import mock
 
@@ -24,7 +26,7 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 class TestBaremetalVolumeConnector(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalVolumeConnector, self).setUp()
 
         self.baremetal_mock = self.app.client_manager.baremetal
@@ -33,7 +35,7 @@ class TestBaremetalVolumeConnector(baremetal_fakes.TestBaremetal):
 
 class TestCreateBaremetalVolumeConnector(TestBaremetalVolumeConnector):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestCreateBaremetalVolumeConnector, self).setUp()
 
         self.baremetal_mock.volume_connector.create.return_value = (
@@ -47,7 +49,7 @@ class TestCreateBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.cmd = (
             bm_vol_connector.CreateBaremetalVolumeConnector(self.app, None))
 
-    def test_baremetal_volume_connector_create(self):
+    def test_baremetal_volume_connector_create(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type', baremetal_fakes.baremetal_volume_connector_type,
@@ -79,7 +81,7 @@ class TestCreateBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.baremetal_mock.volume_connector.create.assert_called_once_with(
             **args)
 
-    def test_baremetal_volume_connector_create_without_uuid(self):
+    def test_baremetal_volume_connector_create_without_uuid(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type', baremetal_fakes.baremetal_volume_connector_type,
@@ -108,7 +110,7 @@ class TestCreateBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.baremetal_mock.volume_connector.create.assert_called_once_with(
             **args)
 
-    def test_baremetal_volume_connector_create_extras(self):
+    def test_baremetal_volume_connector_create_extras(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type', baremetal_fakes.baremetal_volume_connector_type,
@@ -141,7 +143,7 @@ class TestCreateBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.baremetal_mock.volume_connector.create.assert_called_once_with(
             **args)
 
-    def test_baremetal_volume_connector_create_invalid_type(self):
+    def test_baremetal_volume_connector_create_invalid_type(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type', 'invalid',
@@ -155,7 +157,7 @@ class TestCreateBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_connector_create_missing_node(self):
+    def test_baremetal_volume_connector_create_missing_node(self) -> None:
         arglist = [
             '--type', baremetal_fakes.baremetal_volume_connector_type,
             '--connector-id',
@@ -168,7 +170,7 @@ class TestCreateBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_connector_create_missing_type(self):
+    def test_baremetal_volume_connector_create_missing_type(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--connector-id',
@@ -181,7 +183,8 @@ class TestCreateBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_connector_create_missing_connector_id(self):
+    def test_baremetal_volume_connector_create_missing_connector_id(
+            self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type', baremetal_fakes.baremetal_volume_connector_type,
@@ -196,7 +199,7 @@ class TestCreateBaremetalVolumeConnector(TestBaremetalVolumeConnector):
 
 class TestShowBaremetalVolumeConnector(TestBaremetalVolumeConnector):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestShowBaremetalVolumeConnector, self).setUp()
 
         self.baremetal_mock.volume_connector.get.return_value = (
@@ -208,7 +211,7 @@ class TestShowBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.cmd = (
             bm_vol_connector.ShowBaremetalVolumeConnector(self.app, None))
 
-    def test_baremetal_volume_connector_show(self):
+    def test_baremetal_volume_connector_show(self) -> None:
         arglist = ['vvv-cccccc-vvvv']
         verifylist = [('volume_connector',
                        baremetal_fakes.baremetal_volume_connector_uuid)]
@@ -231,14 +234,14 @@ class TestShowBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_connector_show_no_options(self):
+    def test_baremetal_volume_connector_show_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_connector_show_fields(self):
+    def test_baremetal_volume_connector_show_fields(self) -> None:
         arglist = ['vvv-cccccc-vvvv', '--fields', 'uuid', 'connector_id']
         verifylist = [('fields', [['uuid', 'connector_id']]),
                       ('volume_connector',
@@ -270,7 +273,7 @@ class TestShowBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_connector_show_fields_multiple(self):
+    def test_baremetal_volume_connector_show_fields_multiple(self) -> None:
         arglist = ['vvv-cccccc-vvvv', '--fields', 'uuid', 'connector_id',
                    '--fields', 'type']
         verifylist = [('fields', [['uuid', 'connector_id'], ['type']]),
@@ -305,7 +308,7 @@ class TestShowBaremetalVolumeConnector(TestBaremetalVolumeConnector):
 
 
 class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestListBaremetalVolumeConnector, self).setUp()
 
         self.baremetal_mock.volume_connector.list.return_value = [
@@ -317,7 +320,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.cmd = (
             bm_vol_connector.ListBaremetalVolumeConnector(self.app, None))
 
-    def test_baremetal_volume_connector_list(self):
+    def test_baremetal_volume_connector_list(self) -> None:
         arglist = []
         verifylist = []
 
@@ -343,7 +346,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                      baremetal_fakes.baremetal_volume_connector_connector_id),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_connector_list_node(self):
+    def test_baremetal_volume_connector_list_node(self) -> None:
         arglist = ['--node', baremetal_fakes.baremetal_uuid]
         verifylist = [('node', baremetal_fakes.baremetal_uuid)]
 
@@ -370,7 +373,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                      baremetal_fakes.baremetal_volume_connector_connector_id),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_connector_list_long(self):
+    def test_baremetal_volume_connector_list_long(self) -> None:
         arglist = ['--long']
         verifylist = [('detail', True)]
 
@@ -397,7 +400,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                      ''),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_connector_list_fields(self):
+    def test_baremetal_volume_connector_list_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'connector_id']
         verifylist = [('fields', [['uuid', 'connector_id']])]
 
@@ -430,7 +433,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                      baremetal_fakes.baremetal_volume_connector_connector_id),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_connector_list_fields_multiple(self):
+    def test_baremetal_volume_connector_list_fields_multiple(self) -> None:
         arglist = ['--fields', 'uuid', 'connector_id', '--fields', 'extra']
         verifylist = [('fields', [['uuid', 'connector_id'], ['extra']])]
 
@@ -463,14 +466,14 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                      baremetal_fakes.baremetal_volume_connector_extra),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_connector_list_invalid_fields(self):
+    def test_baremetal_volume_connector_list_invalid_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'invalid']
         verifylist = [('fields', [['uuid', 'invalid']])]
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_connector_list_marker(self):
+    def test_baremetal_volume_connector_list_marker(self) -> None:
         arglist = ['--marker', baremetal_fakes.baremetal_volume_connector_uuid]
         verifylist = [
             ('marker', baremetal_fakes.baremetal_volume_connector_uuid)]
@@ -484,7 +487,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.baremetal_mock.volume_connector.list.assert_called_once_with(
             **kwargs)
 
-    def test_baremetal_volume_connector_list_limit(self):
+    def test_baremetal_volume_connector_list_limit(self) -> None:
         arglist = ['--limit', '10']
         verifylist = [('limit', 10)]
 
@@ -497,7 +500,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.baremetal_mock.volume_connector.list.assert_called_once_with(
             **kwargs)
 
-    def test_baremetal_volume_connector_list_sort(self):
+    def test_baremetal_volume_connector_list_sort(self) -> None:
         arglist = ['--sort', 'type']
         verifylist = [('sort', 'type')]
 
@@ -510,7 +513,7 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.baremetal_mock.volume_connector.list.assert_called_once_with(
             **kwargs)
 
-    def test_baremetal_volume_connector_list_sort_desc(self):
+    def test_baremetal_volume_connector_list_sort_desc(self) -> None:
         arglist = ['--sort', 'type:desc']
         verifylist = [('sort', 'type:desc')]
 
@@ -523,13 +526,13 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.baremetal_mock.volume_connector.list.assert_called_once_with(
             **kwargs)
 
-    def test_baremetal_volume_connector_list_exclusive_options(self):
+    def test_baremetal_volume_connector_list_exclusive_options(self) -> None:
         arglist = ['--fields', 'uuid', '--long']
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, [])
 
-    def test_baremetal_volume_connector_list_negative_limit(self):
+    def test_baremetal_volume_connector_list_negative_limit(self) -> None:
         arglist = ['--limit', '-1']
         verifylist = [('limit', -1)]
 
@@ -541,13 +544,13 @@ class TestListBaremetalVolumeConnector(TestBaremetalVolumeConnector):
 
 class TestDeleteBaremetalVolumeConnector(TestBaremetalVolumeConnector):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestDeleteBaremetalVolumeConnector, self).setUp()
 
         self.cmd = (
             bm_vol_connector.DeleteBaremetalVolumeConnector(self.app, None))
 
-    def test_baremetal_volume_connector_delete(self):
+    def test_baremetal_volume_connector_delete(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_connector_uuid]
         verifylist = [('volume_connectors',
                        [baremetal_fakes.baremetal_volume_connector_uuid])]
@@ -558,7 +561,7 @@ class TestDeleteBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.baremetal_mock.volume_connector.delete.assert_called_with(
             baremetal_fakes.baremetal_volume_connector_uuid)
 
-    def test_baremetal_volume_connector_delete_multiple(self):
+    def test_baremetal_volume_connector_delete_multiple(self) -> None:
         fake_volume_connector_uuid2 = 'vvv-cccccc-cccc'
         arglist = [baremetal_fakes.baremetal_volume_connector_uuid,
                    fake_volume_connector_uuid2]
@@ -575,14 +578,14 @@ class TestDeleteBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.assertEqual(
             2, self.baremetal_mock.volume_connector.delete.call_count)
 
-    def test_baremetal_volume_connector_delete_no_options(self):
+    def test_baremetal_volume_connector_delete_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_connector_delete_error(self):
+    def test_baremetal_volume_connector_delete_error(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_connector_uuid]
         verifylist = [('volume_connectors',
                        [baremetal_fakes.baremetal_volume_connector_uuid])]
@@ -597,7 +600,7 @@ class TestDeleteBaremetalVolumeConnector(TestBaremetalVolumeConnector):
         self.baremetal_mock.volume_connector.delete.assert_called_with(
             baremetal_fakes.baremetal_volume_connector_uuid)
 
-    def test_baremetal_volume_connector_delete_multiple_error(self):
+    def test_baremetal_volume_connector_delete_multiple_error(self) -> None:
         fake_volume_connector_uuid2 = 'vvv-cccccc-cccc'
         arglist = [baremetal_fakes.baremetal_volume_connector_uuid,
                    fake_volume_connector_uuid2]
@@ -621,13 +624,13 @@ class TestDeleteBaremetalVolumeConnector(TestBaremetalVolumeConnector):
 
 
 class TestSetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestSetBaremetalVolumeConnector, self).setUp()
 
         self.cmd = (
             bm_vol_connector.SetBaremetalVolumeConnector(self.app, None))
 
-    def test_baremetal_volume_connector_set_node_uuid(self):
+    def test_baremetal_volume_connector_set_node_uuid(self) -> None:
         new_node_uuid = 'xxx-xxxxxx-zzzz'
         arglist = [
             baremetal_fakes.baremetal_volume_connector_uuid,
@@ -644,7 +647,7 @@ class TestSetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             baremetal_fakes.baremetal_volume_connector_uuid,
             [{'path': '/node_uuid', 'value': new_node_uuid, 'op': 'add'}])
 
-    def test_baremetal_volume_connector_set_type(self):
+    def test_baremetal_volume_connector_set_type(self) -> None:
         new_type = 'wwnn'
         arglist = [
             baremetal_fakes.baremetal_volume_connector_uuid,
@@ -661,7 +664,7 @@ class TestSetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             baremetal_fakes.baremetal_volume_connector_uuid,
             [{'path': '/type', 'value': new_type, 'op': 'add'}])
 
-    def test_baremetal_volume_connector_set_invalid_type(self):
+    def test_baremetal_volume_connector_set_invalid_type(self) -> None:
         new_type = 'invalid'
         arglist = [
             baremetal_fakes.baremetal_volume_connector_uuid,
@@ -672,7 +675,7 @@ class TestSetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_connector_set_connector_id(self):
+    def test_baremetal_volume_connector_set_connector_id(self) -> None:
         new_conn_id = '11:22:33:44:55:66:77:88'
         arglist = [
             baremetal_fakes.baremetal_volume_connector_uuid,
@@ -689,7 +692,8 @@ class TestSetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             baremetal_fakes.baremetal_volume_connector_uuid,
             [{'path': '/connector_id', 'value': new_conn_id, 'op': 'add'}])
 
-    def test_baremetal_volume_connector_set_type_and_connector_id(self):
+    def test_baremetal_volume_connector_set_type_and_connector_id(
+            self) -> None:
         new_type = 'wwnn'
         new_conn_id = '11:22:33:44:55:66:77:88'
         arglist = [
@@ -710,7 +714,7 @@ class TestSetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             [{'path': '/type', 'value': new_type, 'op': 'add'},
              {'path': '/connector_id', 'value': new_conn_id, 'op': 'add'}])
 
-    def test_baremetal_volume_connector_set_extra(self):
+    def test_baremetal_volume_connector_set_extra(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_volume_connector_uuid,
             '--extra', 'foo=bar']
@@ -726,7 +730,7 @@ class TestSetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             baremetal_fakes.baremetal_volume_connector_uuid,
             [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}])
 
-    def test_baremetal_volume_connector_set_multiple_extras(self):
+    def test_baremetal_volume_connector_set_multiple_extras(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_volume_connector_uuid,
             '--extra', 'key1=val1', '--extra', 'key2=val2']
@@ -743,14 +747,14 @@ class TestSetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             [{'path': '/extra/key1', 'value': 'val1', 'op': 'add'},
              {'path': '/extra/key2', 'value': 'val2', 'op': 'add'}])
 
-    def test_baremetal_volume_connector_set_no_options(self):
+    def test_baremetal_volume_connector_set_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_connector_set_no_property(self):
+    def test_baremetal_volume_connector_set_no_property(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_connector_uuid]
         verifylist = [('volume_connector',
                        baremetal_fakes.baremetal_volume_connector_uuid)]
@@ -761,13 +765,13 @@ class TestSetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
 
 
 class TestUnsetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestUnsetBaremetalVolumeConnector, self).setUp()
 
         self.cmd = (
             bm_vol_connector.UnsetBaremetalVolumeConnector(self.app, None))
 
-    def test_baremetal_volume_connector_unset_extra(self):
+    def test_baremetal_volume_connector_unset_extra(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_connector_uuid,
                    '--extra', 'key1']
         verifylist = [('volume_connector',
@@ -781,7 +785,7 @@ class TestUnsetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             baremetal_fakes.baremetal_volume_connector_uuid,
             [{'path': '/extra/key1', 'op': 'remove'}])
 
-    def test_baremetal_volume_connector_unset_multiple_extras(self):
+    def test_baremetal_volume_connector_unset_multiple_extras(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_connector_uuid,
                    '--extra', 'key1', '--extra', 'key2']
         verifylist = [('volume_connector',
@@ -796,14 +800,14 @@ class TestUnsetBaremetalVolumeConnector(TestBaremetalVolumeConnector):
             [{'path': '/extra/key1', 'op': 'remove'},
              {'path': '/extra/key2', 'op': 'remove'}])
 
-    def test_baremetal_volume_connector_unset_no_options(self):
+    def test_baremetal_volume_connector_unset_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_connector_unset_no_property(self):
+    def test_baremetal_volume_connector_unset_no_property(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_connector_uuid]
         verifylist = [('volume_connector',
                        baremetal_fakes.baremetal_volume_connector_uuid)]

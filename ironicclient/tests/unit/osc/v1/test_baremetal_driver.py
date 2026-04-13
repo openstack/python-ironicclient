@@ -13,6 +13,8 @@
 # under the License.
 #
 
+from __future__ import annotations
+
 import copy
 
 from osc_lib.tests import utils as oscutils
@@ -23,7 +25,7 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 class TestBaremetalDriver(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalDriver, self).setUp()
 
         self.baremetal_mock = self.app.client_manager.baremetal
@@ -32,7 +34,7 @@ class TestBaremetalDriver(baremetal_fakes.TestBaremetal):
 
 class TestListBaremetalDriver(TestBaremetalDriver):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestListBaremetalDriver, self).setUp()
 
         self.baremetal_mock.driver.list.return_value = [
@@ -43,7 +45,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
         ]
         self.cmd = baremetal_driver.ListBaremetalDriver(self.app, None)
 
-    def test_baremetal_driver_list(self):
+    def test_baremetal_driver_list(self) -> None:
         arglist = []
         verifylist = []
 
@@ -60,7 +62,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
             ', '.join(baremetal_fakes.baremetal_driver_hosts)), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_driver_list_with_type(self):
+    def test_baremetal_driver_list_with_type(self) -> None:
         arglist = ['--type', baremetal_fakes.baremetal_driver_type]
         verifylist = [('type', baremetal_fakes.baremetal_driver_type)]
 
@@ -77,7 +79,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
             ', '.join(baremetal_fakes.baremetal_driver_hosts)),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_driver_list_with_detail(self):
+    def test_baremetal_driver_list_with_detail(self) -> None:
         arglist = ['--long']
         verifylist = [('long', True)]
 
@@ -150,7 +152,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
         ),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_driver_list_fields(self):
+    def test_baremetal_driver_list_fields(self) -> None:
         arglist = [
             '--fields', 'name', 'hosts'
         ]
@@ -169,7 +171,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
 
         self.baremetal_mock.driver.list.assert_called_with(**kwargs)
 
-    def test_baremetal_driver_list_fields_multiple(self):
+    def test_baremetal_driver_list_fields_multiple(self) -> None:
         arglist = [
             '--fields', 'name',
             '--fields', 'hosts', 'type'
@@ -189,7 +191,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
 
         self.baremetal_mock.driver.list.assert_called_with(**kwargs)
 
-    def test_baremetal_driver_list_invalid_fields(self):
+    def test_baremetal_driver_list_invalid_fields(self) -> None:
         arglist = [
             '--fields', 'name', 'invalid'
         ]
@@ -200,7 +202,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_driver_list_fields_with_long(self):
+    def test_baremetal_driver_list_fields_with_long(self) -> None:
         arglist = [
             '--fields', 'name', 'hosts',
             '--long'
@@ -216,7 +218,7 @@ class TestListBaremetalDriver(TestBaremetalDriver):
 
 class TestListBaremetalDriverProperty(TestBaremetalDriver):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestListBaremetalDriverProperty, self).setUp()
 
         self.baremetal_mock.driver.properties.return_value = {
@@ -224,7 +226,7 @@ class TestListBaremetalDriverProperty(TestBaremetalDriver):
         self.cmd = baremetal_driver.ListBaremetalDriverProperty(
             self.app, None)
 
-    def test_baremetal_driver_property_list(self):
+    def test_baremetal_driver_property_list(self) -> None:
         arglist = ['fakedrivername']
         verifylist = []
 
@@ -238,7 +240,7 @@ class TestListBaremetalDriverProperty(TestBaremetalDriver):
                          ('property2', 'description2')]
         self.assertEqual(expected_data, data)
 
-    def test_baremetal_driver_list_no_arg(self):
+    def test_baremetal_driver_list_no_arg(self) -> None:
         arglist = []
         verifylist = []
 
@@ -249,7 +251,7 @@ class TestListBaremetalDriverProperty(TestBaremetalDriver):
 
 class TestListBaremetalDriverRaidProperty(TestBaremetalDriver):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestListBaremetalDriverRaidProperty, self).setUp()
 
         (self.baremetal_mock.driver.
@@ -262,7 +264,7 @@ class TestListBaremetalDriverRaidProperty(TestBaremetalDriver):
             baremetal_driver.ListBaremetalDriverRaidProperty(
                 self.app, None))
 
-    def test_baremetal_driver_raid_property_list(self):
+    def test_baremetal_driver_raid_property_list(self) -> None:
         arglist = ['fakedrivername']
         verifylist = []
 
@@ -279,7 +281,7 @@ class TestListBaremetalDriverRaidProperty(TestBaremetalDriver):
                          ('RAIDProperty2', 'driver_raid_property2')]
         self.assertEqual(expected_data, data)
 
-    def test_baremetal_driver_raid_property_list_no_arg(self):
+    def test_baremetal_driver_raid_property_list_no_arg(self) -> None:
         arglist = []
         verifylist = []
 
@@ -290,7 +292,7 @@ class TestListBaremetalDriverRaidProperty(TestBaremetalDriver):
 
 class TestPassthruCallBaremetalDriver(TestBaremetalDriver):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestPassthruCallBaremetalDriver, self).setUp()
 
         self.baremetal_mock.driver.vendor_passthru.return_value = (
@@ -299,7 +301,7 @@ class TestPassthruCallBaremetalDriver(TestBaremetalDriver):
 
         self.cmd = baremetal_driver.PassthruCallBaremetalDriver(self.app, None)
 
-    def test_baremetal_driver_passthru_call_with_min_args(self):
+    def test_baremetal_driver_passthru_call_with_min_args(self) -> None:
 
         arglist = [
             baremetal_fakes.baremetal_driver_name,
@@ -326,7 +328,7 @@ class TestPassthruCallBaremetalDriver(TestBaremetalDriver):
         (self.baremetal_mock.driver.vendor_passthru.
             assert_called_once_with(*args, **kwargs))
 
-    def test_baremetal_driver_passthru_call_with_all_args(self):
+    def test_baremetal_driver_passthru_call_with_all_args(self) -> None:
 
         arglist = [
             baremetal_fakes.baremetal_driver_name,
@@ -357,7 +359,7 @@ class TestPassthruCallBaremetalDriver(TestBaremetalDriver):
         (self.baremetal_mock.driver.vendor_passthru.
             assert_called_once_with(*args, **kwargs))
 
-    def test_baremetal_driver_passthru_call_no_arg(self):
+    def test_baremetal_driver_passthru_call_no_arg(self) -> None:
         arglist = []
         verifylist = []
 
@@ -368,7 +370,7 @@ class TestPassthruCallBaremetalDriver(TestBaremetalDriver):
 
 class TestPassthruListBaremetalDriver(TestBaremetalDriver):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestPassthruListBaremetalDriver, self).setUp()
 
         self.baremetal_mock.driver.get_vendor_passthru_methods.return_value = (
@@ -376,7 +378,7 @@ class TestPassthruListBaremetalDriver(TestBaremetalDriver):
         )
         self.cmd = baremetal_driver.PassthruListBaremetalDriver(self.app, None)
 
-    def test_baremetal_driver_passthru_list(self):
+    def test_baremetal_driver_passthru_list(self) -> None:
         arglist = ['fakedrivername']
         verifylist = []
 
@@ -400,7 +402,7 @@ class TestPassthruListBaremetalDriver(TestBaremetalDriver):
 
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_driver_passthru_list_no_arg(self):
+    def test_baremetal_driver_passthru_list_no_arg(self) -> None:
         arglist = []
         verifylist = []
 
@@ -411,7 +413,7 @@ class TestPassthruListBaremetalDriver(TestBaremetalDriver):
 
 class TestShowBaremetalDriver(TestBaremetalDriver):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestShowBaremetalDriver, self).setUp()
 
         self.baremetal_mock.driver.get.return_value = (
@@ -421,7 +423,7 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
                 loaded=True))
         self.cmd = baremetal_driver.ShowBaremetalDriver(self.app, None)
 
-    def test_baremetal_driver_show(self):
+    def test_baremetal_driver_show(self) -> None:
         arglist = ['fakedrivername']
         verifylist = []
 
@@ -483,7 +485,7 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
 
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_driver_show_no_arg(self):
+    def test_baremetal_driver_show_no_arg(self) -> None:
         arglist = []
         verifylist = []
 
@@ -491,7 +493,7 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_driver_show_fields(self):
+    def test_baremetal_driver_show_fields(self) -> None:
         arglist = [
             'fakedrivername',
             '--fields', 'name', 'hosts'
@@ -509,7 +511,7 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
         self.baremetal_mock.driver.get.assert_called_with(*args, fields=fields)
         self.assertFalse(self.baremetal_mock.driver.properties.called)
 
-    def test_baremetal_driver_show_fields_multiple(self):
+    def test_baremetal_driver_show_fields_multiple(self) -> None:
         arglist = [
             'fakedrivername',
             '--fields', 'name',
@@ -528,7 +530,7 @@ class TestShowBaremetalDriver(TestBaremetalDriver):
         self.baremetal_mock.driver.get.assert_called_with(*args, fields=fields)
         self.assertFalse(self.baremetal_mock.driver.properties.called)
 
-    def test_baremetal_driver_show_invalid_fields(self):
+    def test_baremetal_driver_show_invalid_fields(self) -> None:
         arglist = [
             'fakedrivername',
             '--fields', 'name', 'invalid'

@@ -14,6 +14,8 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 import json
 from unittest import mock
 
@@ -344,7 +346,7 @@ INSPECTION_RULE = {
 
 class TestBaremetal(utils.TestCommand):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetal, self).setUp()
 
         self.app.client_manager.auth_ref = mock.Mock(auth_token="TOKEN")
@@ -353,5 +355,5 @@ class TestBaremetal(utils.TestCommand):
 
 class FakeBaremetalResource(fakes.FakeResource):
 
-    def get_keys(self):
+    def get_keys(self) -> dict[str, str]:
         return {'property': 'value'}

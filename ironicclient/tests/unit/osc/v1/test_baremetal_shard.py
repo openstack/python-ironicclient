@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import annotations
+
 import copy
 
 from ironicclient.osc.v1 import baremetal_shard
@@ -17,14 +19,14 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 
 class TestBaremetalShard(baremetal_fakes.TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalShard, self).setUp()
         self.baremetal_mock = self.app.client_manager.baremetal
         self.baremetal_mock.reset_mock()
 
 
 class TestBaremetalShardList(TestBaremetalShard):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalShardList, self).setUp()
 
         # Return a list containing mocked shard data to
@@ -40,7 +42,7 @@ class TestBaremetalShardList(TestBaremetalShard):
         # Get the command object to test
         self.cmd = baremetal_shard.ListBaremetalShard(self.app, None)
 
-    def test_shard_list(self):
+    def test_shard_list(self) -> None:
         arglist = []
         verifylist = []
 

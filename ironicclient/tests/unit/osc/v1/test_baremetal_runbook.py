@@ -11,6 +11,8 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 import copy
 import json
 from unittest import mock
@@ -24,7 +26,7 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 class TestBaremetalRunbook(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalRunbook, self).setUp()
 
         self.baremetal_mock = self.app.client_manager.baremetal
@@ -32,7 +34,7 @@ class TestBaremetalRunbook(baremetal_fakes.TestBaremetal):
 
 
 class TestCreateBaremetalRunbook(TestBaremetalRunbook):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestCreateBaremetalRunbook, self).setUp()
 
         self.baremetal_mock.runbook.create.return_value = (
@@ -46,7 +48,7 @@ class TestCreateBaremetalRunbook(TestBaremetalRunbook):
         self.cmd = baremetal_runbook.CreateBaremetalRunbook(
             self.app, None)
 
-    def test_baremetal_runbook_create(self):
+    def test_baremetal_runbook_create(self) -> None:
         arglist = [
             '--name', baremetal_fakes.baremetal_runbook_name,
             '--steps', baremetal_fakes.baremetal_runbook_steps,
@@ -71,7 +73,7 @@ class TestCreateBaremetalRunbook(TestBaremetalRunbook):
         self.baremetal_mock.runbook.create.assert_called_once_with(
             **args)
 
-    def test_baremetal_runbook_create_uuid(self):
+    def test_baremetal_runbook_create_uuid(self) -> None:
         arglist = [
             '--name', baremetal_fakes.baremetal_runbook_name,
             '--steps', baremetal_fakes.baremetal_runbook_steps,
@@ -99,7 +101,7 @@ class TestCreateBaremetalRunbook(TestBaremetalRunbook):
         self.baremetal_mock.runbook.create.assert_called_once_with(
             **args)
 
-    def test_baremetal_runbook_create_no_name(self):
+    def test_baremetal_runbook_create_no_name(self) -> None:
         arglist = [
             '--steps', baremetal_fakes.baremetal_runbook_steps,
         ]
@@ -113,7 +115,7 @@ class TestCreateBaremetalRunbook(TestBaremetalRunbook):
                           self.cmd, arglist, verifylist)
         self.assertFalse(self.baremetal_mock.runbook.create.called)
 
-    def test_baremetal_runbook_create_no_steps(self):
+    def test_baremetal_runbook_create_no_steps(self) -> None:
         arglist = [
             '--name', baremetal_fakes.baremetal_runbook_name,
         ]
@@ -127,7 +129,7 @@ class TestCreateBaremetalRunbook(TestBaremetalRunbook):
                           self.cmd, arglist, verifylist)
         self.assertFalse(self.baremetal_mock.runbook.create.called)
 
-    def test_baremetal_runbook_create_public_false(self):
+    def test_baremetal_runbook_create_public_false(self) -> None:
         arglist = [
             '--name', baremetal_fakes.baremetal_runbook_name,
             '--steps', baremetal_fakes.baremetal_runbook_steps,
@@ -151,7 +153,7 @@ class TestCreateBaremetalRunbook(TestBaremetalRunbook):
 
 
 class TestShowBaremetalRunbook(TestBaremetalRunbook):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestShowBaremetalRunbook, self).setUp()
 
         self.baremetal_mock.runbook.get.return_value = (
@@ -163,7 +165,7 @@ class TestShowBaremetalRunbook(TestBaremetalRunbook):
         self.cmd = baremetal_runbook.ShowBaremetalRunbook(
             self.app, None)
 
-    def test_baremetal_runbook_show(self):
+    def test_baremetal_runbook_show(self) -> None:
         arglist = [baremetal_fakes.baremetal_runbook_uuid]
         verifylist = [('runbook',
                       baremetal_fakes.baremetal_runbook_uuid)]
@@ -194,7 +196,7 @@ class TestShowBaremetalRunbook(TestBaremetalRunbook):
             baremetal_fakes.baremetal_runbook_uuid)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_runbook_show_no_template(self):
+    def test_baremetal_runbook_show_no_template(self) -> None:
         arglist = []
         verifylist = []
 
@@ -204,7 +206,7 @@ class TestShowBaremetalRunbook(TestBaremetalRunbook):
 
 
 class TestBaremetalRunbookSet(TestBaremetalRunbook):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalRunbookSet, self).setUp()
 
         self.baremetal_mock.runbook.update.return_value = (
@@ -216,7 +218,7 @@ class TestBaremetalRunbookSet(TestBaremetalRunbook):
         self.cmd = baremetal_runbook.SetBaremetalRunbook(
             self.app, None)
 
-    def test_baremetal_runbook_set_name(self):
+    def test_baremetal_runbook_set_name(self) -> None:
         new_name = 'foo'
         arglist = [
             baremetal_fakes.baremetal_runbook_uuid,
@@ -232,7 +234,7 @@ class TestBaremetalRunbookSet(TestBaremetalRunbook):
             baremetal_fakes.baremetal_runbook_uuid,
             [{'path': '/name', 'value': new_name, 'op': 'add'}])
 
-    def test_baremetal_runbook_set_steps(self):
+    def test_baremetal_runbook_set_steps(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_runbook_uuid,
             '--steps', baremetal_fakes.baremetal_runbook_steps]
@@ -249,7 +251,7 @@ class TestBaremetalRunbookSet(TestBaremetalRunbook):
             baremetal_fakes.baremetal_runbook_uuid,
             [{'path': '/steps', 'value': expected_steps, 'op': 'add'}])
 
-    def test_baremetal_runbook_set_no_options(self):
+    def test_baremetal_runbook_set_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
@@ -258,7 +260,7 @@ class TestBaremetalRunbookSet(TestBaremetalRunbook):
 
 
 class TestBaremetalRunbookUnset(TestBaremetalRunbook):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalRunbookUnset, self).setUp()
 
         self.baremetal_mock.runbook.update.return_value = (
@@ -270,7 +272,7 @@ class TestBaremetalRunbookUnset(TestBaremetalRunbook):
         self.cmd = baremetal_runbook.UnsetBaremetalRunbook(
             self.app, None)
 
-    def test_baremetal_runbook_unset_extra(self):
+    def test_baremetal_runbook_unset_extra(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_runbook_uuid, '--extra', 'key1']
         verifylist = [('runbook',
@@ -284,7 +286,7 @@ class TestBaremetalRunbookUnset(TestBaremetalRunbook):
             baremetal_fakes.baremetal_runbook_uuid,
             [{'path': '/extra/key1', 'op': 'remove'}])
 
-    def test_baremetal_runbook_unset_multiple_extras(self):
+    def test_baremetal_runbook_unset_multiple_extras(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_runbook_uuid,
             '--extra', 'key1', '--extra', 'key2']
@@ -300,14 +302,14 @@ class TestBaremetalRunbookUnset(TestBaremetalRunbook):
             [{'path': '/extra/key1', 'op': 'remove'},
              {'path': '/extra/key2', 'op': 'remove'}])
 
-    def test_baremetal_runbook_unset_no_options(self):
+    def test_baremetal_runbook_unset_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_runbook_unset_no_property(self):
+    def test_baremetal_runbook_unset_no_property(self) -> None:
         uuid = baremetal_fakes.baremetal_runbook_uuid
         arglist = [uuid]
         verifylist = [('runbook', uuid)]
@@ -318,13 +320,13 @@ class TestBaremetalRunbookUnset(TestBaremetalRunbook):
 
 
 class TestBaremetalRunbookDelete(TestBaremetalRunbook):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalRunbookDelete, self).setUp()
 
         self.cmd = baremetal_runbook.DeleteBaremetalRunbook(
             self.app, None)
 
-    def test_baremetal_runbook_delete(self):
+    def test_baremetal_runbook_delete(self) -> None:
         arglist = ['zzz-zzzzzz-zzzz']
         verifylist = []
 
@@ -334,7 +336,7 @@ class TestBaremetalRunbookDelete(TestBaremetalRunbook):
         args = 'zzz-zzzzzz-zzzz'
         self.baremetal_mock.runbook.delete.assert_called_with(args)
 
-    def test_baremetal_runbook_delete_multiple(self):
+    def test_baremetal_runbook_delete_multiple(self) -> None:
         arglist = ['zzz-zzzzzz-zzzz', 'fakename']
         verifylist = []
 
@@ -347,7 +349,7 @@ class TestBaremetalRunbookDelete(TestBaremetalRunbook):
         self.assertEqual(
             2, self.baremetal_mock.runbook.delete.call_count)
 
-    def test_baremetal_runbook_delete_multiple_with_fail(self):
+    def test_baremetal_runbook_delete_multiple_with_fail(self) -> None:
         arglist = ['zzz-zzzzzz-zzzz', 'badname']
         verifylist = []
 
@@ -364,7 +366,7 @@ class TestBaremetalRunbookDelete(TestBaremetalRunbook):
         self.assertEqual(
             2, self.baremetal_mock.runbook.delete.call_count)
 
-    def test_baremetal_runbook_delete_no_template(self):
+    def test_baremetal_runbook_delete_no_template(self) -> None:
         arglist = []
         verifylist = []
 
@@ -374,7 +376,7 @@ class TestBaremetalRunbookDelete(TestBaremetalRunbook):
 
 
 class TestBaremetalRunbookList(TestBaremetalRunbook):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalRunbookList, self).setUp()
 
         self.baremetal_mock.runbook.list.return_value = [
@@ -387,7 +389,7 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
         self.cmd = baremetal_runbook.ListBaremetalRunbook(
             self.app, None)
 
-    def test_baremetal_runbook_list(self):
+    def test_baremetal_runbook_list(self) -> None:
         arglist = []
         verifylist = []
 
@@ -410,7 +412,7 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
         ), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_runbook_list_long(self):
+    def test_baremetal_runbook_list_long(self) -> None:
         arglist = ['--long']
         verifylist = [('detail', True)]
 
@@ -446,7 +448,7 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
         ), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_runbook_list_fields(self):
+    def test_baremetal_runbook_list_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'steps']
         verifylist = [('fields', [['uuid', 'steps']])]
 
@@ -461,7 +463,7 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
         }
         self.baremetal_mock.runbook.list.assert_called_with(**kwargs)
 
-    def test_baremetal_runbook_list_fields_multiple(self):
+    def test_baremetal_runbook_list_fields_multiple(self) -> None:
         arglist = ['--fields', 'uuid', 'name', '--fields', 'steps']
         verifylist = [('fields', [['uuid', 'name'], ['steps']])]
 
@@ -476,7 +478,7 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
         }
         self.baremetal_mock.runbook.list.assert_called_with(**kwargs)
 
-    def test_baremetal_runbook_list_invalid_fields(self):
+    def test_baremetal_runbook_list_invalid_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'invalid']
         verifylist = [('fields', [['uuid', 'invalid']])]
         self.assertRaises(osctestutils.ParserException,

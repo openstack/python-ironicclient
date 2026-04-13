@@ -12,6 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import annotations
+
+from collections.abc import Collection
 import copy
 from unittest import mock
 
@@ -24,7 +27,7 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 class TestBaremetalVolumeTarget(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalVolumeTarget, self).setUp()
 
         self.baremetal_mock = self.app.client_manager.baremetal
@@ -33,7 +36,7 @@ class TestBaremetalVolumeTarget(baremetal_fakes.TestBaremetal):
 
 class TestCreateBaremetalVolumeTarget(TestBaremetalVolumeTarget):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestCreateBaremetalVolumeTarget, self).setUp()
 
         self.baremetal_mock.volume_target.create.return_value = (
@@ -47,7 +50,7 @@ class TestCreateBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.cmd = (
             bm_vol_target.CreateBaremetalVolumeTarget(self.app, None))
 
-    def test_baremetal_volume_target_create(self):
+    def test_baremetal_volume_target_create(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type',
@@ -88,7 +91,7 @@ class TestCreateBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.baremetal_mock.volume_target.create.assert_called_once_with(
             **args)
 
-    def test_baremetal_volume_target_create_without_uuid(self):
+    def test_baremetal_volume_target_create_without_uuid(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type',
@@ -126,7 +129,7 @@ class TestCreateBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.baremetal_mock.volume_target.create.assert_called_once_with(
             **args)
 
-    def test_baremetal_volume_target_create_extras(self):
+    def test_baremetal_volume_target_create_extras(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type',
@@ -168,7 +171,8 @@ class TestCreateBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.baremetal_mock.volume_target.create.assert_called_once_with(
             **args)
 
-    def _test_baremetal_volume_target_missing_param(self, missing):
+    def _test_baremetal_volume_target_missing_param(
+            self, missing: Collection[str]) -> None:
         argdict = {
             '--node': baremetal_fakes.baremetal_uuid,
             '--type':
@@ -190,19 +194,19 @@ class TestCreateBaremetalVolumeTarget(TestBaremetalVolumeTarget):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_target_create_missing_node(self):
+    def test_baremetal_volume_target_create_missing_node(self) -> None:
         self._test_baremetal_volume_target_missing_param(['--node'])
 
-    def test_baremetal_volume_target_create_missing_type(self):
+    def test_baremetal_volume_target_create_missing_type(self) -> None:
         self._test_baremetal_volume_target_missing_param(['--type'])
 
-    def test_baremetal_volume_target_create_missing_boot_index(self):
+    def test_baremetal_volume_target_create_missing_boot_index(self) -> None:
         self._test_baremetal_volume_target_missing_param(['--boot-index'])
 
-    def test_baremetal_volume_target_create_missing_volume_id(self):
+    def test_baremetal_volume_target_create_missing_volume_id(self) -> None:
         self._test_baremetal_volume_target_missing_param(['--volume-id'])
 
-    def test_baremetal_volume_target_create_invalid_boot_index(self):
+    def test_baremetal_volume_target_create_invalid_boot_index(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type',
@@ -217,7 +221,7 @@ class TestCreateBaremetalVolumeTarget(TestBaremetalVolumeTarget):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_target_create_negative_boot_index(self):
+    def test_baremetal_volume_target_create_negative_boot_index(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--type',
@@ -243,7 +247,7 @@ class TestCreateBaremetalVolumeTarget(TestBaremetalVolumeTarget):
 
 class TestShowBaremetalVolumeTarget(TestBaremetalVolumeTarget):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestShowBaremetalVolumeTarget, self).setUp()
 
         self.baremetal_mock.volume_target.get.return_value = (
@@ -255,7 +259,7 @@ class TestShowBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.cmd = (
             bm_vol_target.ShowBaremetalVolumeTarget(self.app, None))
 
-    def test_baremetal_volume_target_show(self):
+    def test_baremetal_volume_target_show(self) -> None:
         arglist = ['vvv-tttttt-vvvv']
         verifylist = [('volume_target',
                        baremetal_fakes.baremetal_volume_target_uuid)]
@@ -281,14 +285,14 @@ class TestShowBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_target_show_no_options(self):
+    def test_baremetal_volume_target_show_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_target_show_fields(self):
+    def test_baremetal_volume_target_show_fields(self) -> None:
         arglist = ['vvv-tttttt-vvvv', '--fields', 'uuid', 'volume_id']
         verifylist = [('fields', [['uuid', 'volume_id']]),
                       ('volume_target',
@@ -322,7 +326,7 @@ class TestShowBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_target_show_fields_multiple(self):
+    def test_baremetal_volume_target_show_fields_multiple(self) -> None:
         arglist = ['vvv-tttttt-vvvv', '--fields', 'uuid', 'volume_id',
                    '--fields', 'volume_type']
         verifylist = [('fields', [['uuid', 'volume_id'], ['volume_type']]),
@@ -357,7 +361,7 @@ class TestShowBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_target_show_invalid_fields(self):
+    def test_baremetal_volume_target_show_invalid_fields(self) -> None:
         arglist = ['vvv-tttttt-vvvv', '--fields', 'uuid', 'invalid']
         verifylist = None
 
@@ -367,7 +371,7 @@ class TestShowBaremetalVolumeTarget(TestBaremetalVolumeTarget):
 
 
 class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestListBaremetalVolumeTarget, self).setUp()
 
         self.baremetal_mock.volume_target.list.return_value = [
@@ -379,7 +383,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.cmd = (
             bm_vol_target.ListBaremetalVolumeTarget(self.app, None))
 
-    def test_baremetal_volume_target_list(self):
+    def test_baremetal_volume_target_list(self) -> None:
         arglist = []
         verifylist = []
 
@@ -407,7 +411,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
                      baremetal_fakes.baremetal_volume_target_volume_id),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_target_list_node(self):
+    def test_baremetal_volume_target_list_node(self) -> None:
         arglist = ['--node', baremetal_fakes.baremetal_uuid]
         verifylist = [('node', baremetal_fakes.baremetal_uuid)]
 
@@ -436,7 +440,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
                      baremetal_fakes.baremetal_volume_target_volume_id),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_target_list_long(self):
+    def test_baremetal_volume_target_list_long(self) -> None:
         arglist = ['--long']
         verifylist = [('detail', True)]
 
@@ -466,7 +470,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
                      ''),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_target_list_fields(self):
+    def test_baremetal_volume_target_list_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'boot_index']
         verifylist = [('fields', [['uuid', 'boot_index']])]
 
@@ -501,7 +505,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
                      baremetal_fakes.baremetal_volume_target_boot_index),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_target_list_fields_multiple(self):
+    def test_baremetal_volume_target_list_fields_multiple(self) -> None:
         arglist = ['--fields', 'uuid', 'boot_index', '--fields', 'extra']
         verifylist = [('fields', [['uuid', 'boot_index'], ['extra']])]
 
@@ -536,14 +540,14 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
                      baremetal_fakes.baremetal_volume_target_extra),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_volume_target_list_invalid_fields(self):
+    def test_baremetal_volume_target_list_invalid_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'invalid']
         verifylist = [('fields', [['uuid', 'invalid']])]
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_target_list_marker(self):
+    def test_baremetal_volume_target_list_marker(self) -> None:
         arglist = ['--marker', baremetal_fakes.baremetal_volume_target_uuid]
         verifylist = [
             ('marker', baremetal_fakes.baremetal_volume_target_uuid)]
@@ -557,7 +561,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.baremetal_mock.volume_target.list.assert_called_once_with(
             **kwargs)
 
-    def test_baremetal_volume_target_list_limit(self):
+    def test_baremetal_volume_target_list_limit(self) -> None:
         arglist = ['--limit', '10']
         verifylist = [('limit', 10)]
 
@@ -570,7 +574,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.baremetal_mock.volume_target.list.assert_called_once_with(
             **kwargs)
 
-    def test_baremetal_volume_target_list_sort(self):
+    def test_baremetal_volume_target_list_sort(self) -> None:
         arglist = ['--sort', 'boot_index']
         verifylist = [('sort', 'boot_index')]
 
@@ -583,7 +587,7 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.baremetal_mock.volume_target.list.assert_called_once_with(
             **kwargs)
 
-    def test_baremetal_volume_target_list_sort_desc(self):
+    def test_baremetal_volume_target_list_sort_desc(self) -> None:
         arglist = ['--sort', 'boot_index:desc']
         verifylist = [('sort', 'boot_index:desc')]
 
@@ -596,13 +600,13 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.baremetal_mock.volume_target.list.assert_called_once_with(
             **kwargs)
 
-    def test_baremetal_volume_target_list_exclusive_options(self):
+    def test_baremetal_volume_target_list_exclusive_options(self) -> None:
         arglist = ['--fields', 'uuid', '--long']
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, [])
 
-    def test_baremetal_volume_target_list_negative_limit(self):
+    def test_baremetal_volume_target_list_negative_limit(self) -> None:
         arglist = ['--limit', '-1']
         verifylist = [('limit', -1)]
 
@@ -614,12 +618,12 @@ class TestListBaremetalVolumeTarget(TestBaremetalVolumeTarget):
 
 class TestDeleteBaremetalVolumeTarget(TestBaremetalVolumeTarget):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestDeleteBaremetalVolumeTarget, self).setUp()
 
         self.cmd = bm_vol_target.DeleteBaremetalVolumeTarget(self.app, None)
 
-    def test_baremetal_volume_target_delete(self):
+    def test_baremetal_volume_target_delete(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_target_uuid]
         verifylist = [('volume_targets',
                        [baremetal_fakes.baremetal_volume_target_uuid])]
@@ -630,7 +634,7 @@ class TestDeleteBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.baremetal_mock.volume_target.delete.assert_called_with(
             baremetal_fakes.baremetal_volume_target_uuid)
 
-    def test_baremetal_volume_target_delete_multiple(self):
+    def test_baremetal_volume_target_delete_multiple(self) -> None:
         fake_volume_target_uuid2 = 'vvv-tttttt-tttt'
         arglist = [baremetal_fakes.baremetal_volume_target_uuid,
                    fake_volume_target_uuid2]
@@ -647,14 +651,14 @@ class TestDeleteBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.assertEqual(
             2, self.baremetal_mock.volume_target.delete.call_count)
 
-    def test_baremetal_volume_target_delete_no_options(self):
+    def test_baremetal_volume_target_delete_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_target_delete_error(self):
+    def test_baremetal_volume_target_delete_error(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_target_uuid]
         verifylist = [('volume_targets',
                        [baremetal_fakes.baremetal_volume_target_uuid])]
@@ -669,7 +673,7 @@ class TestDeleteBaremetalVolumeTarget(TestBaremetalVolumeTarget):
         self.baremetal_mock.volume_target.delete.assert_called_with(
             baremetal_fakes.baremetal_volume_target_uuid)
 
-    def test_baremetal_volume_target_delete_multiple_error(self):
+    def test_baremetal_volume_target_delete_multiple_error(self) -> None:
         fake_volume_target_uuid2 = 'vvv-tttttt-tttt'
         arglist = [baremetal_fakes.baremetal_volume_target_uuid,
                    fake_volume_target_uuid2]
@@ -693,13 +697,13 @@ class TestDeleteBaremetalVolumeTarget(TestBaremetalVolumeTarget):
 
 
 class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestSetBaremetalVolumeTarget, self).setUp()
 
         self.cmd = (
             bm_vol_target.SetBaremetalVolumeTarget(self.app, None))
 
-    def test_baremetal_volume_target_set_node_uuid(self):
+    def test_baremetal_volume_target_set_node_uuid(self) -> None:
         new_node_uuid = 'xxx-xxxxxx-zzzz'
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
@@ -716,7 +720,7 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             baremetal_fakes.baremetal_volume_target_uuid,
             [{'path': '/node_uuid', 'value': new_node_uuid, 'op': 'add'}])
 
-    def test_baremetal_volume_target_set_volume_type(self):
+    def test_baremetal_volume_target_set_volume_type(self) -> None:
         new_type = 'fibre_channel'
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
@@ -733,7 +737,7 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             baremetal_fakes.baremetal_volume_target_uuid,
             [{'path': '/volume_type', 'value': new_type, 'op': 'add'}])
 
-    def test_baremetal_volume_target_set_boot_index(self):
+    def test_baremetal_volume_target_set_boot_index(self) -> None:
         new_boot_idx = '3'
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
@@ -750,7 +754,7 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             baremetal_fakes.baremetal_volume_target_uuid,
             [{'path': '/boot_index', 'value': int(new_boot_idx), 'op': 'add'}])
 
-    def test_baremetal_volume_target_set_negative_boot_index(self):
+    def test_baremetal_volume_target_set_negative_boot_index(self) -> None:
         new_boot_idx = '-3'
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
@@ -764,7 +768,7 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
 
         self.assertRaises(exc.CommandError, self.cmd.take_action, parsed_args)
 
-    def test_baremetal_volume_target_set_invalid_boot_index(self):
+    def test_baremetal_volume_target_set_invalid_boot_index(self) -> None:
         new_boot_idx = 'string'
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
@@ -775,7 +779,7 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_target_set_volume_id(self):
+    def test_baremetal_volume_target_set_volume_id(self) -> None:
         new_volume_id = 'new-volume-id'
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
@@ -792,7 +796,8 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             baremetal_fakes.baremetal_volume_target_uuid,
             [{'path': '/volume_id', 'value': new_volume_id, 'op': 'add'}])
 
-    def test_baremetal_volume_target_set_volume_type_and_volume_id(self):
+    def test_baremetal_volume_target_set_volume_type_and_volume_id(
+            self) -> None:
         new_volume_type = 'fibre_channel'
         new_volume_id = 'new-volume-id'
         arglist = [
@@ -813,7 +818,7 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             [{'path': '/volume_type', 'value': new_volume_type, 'op': 'add'},
              {'path': '/volume_id', 'value': new_volume_id, 'op': 'add'}])
 
-    def test_baremetal_volume_target_set_extra(self):
+    def test_baremetal_volume_target_set_extra(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
             '--extra', 'foo=bar']
@@ -829,7 +834,7 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             baremetal_fakes.baremetal_volume_target_uuid,
             [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}])
 
-    def test_baremetal_volume_target_set_multiple_extras(self):
+    def test_baremetal_volume_target_set_multiple_extras(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
             '--extra', 'key1=val1', '--extra', 'key2=val2']
@@ -846,7 +851,7 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             [{'path': '/extra/key1', 'value': 'val1', 'op': 'add'},
              {'path': '/extra/key2', 'value': 'val2', 'op': 'add'}])
 
-    def test_baremetal_volume_target_set_property(self):
+    def test_baremetal_volume_target_set_property(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
             '--property', 'foo=bar']
@@ -862,7 +867,7 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             baremetal_fakes.baremetal_volume_target_uuid,
             [{'path': '/properties/foo', 'value': 'bar', 'op': 'add'}])
 
-    def test_baremetal_volume_target_set_multiple_properties(self):
+    def test_baremetal_volume_target_set_multiple_properties(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_volume_target_uuid,
             '--property', 'key1=val1', '--property', 'key2=val2']
@@ -879,14 +884,14 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             [{'path': '/properties/key1', 'value': 'val1', 'op': 'add'},
              {'path': '/properties/key2', 'value': 'val2', 'op': 'add'}])
 
-    def test_baremetal_volume_target_set_no_options(self):
+    def test_baremetal_volume_target_set_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_target_set_no_property(self):
+    def test_baremetal_volume_target_set_no_property(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_target_uuid]
         verifylist = [('volume_target',
                        baremetal_fakes.baremetal_volume_target_uuid)]
@@ -897,12 +902,12 @@ class TestSetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
 
 
 class TestUnsetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestUnsetBaremetalVolumeTarget, self).setUp()
 
         self.cmd = bm_vol_target.UnsetBaremetalVolumeTarget(self.app, None)
 
-    def test_baremetal_volume_target_unset_extra(self):
+    def test_baremetal_volume_target_unset_extra(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_target_uuid,
                    '--extra', 'key1']
         verifylist = [('volume_target',
@@ -916,7 +921,7 @@ class TestUnsetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             baremetal_fakes.baremetal_volume_target_uuid,
             [{'path': '/extra/key1', 'op': 'remove'}])
 
-    def test_baremetal_volume_target_unset_multiple_extras(self):
+    def test_baremetal_volume_target_unset_multiple_extras(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_target_uuid,
                    '--extra', 'key1', '--extra', 'key2']
         verifylist = [('volume_target',
@@ -931,7 +936,7 @@ class TestUnsetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             [{'path': '/extra/key1', 'op': 'remove'},
              {'path': '/extra/key2', 'op': 'remove'}])
 
-    def test_baremetal_volume_target_unset_property(self):
+    def test_baremetal_volume_target_unset_property(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_target_uuid,
                    '--property', 'key11']
         verifylist = [('volume_target',
@@ -945,7 +950,7 @@ class TestUnsetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             baremetal_fakes.baremetal_volume_target_uuid,
             [{'path': '/properties/key11', 'op': 'remove'}])
 
-    def test_baremetal_volume_target_unset_multiple_properties(self):
+    def test_baremetal_volume_target_unset_multiple_properties(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_target_uuid,
                    '--property', 'key11', '--property', 'key22']
         verifylist = [('volume_target',
@@ -960,14 +965,14 @@ class TestUnsetBaremetalVolumeTarget(TestBaremetalVolumeTarget):
             [{'path': '/properties/key11', 'op': 'remove'},
              {'path': '/properties/key22', 'op': 'remove'}])
 
-    def test_baremetal_volume_target_unset_no_options(self):
+    def test_baremetal_volume_target_unset_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_volume_target_unset_no_property(self):
+    def test_baremetal_volume_target_unset_no_property(self) -> None:
         arglist = [baremetal_fakes.baremetal_volume_target_uuid]
         verifylist = [('volume_target',
                        baremetal_fakes.baremetal_volume_target_uuid)]

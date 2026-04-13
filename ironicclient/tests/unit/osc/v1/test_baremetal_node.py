@@ -14,6 +14,8 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 import copy
 import io
 import json
@@ -31,7 +33,7 @@ from ironicclient.v1 import utils as v1_utils
 
 class TestBaremetal(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetal, self).setUp()
 
         # Get a shortcut to the baremetal manager mock
@@ -40,13 +42,13 @@ class TestBaremetal(baremetal_fakes.TestBaremetal):
 
 
 class TestAbort(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestAbort, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.AbortBaremetalNode(self.app, None)
 
-    def test_abort(self):
+    def test_abort(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -64,13 +66,13 @@ class TestAbort(TestBaremetal):
 
 
 class TestAdopt(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestAdopt, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.AdoptBaremetalNode(self.app, None)
 
-    def test_adopt(self):
+    def test_adopt(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -88,7 +90,7 @@ class TestAdopt(TestBaremetal):
             disable_ramdisk=None)
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
-    def test_adopt_baremetal_provision_state_active_and_wait(self):
+    def test_adopt_baremetal_provision_state_active_and_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15']
         verifylist = [
@@ -111,7 +113,7 @@ class TestAdopt(TestBaremetal):
             ['node_uuid'], expected_state='active',
             poll_interval=2, timeout=15)
 
-    def test_adopt_baremetal_provision_state_default_wait(self):
+    def test_adopt_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait']
         verifylist = [
@@ -136,13 +138,13 @@ class TestAdopt(TestBaremetal):
 
 
 class TestClean(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestClean, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.CleanBaremetalNode(self.app, None)
 
-    def test_clean_without_steps(self):
+    def test_clean_without_steps(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -152,7 +154,7 @@ class TestClean(TestBaremetal):
         self.assertRaises(oscutils.ParserException, self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_clean_with_steps(self):
+    def test_clean_with_steps(self) -> None:
         steps_dict = {
             "clean_steps": [{
                 "interface": "raid",
@@ -181,7 +183,7 @@ class TestClean(TestBaremetal):
             deploysteps=None, rescue_password=None, servicesteps=None,
             runbook=None, disable_ramdisk=None)
 
-    def test_clean_with_runbook(self):
+    def test_clean_with_runbook(self) -> None:
         runbook_name = 'runbook_name'
         arglist = ['--runbook', runbook_name, 'node_uuid']
         verifylist = [
@@ -199,7 +201,7 @@ class TestClean(TestBaremetal):
             deploysteps=None, rescue_password=None, servicesteps=None,
             runbook=runbook_name, disable_ramdisk=None)
 
-    def test_clean_with_runbook_and_steps(self):
+    def test_clean_with_runbook_and_steps(self) -> None:
         runbook_name = 'runbook_name'
 
         steps_dict = {
@@ -228,7 +230,7 @@ class TestClean(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_clean_with_steps_and_disable_ramdisk(self):
+    def test_clean_with_steps_and_disable_ramdisk(self) -> None:
         steps_dict = {
             "clean_steps": [{
                 "interface": "raid",
@@ -261,7 +263,7 @@ class TestClean(TestBaremetal):
             deploysteps=None, rescue_password=None, servicesteps=None,
             runbook=None, disable_ramdisk=True)
 
-    def test_clean_with_runbook_and_disable_ramdisk(self):
+    def test_clean_with_runbook_and_disable_ramdisk(self) -> None:
         runbook_name = 'runbook_name'
 
         arglist = ['--runbook',
@@ -282,13 +284,13 @@ class TestClean(TestBaremetal):
 
 
 class TestService(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestService, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.ServiceBaremetalNode(self.app, None)
 
-    def test_service_with_steps(self):
+    def test_service_with_steps(self) -> None:
         steps_dict = {
             "service_steps": [{
                 "interface": "raid",
@@ -317,7 +319,7 @@ class TestService(TestBaremetal):
             deploysteps=None, rescue_password=None, servicesteps=steps_dict,
             runbook=None, disable_ramdisk=None)
 
-    def test_service_with_runbook(self):
+    def test_service_with_runbook(self) -> None:
         runbook_name = 'runbook_name'
         arglist = ['--runbook', runbook_name, 'node_uuid']
         verifylist = [
@@ -335,7 +337,7 @@ class TestService(TestBaremetal):
             deploysteps=None, rescue_password=None, servicesteps=None,
             runbook=runbook_name, disable_ramdisk=None)
 
-    def test_service_with_runbook_and_steps(self):
+    def test_service_with_runbook_and_steps(self) -> None:
         runbook_name = 'runbook_name'
         steps_dict = {
             "service_steps": [{
@@ -363,7 +365,7 @@ class TestService(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_service_with_steps_and_disable_ramdisk(self):
+    def test_service_with_steps_and_disable_ramdisk(self) -> None:
         steps_dict = {
             "service_steps": [{
                 "interface": "raid",
@@ -396,7 +398,7 @@ class TestService(TestBaremetal):
             deploysteps=None, rescue_password=None, servicesteps=steps_dict,
             runbook=None, disable_ramdisk=True)
 
-    def test_service_with_runbook_and_disable_ramdisk(self):
+    def test_service_with_runbook_and_disable_ramdisk(self) -> None:
         runbook_name = 'runbook_name'
 
         arglist = ['--runbook',
@@ -417,13 +419,13 @@ class TestService(TestBaremetal):
 
 
 class TestInspect(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestInspect, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.InspectBaremetalNode(self.app, None)
 
-    def test_inspect(self):
+    def test_inspect(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -441,13 +443,13 @@ class TestInspect(TestBaremetal):
 
 
 class TestManage(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestManage, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.ManageBaremetalNode(self.app, None)
 
-    def test_manage(self):
+    def test_manage(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -465,13 +467,13 @@ class TestManage(TestBaremetal):
 
 
 class TestProvide(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestProvide, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.ProvideBaremetalNode(self.app, None)
 
-    def test_provide(self):
+    def test_provide(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -489,13 +491,13 @@ class TestProvide(TestBaremetal):
 
 
 class TestRebuild(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestRebuild, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.RebuildBaremetalNode(self.app, None)
 
-    def test_rebuild(self):
+    def test_rebuild(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -513,13 +515,13 @@ class TestRebuild(TestBaremetal):
 
 
 class TestUndeploy(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestUndeploy, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.UndeployBaremetalNode(self.app, None)
 
-    def test_undeploy(self):
+    def test_undeploy(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -537,13 +539,13 @@ class TestUndeploy(TestBaremetal):
 
 
 class TestBootdeviceSet(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBootdeviceSet, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.BootdeviceSetBaremetalNode(self.app, None)
 
-    def test_bootdevice_set(self):
+    def test_bootdevice_set(self) -> None:
         arglist = ['node_uuid', 'bios']
         verifylist = [('nodes', ['node_uuid']),
                       ('device', 'bios')]
@@ -555,7 +557,7 @@ class TestBootdeviceSet(TestBaremetal):
         self.baremetal_mock.node.set_boot_device.assert_called_once_with(
             'node_uuid', 'bios', False)
 
-    def test_bootdevice_set_persistent(self):
+    def test_bootdevice_set_persistent(self) -> None:
         arglist = ['node_uuid', 'bios', '--persistent']
         verifylist = [('nodes', ['node_uuid']),
                       ('device', 'bios'),
@@ -568,7 +570,7 @@ class TestBootdeviceSet(TestBaremetal):
         self.baremetal_mock.node.set_boot_device.assert_called_once_with(
             'node_uuid', 'bios', True)
 
-    def test_bootdevice_set_invalid_device(self):
+    def test_bootdevice_set_invalid_device(self) -> None:
         arglist = ['node_uuid', 'foo']
         verifylist = [('nodes', ['node_uuid']),
                       ('device', 'foo')]
@@ -577,7 +579,7 @@ class TestBootdeviceSet(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_bootdevice_set_device_only(self):
+    def test_bootdevice_set_device_only(self) -> None:
         arglist = ['bios']
         verifylist = [('device', 'bios')]
 
@@ -587,7 +589,7 @@ class TestBootdeviceSet(TestBaremetal):
 
 
 class TestBootdeviceShow(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBootdeviceShow, self).setUp()
 
         # Get the command object to test
@@ -599,7 +601,7 @@ class TestBootdeviceShow(TestBaremetal):
         self.baremetal_mock.node.get_supported_boot_devices.return_value = {
             "supported_boot_devices": v1_utils.BOOT_DEVICES}
 
-    def test_bootdevice_show(self):
+    def test_bootdevice_show(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -610,7 +612,7 @@ class TestBootdeviceShow(TestBaremetal):
         self.baremetal_mock.node.get_boot_device.assert_called_once_with(
             'node_uuid')
 
-    def test_bootdevice_supported_show(self):
+    def test_bootdevice_supported_show(self) -> None:
         arglist = ['node_uuid', '--supported']
         verifylist = [('node', 'node_uuid'), ('supported', True)]
 
@@ -623,13 +625,13 @@ class TestBootdeviceShow(TestBaremetal):
 
 
 class TestConsoleDisable(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestConsoleDisable, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.ConsoleDisableBaremetalNode(self.app, None)
 
-    def test_console_disable(self):
+    def test_console_disable(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid'])]
 
@@ -642,13 +644,13 @@ class TestConsoleDisable(TestBaremetal):
 
 
 class TestConsoleEnable(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestConsoleEnable, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.ConsoleEnableBaremetalNode(self.app, None)
 
-    def test_console_enable(self):
+    def test_console_enable(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid'])]
 
@@ -661,7 +663,7 @@ class TestConsoleEnable(TestBaremetal):
 
 
 class TestConsoleShow(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestConsoleShow, self).setUp()
 
         # Get the command object to test
@@ -670,7 +672,7 @@ class TestConsoleShow(TestBaremetal):
         self.baremetal_mock.node.get_console.return_value = {
             "console_enabled": False, "console_info": None}
 
-    def test_console_show(self):
+    def test_console_show(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -683,13 +685,13 @@ class TestConsoleShow(TestBaremetal):
 
 
 class TestSecurebootOff(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestSecurebootOff, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.SecurebootOffBaremetalNode(self.app, None)
 
-    def test_secure_boot_off(self):
+    def test_secure_boot_off(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid'])]
 
@@ -702,13 +704,13 @@ class TestSecurebootOff(TestBaremetal):
 
 
 class TestSecurebootOn(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestSecurebootOn, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.SecurebootOnBaremetalNode(self.app, None)
 
-    def test_console_enable(self):
+    def test_console_enable(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid'])]
 
@@ -721,13 +723,13 @@ class TestSecurebootOn(TestBaremetal):
 
 
 class TestBootmodeSet(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBootmodeSet, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.BootmodeSetBaremetalNode(self.app, None)
 
-    def test_baremetal_boot_mode_bios(self):
+    def test_baremetal_boot_mode_bios(self) -> None:
         arglist = ['node_uuid', 'bios']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -745,7 +747,7 @@ class TestBootmodeSet(TestBaremetal):
 
 
 class TestBaremetalCreate(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalCreate, self).setUp()
 
         self.baremetal_mock.node.create.return_value = (
@@ -781,7 +783,12 @@ class TestBaremetalCreate(TestBaremetal):
             'driver': 'fake_driver'
         }
 
-    def check_with_options(self, addl_arglist, addl_verifylist, addl_kwargs):
+    def check_with_options(
+            self,
+            addl_arglist: list[str],
+            addl_verifylist: list[tuple[str, object]],
+            addl_kwargs: dict[str, object],
+    ) -> None:
         arglist = copy.copy(self.arglist) + addl_arglist
         verifylist = copy.copy(self.verifylist) + addl_verifylist
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
@@ -800,7 +807,7 @@ class TestBaremetalCreate(TestBaremetal):
 
         self.baremetal_mock.node.create.assert_called_once_with(**kwargs)
 
-    def test_baremetal_create_no_options(self):
+    def test_baremetal_create_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -808,7 +815,7 @@ class TestBaremetalCreate(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_create_with_driver(self):
+    def test_baremetal_create_with_driver(self) -> None:
         arglist = copy.copy(self.arglist)
 
         verifylist = copy.copy(self.verifylist)
@@ -830,12 +837,12 @@ class TestBaremetalCreate(TestBaremetal):
 
         self.baremetal_mock.node.create.assert_called_once_with(**kwargs)
 
-    def test_baremetal_create_with_chassis(self):
+    def test_baremetal_create_with_chassis(self) -> None:
         self.check_with_options(['--chassis-uuid', 'chassis_uuid'],
                                 [('chassis_uuid', 'chassis_uuid')],
                                 {'chassis_uuid': 'chassis_uuid'})
 
-    def test_baremetal_create_with_driver_info(self):
+    def test_baremetal_create_with_driver_info(self) -> None:
         self.check_with_options(['--driver-info', 'arg1=val1',
                                  '--driver-info', 'arg2=val2'],
                                 [('driver_info',
@@ -845,7 +852,7 @@ class TestBaremetalCreate(TestBaremetal):
                                     'arg1': 'val1',
                                     'arg2': 'val2'}})
 
-    def test_baremetal_create_with_properties(self):
+    def test_baremetal_create_with_properties(self) -> None:
         self.check_with_options(['--property', 'arg1=val1',
                                  '--property', 'arg2=val2'],
                                 [('properties',
@@ -855,7 +862,7 @@ class TestBaremetalCreate(TestBaremetal):
                                     'arg1': 'val1',
                                     'arg2': 'val2'}})
 
-    def test_baremetal_create_with_extra(self):
+    def test_baremetal_create_with_extra(self) -> None:
         self.check_with_options(['--extra', 'arg1=val1',
                                  '--extra', 'arg2=val2'],
                                 [('extra',
@@ -865,144 +872,144 @@ class TestBaremetalCreate(TestBaremetal):
                                     'arg1': 'val1',
                                     'arg2': 'val2'}})
 
-    def test_baremetal_create_with_uuid(self):
+    def test_baremetal_create_with_uuid(self) -> None:
         self.check_with_options(['--uuid', 'uuid'],
                                 [('uuid', 'uuid')],
                                 {'uuid': 'uuid'})
 
-    def test_baremetal_create_with_name(self):
+    def test_baremetal_create_with_name(self) -> None:
         self.check_with_options(['--name', 'name'],
                                 [('name', 'name')],
                                 {'name': 'name'})
 
-    def test_baremetal_create_with_bios_interface(self):
+    def test_baremetal_create_with_bios_interface(self) -> None:
         self.check_with_options(['--bios-interface', 'bios'],
                                 [('bios_interface', 'bios')],
                                 {'bios_interface': 'bios'})
 
-    def test_baremetal_create_with_boot_interface(self):
+    def test_baremetal_create_with_boot_interface(self) -> None:
         self.check_with_options(['--boot-interface', 'boot'],
                                 [('boot_interface', 'boot')],
                                 {'boot_interface': 'boot'})
 
-    def test_baremetal_create_with_console_interface(self):
+    def test_baremetal_create_with_console_interface(self) -> None:
         self.check_with_options(['--console-interface', 'console'],
                                 [('console_interface', 'console')],
                                 {'console_interface': 'console'})
 
-    def test_baremetal_create_with_deploy_interface(self):
+    def test_baremetal_create_with_deploy_interface(self) -> None:
         self.check_with_options(['--deploy-interface', 'deploy'],
                                 [('deploy_interface', 'deploy')],
                                 {'deploy_interface': 'deploy'})
 
-    def test_baremetal_create_with_firmware_interface(self):
+    def test_baremetal_create_with_firmware_interface(self) -> None:
         self.check_with_options(['--firmware-interface', 'firmware'],
                                 [('firmware_interface', 'firmware')],
                                 {'firmware_interface': 'firmware'})
 
-    def test_baremetal_create_with_inspect_interface(self):
+    def test_baremetal_create_with_inspect_interface(self) -> None:
         self.check_with_options(['--inspect-interface', 'inspect'],
                                 [('inspect_interface', 'inspect')],
                                 {'inspect_interface': 'inspect'})
 
-    def test_baremetal_create_with_management_interface(self):
+    def test_baremetal_create_with_management_interface(self) -> None:
         self.check_with_options(['--management-interface', 'management'],
                                 [('management_interface', 'management')],
                                 {'management_interface': 'management'})
 
-    def test_baremetal_create_with_network_data(self):
+    def test_baremetal_create_with_network_data(self) -> None:
         self.check_with_options(['--network-data', '{"a": ["b"]}'],
                                 [('network_data', '{"a": ["b"]}')],
                                 {'network_data': {"a": ["b"]}})
 
-    def test_baremetal_create_with_network_interface(self):
+    def test_baremetal_create_with_network_interface(self) -> None:
         self.check_with_options(['--network-interface', 'neutron'],
                                 [('network_interface', 'neutron')],
                                 {'network_interface': 'neutron'})
 
-    def test_baremetal_create_with_power_interface(self):
+    def test_baremetal_create_with_power_interface(self) -> None:
         self.check_with_options(['--power-interface', 'power'],
                                 [('power_interface', 'power')],
                                 {'power_interface': 'power'})
 
-    def test_baremetal_create_with_raid_interface(self):
+    def test_baremetal_create_with_raid_interface(self) -> None:
         self.check_with_options(['--raid-interface', 'raid'],
                                 [('raid_interface', 'raid')],
                                 {'raid_interface': 'raid'})
 
-    def test_baremetal_create_with_rescue_interface(self):
+    def test_baremetal_create_with_rescue_interface(self) -> None:
         self.check_with_options(['--rescue-interface', 'rescue'],
                                 [('rescue_interface', 'rescue')],
                                 {'rescue_interface': 'rescue'})
 
-    def test_baremetal_create_with_storage_interface(self):
+    def test_baremetal_create_with_storage_interface(self) -> None:
         self.check_with_options(['--storage-interface', 'storage'],
                                 [('storage_interface', 'storage')],
                                 {'storage_interface': 'storage'})
 
-    def test_baremetal_create_with_vendor_interface(self):
+    def test_baremetal_create_with_vendor_interface(self) -> None:
         self.check_with_options(['--vendor-interface', 'vendor'],
                                 [('vendor_interface', 'vendor')],
                                 {'vendor_interface': 'vendor'})
 
-    def test_baremetal_create_with_resource_class(self):
+    def test_baremetal_create_with_resource_class(self) -> None:
         self.check_with_options(['--resource-class', 'foo'],
                                 [('resource_class', 'foo')],
                                 {'resource_class': 'foo'})
 
-    def test_baremetal_create_with_conductor_group(self):
+    def test_baremetal_create_with_conductor_group(self) -> None:
         self.check_with_options(['--conductor-group', 'conductor_group'],
                                 [('conductor_group', 'conductor_group')],
                                 {'conductor_group': 'conductor_group'})
 
-    def test_baremetal_create_with_automated_clean(self):
+    def test_baremetal_create_with_automated_clean(self) -> None:
         self.check_with_options(['--automated-clean'],
                                 [('automated_clean', True)],
                                 {'automated_clean': True})
 
-    def test_baremetal_create_with_no_automated_clean(self):
+    def test_baremetal_create_with_no_automated_clean(self) -> None:
         self.check_with_options(['--no-automated-clean'],
                                 [('automated_clean', False)],
                                 {'automated_clean': False})
 
-    def test_baremetal_create_with_owner(self):
+    def test_baremetal_create_with_owner(self) -> None:
         self.check_with_options(['--owner', 'owner 1'],
                                 [('owner', 'owner 1')],
                                 {'owner': 'owner 1'})
 
-    def test_baremetal_create_with_description(self):
+    def test_baremetal_create_with_description(self) -> None:
         self.check_with_options(['--description', 'there is no spoon'],
                                 [('description', 'there is no spoon')],
                                 {'description': 'there is no spoon'})
 
-    def test_baremetal_create_with_lessee(self):
+    def test_baremetal_create_with_lessee(self) -> None:
         self.check_with_options(['--lessee', 'lessee 1'],
                                 [('lessee', 'lessee 1')],
                                 {'lessee': 'lessee 1'})
 
-    def test_baremetal_create_with_shard(self):
+    def test_baremetal_create_with_shard(self) -> None:
         self.check_with_options(['--shard', 'myshard'],
                                 [('shard', 'myshard')],
                                 {'shard': 'myshard'})
 
-    def test_baremetal_create_with_parent_node(self):
+    def test_baremetal_create_with_parent_node(self) -> None:
         self.check_with_options(['--parent-node', 'nodex'],
                                 [('parent_node', 'nodex')],
                                 {'parent_node': 'nodex'})
 
-    def test_baremetal_create_with_instance_name(self):
+    def test_baremetal_create_with_instance_name(self) -> None:
         self.check_with_options(['--instance-name', 'for-instance'],
                                 [('instance_name', 'for-instance')],
                                 {'instance_name': 'for-instance'})
 
-    def test_baremetal_create_with_disable_power_off(self):
+    def test_baremetal_create_with_disable_power_off(self) -> None:
         self.check_with_options(['--disable-power-off'],
                                 [('disable_power_off', True)],
                                 {'disable_power_off': True})
 
 
 class TestBaremetalDelete(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalDelete, self).setUp()
 
         self.baremetal_mock.node.get.return_value = (
@@ -1015,7 +1022,7 @@ class TestBaremetalDelete(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.DeleteBaremetalNode(self.app, None)
 
-    def test_baremetal_delete(self):
+    def test_baremetal_delete(self) -> None:
         arglist = ['xxx-xxxxxx-xxxx']
         verifylist = []
 
@@ -1030,7 +1037,7 @@ class TestBaremetalDelete(TestBaremetal):
             args
         )
 
-    def test_baremetal_delete_multiple(self):
+    def test_baremetal_delete_multiple(self) -> None:
         arglist = ['xxx-xxxxxx-xxxx', 'fakename']
         verifylist = []
 
@@ -1045,7 +1052,7 @@ class TestBaremetalDelete(TestBaremetal):
         )
         self.assertEqual(2, self.baremetal_mock.node.delete.call_count)
 
-    def test_baremetal_delete_multiple_with_failure(self):
+    def test_baremetal_delete_multiple_with_failure(self) -> None:
         arglist = ['xxx-xxxxxx-xxxx', 'badname']
         verifylist = []
 
@@ -1067,7 +1074,7 @@ class TestBaremetalDelete(TestBaremetal):
 
 class TestBaremetalList(TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalList, self).setUp()
 
         self.baremetal_mock.node.list.return_value = [
@@ -1081,7 +1088,7 @@ class TestBaremetalList(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.ListBaremetalNode(self.app, None)
 
-    def test_baremetal_list_no_options(self):
+    def test_baremetal_list_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -1119,7 +1126,7 @@ class TestBaremetalList(TestBaremetal):
         ), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_list_long(self):
+    def test_baremetal_list_long(self) -> None:
         arglist = [
             '--long',
         ]
@@ -1220,7 +1227,8 @@ class TestBaremetalList(TestBaremetal):
         values = tuple(fake_values.get(name, '') for name in collist)
         self.assertEqual((values,), tuple(data))
 
-    def _test_baremetal_list_maintenance(self, maint_option, maint_value):
+    def _test_baremetal_list_maintenance(
+            self, maint_option: str, maint_value: bool) -> None:
         arglist = [
             maint_option,
         ]
@@ -1244,13 +1252,13 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_maintenance(self):
+    def test_baremetal_list_maintenance(self) -> None:
         self._test_baremetal_list_maintenance('--maintenance', True)
 
-    def test_baremetal_list_no_maintenance(self):
+    def test_baremetal_list_no_maintenance(self) -> None:
         self._test_baremetal_list_maintenance('--no-maintenance', False)
 
-    def test_baremetal_list_none_maintenance(self):
+    def test_baremetal_list_none_maintenance(self) -> None:
         arglist = [
         ]
         verifylist = [
@@ -1271,7 +1279,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_both_maintenances(self):
+    def test_baremetal_list_both_maintenances(self) -> None:
         arglist = [
             '--maintenance',
             '--no-maintenance',
@@ -1282,7 +1290,8 @@ class TestBaremetalList(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def _test_baremetal_list_retired(self, retired_option, retired_value):
+    def _test_baremetal_list_retired(
+            self, retired_option: str, retired_value: bool) -> None:
         arglist = [
             retired_option,
         ]
@@ -1306,13 +1315,13 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_retired(self):
+    def test_baremetal_list_retired(self) -> None:
         self._test_baremetal_list_retired('--retired', True)
 
-    def test_baremetal_list_no_retired(self):
+    def test_baremetal_list_no_retired(self) -> None:
         self._test_baremetal_list_retired('--no-retired', False)
 
-    def test_baremetal_list_fault(self):
+    def test_baremetal_list_fault(self) -> None:
         arglist = [
             '--maintenance',
             '--fault', 'power failure',
@@ -1339,7 +1348,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_associated(self):
+    def test_baremetal_list_associated(self) -> None:
         arglist = [
             '--associated',
         ]
@@ -1363,7 +1372,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_unassociated(self):
+    def test_baremetal_list_unassociated(self) -> None:
         arglist = [
             '--unassociated',
         ]
@@ -1386,7 +1395,8 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_both_associated_unassociated_not_allowed(self):
+    def test_baremetal_list_both_associated_unassociated_not_allowed(
+            self) -> None:
         arglist = [
             '--associated', '--unassociated',
         ]
@@ -1396,7 +1406,7 @@ class TestBaremetalList(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_list_provision_state(self):
+    def test_baremetal_list_provision_state(self) -> None:
         arglist = [
             '--provision-state', 'active',
         ]
@@ -1420,7 +1430,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_driver(self):
+    def test_baremetal_list_driver(self) -> None:
         arglist = [
             '--driver', 'ipmi',
         ]
@@ -1444,7 +1454,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_resource_class(self):
+    def test_baremetal_list_resource_class(self) -> None:
         arglist = [
             '--resource-class', 'foo',
         ]
@@ -1468,7 +1478,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_chassis(self):
+    def test_baremetal_list_chassis(self) -> None:
         chassis_uuid = 'aaaaaaaa-1111-bbbb-2222-cccccccccccc'
         arglist = [
             '--chassis', chassis_uuid,
@@ -1493,7 +1503,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_conductor_group(self):
+    def test_baremetal_list_conductor_group(self) -> None:
         conductor_group = 'in-the-closet-to-the-left'
         arglist = [
             '--conductor-group', conductor_group,
@@ -1518,7 +1528,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_empty_conductor_group(self):
+    def test_baremetal_list_empty_conductor_group(self) -> None:
         conductor_group = ''
         arglist = [
             '--conductor-group', conductor_group,
@@ -1543,7 +1553,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_by_conductor(self):
+    def test_baremetal_list_by_conductor(self) -> None:
         conductor = 'fake-conductor'
         arglist = [
             '--conductor', conductor,
@@ -1568,7 +1578,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_by_owner(self):
+    def test_baremetal_list_by_owner(self) -> None:
         owner = 'owner 1'
         arglist = [
             '--owner', owner,
@@ -1591,7 +1601,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_has_description(self):
+    def test_baremetal_list_has_description(self) -> None:
         description = 'there is no spoon'
         arglist = [
             '--description-contains', description,
@@ -1616,7 +1626,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_by_lessee(self):
+    def test_baremetal_list_by_lessee(self) -> None:
         lessee = 'lessee 1'
         arglist = [
             '--lessee', lessee,
@@ -1639,7 +1649,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_by_instance_name(self):
+    def test_baremetal_list_by_instance_name(self) -> None:
         instance_name = 'for-instance'
         arglist = [
             '--instance-name', instance_name,
@@ -1662,7 +1672,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_fields(self):
+    def test_baremetal_list_fields(self) -> None:
         arglist = [
             '--fields', 'uuid', 'name',
         ]
@@ -1687,7 +1697,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_fields_multiple(self):
+    def test_baremetal_list_fields_multiple(self) -> None:
         arglist = [
             '--fields', 'uuid', 'name',
             '--fields', 'extra',
@@ -1712,7 +1722,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_invalid_fields(self):
+    def test_baremetal_list_invalid_fields(self) -> None:
         arglist = [
             '--fields', 'uuid', 'invalid'
         ]
@@ -1724,7 +1734,7 @@ class TestBaremetalList(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_list_by_shards(self):
+    def test_baremetal_list_by_shards(self) -> None:
         arglist = ['--shards', 'myshard1', 'myshard2']
         verifylist = [
             ('shards', ['myshard1', 'myshard2'])
@@ -1744,7 +1754,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_sharded(self):
+    def test_baremetal_list_sharded(self) -> None:
         arglist = ['--sharded']
         verifylist = [('sharded', True)]
 
@@ -1762,7 +1772,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_unsharded(self):
+    def test_baremetal_list_unsharded(self) -> None:
         arglist = ['--unsharded']
         verifylist = [('sharded', False)]
 
@@ -1780,14 +1790,14 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_sharded_unsharded_fail(self):
+    def test_baremetal_list_sharded_unsharded_fail(self) -> None:
         arglist = ['--sharded', '--unsharded']
         verifylist = [('sharded', True), ('sharded', False)]
 
         self.assertRaises(oscutils.ParserException, self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_list_by_parent_node(self):
+    def test_baremetal_list_by_parent_node(self) -> None:
         parent_node = 'node1'
         arglist = [
             '--parent-node', parent_node,
@@ -1810,7 +1820,7 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
-    def test_baremetal_list_include_children(self):
+    def test_baremetal_list_include_children(self) -> None:
         arglist = [
             '--include-children',
         ]
@@ -1834,13 +1844,13 @@ class TestBaremetalList(TestBaremetal):
 
 
 class TestBaremetalMaintenanceSet(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalMaintenanceSet, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.MaintenanceSetBaremetalNode(self.app, None)
 
-    def test_baremetal_maintenance_on(self):
+    def test_baremetal_maintenance_on(self) -> None:
         arglist = ['node_uuid',
                    '--reason', 'maintenance reason']
         verifylist = [
@@ -1858,7 +1868,7 @@ class TestBaremetalMaintenanceSet(TestBaremetal):
             maint_reason='maintenance reason'
         )
 
-    def test_baremetal_maintenance_on_no_reason(self):
+    def test_baremetal_maintenance_on_no_reason(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -1874,7 +1884,7 @@ class TestBaremetalMaintenanceSet(TestBaremetal):
             maint_reason=None
         )
 
-    def test_baremetal_maintenance_on_several_nodes(self):
+    def test_baremetal_maintenance_on_several_nodes(self) -> None:
         arglist = ['node_uuid', 'node_name']
         verifylist = [
             ('nodes', ['node_uuid', 'node_name']),
@@ -1890,13 +1900,13 @@ class TestBaremetalMaintenanceSet(TestBaremetal):
 
 
 class TestBaremetalMaintenanceUnset(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalMaintenanceUnset, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.MaintenanceUnsetBaremetalNode(self.app, None)
 
-    def test_baremetal_maintenance_off(self):
+    def test_baremetal_maintenance_off(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid'])]
 
@@ -1908,7 +1918,7 @@ class TestBaremetalMaintenanceUnset(TestBaremetal):
             'node_uuid',
             False)
 
-    def test_baremetal_maintenance_off_several_nodes(self):
+    def test_baremetal_maintenance_off_several_nodes(self) -> None:
         arglist = ['node_uuid', 'node_name']
         verifylist = [('nodes', ['node_uuid', 'node_name'])]
 
@@ -1922,13 +1932,13 @@ class TestBaremetalMaintenanceUnset(TestBaremetal):
 
 
 class TestPassthruCall(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestPassthruCall, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.PassthruCallBaremetalNode(self.app, None)
 
-    def test_passthru_call(self):
+    def test_passthru_call(self) -> None:
         arglist = ['node_uuid', 'heartbeat']
         verifylist = [('node', 'node_uuid'),
                       ('method', 'heartbeat')]
@@ -1938,7 +1948,7 @@ class TestPassthruCall(TestBaremetal):
         self.baremetal_mock.node.vendor_passthru.assert_called_once_with(
             'node_uuid', 'heartbeat', http_method='POST', args={})
 
-    def test_passthru_call_http_method(self):
+    def test_passthru_call_http_method(self) -> None:
         arglist = ['node_uuid', 'heartbeat', '--http-method', 'PUT']
         verifylist = [('node', 'node_uuid'),
                       ('method', 'heartbeat'),
@@ -1949,7 +1959,7 @@ class TestPassthruCall(TestBaremetal):
         self.baremetal_mock.node.vendor_passthru.assert_called_once_with(
             'node_uuid', 'heartbeat', http_method='PUT', args={})
 
-    def test_passthru_call_args(self):
+    def test_passthru_call_args(self) -> None:
         arglist = ['node_uuid', 'heartbeat',
                    '--arg', 'key1=value1', '--arg', 'key2=value2']
         verifylist = [('node', 'node_uuid'),
@@ -1964,7 +1974,7 @@ class TestPassthruCall(TestBaremetal):
 
 
 class TestPassthruList(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestPassthruList, self).setUp()
 
         # Get the command object to test
@@ -1978,7 +1988,7 @@ class TestPassthruList(TestBaremetal):
                           "http_methods": ["POST"], "description": "",
                           "async": True}}
 
-    def test_passthru_list(self):
+    def test_passthru_list(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
         parsed_args = self.check_parser(self.cmd, arglist, verifylist)
@@ -1989,13 +1999,13 @@ class TestPassthruList(TestBaremetal):
 
 
 class TestPower(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestPower, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.PowerBaremetalNode(self.app, None)
 
-    def test_baremetal_power(self):
+    def test_baremetal_power(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid'])]
 
@@ -2007,13 +2017,13 @@ class TestPower(TestBaremetal):
 
 
 class TestPowerOff(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestPowerOff, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.PowerOffBaremetalNode(self.app, None)
 
-    def test_baremetal_power_off(self):
+    def test_baremetal_power_off(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid']),
                       ('soft', False),
@@ -2026,7 +2036,7 @@ class TestPowerOff(TestBaremetal):
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'off', False, timeout=None)
 
-    def test_baremetal_power_off_timeout(self):
+    def test_baremetal_power_off_timeout(self) -> None:
         arglist = ['node_uuid', '--power-timeout', '2']
         verifylist = [('nodes', ['node_uuid']),
                       ('soft', False),
@@ -2039,7 +2049,7 @@ class TestPowerOff(TestBaremetal):
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'off', False, timeout=2)
 
-    def test_baremetal_soft_power_off(self):
+    def test_baremetal_soft_power_off(self) -> None:
         arglist = ['node_uuid', '--soft']
         verifylist = [('nodes', ['node_uuid']),
                       ('soft', True),
@@ -2052,7 +2062,7 @@ class TestPowerOff(TestBaremetal):
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'off', True, timeout=None)
 
-    def test_baremetal_soft_power_off_timeout(self):
+    def test_baremetal_soft_power_off_timeout(self) -> None:
         arglist = ['node_uuid', '--soft', '--power-timeout', '2']
         verifylist = [('nodes', ['node_uuid']),
                       ('soft', True),
@@ -2065,7 +2075,7 @@ class TestPowerOff(TestBaremetal):
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'off', True, timeout=2)
 
-    def test_baremetal_power_off_no_args(self):
+    def test_baremetal_power_off_no_args(self) -> None:
         arglist = []
         verifylist = []
 
@@ -2073,7 +2083,7 @@ class TestPowerOff(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_power_off_several_nodes(self):
+    def test_baremetal_power_off_several_nodes(self) -> None:
         arglist = ['node_uuid', 'node_name']
         verifylist = [('nodes', ['node_uuid', 'node_name']),
                       ('soft', False),
@@ -2089,13 +2099,13 @@ class TestPowerOff(TestBaremetal):
 
 
 class TestPowerOn(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestPowerOn, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.PowerOnBaremetalNode(self.app, None)
 
-    def test_baremetal_power_on(self):
+    def test_baremetal_power_on(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid']),
                       ('power_timeout', None)]
@@ -2107,7 +2117,7 @@ class TestPowerOn(TestBaremetal):
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'on', False, timeout=None)
 
-    def test_baremetal_power_on_timeout(self):
+    def test_baremetal_power_on_timeout(self) -> None:
         arglist = ['node_uuid', '--power-timeout', '2']
         verifylist = [('nodes', ['node_uuid']),
                       ('power_timeout', 2)]
@@ -2119,7 +2129,7 @@ class TestPowerOn(TestBaremetal):
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'on', False, timeout=2)
 
-    def test_baremetal_power_on_no_args(self):
+    def test_baremetal_power_on_no_args(self) -> None:
         arglist = []
         verifylist = []
 
@@ -2129,13 +2139,14 @@ class TestPowerOn(TestBaremetal):
 
 
 class TestDeployBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestDeployBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.DeployBaremetalNode(self.app, None)
 
-    def test_deploy_baremetal_provision_state_active_and_configdrive(self):
+    def test_deploy_baremetal_provision_state_active_and_configdrive(
+            self) -> None:
         arglist = ['node_uuid',
                    '--config-drive', 'path/to/drive',
                    '--deploy-steps', '[{"interface":"deploy"}]']
@@ -2157,7 +2168,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
             servicesteps=None, runbook=None, disable_ramdisk=None)
 
     def test_deploy_baremetal_provision_state_active_and_configdrive_dict(
-            self):
+            self) -> None:
         arglist = ['node_uuid',
                    '--config-drive', '{"meta_data": {}}']
         verifylist = [
@@ -2176,7 +2187,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
             rescue_password=None, servicesteps=None, runbook=None,
             disable_ramdisk=None)
 
-    def test_deploy_no_wait(self):
+    def test_deploy_no_wait(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2186,7 +2197,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
         self.cmd.take_action(parsed_args)
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
-    def test_deploy_baremetal_provision_state_active_and_wait(self):
+    def test_deploy_baremetal_provision_state_active_and_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15']
         verifylist = [
@@ -2204,7 +2215,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='active',
             poll_interval=10, timeout=15)
 
-    def test_deploy_baremetal_provision_state_default_wait(self):
+    def test_deploy_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait']
         verifylist = [
@@ -2222,7 +2233,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='active',
             poll_interval=10, timeout=0)
 
-    def test_deploy_baremetal_provision_state_several_nodes(self):
+    def test_deploy_baremetal_provision_state_several_nodes(self) -> None:
         arglist = ['node_uuid', 'node_name',
                    '--wait', '15']
         verifylist = [
@@ -2246,7 +2257,7 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
             ['node_uuid', 'node_name'], expected_state='active',
             poll_interval=10, timeout=15)
 
-    def test_deploy_baremetal_provision_state_mismatch(self):
+    def test_deploy_baremetal_provision_state_mismatch(self) -> None:
         arglist = ['node_uuid',
                    '--provision-state', 'abort']
         verifylist = [
@@ -2260,13 +2271,13 @@ class TestDeployBaremetalProvisionState(TestBaremetal):
 
 
 class TestManageBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestManageBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.ManageBaremetalNode(self.app, None)
 
-    def test_manage_no_wait(self):
+    def test_manage_no_wait(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2279,7 +2290,8 @@ class TestManageBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
-    def test_manage_baremetal_provision_state_manageable_and_wait(self):
+    def test_manage_baremetal_provision_state_manageable_and_wait(
+            self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15']
         verifylist = [
@@ -2297,7 +2309,7 @@ class TestManageBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='manageable',
             poll_interval=2, timeout=15)
 
-    def test_manage_baremetal_provision_state_default_wait(self):
+    def test_manage_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait']
         verifylist = [
@@ -2317,13 +2329,13 @@ class TestManageBaremetalProvisionState(TestBaremetal):
 
 
 class TestCleanBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestCleanBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.CleanBaremetalNode(self.app, None)
 
-    def test_clean_no_wait(self):
+    def test_clean_no_wait(self) -> None:
         arglist = ['node_uuid', '--clean-steps', '-']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2337,7 +2349,7 @@ class TestCleanBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
-    def test_clean_baremetal_provision_state_manageable_and_wait(self):
+    def test_clean_baremetal_provision_state_manageable_and_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15',
                    '--clean-steps', '-']
@@ -2357,7 +2369,7 @@ class TestCleanBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='manageable',
             poll_interval=10, timeout=15)
 
-    def test_clean_baremetal_provision_state_default_wait(self):
+    def test_clean_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait',
                    '--clean-steps', '-']
@@ -2379,13 +2391,13 @@ class TestCleanBaremetalProvisionState(TestBaremetal):
 
 
 class TestServiceBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestServiceBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.ServiceBaremetalNode(self.app, None)
 
-    def test_service_no_wait(self):
+    def test_service_no_wait(self) -> None:
         arglist = ['node_uuid', '--service-steps', '-']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2399,7 +2411,8 @@ class TestServiceBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
-    def test_service_baremetal_provision_state_manageable_and_wait(self):
+    def test_service_baremetal_provision_state_manageable_and_wait(
+            self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15',
                    '--service-steps', '-']
@@ -2419,7 +2432,7 @@ class TestServiceBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='active',
             poll_interval=10, timeout=15)
 
-    def test_service_baremetal_provision_state_default_wait(self):
+    def test_service_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait',
                    '--service-steps', '-']
@@ -2441,13 +2454,13 @@ class TestServiceBaremetalProvisionState(TestBaremetal):
 
 
 class TestRescueBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestRescueBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.RescueBaremetalNode(self.app, None)
 
-    def test_rescue_baremetal_no_wait(self):
+    def test_rescue_baremetal_no_wait(self) -> None:
         arglist = ['node_uuid',
                    '--rescue-password', 'supersecret']
         verifylist = [
@@ -2465,7 +2478,7 @@ class TestRescueBaremetalProvisionState(TestBaremetal):
             configdrive=None, rescue_password='supersecret',
             servicesteps=None, runbook=None, disable_ramdisk=None)
 
-    def test_rescue_baremetal_provision_state_rescue_and_wait(self):
+    def test_rescue_baremetal_provision_state_rescue_and_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15',
                    '--rescue-password', 'supersecret']
@@ -2485,7 +2498,7 @@ class TestRescueBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='rescue',
             poll_interval=10, timeout=15)
 
-    def test_rescue_baremetal_provision_state_default_wait(self):
+    def test_rescue_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait',
                    '--rescue-password', 'supersecret']
@@ -2505,7 +2518,7 @@ class TestRescueBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='rescue',
             poll_interval=10, timeout=0)
 
-    def test_rescue_baremetal_no_rescue_password(self):
+    def test_rescue_baremetal_no_rescue_password(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid'),
                       ('provision_state', 'rescue')]
@@ -2516,13 +2529,13 @@ class TestRescueBaremetalProvisionState(TestBaremetal):
 
 
 class TestInspectBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestInspectBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.InspectBaremetalNode(self.app, None)
 
-    def test_inspect_no_wait(self):
+    def test_inspect_no_wait(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2535,7 +2548,8 @@ class TestInspectBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
-    def test_inspect_baremetal_provision_state_managable_and_wait(self):
+    def test_inspect_baremetal_provision_state_managable_and_wait(
+            self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15']
         verifylist = [
@@ -2553,7 +2567,7 @@ class TestInspectBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='manageable',
             poll_interval=2, timeout=15)
 
-    def test_inspect_baremetal_provision_state_default_wait(self):
+    def test_inspect_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait']
         verifylist = [
@@ -2573,13 +2587,13 @@ class TestInspectBaremetalProvisionState(TestBaremetal):
 
 
 class TestProvideBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestProvideBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.ProvideBaremetalNode(self.app, None)
 
-    def test_provide_no_wait(self):
+    def test_provide_no_wait(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2592,7 +2606,8 @@ class TestProvideBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
-    def test_provide_baremetal_provision_state_available_and_wait(self):
+    def test_provide_baremetal_provision_state_available_and_wait(
+            self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15']
         verifylist = [
@@ -2610,7 +2625,7 @@ class TestProvideBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='available',
             poll_interval=10, timeout=15)
 
-    def test_provide_baremetal_provision_state_default_wait(self):
+    def test_provide_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait']
         verifylist = [
@@ -2630,13 +2645,14 @@ class TestProvideBaremetalProvisionState(TestBaremetal):
 
 
 class TestRebuildBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestRebuildBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.RebuildBaremetalNode(self.app, None)
 
-    def test_rebuild_baremetal_provision_state_active_and_configdrive(self):
+    def test_rebuild_baremetal_provision_state_active_and_configdrive(
+            self) -> None:
         arglist = ['node_uuid',
                    '--config-drive', 'path/to/drive',
                    '--deploy-steps', '[{"interface":"deploy"}]']
@@ -2657,7 +2673,7 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
             configdrive='path/to/drive', rescue_password=None,
             servicesteps=None, runbook=None, disable_ramdisk=None)
 
-    def test_rebuild_no_wait(self):
+    def test_rebuild_no_wait(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2676,7 +2692,7 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
-    def test_rebuild_baremetal_provision_state_active_and_wait(self):
+    def test_rebuild_baremetal_provision_state_active_and_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15']
         verifylist = [
@@ -2694,7 +2710,7 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='active',
             poll_interval=10, timeout=15)
 
-    def test_rebuild_baremetal_provision_state_default_wait(self):
+    def test_rebuild_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait']
         verifylist = [
@@ -2714,13 +2730,13 @@ class TestRebuildBaremetalProvisionState(TestBaremetal):
 
 
 class TestUndeployBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestUndeployBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.UndeployBaremetalNode(self.app, None)
 
-    def test_undeploy_no_wait(self):
+    def test_undeploy_no_wait(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2733,7 +2749,8 @@ class TestUndeployBaremetalProvisionState(TestBaremetal):
 
         self.baremetal_mock.node.wait_for_provision_state.assert_not_called()
 
-    def test_undeploy_baremetal_provision_state_available_and_wait(self):
+    def test_undeploy_baremetal_provision_state_available_and_wait(
+            self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15']
         verifylist = [
@@ -2751,7 +2768,7 @@ class TestUndeployBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='available',
             poll_interval=10, timeout=15)
 
-    def test_undeploy_baremetal_provision_state_default_wait(self):
+    def test_undeploy_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait']
         verifylist = [
@@ -2771,13 +2788,13 @@ class TestUndeployBaremetalProvisionState(TestBaremetal):
 
 
 class TestUnrescueBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestUnrescueBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.UnrescueBaremetalNode(self.app, None)
 
-    def test_unrescue_no_wait(self):
+    def test_unrescue_no_wait(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2793,7 +2810,7 @@ class TestUnrescueBaremetalProvisionState(TestBaremetal):
             configdrive=None, rescue_password=None, servicesteps=None,
             runbook=None, disable_ramdisk=None)
 
-    def test_unrescue_baremetal_provision_state_active_and_wait(self):
+    def test_unrescue_baremetal_provision_state_active_and_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait', '15']
         verifylist = [
@@ -2811,7 +2828,7 @@ class TestUnrescueBaremetalProvisionState(TestBaremetal):
             ['node_uuid'], expected_state='active',
             poll_interval=10, timeout=15)
 
-    def test_unrescue_baremetal_provision_state_default_wait(self):
+    def test_unrescue_baremetal_provision_state_default_wait(self) -> None:
         arglist = ['node_uuid',
                    '--wait']
         verifylist = [
@@ -2831,13 +2848,13 @@ class TestUnrescueBaremetalProvisionState(TestBaremetal):
 
 
 class TestBaremetalReboot(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalReboot, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.RebootBaremetalNode(self.app, None)
 
-    def test_baremetal_reboot_no_options(self):
+    def test_baremetal_reboot_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -2845,7 +2862,7 @@ class TestBaremetalReboot(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_reboot_uuid_only(self):
+    def test_baremetal_reboot_uuid_only(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid']),
                       ('soft', False),
@@ -2858,7 +2875,7 @@ class TestBaremetalReboot(TestBaremetal):
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'reboot', False, timeout=None)
 
-    def test_baremetal_reboot_timeout(self):
+    def test_baremetal_reboot_timeout(self) -> None:
         arglist = ['node_uuid', '--power-timeout', '2']
         verifylist = [('nodes', ['node_uuid']),
                       ('soft', False),
@@ -2871,7 +2888,7 @@ class TestBaremetalReboot(TestBaremetal):
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'reboot', False, timeout=2)
 
-    def test_baremetal_soft_reboot(self):
+    def test_baremetal_soft_reboot(self) -> None:
         arglist = ['node_uuid', '--soft']
         verifylist = [('nodes', ['node_uuid']),
                       ('soft', True),
@@ -2884,7 +2901,7 @@ class TestBaremetalReboot(TestBaremetal):
         self.baremetal_mock.node.set_power_state.assert_called_once_with(
             'node_uuid', 'reboot', True, timeout=None)
 
-    def test_baremetal_soft_reboot_timeout(self):
+    def test_baremetal_soft_reboot_timeout(self) -> None:
         arglist = ['node_uuid', '--soft', '--power-timeout', '2']
         verifylist = [('nodes', ['node_uuid']),
                       ('soft', True),
@@ -2899,7 +2916,7 @@ class TestBaremetalReboot(TestBaremetal):
 
 
 class TestBaremetalSet(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalSet, self).setUp()
 
         self.baremetal_mock.node.update.return_value = (
@@ -2912,7 +2929,7 @@ class TestBaremetalSet(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.SetBaremetalNode(self.app, None)
 
-    def test_baremetal_set_no_options(self):
+    def test_baremetal_set_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -2920,7 +2937,7 @@ class TestBaremetalSet(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_set_no_property(self):
+    def test_baremetal_set_no_property(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2930,7 +2947,7 @@ class TestBaremetalSet(TestBaremetal):
         self.cmd.take_action(parsed_args)
         self.assertFalse(self.baremetal_mock.node.update.called)
 
-    def test_baremetal_set_one_property(self):
+    def test_baremetal_set_one_property(self) -> None:
         arglist = ['node_uuid', '--property', 'path/to/property=value']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -2948,7 +2965,7 @@ class TestBaremetalSet(TestBaremetal):
               'op': 'add'}],
             reset_interfaces=None)
 
-    def test_baremetal_set_multiple_properties(self):
+    def test_baremetal_set_multiple_properties(self) -> None:
         arglist = [
             'node_uuid',
             '--property', 'path/to/property=value',
@@ -2978,7 +2995,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_instance_uuid(self):
+    def test_baremetal_set_instance_uuid(self) -> None:
         arglist = [
             'node_uuid',
             '--instance-uuid', 'xxxxx',
@@ -2998,7 +3015,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_name(self):
+    def test_baremetal_set_name(self) -> None:
         arglist = [
             'node_uuid',
             '--name', 'xxxxx',
@@ -3018,7 +3035,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_instance_name(self):
+    def test_baremetal_set_instance_name(self) -> None:
         arglist = [
             'node_uuid',
             '--instance-name', 'for-instance',
@@ -3038,7 +3055,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_chassis(self):
+    def test_baremetal_set_chassis(self) -> None:
         chassis = '4f4135ea-7e58-4e3d-bcc4-b87ca16e980b'
         arglist = [
             'node_uuid',
@@ -3059,7 +3076,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_driver(self):
+    def test_baremetal_set_driver(self) -> None:
         arglist = [
             'node_uuid',
             '--driver', 'xxxxx',
@@ -3079,7 +3096,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_driver_reset_interfaces(self):
+    def test_baremetal_set_driver_reset_interfaces(self) -> None:
         arglist = [
             'node_uuid',
             '--driver', 'xxxxx',
@@ -3101,7 +3118,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=True,
         )
 
-    def test_reset_interfaces_without_driver(self):
+    def test_reset_interfaces_without_driver(self) -> None:
         arglist = [
             'node_uuid',
             '--reset-interfaces',
@@ -3117,7 +3134,7 @@ class TestBaremetalSet(TestBaremetal):
                           self.cmd.take_action, parsed_args)
         self.assertFalse(self.baremetal_mock.node.update.called)
 
-    def _test_baremetal_set_hardware_interface(self, interface):
+    def _test_baremetal_set_hardware_interface(self, interface: str) -> None:
         arglist = [
             'node_uuid',
             '--%s-interface' % interface, 'xxxxx',
@@ -3138,46 +3155,46 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_bios_interface(self):
+    def test_baremetal_set_bios_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('bios')
 
-    def test_baremetal_set_boot_interface(self):
+    def test_baremetal_set_boot_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('boot')
 
-    def test_baremetal_set_console_interface(self):
+    def test_baremetal_set_console_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('console')
 
-    def test_baremetal_set_deploy_interface(self):
+    def test_baremetal_set_deploy_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('deploy')
 
-    def test_baremetal_set_firmware_interface(self):
+    def test_baremetal_set_firmware_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('firmware')
 
-    def test_baremetal_set_inspect_interface(self):
+    def test_baremetal_set_inspect_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('inspect')
 
-    def test_baremetal_set_management_interface(self):
+    def test_baremetal_set_management_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('management')
 
-    def test_baremetal_set_network_interface(self):
+    def test_baremetal_set_network_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('network')
 
-    def test_baremetal_set_power_interface(self):
+    def test_baremetal_set_power_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('power')
 
-    def test_baremetal_set_raid_interface(self):
+    def test_baremetal_set_raid_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('raid')
 
-    def test_baremetal_set_rescue_interface(self):
+    def test_baremetal_set_rescue_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('rescue')
 
-    def test_baremetal_set_storage_interface(self):
+    def test_baremetal_set_storage_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('storage')
 
-    def test_baremetal_set_vendor_interface(self):
+    def test_baremetal_set_vendor_interface(self) -> None:
         self._test_baremetal_set_hardware_interface('vendor')
 
-    def _test_baremetal_reset_hardware_interface(self, interface):
+    def _test_baremetal_reset_hardware_interface(self, interface: str) -> None:
         arglist = [
             'node_uuid',
             '--reset-%s-interface' % interface,
@@ -3197,46 +3214,46 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_reset_bios_interface(self):
+    def test_baremetal_reset_bios_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('bios')
 
-    def test_baremetal_reset_boot_interface(self):
+    def test_baremetal_reset_boot_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('boot')
 
-    def test_baremetal_reset_console_interface(self):
+    def test_baremetal_reset_console_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('console')
 
-    def test_baremetal_reset_deploy_interface(self):
+    def test_baremetal_reset_deploy_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('deploy')
 
-    def test_baremetal_reset_firmware_interface(self):
+    def test_baremetal_reset_firmware_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('firmware')
 
-    def test_baremetal_reset_inspect_interface(self):
+    def test_baremetal_reset_inspect_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('inspect')
 
-    def test_baremetal_reset_management_interface(self):
+    def test_baremetal_reset_management_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('management')
 
-    def test_baremetal_reset_network_interface(self):
+    def test_baremetal_reset_network_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('network')
 
-    def test_baremetal_reset_power_interface(self):
+    def test_baremetal_reset_power_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('power')
 
-    def test_baremetal_reset_raid_interface(self):
+    def test_baremetal_reset_raid_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('raid')
 
-    def test_baremetal_reset_rescue_interface(self):
+    def test_baremetal_reset_rescue_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('rescue')
 
-    def test_baremetal_reset_storage_interface(self):
+    def test_baremetal_reset_storage_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('storage')
 
-    def test_baremetal_reset_vendor_interface(self):
+    def test_baremetal_reset_vendor_interface(self) -> None:
         self._test_baremetal_reset_hardware_interface('vendor')
 
-    def test_baremetal_set_resource_class(self):
+    def test_baremetal_set_resource_class(self) -> None:
         arglist = [
             'node_uuid',
             '--resource-class', 'foo',
@@ -3256,7 +3273,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_conductor_group(self):
+    def test_baremetal_set_conductor_group(self) -> None:
         arglist = [
             'node_uuid',
             '--conductor-group', 'foo',
@@ -3276,7 +3293,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_automated_clean(self):
+    def test_baremetal_set_automated_clean(self) -> None:
         arglist = [
             'node_uuid',
             '--automated-clean'
@@ -3296,7 +3313,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_no_automated_clean(self):
+    def test_baremetal_set_no_automated_clean(self) -> None:
         arglist = [
             'node_uuid',
             '--no-automated-clean'
@@ -3316,7 +3333,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_protected(self):
+    def test_baremetal_set_protected(self) -> None:
         arglist = [
             'node_uuid',
             '--protected'
@@ -3336,7 +3353,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_protected_with_reason(self):
+    def test_baremetal_set_protected_with_reason(self) -> None:
         arglist = [
             'node_uuid',
             '--protected',
@@ -3359,7 +3376,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_retired(self):
+    def test_baremetal_set_retired(self) -> None:
         arglist = [
             'node_uuid',
             '--retired'
@@ -3379,7 +3396,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_retired_with_reason(self):
+    def test_baremetal_set_retired_with_reason(self) -> None:
         arglist = [
             'node_uuid',
             '--retired',
@@ -3403,7 +3420,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_extra(self):
+    def test_baremetal_set_extra(self) -> None:
         arglist = [
             'node_uuid',
             '--extra', 'foo=bar',
@@ -3423,7 +3440,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_driver_info(self):
+    def test_baremetal_set_driver_info(self) -> None:
         arglist = [
             'node_uuid',
             '--driver-info', 'foo=bar',
@@ -3443,7 +3460,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_instance_info(self):
+    def test_baremetal_set_instance_info(self) -> None:
         arglist = [
             'node_uuid',
             '--instance-info', 'foo=bar',
@@ -3465,7 +3482,8 @@ class TestBaremetalSet(TestBaremetal):
 
     @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
-    def test_baremetal_set_target_raid_config(self, mock_handle, mock_stdin):
+    def test_baremetal_set_target_raid_config(
+            self, mock_handle: mock.Mock, mock_stdin: mock.Mock) -> None:
         self.cmd.log = mock.Mock(autospec=True)
         target_raid_config_string = '{"raid": "config"}'
         expected_target_raid_config = {'raid': 'config'}
@@ -3489,7 +3507,7 @@ class TestBaremetalSet(TestBaremetal):
     @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
     def test_baremetal_set_target_raid_config_and_name(
-            self, mock_handle, mock_stdin):
+            self, mock_handle: mock.Mock, mock_stdin: mock.Mock) -> None:
         self.cmd.log = mock.Mock(autospec=True)
         target_raid_config_string = '{"raid": "config"}'
         expected_target_raid_config = {'raid': 'config'}
@@ -3517,8 +3535,8 @@ class TestBaremetalSet(TestBaremetal):
 
     @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
-    def test_baremetal_set_target_raid_config_stdin(self, mock_handle,
-                                                    mock_stdin):
+    def test_baremetal_set_target_raid_config_stdin(
+            self, mock_handle: mock.Mock, mock_stdin: mock.Mock) -> None:
         self.cmd.log = mock.Mock(autospec=True)
         target_value = '-'
         target_raid_config_string = '{"raid": "config"}'
@@ -3544,7 +3562,7 @@ class TestBaremetalSet(TestBaremetal):
     @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
     def test_baremetal_set_target_raid_config_stdin_exception(
-            self, mock_handle, mock_stdin):
+            self, mock_handle: mock.Mock, mock_stdin: mock.Mock) -> None:
         self.cmd.log = mock.Mock(autospec=True)
         target_value = '-'
         mock_stdin.side_effect = exc.InvalidAttribute('bad')
@@ -3565,7 +3583,7 @@ class TestBaremetalSet(TestBaremetal):
             self.baremetal_mock.node.set_target_raid_config.called)
         self.assertFalse(self.baremetal_mock.node.update.called)
 
-    def test_baremetal_set_owner(self):
+    def test_baremetal_set_owner(self) -> None:
         arglist = [
             'node_uuid',
             '--owner', 'owner 1',
@@ -3587,7 +3605,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_description(self):
+    def test_baremetal_set_description(self) -> None:
         arglist = [
             'node_uuid',
             '--description', 'there is no spoon',
@@ -3609,7 +3627,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_lessee(self):
+    def test_baremetal_set_lessee(self) -> None:
         arglist = [
             'node_uuid',
             '--lessee', 'lessee 1',
@@ -3630,7 +3648,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None
         )
 
-    def test_baremetal_set_shard(self):
+    def test_baremetal_set_shard(self) -> None:
         arglist = [
             'node_uuid',
             '--shard', 'myshard',
@@ -3652,7 +3670,8 @@ class TestBaremetalSet(TestBaremetal):
 
     @mock.patch.object(commonutils, 'get_from_stdin', autospec=True)
     @mock.patch.object(commonutils, 'handle_json_or_file_arg', autospec=True)
-    def test_baremetal_set_network_data(self, mock_handle, mock_stdin):
+    def test_baremetal_set_network_data(
+            self, mock_handle: mock.Mock, mock_stdin: mock.Mock) -> None:
         self.cmd.log = mock.Mock(autospec=True)
         network_data_string = '{"a": ["b"]}'
         expected_network_data = {'a': ['b']}
@@ -3674,7 +3693,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_disable_power_off(self):
+    def test_baremetal_set_disable_power_off(self) -> None:
         arglist = [
             'node_uuid',
             '--disable-power-off'
@@ -3694,7 +3713,7 @@ class TestBaremetalSet(TestBaremetal):
             reset_interfaces=None,
         )
 
-    def test_baremetal_set_enable_power_off(self):
+    def test_baremetal_set_enable_power_off(self) -> None:
         arglist = [
             'node_uuid',
             '--enable-power-off'
@@ -3716,7 +3735,7 @@ class TestBaremetalSet(TestBaremetal):
 
 
 class TestBaremetalShow(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalShow, self).setUp()
 
         self.baremetal_mock.node.get.return_value = (
@@ -3736,7 +3755,7 @@ class TestBaremetalShow(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.ShowBaremetalNode(self.app, None)
 
-    def test_baremetal_show(self):
+    def test_baremetal_show(self) -> None:
         arglist = ['xxx-xxxxxx-xxxx']
         verifylist = []
 
@@ -3775,7 +3794,7 @@ class TestBaremetalShow(TestBaremetal):
         )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_show_no_node(self):
+    def test_baremetal_show_no_node(self) -> None:
         arglist = []
         verifylist = []
 
@@ -3783,7 +3802,7 @@ class TestBaremetalShow(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_show_with_instance_uuid(self):
+    def test_baremetal_show_with_instance_uuid(self) -> None:
         arglist = [
             'xxx-xxxxxx-xxxx',
             '--instance',
@@ -3805,7 +3824,7 @@ class TestBaremetalShow(TestBaremetal):
             *args, fields=None
         )
 
-    def test_baremetal_show_fields(self):
+    def test_baremetal_show_fields(self) -> None:
         arglist = [
             'xxxxx',
             '--fields', 'uuid', 'name',
@@ -3829,7 +3848,7 @@ class TestBaremetalShow(TestBaremetal):
             *args, fields=fields
         )
 
-    def test_baremetal_show_fields_multiple(self):
+    def test_baremetal_show_fields_multiple(self) -> None:
         arglist = [
             'xxxxx',
             '--fields', 'uuid', 'name',
@@ -3852,7 +3871,7 @@ class TestBaremetalShow(TestBaremetal):
             *args, fields=fields
         )
 
-    def test_baremetal_show_invalid_fields(self):
+    def test_baremetal_show_invalid_fields(self) -> None:
         arglist = [
             'xxxxx',
             '--fields', 'uuid', 'invalid'
@@ -3868,7 +3887,7 @@ class TestBaremetalShow(TestBaremetal):
 
 
 class TestBaremetalUnset(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalUnset, self).setUp()
 
         self.baremetal_mock.node.update.return_value = (
@@ -3881,7 +3900,7 @@ class TestBaremetalUnset(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.UnsetBaremetalNode(self.app, None)
 
-    def test_baremetal_unset_no_options(self):
+    def test_baremetal_unset_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -3889,7 +3908,7 @@ class TestBaremetalUnset(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_unset_no_property(self):
+    def test_baremetal_unset_no_property(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid'])]
 
@@ -3897,7 +3916,7 @@ class TestBaremetalUnset(TestBaremetal):
         self.cmd.take_action(parsed_args)
         self.assertFalse(self.baremetal_mock.node.update.called)
 
-    def test_baremetal_unset_one_property(self):
+    def test_baremetal_unset_one_property(self) -> None:
         arglist = ['node_uuid', '--property', 'path/to/property']
         verifylist = [('nodes', ['node_uuid']),
                       ('property', ['path/to/property'])]
@@ -3910,7 +3929,7 @@ class TestBaremetalUnset(TestBaremetal):
             'node_uuid',
             [{'path': '/properties/path/to/property', 'op': 'remove'}])
 
-    def test_baremetal_unset_multiple_properties(self):
+    def test_baremetal_unset_multiple_properties(self) -> None:
         arglist = ['node_uuid',
                    '--property', 'path/to/property',
                    '--property', 'other/path']
@@ -3929,7 +3948,7 @@ class TestBaremetalUnset(TestBaremetal):
              {'path': '/properties/other/path', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_instance_uuid(self):
+    def test_baremetal_unset_instance_uuid(self) -> None:
         arglist = [
             'node_uuid',
             '--instance-uuid',
@@ -3948,7 +3967,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/instance_uuid', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_name(self):
+    def test_baremetal_unset_name(self) -> None:
         arglist = [
             'node_uuid',
             '--name',
@@ -3967,7 +3986,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/name', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_instance_name(self):
+    def test_baremetal_unset_instance_name(self) -> None:
         arglist = [
             'node_uuid',
             '--instance-name',
@@ -3986,7 +4005,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/instance_name', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_resource_class(self):
+    def test_baremetal_unset_resource_class(self) -> None:
         arglist = [
             'node_uuid',
             '--resource-class',
@@ -4005,7 +4024,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/resource_class', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_conductor_group(self):
+    def test_baremetal_unset_conductor_group(self) -> None:
         arglist = [
             'node_uuid',
             '--conductor-group',
@@ -4024,7 +4043,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/conductor_group', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_automated_clean(self):
+    def test_baremetal_unset_automated_clean(self) -> None:
         arglist = [
             'node_uuid',
             '--automated-clean',
@@ -4043,7 +4062,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/automated_clean', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_protected(self):
+    def test_baremetal_unset_protected(self) -> None:
         arglist = [
             'node_uuid',
             '--protected',
@@ -4062,7 +4081,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/protected', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_protected_reason(self):
+    def test_baremetal_unset_protected_reason(self) -> None:
         arglist = [
             'node_uuid',
             '--protected-reason',
@@ -4081,7 +4100,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/protected_reason', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_retired(self):
+    def test_baremetal_unset_retired(self) -> None:
         arglist = [
             'node_uuid',
             '--retired',
@@ -4100,7 +4119,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/retired', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_retired_reason(self):
+    def test_baremetal_unset_retired_reason(self) -> None:
         arglist = [
             'node_uuid',
             '--retired-reason',
@@ -4119,7 +4138,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/retired_reason', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_extra(self):
+    def test_baremetal_unset_extra(self) -> None:
         arglist = [
             'node_uuid',
             '--extra', 'foo',
@@ -4138,7 +4157,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/extra/foo', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_driver_info(self):
+    def test_baremetal_unset_driver_info(self) -> None:
         arglist = [
             'node_uuid',
             '--driver-info', 'foo',
@@ -4157,7 +4176,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/driver_info/foo', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_instance_info(self):
+    def test_baremetal_unset_instance_info(self) -> None:
         arglist = [
             'node_uuid',
             '--instance-info', 'foo',
@@ -4176,7 +4195,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/instance_info/foo', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_target_raid_config(self):
+    def test_baremetal_unset_target_raid_config(self) -> None:
         self.cmd.log = mock.Mock(autospec=True)
         arglist = [
             'node_uuid',
@@ -4196,7 +4215,7 @@ class TestBaremetalUnset(TestBaremetal):
         self.baremetal_mock.node.set_target_raid_config.\
             assert_called_once_with('node_uuid', {})
 
-    def test_baremetal_unset_target_raid_config_and_name(self):
+    def test_baremetal_unset_target_raid_config_and_name(self) -> None:
         self.cmd.log = mock.Mock(autospec=True)
         arglist = [
             'node_uuid',
@@ -4221,7 +4240,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/name', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_chassis_uuid(self):
+    def test_baremetal_unset_chassis_uuid(self) -> None:
         arglist = [
             'node_uuid',
             '--chassis-uuid',
@@ -4240,7 +4259,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/chassis_uuid', 'op': 'remove'}]
         )
 
-    def _test_baremetal_unset_hw_interface(self, interface):
+    def _test_baremetal_unset_hw_interface(self, interface: str) -> None:
         arglist = [
             'node_uuid',
             '--%s-interface' % interface,
@@ -4259,46 +4278,46 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/%s_interface' % interface, 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_bios_interface(self):
+    def test_baremetal_unset_bios_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('bios')
 
-    def test_baremetal_unset_boot_interface(self):
+    def test_baremetal_unset_boot_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('boot')
 
-    def test_baremetal_unset_console_interface(self):
+    def test_baremetal_unset_console_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('console')
 
-    def test_baremetal_unset_deploy_interface(self):
+    def test_baremetal_unset_deploy_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('deploy')
 
-    def test_baremetal_unset_firmware_interface(self):
+    def test_baremetal_unset_firmware_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('firmware')
 
-    def test_baremetal_unset_inspect_interface(self):
+    def test_baremetal_unset_inspect_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('inspect')
 
-    def test_baremetal_unset_management_interface(self):
+    def test_baremetal_unset_management_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('management')
 
-    def test_baremetal_unset_network_interface(self):
+    def test_baremetal_unset_network_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('network')
 
-    def test_baremetal_unset_power_interface(self):
+    def test_baremetal_unset_power_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('power')
 
-    def test_baremetal_unset_raid_interface(self):
+    def test_baremetal_unset_raid_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('raid')
 
-    def test_baremetal_unset_rescue_interface(self):
+    def test_baremetal_unset_rescue_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('rescue')
 
-    def test_baremetal_unset_storage_interface(self):
+    def test_baremetal_unset_storage_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('storage')
 
-    def test_baremetal_unset_vendor_interface(self):
+    def test_baremetal_unset_vendor_interface(self) -> None:
         self._test_baremetal_unset_hw_interface('vendor')
 
-    def test_baremetal_unset_owner(self):
+    def test_baremetal_unset_owner(self) -> None:
         arglist = [
             'node_uuid',
             '--owner',
@@ -4317,7 +4336,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/owner', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_description(self):
+    def test_baremetal_unset_description(self) -> None:
         arglist = [
             'node_uuid',
             '--description',
@@ -4336,7 +4355,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/description', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_lessee(self):
+    def test_baremetal_unset_lessee(self) -> None:
         arglist = [
             'node_uuid',
             '--lessee',
@@ -4355,7 +4374,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/lessee', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_shard(self):
+    def test_baremetal_unset_shard(self) -> None:
         arglist = [
             'node_uuid',
             '--shard',
@@ -4374,7 +4393,7 @@ class TestBaremetalUnset(TestBaremetal):
             [{'path': '/shard', 'op': 'remove'}]
         )
 
-    def test_baremetal_unset_network_data(self):
+    def test_baremetal_unset_network_data(self) -> None:
         arglist = [
             'node_uuid',
             '--network-data',
@@ -4395,7 +4414,7 @@ class TestBaremetalUnset(TestBaremetal):
 
 
 class TestValidate(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestValidate, self).setUp()
 
         # Get the command object to test
@@ -4416,7 +4435,7 @@ class TestValidate(TestBaremetal):
                 loaded=True,
             ))
 
-    def test_baremetal_validate_no_arg(self):
+    def test_baremetal_validate_no_arg(self) -> None:
         arglist = []
         verifylist = []
 
@@ -4424,7 +4443,7 @@ class TestValidate(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_validate(self):
+    def test_baremetal_validate(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -4436,7 +4455,7 @@ class TestValidate(TestBaremetal):
 
 
 class TestVifList(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestVifList, self).setUp()
 
         self.baremetal_mock.node.vif_list.return_value = [
@@ -4450,7 +4469,7 @@ class TestVifList(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.VifListBaremetalNode(self.app, None)
 
-    def test_baremetal_vif_list(self):
+    def test_baremetal_vif_list(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -4462,13 +4481,13 @@ class TestVifList(TestBaremetal):
 
 
 class TestVifAttach(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestVifAttach, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.VifAttachBaremetalNode(self.app, None)
 
-    def test_baremetal_vif_attach(self):
+    def test_baremetal_vif_attach(self) -> None:
         arglist = ['node_uuid', 'aaa-aaa']
         verifylist = [('node', 'node_uuid'),
                       ('vif_id', 'aaa-aaa')]
@@ -4480,7 +4499,7 @@ class TestVifAttach(TestBaremetal):
         self.baremetal_mock.node.vif_attach.assert_called_once_with(
             'node_uuid', 'aaa-aaa')
 
-    def test_baremetal_vif_attach_custom_fields(self):
+    def test_baremetal_vif_attach_custom_fields(self) -> None:
         arglist = ['node_uuid', 'aaa-aaa', '--vif-info', 'foo=bar']
         verifylist = [('node', 'node_uuid'),
                       ('vif_id', 'aaa-aaa'),
@@ -4492,7 +4511,7 @@ class TestVifAttach(TestBaremetal):
         self.baremetal_mock.node.vif_attach.assert_called_once_with(
             'node_uuid', 'aaa-aaa', foo='bar')
 
-    def test_baremetal_vif_attach_port_uuid(self):
+    def test_baremetal_vif_attach_port_uuid(self) -> None:
         arglist = ['node_uuid', 'aaa-aaa', '--port-uuid', 'fake-port-uuid']
         verifylist = [('node', 'node_uuid'),
                       ('vif_id', 'aaa-aaa'),
@@ -4506,13 +4525,13 @@ class TestVifAttach(TestBaremetal):
 
 
 class TestVifDetach(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestVifDetach, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.VifDetachBaremetalNode(self.app, None)
 
-    def test_baremetal_vif_detach(self):
+    def test_baremetal_vif_detach(self) -> None:
         arglist = ['node_uuid', 'aaa-aaa']
         verifylist = [('node', 'node_uuid'),
                       ('vif_id', 'aaa-aaa')]
@@ -4526,13 +4545,13 @@ class TestVifDetach(TestBaremetal):
 
 
 class TestBaremetalInject(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalInject, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.InjectNmiBaremetalNode(self.app, None)
 
-    def test_baremetal_inject_no_options(self):
+    def test_baremetal_inject_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -4540,7 +4559,7 @@ class TestBaremetalInject(TestBaremetal):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_inject_nmi_uuid(self):
+    def test_baremetal_inject_nmi_uuid(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('nodes', ['node_uuid'])]
 
@@ -4553,7 +4572,7 @@ class TestBaremetalInject(TestBaremetal):
 
 
 class TestListTraits(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestListTraits, self).setUp()
 
         self.baremetal_mock.node.get_traits.return_value = (
@@ -4562,7 +4581,7 @@ class TestListTraits(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.ListTraitsBaremetalNode(self.app, None)
 
-    def test_baremetal_list_traits(self):
+    def test_baremetal_list_traits(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -4577,13 +4596,13 @@ class TestListTraits(TestBaremetal):
 
 
 class TestAddTrait(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestAddTrait, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.AddTraitBaremetalNode(self.app, None)
 
-    def test_baremetal_add_trait(self):
+    def test_baremetal_add_trait(self) -> None:
         arglist = ['node_uuid', 'CUSTOM_FOO']
         verifylist = [('node', 'node_uuid'), ('traits', ['CUSTOM_FOO'])]
 
@@ -4594,7 +4613,7 @@ class TestAddTrait(TestBaremetal):
         self.baremetal_mock.node.add_trait.assert_called_once_with(
             'node_uuid', 'CUSTOM_FOO')
 
-    def test_baremetal_add_traits_multiple(self):
+    def test_baremetal_add_traits_multiple(self) -> None:
         arglist = ['node_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
         verifylist = [('node', 'node_uuid'),
                       ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
@@ -4610,7 +4629,7 @@ class TestAddTrait(TestBaremetal):
         self.assertEqual(expected_calls,
                          self.baremetal_mock.node.add_trait.call_args_list)
 
-    def test_baremetal_add_traits_multiple_with_failure(self):
+    def test_baremetal_add_traits_multiple_with_failure(self) -> None:
         arglist = ['node_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
         verifylist = [('node', 'node_uuid'),
                       ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
@@ -4631,7 +4650,7 @@ class TestAddTrait(TestBaremetal):
         self.assertEqual(expected_calls,
                          self.baremetal_mock.node.add_trait.call_args_list)
 
-    def test_baremetal_add_traits_no_traits(self):
+    def test_baremetal_add_traits_no_traits(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -4643,13 +4662,13 @@ class TestAddTrait(TestBaremetal):
 
 
 class TestRemoveTrait(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestRemoveTrait, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.RemoveTraitBaremetalNode(self.app, None)
 
-    def test_baremetal_remove_trait(self):
+    def test_baremetal_remove_trait(self) -> None:
         arglist = ['node_uuid', 'CUSTOM_FOO']
         verifylist = [('node', 'node_uuid'), ('traits', ['CUSTOM_FOO'])]
 
@@ -4660,7 +4679,7 @@ class TestRemoveTrait(TestBaremetal):
         self.baremetal_mock.node.remove_trait.assert_called_once_with(
             'node_uuid', 'CUSTOM_FOO')
 
-    def test_baremetal_remove_trait_multiple(self):
+    def test_baremetal_remove_trait_multiple(self) -> None:
         arglist = ['node_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
         verifylist = [('node', 'node_uuid'),
                       ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
@@ -4676,7 +4695,7 @@ class TestRemoveTrait(TestBaremetal):
         self.assertEqual(expected_calls,
                          self.baremetal_mock.node.remove_trait.call_args_list)
 
-    def test_baremetal_remove_trait_multiple_with_failure(self):
+    def test_baremetal_remove_trait_multiple_with_failure(self) -> None:
         arglist = ['node_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
         verifylist = [('node', 'node_uuid'),
                       ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
@@ -4697,7 +4716,7 @@ class TestRemoveTrait(TestBaremetal):
         self.assertEqual(expected_calls,
                          self.baremetal_mock.node.remove_trait.call_args_list)
 
-    def test_baremetal_remove_trait_all(self):
+    def test_baremetal_remove_trait_all(self) -> None:
         arglist = ['node_uuid', '--all']
         verifylist = [('node', 'node_uuid'), ('remove_all', True)]
 
@@ -4708,7 +4727,7 @@ class TestRemoveTrait(TestBaremetal):
         self.baremetal_mock.node.remove_all_traits.assert_called_once_with(
             'node_uuid')
 
-    def test_baremetal_remove_trait_traits_and_all(self):
+    def test_baremetal_remove_trait_traits_and_all(self) -> None:
         arglist = ['node_uuid', 'CUSTOM_FOO', '--all']
         verifylist = [('node', 'node_uuid'),
                       ('traits', ['CUSTOM_FOO']),
@@ -4723,7 +4742,7 @@ class TestRemoveTrait(TestBaremetal):
         self.baremetal_mock.node.remove_all_traits.assert_not_called()
         self.baremetal_mock.node.remove_trait.assert_not_called()
 
-    def test_baremetal_remove_traits_no_traits_no_all(self):
+    def test_baremetal_remove_traits_no_traits_no_all(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -4738,7 +4757,7 @@ class TestRemoveTrait(TestBaremetal):
 
 
 class TestListBIOSSetting(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestListBIOSSetting, self).setUp()
 
         self.baremetal_mock.node.list_bios_settings.return_value = (
@@ -4747,7 +4766,7 @@ class TestListBIOSSetting(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.ListBIOSSettingBaremetalNode(self.app, None)
 
-    def test_baremetal_list_bios_setting(self):
+    def test_baremetal_list_bios_setting(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -4764,7 +4783,7 @@ class TestListBIOSSetting(TestBaremetal):
                          for s in baremetal_fakes.BIOS_SETTINGS])
         self.assertEqual(tuple(expected_data), tuple(data))
 
-    def test_baremetal_list_bios_setting_long(self):
+    def test_baremetal_list_bios_setting_long(self) -> None:
         verifylist = [
             ('long', True),
         ]
@@ -4800,7 +4819,7 @@ class TestListBIOSSetting(TestBaremetal):
                           '', '', '', ''))
         self.assertEqual(expected_data, tuple(data))
 
-    def test_baremetal_list_bios_setting_fields(self):
+    def test_baremetal_list_bios_setting_fields(self) -> None:
 
         arglist = ['node_uuid', '--fields', 'name', 'attribute_type']
         verifylist = [
@@ -4826,7 +4845,7 @@ class TestListBIOSSetting(TestBaremetal):
 
 
 class TestBIOSSettingShow(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBIOSSettingShow, self).setUp()
 
         self.baremetal_mock.node.get_bios_setting.return_value = (
@@ -4835,7 +4854,7 @@ class TestBIOSSettingShow(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.BIOSSettingShowBaremetalNode(self.app, None)
 
-    def test_baremetal_bios_setting_show(self):
+    def test_baremetal_bios_setting_show(self) -> None:
         arglist = ['node_uuid', 'bios_name_1']
         verifylist = [('node', 'node_uuid'), ('setting_name', 'bios_name_1')]
 
@@ -4850,7 +4869,7 @@ class TestBIOSSettingShow(TestBaremetal):
 
 
 class TestNodeHistoryEventList(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestNodeHistoryEventList, self).setUp()
 
         self.baremetal_mock.node.get_history_list.return_value = (
@@ -4859,7 +4878,7 @@ class TestNodeHistoryEventList(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.NodeHistoryList(self.app, None)
 
-    def test_baremetal_node_history_list(self):
+    def test_baremetal_node_history_list(self) -> None:
         arglist = ['node_uuid', '--long']
         verifylist = [('node', 'node_uuid'), ('long', True)]
 
@@ -4878,7 +4897,7 @@ class TestNodeHistoryEventList(TestBaremetal):
 
 
 class TestNodeHistoryEventGet(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestNodeHistoryEventGet, self).setUp()
 
         self.baremetal_mock.node.get_history_event.return_value = (
@@ -4887,7 +4906,7 @@ class TestNodeHistoryEventGet(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.NodeHistoryEventGet(self.app, None)
 
-    def test_baremetal_node_history_list(self):
+    def test_baremetal_node_history_list(self) -> None:
         arglist = ['node_uuid', 'event_uuid']
         verifylist = [('node', 'node_uuid'), ('event', 'event_uuid')]
 
@@ -4906,7 +4925,7 @@ class TestNodeHistoryEventGet(TestBaremetal):
 
 
 class TestNodeInventorySave(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestNodeInventorySave, self).setUp()
 
         self.baremetal_mock.node.get_inventory.return_value = (
@@ -4915,7 +4934,7 @@ class TestNodeInventorySave(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.NodeInventorySave(self.app, None)
 
-    def test_baremetal_node_inventory_save(self):
+    def test_baremetal_node_inventory_save(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -4943,7 +4962,7 @@ class TestNodeInventorySave(TestBaremetal):
 
 
 class TestNodeChildrenList(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestNodeChildrenList, self).setUp()
 
         self.baremetal_mock.node.list_children_of_node.return_value = (
@@ -4952,7 +4971,7 @@ class TestNodeChildrenList(TestBaremetal):
         # Get the command object to test
         self.cmd = baremetal_node.NodeChildrenList(self.app, None)
 
-    def test_child_node_list(self):
+    def test_child_node_list(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 
@@ -4967,13 +4986,13 @@ class TestNodeChildrenList(TestBaremetal):
 
 
 class TestUnholdBaremetalProvisionState(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestUnholdBaremetalProvisionState, self).setUp()
 
         # Get the command object to test
         self.cmd = baremetal_node.UnholdBaremetalNode(self.app, None)
 
-    def test_unrescue_no_wait(self):
+    def test_unrescue_no_wait(self) -> None:
         arglist = ['node_uuid']
         verifylist = [
             ('nodes', ['node_uuid']),
@@ -4991,7 +5010,7 @@ class TestUnholdBaremetalProvisionState(TestBaremetal):
 
 
 class TestListFirmwareComponents(TestBaremetal):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestListFirmwareComponents, self).setUp()
 
         self.baremetal_mock.node.list_firmware_components.return_value = (
@@ -5001,7 +5020,7 @@ class TestListFirmwareComponents(TestBaremetal):
         self.cmd = baremetal_node.ListFirmwareComponentBaremetalNode(self.app,
                                                                      None)
 
-    def test_baremetal_list_firmware_components(self):
+    def test_baremetal_list_firmware_components(self) -> None:
         arglist = ['node_uuid']
         verifylist = [('node', 'node_uuid')]
 

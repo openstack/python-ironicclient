@@ -14,6 +14,8 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 import copy
 from unittest import mock
 
@@ -26,7 +28,7 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 class TestChassis(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestChassis, self).setUp()
 
         # Get a shortcut to the baremetal manager mock
@@ -35,7 +37,7 @@ class TestChassis(baremetal_fakes.TestBaremetal):
 
 
 class TestChassisCreate(TestChassis):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestChassisCreate, self).setUp()
 
         self.baremetal_mock.chassis.create.return_value = (
@@ -61,7 +63,12 @@ class TestChassisCreate(TestChassis):
         )
         self.actual_kwargs = {}
 
-    def check_with_options(self, addl_arglist, addl_verifylist, addl_kwargs):
+    def check_with_options(
+            self,
+            addl_arglist: list[str],
+            addl_verifylist: list[tuple[str, object]],
+            addl_kwargs: dict[str, object],
+    ) -> None:
         arglist = copy.copy(self.arglist) + addl_arglist
         verifylist = copy.copy(self.verifylist) + addl_verifylist
 
@@ -82,16 +89,16 @@ class TestChassisCreate(TestChassis):
 
         self.baremetal_mock.chassis.create.assert_called_once_with(**kwargs)
 
-    def test_chassis_create_no_options(self):
+    def test_chassis_create_no_options(self) -> None:
         self.check_with_options([], [], {})
 
-    def test_chassis_create_with_description(self):
+    def test_chassis_create_with_description(self) -> None:
         description = 'chassis description'
         self.check_with_options(['--description', description],
                                 [('description', description)],
                                 {'description': description})
 
-    def test_chassis_create_with_extra(self):
+    def test_chassis_create_with_extra(self) -> None:
         extra1 = 'arg1=val1'
         extra2 = 'arg2=val2'
         self.check_with_options(['--extra', extra1,
@@ -101,7 +108,7 @@ class TestChassisCreate(TestChassis):
                                     'arg1': 'val1',
                                     'arg2': 'val2'}})
 
-    def test_chassis_create_with_uuid(self):
+    def test_chassis_create_with_uuid(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         self.check_with_options(['--uuid', uuid],
                                 [('uuid', uuid)],
@@ -109,7 +116,7 @@ class TestChassisCreate(TestChassis):
 
 
 class TestChassisDelete(TestChassis):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestChassisDelete, self).setUp()
 
         self.baremetal_mock.chassis.get.return_value = (
@@ -122,7 +129,7 @@ class TestChassisDelete(TestChassis):
         # Get the command object to test
         self.cmd = baremetal_chassis.DeleteBaremetalChassis(self.app, None)
 
-    def test_chassis_delete(self):
+    def test_chassis_delete(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         arglist = [uuid]
         verifylist = []
@@ -133,7 +140,7 @@ class TestChassisDelete(TestChassis):
 
         self.baremetal_mock.chassis.delete.assert_called_with(uuid)
 
-    def test_chassis_delete_multiple(self):
+    def test_chassis_delete_multiple(self) -> None:
         uuid1 = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
         uuid2 = '11111111-2222-3333-4444-555555555555'
         arglist = [uuid1, uuid2]
@@ -150,7 +157,7 @@ class TestChassisDelete(TestChassis):
         )
         self.assertEqual(2, self.baremetal_mock.chassis.delete.call_count)
 
-    def test_chassis_delete_multiple_with_failure(self):
+    def test_chassis_delete_multiple_with_failure(self) -> None:
         uuid1 = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
         uuid2 = '11111111-2222-3333-4444-555555555555'
         arglist = [uuid1, uuid2]
@@ -175,7 +182,7 @@ class TestChassisDelete(TestChassis):
 
 class TestChassisList(TestChassis):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestChassisList, self).setUp()
 
         self.baremetal_mock.chassis.list.return_value = [
@@ -189,7 +196,7 @@ class TestChassisList(TestChassis):
         # Get the command object to test
         self.cmd = baremetal_chassis.ListBaremetalChassis(self.app, None)
 
-    def test_chassis_list_no_options(self):
+    def test_chassis_list_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -219,7 +226,7 @@ class TestChassisList(TestChassis):
         ), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_chassis_list_long(self):
+    def test_chassis_list_long(self) -> None:
         arglist = [
             '--long',
         ]
@@ -254,7 +261,7 @@ class TestChassisList(TestChassis):
         ), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_chassis_list_fields(self):
+    def test_chassis_list_fields(self) -> None:
         arglist = [
             '--fields', 'uuid', 'extra',
         ]
@@ -278,7 +285,7 @@ class TestChassisList(TestChassis):
             **kwargs
         )
 
-    def test_chassis_list_fields_multiple(self):
+    def test_chassis_list_fields_multiple(self) -> None:
         arglist = [
             '--fields', 'uuid', 'description',
             '--fields', 'extra',
@@ -303,7 +310,7 @@ class TestChassisList(TestChassis):
             **kwargs
         )
 
-    def test_chassis_list_invalid_fields(self):
+    def test_chassis_list_invalid_fields(self) -> None:
         arglist = [
             '--fields', 'uuid', 'invalid'
         ]
@@ -315,7 +322,7 @@ class TestChassisList(TestChassis):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_chassis_list_long_and_fields(self):
+    def test_chassis_list_long_and_fields(self) -> None:
         arglist = [
             '--long',
             '--fields', 'uuid', 'invalid'
@@ -331,7 +338,7 @@ class TestChassisList(TestChassis):
 
 
 class TestChassisSet(TestChassis):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestChassisSet, self).setUp()
 
         self.baremetal_mock.chassis.update.return_value = (
@@ -344,7 +351,7 @@ class TestChassisSet(TestChassis):
         # Get the command object to test
         self.cmd = baremetal_chassis.SetBaremetalChassis(self.app, None)
 
-    def test_chassis_set_no_options(self):
+    def test_chassis_set_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -352,7 +359,7 @@ class TestChassisSet(TestChassis):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_chassis_set_no_property(self):
+    def test_chassis_set_no_property(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         arglist = [uuid]
         verifylist = [('chassis', uuid)]
@@ -361,7 +368,7 @@ class TestChassisSet(TestChassis):
         self.cmd.take_action(parsed_args)
         self.assertFalse(self.baremetal_mock.chassis.update.called)
 
-    def test_chassis_set_description(self):
+    def test_chassis_set_description(self) -> None:
         description = 'new description'
         uuid = baremetal_fakes.baremetal_chassis_uuid
         arglist = [
@@ -382,7 +389,7 @@ class TestChassisSet(TestChassis):
             [{'path': '/description', 'value': description, 'op': 'add'}]
         )
 
-    def test_chassis_set_extra(self):
+    def test_chassis_set_extra(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         extra = 'foo=bar'
         arglist = [
@@ -405,7 +412,7 @@ class TestChassisSet(TestChassis):
 
 
 class TestChassisShow(TestChassis):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestChassisShow, self).setUp()
 
         self.baremetal_mock.chassis.get.return_value = (
@@ -418,7 +425,7 @@ class TestChassisShow(TestChassis):
         # Get the command object to test
         self.cmd = baremetal_chassis.ShowBaremetalChassis(self.app, None)
 
-    def test_chassis_show(self):
+    def test_chassis_show(self) -> None:
         arglist = [baremetal_fakes.baremetal_chassis_uuid]
         verifylist = []
 
@@ -448,7 +455,7 @@ class TestChassisShow(TestChassis):
         )
         self.assertEqual(datalist, tuple(data))
 
-    def test_chassis_show_no_chassis(self):
+    def test_chassis_show_no_chassis(self) -> None:
         arglist = []
         verifylist = []
 
@@ -456,7 +463,7 @@ class TestChassisShow(TestChassis):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_chassis_show_fields(self):
+    def test_chassis_show_fields(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         arglist = [
             uuid,
@@ -479,7 +486,7 @@ class TestChassisShow(TestChassis):
             *args, fields=fields
         )
 
-    def test_chassis_show_fields_multiple(self):
+    def test_chassis_show_fields_multiple(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         arglist = [
             uuid,
@@ -503,7 +510,7 @@ class TestChassisShow(TestChassis):
             *args, fields=fields
         )
 
-    def test_chassis_show_invalid_fields(self):
+    def test_chassis_show_invalid_fields(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         arglist = [
             uuid,
@@ -520,7 +527,7 @@ class TestChassisShow(TestChassis):
 
 
 class TestChassisUnset(TestChassis):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestChassisUnset, self).setUp()
 
         self.baremetal_mock.chassis.update.return_value = (
@@ -533,7 +540,7 @@ class TestChassisUnset(TestChassis):
         # Get the command object to test
         self.cmd = baremetal_chassis.UnsetBaremetalChassis(self.app, None)
 
-    def test_chassis_unset_no_options(self):
+    def test_chassis_unset_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -541,7 +548,7 @@ class TestChassisUnset(TestChassis):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_chassis_unset_no_property(self):
+    def test_chassis_unset_no_property(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         arglist = [uuid]
         verifylist = [('chassis', uuid)]
@@ -550,7 +557,7 @@ class TestChassisUnset(TestChassis):
         self.cmd.take_action(parsed_args)
         self.assertFalse(self.baremetal_mock.chassis.update.called)
 
-    def test_chassis_unset_description(self):
+    def test_chassis_unset_description(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         arglist = [
             uuid,
@@ -570,7 +577,7 @@ class TestChassisUnset(TestChassis):
             [{'path': '/description', 'op': 'remove'}]
         )
 
-    def test_chassis_unset_extra(self):
+    def test_chassis_unset_extra(self) -> None:
         uuid = baremetal_fakes.baremetal_chassis_uuid
         arglist = [
             uuid,

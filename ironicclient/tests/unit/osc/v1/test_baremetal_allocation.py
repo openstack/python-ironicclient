@@ -11,6 +11,8 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 import copy
 from unittest import mock
 
@@ -23,7 +25,7 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 class TestBaremetalAllocation(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalAllocation, self).setUp()
 
         self.baremetal_mock = self.app.client_manager.baremetal
@@ -32,7 +34,7 @@ class TestBaremetalAllocation(baremetal_fakes.TestBaremetal):
 
 class TestCreateBaremetalAllocation(TestBaremetalAllocation):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestCreateBaremetalAllocation, self).setUp()
 
         self.baremetal_mock.allocation.create.return_value = (
@@ -53,7 +55,7 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
         self.cmd = baremetal_allocation.CreateBaremetalAllocation(self.app,
                                                                   None)
 
-    def test_baremetal_allocation_create(self):
+    def test_baremetal_allocation_create(self) -> None:
         arglist = [
             '--resource-class', baremetal_fakes.baremetal_resource_class,
         ]
@@ -72,7 +74,7 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
 
         self.baremetal_mock.allocation.create.assert_called_once_with(**args)
 
-    def test_baremetal_allocation_create_wait(self):
+    def test_baremetal_allocation_create_wait(self) -> None:
         arglist = [
             '--resource-class', baremetal_fakes.baremetal_resource_class,
             '--wait',
@@ -95,7 +97,7 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
         self.baremetal_mock.allocation.wait.assert_called_once_with(
             baremetal_fakes.ALLOCATION['uuid'], timeout=0)
 
-    def test_baremetal_allocation_create_wait_with_timeout(self):
+    def test_baremetal_allocation_create_wait_with_timeout(self) -> None:
         arglist = [
             '--resource-class', baremetal_fakes.baremetal_resource_class,
             '--wait', '3600',
@@ -118,7 +120,7 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
         self.baremetal_mock.allocation.wait.assert_called_once_with(
             baremetal_fakes.ALLOCATION['uuid'], timeout=3600)
 
-    def test_baremetal_allocation_create_name_extras(self):
+    def test_baremetal_allocation_create_name_extras(self) -> None:
         arglist = [
             '--resource-class', baremetal_fakes.baremetal_resource_class,
             '--uuid', baremetal_fakes.baremetal_uuid,
@@ -147,7 +149,7 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
 
         self.baremetal_mock.allocation.create.assert_called_once_with(**args)
 
-    def test_baremetal_allocation_create_nodes_and_traits(self):
+    def test_baremetal_allocation_create_nodes_and_traits(self) -> None:
         arglist = [
             '--resource-class', baremetal_fakes.baremetal_resource_class,
             '--candidate-node', 'node1',
@@ -174,7 +176,7 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
 
         self.baremetal_mock.allocation.create.assert_called_once_with(**args)
 
-    def test_baremetal_allocation_create_owner(self):
+    def test_baremetal_allocation_create_owner(self) -> None:
         arglist = [
             '--resource-class', baremetal_fakes.baremetal_resource_class,
             '--owner', baremetal_fakes.baremetal_owner,
@@ -196,7 +198,7 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
 
         self.baremetal_mock.allocation.create.assert_called_once_with(**args)
 
-    def test_baremetal_allocation_create_no_options(self):
+    def test_baremetal_allocation_create_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -205,7 +207,7 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
                           self.cmd.take_action,
                           parsed_args)
 
-    def test_baremetal_allocation_backfill(self):
+    def test_baremetal_allocation_backfill(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
         ]
@@ -227,7 +229,7 @@ class TestCreateBaremetalAllocation(TestBaremetalAllocation):
 
 class TestShowBaremetalAllocation(TestBaremetalAllocation):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestShowBaremetalAllocation, self).setUp()
 
         self.baremetal_mock.allocation.get.return_value = (
@@ -238,7 +240,7 @@ class TestShowBaremetalAllocation(TestBaremetalAllocation):
 
         self.cmd = baremetal_allocation.ShowBaremetalAllocation(self.app, None)
 
-    def test_baremetal_allocation_show(self):
+    def test_baremetal_allocation_show(self) -> None:
         arglist = [baremetal_fakes.baremetal_uuid]
         verifylist = [('allocation', baremetal_fakes.baremetal_uuid)]
 
@@ -261,7 +263,7 @@ class TestShowBaremetalAllocation(TestBaremetalAllocation):
 
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_allocation_show_no_options(self):
+    def test_baremetal_allocation_show_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
@@ -270,7 +272,7 @@ class TestShowBaremetalAllocation(TestBaremetalAllocation):
 
 
 class TestBaremetalAllocationList(TestBaremetalAllocation):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalAllocationList, self).setUp()
 
         self.baremetal_mock.allocation.list.return_value = [
@@ -281,7 +283,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         ]
         self.cmd = baremetal_allocation.ListBaremetalAllocation(self.app, None)
 
-    def test_baremetal_allocation_list(self):
+    def test_baremetal_allocation_list(self) -> None:
         arglist = []
         verifylist = []
 
@@ -308,7 +310,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
                      baremetal_fakes.baremetal_uuid),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_allocation_list_node(self):
+    def test_baremetal_allocation_list_node(self) -> None:
         arglist = ['--node', baremetal_fakes.baremetal_uuid]
         verifylist = [('node', baremetal_fakes.baremetal_uuid)]
 
@@ -336,7 +338,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
                      baremetal_fakes.baremetal_uuid),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_allocation_list_resource_class(self):
+    def test_baremetal_allocation_list_resource_class(self) -> None:
         arglist = ['--resource-class',
                    baremetal_fakes.baremetal_resource_class]
         verifylist = [('resource_class',
@@ -366,7 +368,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
                      baremetal_fakes.baremetal_uuid),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_allocation_list_owner(self):
+    def test_baremetal_allocation_list_owner(self) -> None:
         arglist = ['--owner',
                    baremetal_fakes.baremetal_owner]
         verifylist = [('owner',
@@ -396,7 +398,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
                      baremetal_fakes.baremetal_uuid),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_allocation_list_state(self):
+    def test_baremetal_allocation_list_state(self) -> None:
         arglist = ['--state', baremetal_fakes.baremetal_allocation_state]
         verifylist = [('state', baremetal_fakes.baremetal_allocation_state)]
 
@@ -424,7 +426,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
                      baremetal_fakes.baremetal_uuid),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_allocation_list_long(self):
+    def test_baremetal_allocation_list_long(self) -> None:
         arglist = ['--long']
         verifylist = [('long', True)]
 
@@ -465,7 +467,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
                      ''),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_allocation_list_fields(self):
+    def test_baremetal_allocation_list_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'node_uuid']
         verifylist = [('fields', [['uuid', 'node_uuid']])]
 
@@ -479,7 +481,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         }
         self.baremetal_mock.allocation.list.assert_called_once_with(**kwargs)
 
-    def test_baremetal_allocation_list_fields_multiple(self):
+    def test_baremetal_allocation_list_fields_multiple(self) -> None:
         arglist = ['--fields', 'uuid', 'node_uuid', '--fields', 'extra']
         verifylist = [('fields', [['uuid', 'node_uuid'], ['extra']])]
 
@@ -493,7 +495,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
         }
         self.baremetal_mock.allocation.list.assert_called_once_with(**kwargs)
 
-    def test_baremetal_allocation_list_invalid_fields(self):
+    def test_baremetal_allocation_list_invalid_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'invalid']
         verifylist = [('fields', [['uuid', 'invalid']])]
         self.assertRaises(osctestutils.ParserException,
@@ -503,7 +505,7 @@ class TestBaremetalAllocationList(TestBaremetalAllocation):
 
 class TestBaremetalAllocationDelete(TestBaremetalAllocation):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalAllocationDelete, self).setUp()
 
         self.baremetal_mock.allocation.get.return_value = (
@@ -515,7 +517,7 @@ class TestBaremetalAllocationDelete(TestBaremetalAllocation):
         self.cmd = baremetal_allocation.DeleteBaremetalAllocation(self.app,
                                                                   None)
 
-    def test_baremetal_allocation_delete(self):
+    def test_baremetal_allocation_delete(self) -> None:
         arglist = [baremetal_fakes.baremetal_uuid]
         verifylist = []
 
@@ -525,7 +527,7 @@ class TestBaremetalAllocationDelete(TestBaremetalAllocation):
         self.baremetal_mock.allocation.delete.assert_called_once_with(
             baremetal_fakes.baremetal_uuid)
 
-    def test_baremetal_allocation_delete_multiple(self):
+    def test_baremetal_allocation_delete_multiple(self) -> None:
         arglist = [baremetal_fakes.baremetal_uuid,
                    baremetal_fakes.baremetal_name]
         verifylist = []
@@ -538,7 +540,7 @@ class TestBaremetalAllocationDelete(TestBaremetalAllocation):
         )
         self.assertEqual(2, self.baremetal_mock.allocation.delete.call_count)
 
-    def test_baremetal_allocation_delete_no_options(self):
+    def test_baremetal_allocation_delete_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
@@ -547,7 +549,7 @@ class TestBaremetalAllocationDelete(TestBaremetalAllocation):
 
 
 class TestBaremetalAllocationSet(TestBaremetalAllocation):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalAllocationSet, self).setUp()
 
         self.baremetal_mock.allocation.update.return_value = (
@@ -559,7 +561,7 @@ class TestBaremetalAllocationSet(TestBaremetalAllocation):
         self.cmd = baremetal_allocation.SetBaremetalAllocation(
             self.app, None)
 
-    def test_baremetal_allocation_set_name(self):
+    def test_baremetal_allocation_set_name(self) -> None:
         new_name = 'foo'
         arglist = [
             baremetal_fakes.baremetal_uuid,
@@ -575,7 +577,7 @@ class TestBaremetalAllocationSet(TestBaremetalAllocation):
             baremetal_fakes.baremetal_uuid,
             [{'path': '/name', 'value': new_name, 'op': 'add'}])
 
-    def test_baremetal_allocation_set_extra(self):
+    def test_baremetal_allocation_set_extra(self) -> None:
         extra_value = 'foo=bar'
         arglist = [
             baremetal_fakes.baremetal_uuid,
@@ -591,7 +593,7 @@ class TestBaremetalAllocationSet(TestBaremetalAllocation):
             baremetal_fakes.baremetal_uuid,
             [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}])
 
-    def test_baremetal_allocation_set_no_options(self):
+    def test_baremetal_allocation_set_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
@@ -600,7 +602,7 @@ class TestBaremetalAllocationSet(TestBaremetalAllocation):
 
 
 class TestBaremetalAllocationUnset(TestBaremetalAllocation):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalAllocationUnset, self).setUp()
 
         self.baremetal_mock.allocation.update.return_value = (
@@ -612,7 +614,7 @@ class TestBaremetalAllocationUnset(TestBaremetalAllocation):
         self.cmd = baremetal_allocation.UnsetBaremetalAllocation(
             self.app, None)
 
-    def test_baremetal_allocation_unset_name(self):
+    def test_baremetal_allocation_unset_name(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_uuid, '--name']
         verifylist = [('allocation',
@@ -626,7 +628,7 @@ class TestBaremetalAllocationUnset(TestBaremetalAllocation):
             baremetal_fakes.baremetal_uuid,
             [{'path': '/name', 'op': 'remove'}])
 
-    def test_baremetal_allocation_unset_extra(self):
+    def test_baremetal_allocation_unset_extra(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_uuid, '--extra', 'key1']
         verifylist = [('allocation',
@@ -640,7 +642,7 @@ class TestBaremetalAllocationUnset(TestBaremetalAllocation):
             baremetal_fakes.baremetal_uuid,
             [{'path': '/extra/key1', 'op': 'remove'}])
 
-    def test_baremetal_allocation_unset_multiple_extras(self):
+    def test_baremetal_allocation_unset_multiple_extras(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_uuid,
             '--extra', 'key1', '--extra', 'key2']
@@ -656,14 +658,14 @@ class TestBaremetalAllocationUnset(TestBaremetalAllocation):
             [{'path': '/extra/key1', 'op': 'remove'},
              {'path': '/extra/key2', 'op': 'remove'}])
 
-    def test_baremetal_allocation_unset_no_options(self):
+    def test_baremetal_allocation_unset_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_allocation_unset_no_property(self):
+    def test_baremetal_allocation_unset_no_property(self) -> None:
         uuid = baremetal_fakes.baremetal_uuid
         arglist = [uuid]
         verifylist = [('allocation', uuid)]

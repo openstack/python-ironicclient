@@ -197,7 +197,6 @@ disable_error_code = [
     "assignment",
     "attr-defined",
     "call-arg",
-    "call-overload",
     "dict-item",
     "func-returns-value",
     "index",
@@ -209,14 +208,7 @@ disable_error_code = [
 ]
 
 [[tool.mypy.overrides]]
-module = [
-    "ironicclient.tests.unit.common.*",
-    "ironicclient.tests.unit.utils",
-    "ironicclient.tests.unit.test_client",
-    "ironicclient.tests.unit.test_exc",
-    "ironicclient.tests.unit.test_import",
-    "ironicclient.tests.unit.v1.*",
-]
+module = ["ironicclient.tests.unit.*"]
 disallow_untyped_calls = true
 disallow_untyped_defs = true
 disallow_subclassing_any = false

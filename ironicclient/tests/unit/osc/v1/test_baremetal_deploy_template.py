@@ -11,6 +11,8 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 import copy
 import json
 from unittest import mock
@@ -24,7 +26,7 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 class TestBaremetalDeployTemplate(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalDeployTemplate, self).setUp()
 
         self.baremetal_mock = self.app.client_manager.baremetal
@@ -32,7 +34,7 @@ class TestBaremetalDeployTemplate(baremetal_fakes.TestBaremetal):
 
 
 class TestCreateBaremetalDeployTemplate(TestBaremetalDeployTemplate):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestCreateBaremetalDeployTemplate, self).setUp()
 
         self.baremetal_mock.deploy_template.create.return_value = (
@@ -46,7 +48,7 @@ class TestCreateBaremetalDeployTemplate(TestBaremetalDeployTemplate):
         self.cmd = baremetal_deploy_template.CreateBaremetalDeployTemplate(
             self.app, None)
 
-    def test_baremetal_deploy_template_create(self):
+    def test_baremetal_deploy_template_create(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_deploy_template_name,
             '--steps', baremetal_fakes.baremetal_deploy_template_steps,
@@ -71,7 +73,7 @@ class TestCreateBaremetalDeployTemplate(TestBaremetalDeployTemplate):
         self.baremetal_mock.deploy_template.create.assert_called_once_with(
             **args)
 
-    def test_baremetal_deploy_template_create_uuid(self):
+    def test_baremetal_deploy_template_create_uuid(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_deploy_template_name,
             '--steps', baremetal_fakes.baremetal_deploy_template_steps,
@@ -99,7 +101,7 @@ class TestCreateBaremetalDeployTemplate(TestBaremetalDeployTemplate):
         self.baremetal_mock.deploy_template.create.assert_called_once_with(
             **args)
 
-    def test_baremetal_deploy_template_create_no_name(self):
+    def test_baremetal_deploy_template_create_no_name(self) -> None:
         arglist = [
             '--steps', baremetal_fakes.baremetal_deploy_template_steps,
         ]
@@ -113,7 +115,7 @@ class TestCreateBaremetalDeployTemplate(TestBaremetalDeployTemplate):
                           self.cmd, arglist, verifylist)
         self.assertFalse(self.baremetal_mock.deploy_template.create.called)
 
-    def test_baremetal_deploy_template_create_no_steps(self):
+    def test_baremetal_deploy_template_create_no_steps(self) -> None:
         arglist = [
             '--name', baremetal_fakes.baremetal_deploy_template_name,
         ]
@@ -129,7 +131,7 @@ class TestCreateBaremetalDeployTemplate(TestBaremetalDeployTemplate):
 
 
 class TestShowBaremetalDeployTemplate(TestBaremetalDeployTemplate):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestShowBaremetalDeployTemplate, self).setUp()
 
         self.baremetal_mock.deploy_template.get.return_value = (
@@ -141,7 +143,7 @@ class TestShowBaremetalDeployTemplate(TestBaremetalDeployTemplate):
         self.cmd = baremetal_deploy_template.ShowBaremetalDeployTemplate(
             self.app, None)
 
-    def test_baremetal_deploy_template_show(self):
+    def test_baremetal_deploy_template_show(self) -> None:
         arglist = [baremetal_fakes.baremetal_deploy_template_uuid]
         verifylist = [('template',
                       baremetal_fakes.baremetal_deploy_template_uuid)]
@@ -168,7 +170,7 @@ class TestShowBaremetalDeployTemplate(TestBaremetalDeployTemplate):
             baremetal_fakes.baremetal_deploy_template_uuid)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_deploy_template_show_no_template(self):
+    def test_baremetal_deploy_template_show_no_template(self) -> None:
         arglist = []
         verifylist = []
 
@@ -178,7 +180,7 @@ class TestShowBaremetalDeployTemplate(TestBaremetalDeployTemplate):
 
 
 class TestBaremetalDeployTemplateSet(TestBaremetalDeployTemplate):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalDeployTemplateSet, self).setUp()
 
         self.baremetal_mock.deploy_template.update.return_value = (
@@ -190,7 +192,7 @@ class TestBaremetalDeployTemplateSet(TestBaremetalDeployTemplate):
         self.cmd = baremetal_deploy_template.SetBaremetalDeployTemplate(
             self.app, None)
 
-    def test_baremetal_deploy_template_set_name(self):
+    def test_baremetal_deploy_template_set_name(self) -> None:
         new_name = 'foo'
         arglist = [
             baremetal_fakes.baremetal_deploy_template_uuid,
@@ -206,7 +208,7 @@ class TestBaremetalDeployTemplateSet(TestBaremetalDeployTemplate):
             baremetal_fakes.baremetal_deploy_template_uuid,
             [{'path': '/name', 'value': new_name, 'op': 'add'}])
 
-    def test_baremetal_deploy_template_set_steps(self):
+    def test_baremetal_deploy_template_set_steps(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_deploy_template_uuid,
             '--steps', baremetal_fakes.baremetal_deploy_template_steps]
@@ -223,7 +225,7 @@ class TestBaremetalDeployTemplateSet(TestBaremetalDeployTemplate):
             baremetal_fakes.baremetal_deploy_template_uuid,
             [{'path': '/steps', 'value': expected_steps, 'op': 'add'}])
 
-    def test_baremetal_deploy_template_set_no_options(self):
+    def test_baremetal_deploy_template_set_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
@@ -232,7 +234,7 @@ class TestBaremetalDeployTemplateSet(TestBaremetalDeployTemplate):
 
 
 class TestBaremetalDeployTemplateUnset(TestBaremetalDeployTemplate):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalDeployTemplateUnset, self).setUp()
 
         self.baremetal_mock.deploy_template.update.return_value = (
@@ -244,7 +246,7 @@ class TestBaremetalDeployTemplateUnset(TestBaremetalDeployTemplate):
         self.cmd = baremetal_deploy_template.UnsetBaremetalDeployTemplate(
             self.app, None)
 
-    def test_baremetal_deploy_template_unset_extra(self):
+    def test_baremetal_deploy_template_unset_extra(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_deploy_template_uuid, '--extra', 'key1']
         verifylist = [('template',
@@ -258,7 +260,7 @@ class TestBaremetalDeployTemplateUnset(TestBaremetalDeployTemplate):
             baremetal_fakes.baremetal_deploy_template_uuid,
             [{'path': '/extra/key1', 'op': 'remove'}])
 
-    def test_baremetal_deploy_template_unset_multiple_extras(self):
+    def test_baremetal_deploy_template_unset_multiple_extras(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_deploy_template_uuid,
             '--extra', 'key1', '--extra', 'key2']
@@ -274,14 +276,14 @@ class TestBaremetalDeployTemplateUnset(TestBaremetalDeployTemplate):
             [{'path': '/extra/key1', 'op': 'remove'},
              {'path': '/extra/key2', 'op': 'remove'}])
 
-    def test_baremetal_deploy_template_unset_no_options(self):
+    def test_baremetal_deploy_template_unset_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_deploy_template_unset_no_property(self):
+    def test_baremetal_deploy_template_unset_no_property(self) -> None:
         uuid = baremetal_fakes.baremetal_deploy_template_uuid
         arglist = [uuid]
         verifylist = [('template', uuid)]
@@ -292,13 +294,13 @@ class TestBaremetalDeployTemplateUnset(TestBaremetalDeployTemplate):
 
 
 class TestBaremetalDeployTemplateDelete(TestBaremetalDeployTemplate):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalDeployTemplateDelete, self).setUp()
 
         self.cmd = baremetal_deploy_template.DeleteBaremetalDeployTemplate(
             self.app, None)
 
-    def test_baremetal_deploy_template_delete(self):
+    def test_baremetal_deploy_template_delete(self) -> None:
         arglist = ['zzz-zzzzzz-zzzz']
         verifylist = []
 
@@ -308,7 +310,7 @@ class TestBaremetalDeployTemplateDelete(TestBaremetalDeployTemplate):
         args = 'zzz-zzzzzz-zzzz'
         self.baremetal_mock.deploy_template.delete.assert_called_with(args)
 
-    def test_baremetal_deploy_template_delete_multiple(self):
+    def test_baremetal_deploy_template_delete_multiple(self) -> None:
         arglist = ['zzz-zzzzzz-zzzz', 'fakename']
         verifylist = []
 
@@ -321,7 +323,7 @@ class TestBaremetalDeployTemplateDelete(TestBaremetalDeployTemplate):
         self.assertEqual(
             2, self.baremetal_mock.deploy_template.delete.call_count)
 
-    def test_baremetal_deploy_template_delete_multiple_with_fail(self):
+    def test_baremetal_deploy_template_delete_multiple_with_fail(self) -> None:
         arglist = ['zzz-zzzzzz-zzzz', 'badname']
         verifylist = []
 
@@ -338,7 +340,7 @@ class TestBaremetalDeployTemplateDelete(TestBaremetalDeployTemplate):
         self.assertEqual(
             2, self.baremetal_mock.deploy_template.delete.call_count)
 
-    def test_baremetal_deploy_template_delete_no_template(self):
+    def test_baremetal_deploy_template_delete_no_template(self) -> None:
         arglist = []
         verifylist = []
 
@@ -348,7 +350,7 @@ class TestBaremetalDeployTemplateDelete(TestBaremetalDeployTemplate):
 
 
 class TestBaremetalDeployTemplateList(TestBaremetalDeployTemplate):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalDeployTemplateList, self).setUp()
 
         self.baremetal_mock.deploy_template.list.return_value = [
@@ -361,7 +363,7 @@ class TestBaremetalDeployTemplateList(TestBaremetalDeployTemplate):
         self.cmd = baremetal_deploy_template.ListBaremetalDeployTemplate(
             self.app, None)
 
-    def test_baremetal_deploy_template_list(self):
+    def test_baremetal_deploy_template_list(self) -> None:
         arglist = []
         verifylist = []
 
@@ -384,7 +386,7 @@ class TestBaremetalDeployTemplateList(TestBaremetalDeployTemplate):
         ), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_deploy_template_list_long(self):
+    def test_baremetal_deploy_template_list_long(self) -> None:
         arglist = ['--long']
         verifylist = [('detail', True)]
 
@@ -412,7 +414,7 @@ class TestBaremetalDeployTemplateList(TestBaremetalDeployTemplate):
         ), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_deploy_template_list_fields(self):
+    def test_baremetal_deploy_template_list_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'steps']
         verifylist = [('fields', [['uuid', 'steps']])]
 
@@ -427,7 +429,7 @@ class TestBaremetalDeployTemplateList(TestBaremetalDeployTemplate):
         }
         self.baremetal_mock.deploy_template.list.assert_called_with(**kwargs)
 
-    def test_baremetal_deploy_template_list_fields_multiple(self):
+    def test_baremetal_deploy_template_list_fields_multiple(self) -> None:
         arglist = ['--fields', 'uuid', 'name', '--fields', 'steps']
         verifylist = [('fields', [['uuid', 'name'], ['steps']])]
 
@@ -442,7 +444,7 @@ class TestBaremetalDeployTemplateList(TestBaremetalDeployTemplate):
         }
         self.baremetal_mock.deploy_template.list.assert_called_with(**kwargs)
 
-    def test_baremetal_deploy_template_list_invalid_fields(self):
+    def test_baremetal_deploy_template_list_invalid_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'invalid']
         verifylist = [('fields', [['uuid', 'invalid']])]
         self.assertRaises(osctestutils.ParserException,

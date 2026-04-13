@@ -14,6 +14,8 @@
 #   under the License.
 #
 
+from __future__ import annotations
+
 import copy
 from unittest import mock
 
@@ -25,7 +27,7 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 class TestBaremetalPortGroup(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalPortGroup, self).setUp()
 
         self.baremetal_mock = self.app.client_manager.baremetal
@@ -34,7 +36,7 @@ class TestBaremetalPortGroup(baremetal_fakes.TestBaremetal):
 
 class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestCreateBaremetalPortGroup, self).setUp()
 
         self.baremetal_mock.portgroup.create.return_value = (
@@ -47,7 +49,7 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
         # Get the command object to test
         self.cmd = baremetal_portgroup.CreateBaremetalPortGroup(self.app, None)
 
-    def test_baremetal_portgroup_create(self):
+    def test_baremetal_portgroup_create(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
         ]
@@ -68,7 +70,7 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
 
-    def test_baremetal_portgroup_create_name_address_uuid(self):
+    def test_baremetal_portgroup_create_name_address_uuid(self) -> None:
         arglist = [
             '--address', baremetal_fakes.baremetal_portgroup_address,
             '--node', baremetal_fakes.baremetal_uuid,
@@ -98,7 +100,7 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
 
-    def test_baremetal_portgroup_create_support_standalone_ports(self):
+    def test_baremetal_portgroup_create_support_standalone_ports(self) -> None:
         arglist = [
             '--address', baremetal_fakes.baremetal_portgroup_address,
             '--node', baremetal_fakes.baremetal_uuid,
@@ -125,7 +127,8 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
 
-    def test_baremetal_portgroup_create_unsupport_standalone_ports(self):
+    def test_baremetal_portgroup_create_unsupport_standalone_ports(
+            self) -> None:
         arglist = [
             '--address', baremetal_fakes.baremetal_portgroup_address,
             '--node', baremetal_fakes.baremetal_uuid,
@@ -152,7 +155,7 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
 
-    def test_baremetal_portgroup_create_name_extras(self):
+    def test_baremetal_portgroup_create_name_extras(self) -> None:
         arglist = [
             '--address', baremetal_fakes.baremetal_portgroup_address,
             '--node', baremetal_fakes.baremetal_uuid,
@@ -183,7 +186,7 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
 
-    def test_baremetal_portgroup_create_mode_properties(self):
+    def test_baremetal_portgroup_create_mode_properties(self) -> None:
         arglist = [
             '--node', baremetal_fakes.baremetal_uuid,
             '--mode', baremetal_fakes.baremetal_portgroup_mode,
@@ -211,7 +214,7 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
 
-    def test_baremetal_portgroup_create_no_options(self):
+    def test_baremetal_portgroup_create_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -219,7 +222,7 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_portgroup_create_physical_network(self):
+    def test_baremetal_portgroup_create_physical_network(self) -> None:
         arglist = [
             '--address', baremetal_fakes.baremetal_portgroup_address,
             '--node', baremetal_fakes.baremetal_uuid,
@@ -249,7 +252,7 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
 
-    def test_baremetal_portgroup_create_category(self):
+    def test_baremetal_portgroup_create_category(self) -> None:
         arglist = [
             '--address', baremetal_fakes.baremetal_portgroup_address,
             '--node', baremetal_fakes.baremetal_uuid,
@@ -279,7 +282,7 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
 class TestShowBaremetalPortGroup(TestBaremetalPortGroup):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestShowBaremetalPortGroup, self).setUp()
 
         self.baremetal_mock.portgroup.get.return_value = (
@@ -296,7 +299,7 @@ class TestShowBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.cmd = baremetal_portgroup.ShowBaremetalPortGroup(self.app, None)
 
-    def test_baremetal_portgroup_show(self):
+    def test_baremetal_portgroup_show(self) -> None:
         arglist = ['ppp-gggggg-pppp']
         verifylist = [('portgroup', baremetal_fakes.baremetal_portgroup_uuid)]
 
@@ -327,7 +330,7 @@ class TestShowBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_portgroup_show_address(self):
+    def test_baremetal_portgroup_show_address(self) -> None:
         arglist = ['--address', baremetal_fakes.baremetal_portgroup_address]
         verifylist = [('address', True)]
 
@@ -338,7 +341,7 @@ class TestShowBaremetalPortGroup(TestBaremetalPortGroup):
         self.baremetal_mock.portgroup.get_by_address.assert_called_with(
             *args, fields=None)
 
-    def test_baremetal_portgroup_show_no_options(self):
+    def test_baremetal_portgroup_show_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
@@ -347,7 +350,7 @@ class TestShowBaremetalPortGroup(TestBaremetalPortGroup):
 
 
 class TestBaremetalPortGroupList(TestBaremetalPortGroup):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalPortGroupList, self).setUp()
 
         self.baremetal_mock.portgroup.list.return_value = [
@@ -358,7 +361,7 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
         ]
         self.cmd = baremetal_portgroup.ListBaremetalPortGroup(self.app, None)
 
-    def test_baremetal_portgroup_list(self):
+    def test_baremetal_portgroup_list(self) -> None:
         arglist = []
         verifylist = []
 
@@ -381,7 +384,7 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
                      baremetal_fakes.baremetal_portgroup_name),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_portgroup_list_address(self):
+    def test_baremetal_portgroup_list_address(self) -> None:
         arglist = ['--address', baremetal_fakes.baremetal_portgroup_address]
         verifylist = [('address', baremetal_fakes.baremetal_portgroup_address)]
 
@@ -405,7 +408,7 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
                      baremetal_fakes.baremetal_portgroup_name),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_portgroup_list_node(self):
+    def test_baremetal_portgroup_list_node(self) -> None:
         arglist = ['--node', baremetal_fakes.baremetal_uuid]
         verifylist = [('node', baremetal_fakes.baremetal_uuid)]
 
@@ -429,7 +432,7 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
                      baremetal_fakes.baremetal_portgroup_name),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_portgroup_list_long(self):
+    def test_baremetal_portgroup_list_long(self) -> None:
         arglist = ['--long']
         verifylist = [('detail', True)]
 
@@ -466,7 +469,7 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
                      ),)
         self.assertEqual(datalist, tuple(data))
 
-    def test_baremetal_portgroup_list_fields(self):
+    def test_baremetal_portgroup_list_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'address']
         verifylist = [('fields', [['uuid', 'address']])]
 
@@ -481,7 +484,7 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
         }
         self.baremetal_mock.portgroup.list.assert_called_with(**kwargs)
 
-    def test_baremetal_portgroup_list_fields_multiple(self):
+    def test_baremetal_portgroup_list_fields_multiple(self) -> None:
         arglist = ['--fields', 'uuid', 'address', '--fields', 'extra']
         verifylist = [('fields', [['uuid', 'address'], ['extra']])]
 
@@ -496,14 +499,14 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
         }
         self.baremetal_mock.portgroup.list.assert_called_with(**kwargs)
 
-    def test_baremetal_portgroup_list_invalid_fields(self):
+    def test_baremetal_portgroup_list_invalid_fields(self) -> None:
         arglist = ['--fields', 'uuid', 'invalid']
         verifylist = [('fields', [['uuid', 'invalid']])]
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_portgroup_list_by_shards(self):
+    def test_baremetal_portgroup_list_by_shards(self) -> None:
         arglist = ['--shards', 'shard1', 'shard2']
         verifylist = [('shards', ['shard1', 'shard2'])]
 
@@ -530,7 +533,7 @@ class TestBaremetalPortGroupList(TestBaremetalPortGroup):
 
 class TestBaremetalPortGroupDelete(TestBaremetalPortGroup):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalPortGroupDelete, self).setUp()
 
         self.baremetal_mock.portgroup.get.return_value = (
@@ -541,7 +544,7 @@ class TestBaremetalPortGroupDelete(TestBaremetalPortGroup):
 
         self.cmd = baremetal_portgroup.DeleteBaremetalPortGroup(self.app, None)
 
-    def test_baremetal_portgroup_delete(self):
+    def test_baremetal_portgroup_delete(self) -> None:
         arglist = [baremetal_fakes.baremetal_portgroup_uuid]
         verifylist = []
 
@@ -551,7 +554,7 @@ class TestBaremetalPortGroupDelete(TestBaremetalPortGroup):
         args = baremetal_fakes.baremetal_portgroup_uuid
         self.baremetal_mock.portgroup.delete.assert_called_with(args)
 
-    def test_baremetal_portgroup_delete_multiple(self):
+    def test_baremetal_portgroup_delete_multiple(self) -> None:
         arglist = [baremetal_fakes.baremetal_portgroup_uuid,
                    baremetal_fakes.baremetal_portgroup_name]
         verifylist = []
@@ -565,7 +568,7 @@ class TestBaremetalPortGroupDelete(TestBaremetalPortGroup):
             [mock.call(x) for x in args])
         self.assertEqual(2, self.baremetal_mock.portgroup.delete.call_count)
 
-    def test_baremetal_portgroup_delete_no_options(self):
+    def test_baremetal_portgroup_delete_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
@@ -574,7 +577,7 @@ class TestBaremetalPortGroupDelete(TestBaremetalPortGroup):
 
 
 class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalPortGroupSet, self).setUp()
 
         self.baremetal_mock.portgroup.update.return_value = (
@@ -585,7 +588,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
 
         self.cmd = baremetal_portgroup.SetBaremetalPortGroup(self.app, None)
 
-    def test_baremetal_portgroup_set_name(self):
+    def test_baremetal_portgroup_set_name(self) -> None:
         new_portgroup_name = 'New-Portgroup-name'
         arglist = [
             baremetal_fakes.baremetal_portgroup_uuid,
@@ -601,7 +604,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             baremetal_fakes.baremetal_portgroup_uuid,
             [{'path': '/name', 'value': new_portgroup_name, 'op': 'add'}])
 
-    def test_baremetal_portgroup_set_address(self):
+    def test_baremetal_portgroup_set_address(self) -> None:
         new_portgroup_address = '00:22:44:66:88:00'
         arglist = [
             baremetal_fakes.baremetal_portgroup_uuid,
@@ -618,7 +621,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             [{'path': '/address', 'value': new_portgroup_address,
               'op': 'add'}])
 
-    def test_baremetal_portgroup_set_mode(self):
+    def test_baremetal_portgroup_set_mode(self) -> None:
         new_portgroup_mode = '802.3ad'
         arglist = [
             baremetal_fakes.baremetal_portgroup_uuid,
@@ -635,7 +638,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             [{'path': '/mode', 'value': new_portgroup_mode,
               'op': 'add'}])
 
-    def test_baremetal_portgroup_set_mode_int(self):
+    def test_baremetal_portgroup_set_mode_int(self) -> None:
         new_portgroup_mode = '4'
         arglist = [
             baremetal_fakes.baremetal_portgroup_uuid,
@@ -652,7 +655,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             [{'path': '/mode', 'value': new_portgroup_mode,
               'op': 'add'}])
 
-    def test_baremetal_portgroup_set_node_uuid(self):
+    def test_baremetal_portgroup_set_node_uuid(self) -> None:
         new_node_uuid = 'nnnnnn-uuuuuuuu'
         arglist = [
             baremetal_fakes.baremetal_portgroup_uuid,
@@ -669,7 +672,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             [{'path': '/node_uuid', 'value': new_node_uuid,
               'op': 'add'}])
 
-    def test_baremetal_portgroup_set_support_standalone_ports(self):
+    def test_baremetal_portgroup_set_support_standalone_ports(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_portgroup_uuid,
             '--support-standalone-ports']
@@ -685,7 +688,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             [{'path': '/standalone_ports_supported', 'value': 'True',
               'op': 'add'}])
 
-    def test_baremetal_portgroup_set_unsupport_standalone_ports(self):
+    def test_baremetal_portgroup_set_unsupport_standalone_ports(self) -> None:
         arglist = [
             baremetal_fakes.baremetal_portgroup_uuid,
             '--unsupport-standalone-ports']
@@ -701,7 +704,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             [{'path': '/standalone_ports_supported', 'value': 'False',
               'op': 'add'}])
 
-    def test_baremetal_set_extra(self):
+    def test_baremetal_set_extra(self) -> None:
         arglist = ['portgroup', '--extra', 'foo=bar']
         verifylist = [('portgroup', 'portgroup'),
                       ('extra', ['foo=bar'])]
@@ -713,7 +716,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             'portgroup',
             [{'path': '/extra/foo', 'value': 'bar', 'op': 'add'}])
 
-    def test_baremetal_portgroup_set_multiple_extras(self):
+    def test_baremetal_portgroup_set_multiple_extras(self) -> None:
         arglist = ['portgroup',
                    '--extra', 'key1=val1',
                    '--extra', 'key2=val2']
@@ -728,7 +731,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             [{'path': '/extra/key1', 'value': 'val1', 'op': 'add'},
              {'path': '/extra/key2', 'value': 'val2', 'op': 'add'}])
 
-    def test_baremetal_portgroup_set_multiple_properties(self):
+    def test_baremetal_portgroup_set_multiple_properties(self) -> None:
         arglist = ['portgroup',
                    '--property', 'key3=val3',
                    '--property', 'key4=val4']
@@ -743,14 +746,14 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             [{'path': '/properties/key3', 'value': 'val3', 'op': 'add'},
              {'path': '/properties/key4', 'value': 'val4', 'op': 'add'}])
 
-    def test_baremetal_portgroup_set_no_options(self):
+    def test_baremetal_portgroup_set_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_portgroup_set_no_property(self):
+    def test_baremetal_portgroup_set_no_property(self) -> None:
         uuid = baremetal_fakes.baremetal_portgroup_uuid
         arglist = [uuid]
         verifylist = [('portgroup', uuid)]
@@ -759,7 +762,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
         self.cmd.take_action(parsed_args)
         self.assertFalse(self.baremetal_mock.portgroup.update.called)
 
-    def test_baremetal_portgroup_set_physical_network(self):
+    def test_baremetal_portgroup_set_physical_network(self) -> None:
         new_portgroup_physnet = 'physnet2'
         arglist = [
             baremetal_fakes.baremetal_portgroup_uuid,
@@ -776,7 +779,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
             [{'path': '/physical_network', 'value': new_portgroup_physnet,
               'op': 'add'}])
 
-    def test_baremetal_portgroup_set_category(self):
+    def test_baremetal_portgroup_set_category(self) -> None:
         new_portgroup_category = 'Purple'
         arglist = [
             baremetal_fakes.baremetal_portgroup_uuid,
@@ -795,7 +798,7 @@ class TestBaremetalPortGroupSet(TestBaremetalPortGroup):
 
 
 class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalPortGroupUnset, self).setUp()
 
         self.baremetal_mock.portgroup.update.return_value = (
@@ -806,7 +809,7 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
 
         self.cmd = baremetal_portgroup.UnsetBaremetalPortGroup(self.app, None)
 
-    def test_baremetal_portgroup_unset_extra(self):
+    def test_baremetal_portgroup_unset_extra(self) -> None:
         arglist = ['portgroup', '--extra', 'key1']
         verifylist = [('portgroup', 'portgroup'),
                       ('extra', ['key1'])]
@@ -818,7 +821,7 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
             'portgroup',
             [{'path': '/extra/key1', 'op': 'remove'}])
 
-    def test_baremetal_portgroup_unset_name(self):
+    def test_baremetal_portgroup_unset_name(self) -> None:
         arglist = ['portgroup', '--name']
         verifylist = [('name', True)]
 
@@ -829,7 +832,7 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
             'portgroup',
             [{'path': '/name', 'op': 'remove'}])
 
-    def test_baremetal_portgroup_unset_address(self):
+    def test_baremetal_portgroup_unset_address(self) -> None:
         arglist = ['portgroup', '--address']
         verifylist = [('address', True)]
 
@@ -840,7 +843,7 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
             'portgroup',
             [{'path': '/address', 'op': 'remove'}])
 
-    def test_baremetal_portgroup_unset_multiple_extras(self):
+    def test_baremetal_portgroup_unset_multiple_extras(self) -> None:
         arglist = ['portgroup',
                    '--extra', 'key1',
                    '--extra', 'key2']
@@ -855,7 +858,7 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
             [{'path': '/extra/key1', 'op': 'remove'},
              {'path': '/extra/key2', 'op': 'remove'}])
 
-    def test_baremetal_portgroup_unset_multiple_properties(self):
+    def test_baremetal_portgroup_unset_multiple_properties(self) -> None:
         arglist = ['portgroup',
                    '--property', 'key1',
                    '--property', 'key2']
@@ -870,14 +873,14 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
             [{'path': '/properties/key1', 'op': 'remove'},
              {'path': '/properties/key2', 'op': 'remove'}])
 
-    def test_baremetal_portgroup_unset_no_options(self):
+    def test_baremetal_portgroup_unset_no_options(self) -> None:
         arglist = []
         verifylist = []
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_baremetal_portgroup_unset_no_property(self):
+    def test_baremetal_portgroup_unset_no_property(self) -> None:
         uuid = baremetal_fakes.baremetal_portgroup_uuid
         arglist = [uuid]
         verifylist = [('portgroup', uuid)]
@@ -886,7 +889,7 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
         self.cmd.take_action(parsed_args)
         self.assertFalse(self.baremetal_mock.portgroup.update.called)
 
-    def test_baremetal_portgroup_unset_physical_network(self):
+    def test_baremetal_portgroup_unset_physical_network(self) -> None:
         arglist = ['portgroup', '--physical-network']
         verifylist = [('physical_network', True)]
 
@@ -897,7 +900,7 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
             'portgroup',
             [{'path': '/physical_network', 'op': 'remove'}])
 
-    def test_baremetal_portgroup_unset_category(self):
+    def test_baremetal_portgroup_unset_category(self) -> None:
         arglist = ['portgroup', '--category']
         verifylist = [('category', True)]
 

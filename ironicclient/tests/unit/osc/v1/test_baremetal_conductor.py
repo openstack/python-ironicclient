@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from __future__ import annotations
+
 import copy
 
 from osc_lib.tests import utils as oscutils
@@ -20,7 +22,7 @@ from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
 class TestBaremetalConductor(baremetal_fakes.TestBaremetal):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalConductor, self).setUp()
 
         # Get a shortcut to the baremetal manager mock
@@ -30,7 +32,7 @@ class TestBaremetalConductor(baremetal_fakes.TestBaremetal):
 
 class TestBaremetalConductorList(TestBaremetalConductor):
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalConductorList, self).setUp()
 
         self.baremetal_mock.conductor.list.return_value = [
@@ -44,7 +46,7 @@ class TestBaremetalConductorList(TestBaremetalConductor):
         # Get the command object to test
         self.cmd = baremetal_conductor.ListBaremetalConductor(self.app, None)
 
-    def test_conductor_list_no_options(self):
+    def test_conductor_list_no_options(self) -> None:
         arglist = []
         verifylist = []
 
@@ -76,7 +78,7 @@ class TestBaremetalConductorList(TestBaremetalConductor):
         ), )
         self.assertEqual(datalist, tuple(data))
 
-    def test_conductor_list_long(self):
+    def test_conductor_list_long(self) -> None:
         arglist = [
             '--long',
         ]
@@ -119,7 +121,7 @@ class TestBaremetalConductorList(TestBaremetalConductor):
         values = tuple(fake_values.get(name, '') for name in collist)
         self.assertEqual((values,), tuple(data))
 
-    def test_conductor_list_fields(self):
+    def test_conductor_list_fields(self) -> None:
         arglist = [
             '--fields', 'hostname', 'alive',
         ]
@@ -144,7 +146,7 @@ class TestBaremetalConductorList(TestBaremetalConductor):
             **kwargs
         )
 
-    def test_conductor_list_fields_multiple(self):
+    def test_conductor_list_fields_multiple(self) -> None:
         arglist = [
             '--fields', 'hostname', 'alive',
             '--fields', 'conductor_group',
@@ -169,7 +171,7 @@ class TestBaremetalConductorList(TestBaremetalConductor):
             **kwargs
         )
 
-    def test_conductor_list_invalid_fields(self):
+    def test_conductor_list_invalid_fields(self) -> None:
         arglist = [
             '--fields', 'hostname', 'invalid'
         ]
@@ -183,7 +185,7 @@ class TestBaremetalConductorList(TestBaremetalConductor):
 
 
 class TestBaremetalConductorShow(TestBaremetalConductor):
-    def setUp(self):
+    def setUp(self) -> None:
         super(TestBaremetalConductorShow, self).setUp()
 
         self.baremetal_mock.conductor.get.return_value = (
@@ -196,7 +198,7 @@ class TestBaremetalConductorShow(TestBaremetalConductor):
         # Get the command object to test
         self.cmd = baremetal_conductor.ShowBaremetalConductor(self.app, None)
 
-    def test_conductor_show(self):
+    def test_conductor_show(self) -> None:
         arglist = ['xxxx.xxxx']
         verifylist = []
 
@@ -227,7 +229,7 @@ class TestBaremetalConductorShow(TestBaremetalConductor):
         )
         self.assertEqual(datalist, tuple(data))
 
-    def test_conductor_show_no_conductor(self):
+    def test_conductor_show_no_conductor(self) -> None:
         arglist = []
         verifylist = []
 
@@ -235,7 +237,7 @@ class TestBaremetalConductorShow(TestBaremetalConductor):
                           self.check_parser,
                           self.cmd, arglist, verifylist)
 
-    def test_conductor_show_fields(self):
+    def test_conductor_show_fields(self) -> None:
         arglist = [
             'xxxxx',
             '--fields', 'hostname', 'alive',
@@ -266,7 +268,7 @@ class TestBaremetalConductorShow(TestBaremetalConductor):
             *args, fields=fields
         )
 
-    def test_conductor_show_fields_multiple(self):
+    def test_conductor_show_fields_multiple(self) -> None:
         arglist = [
             'xxxxx',
             '--fields', 'hostname', 'alive',
@@ -295,7 +297,7 @@ class TestBaremetalConductorShow(TestBaremetalConductor):
             *args, fields=fields
         )
 
-    def test_conductor_show_invalid_fields(self):
+    def test_conductor_show_invalid_fields(self) -> None:
         arglist = [
             'xxxxx',
             '--fields', 'hostname', 'invalid'
