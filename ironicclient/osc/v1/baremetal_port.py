@@ -239,6 +239,13 @@ class UnsetBaremetalPort(command.Command):
         )
 
         parser.add_argument(
+            "--local-link-connection",
+            metavar="<key>",
+            action='append',
+            help=_("Remove local link connection on this port "
+                   "(repeat option to unset multiple keys)"))
+
+        parser.add_argument(
             '--port-group',
             action='store_true',
             dest='portgroup',
@@ -292,6 +299,10 @@ class UnsetBaremetalPort(command.Command):
             properties.extend(utils.args_array_to_patch(
                 'remove',
                 ['extra/' + x for x in parsed_args.extra]))
+        if parsed_args.local_link_connection:
+            properties.extend(utils.args_array_to_patch(
+                'remove', ['local_link_connection/' + x for x in
+                           parsed_args.local_link_connection]))
         if parsed_args.portgroup:
             properties.extend(utils.args_array_to_patch('remove',
                               ['portgroup_uuid']))

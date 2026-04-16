@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    It was not possible with OSC to unset local-link-connection on a baremetal
+    port which is a necessary operation when testing setting and creating ports
+    with this data. `bug 2148621 <https://bugs.launchpad.net/python-ironicclient/+bug/2148621>`_.
