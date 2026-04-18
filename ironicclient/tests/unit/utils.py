@@ -68,10 +68,10 @@ class FakeAPI(object):
         # url should always just be a path here, e.g. /v1/nodes
         url = self.path_prefix + url
 
-        call = (method, url, headers or {}, body)
         if params:
-            call += (params,)
-        self.calls.append(call)
+            self.calls.append((method, url, headers or {}, body, params))
+        else:
+            self.calls.append((method, url, headers or {}, body))
         return self.responses[url][method]
 
     def raw_request(

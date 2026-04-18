@@ -353,7 +353,11 @@ class TestBaremetal(utils.TestCommand):
     def setUp(self) -> None:
         super(TestBaremetal, self).setUp()
 
-        self.app.client_manager.auth_ref = mock.Mock(auth_token="TOKEN")
+        # TODO(anandkaranubc): drop setattr once osc_lib annotates
+        # FakeClientManager.auth_ref as ``object | None`` (currently inferred
+        # as ``None``, so direct assignment trips ``[assignment]``).
+        setattr(self.app.client_manager, 'auth_ref',
+                mock.Mock(auth_token="TOKEN"))
         self.app.client_manager.baremetal = mock.Mock()
 
 

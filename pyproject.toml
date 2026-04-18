@@ -201,7 +201,6 @@ disallow_untyped_defs = false
 disallow_subclassing_any = false
 disable_error_code = [
     "arg-type",
-    "assignment",
     "attr-defined",
     "call-arg",
     "dict-item",
