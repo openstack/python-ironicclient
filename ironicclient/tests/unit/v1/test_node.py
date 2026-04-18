@@ -1863,10 +1863,8 @@ class NodeManagerTest(testtools.TestCase):
                          sorted(states.to_dict().keys()))
 
     def test_node_set_console_mode(self) -> None:
-        global ENABLE
         for enabled in ['true', True, 'False', False]:
             self.api.calls = []
-            ENABLE = enabled
             self.mgr.set_console_mode(NODE1['uuid'], enabled)
             body = {'enabled': enabled}
             expect = [
