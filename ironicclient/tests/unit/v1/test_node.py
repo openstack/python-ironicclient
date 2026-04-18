@@ -1170,12 +1170,11 @@ class NodeManagerTest(testtools.TestCase):
         self.assertTrue(node)
 
     def test_delete(self) -> None:
-        node = self.mgr.delete(node_id=NODE1['uuid'])
+        self.mgr.delete(node_id=NODE1['uuid'])
         expect = [
             ('DELETE', '/v1/nodes/%s' % NODE1['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(node)
 
     def test_update(self) -> None:
         patch = {'op': 'replace',
@@ -2346,22 +2345,20 @@ class NodeManagerTest(testtools.TestCase):
         self.assertIsNone(resp)
 
     def test_node_remove_all_traits(self) -> None:
-        resp = self.mgr.remove_all_traits(NODE1['uuid'])
+        self.mgr.remove_all_traits(NODE1['uuid'])
         expect = [
             ('DELETE', '/v1/nodes/%s/traits' % NODE1['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(resp)
 
     def test_node_remove_trait(self) -> None:
         trait = 'CUSTOM_FOO'
-        resp = self.mgr.remove_trait(NODE1['uuid'], trait)
+        self.mgr.remove_trait(NODE1['uuid'], trait)
         expect = [
             ('DELETE', '/v1/nodes/%s/traits/%s' % (NODE1['uuid'], trait),
                 {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(resp)
 
     def test_node_get_inventory(self) -> None:
         inventory = self.mgr.get_inventory(NODE1['uuid'])

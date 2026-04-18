@@ -207,12 +207,11 @@ class AllocationManagerTest(testtools.TestCase):
             self.api.responses['/v1/allocations']['GET'][1]['allocations'])
 
     def test_delete(self) -> None:
-        allocation = self.mgr.delete(allocation_id=ALLOCATION['uuid'])
+        self.mgr.delete(allocation_id=ALLOCATION['uuid'])
         expect = [
             ('DELETE', '/v1/allocations/%s' % ALLOCATION['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(allocation)
 
         expected_resp = ({}, ALLOCATION,)
         self.assertEqual(

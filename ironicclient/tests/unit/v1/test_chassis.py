@@ -335,12 +335,11 @@ class ChassisManagerTest(testtools.TestCase):
         self.assertTrue(chassis)
 
     def test_delete(self) -> None:
-        chassis = self.mgr.delete(chassis_id=CHASSIS['uuid'])
+        self.mgr.delete(chassis_id=CHASSIS['uuid'])
         expect = [
             ('DELETE', '/v1/chassis/%s' % CHASSIS['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(chassis)
 
     def test_update(self) -> None:
         patch = {'op': 'replace',

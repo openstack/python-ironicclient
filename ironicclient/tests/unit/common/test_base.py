@@ -286,7 +286,7 @@ class ManagerTestCase(testtools.TestCase):
         self.assertEqual(NEW_ATTRIBUTE_VALUE, resource.attribute1)
 
     def test_delete(self) -> None:
-        resource = self.manager.delete(
+        self.manager.delete(
             testable_resource_id=TESTABLE_RESOURCE['uuid']
         )
         expect = [
@@ -294,12 +294,11 @@ class ManagerTestCase(testtools.TestCase):
              {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(resource)
 
     def test_delete_microversion_and_global_request_id_override(
         self,
     ) -> None:
-        resource = self.manager.delete(
+        self.manager.delete(
             testable_resource_id=TESTABLE_RESOURCE['uuid'],
             os_ironic_api_version="1.9", global_request_id=REQ_ID
         )
@@ -309,4 +308,3 @@ class ManagerTestCase(testtools.TestCase):
               'X-Openstack-Request-Id': REQ_ID}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(resource)

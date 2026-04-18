@@ -273,13 +273,12 @@ class VolumeTargetManagerTest(VolumeTargetManagerTestBase):
         self._validate_obj(TARGET1, volume_target)
 
     def test_delete(self) -> None:
-        volume_target = self.mgr.delete(TARGET1['uuid'])
+        self.mgr.delete(TARGET1['uuid'])
         expect = [
             ('DELETE', '/v1/volume/targets/%s' % TARGET1['uuid'],
              {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(volume_target)
 
     def test_update(self) -> None:
         patch = {'op': 'replace',

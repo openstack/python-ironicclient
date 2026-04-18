@@ -280,12 +280,11 @@ class PortgroupManagerTest(testtools.TestCase):
             self.api.responses['/v1/portgroups']['GET'][1]['portgroups'])
 
     def test_delete(self) -> None:
-        portgroup = self.mgr.delete(portgroup_id=PORTGROUP['uuid'])
+        self.mgr.delete(portgroup_id=PORTGROUP['uuid'])
         expect = [
             ('DELETE', '/v1/portgroups/%s' % PORTGROUP['uuid'], {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(portgroup)
 
         expected_resp = ({}, PORTGROUP,)
         self.assertEqual(

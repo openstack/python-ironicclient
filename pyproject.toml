@@ -200,7 +200,6 @@ disable_error_code = [
     "arg-type",
     "attr-defined",
     "call-arg",
-    "func-returns-value",
     "list-item",
     "override",
     "union-attr",

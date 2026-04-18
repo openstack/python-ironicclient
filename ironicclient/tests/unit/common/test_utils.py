@@ -136,8 +136,7 @@ class UtilsTest(test_utils.BaseTestCase):
                          strict=False, default='foo'))
 
     def test_check_for_invalid_fields(self) -> None:
-        self.assertIsNone(utils.check_for_invalid_fields(
-                          ['a', 'b'], ['a', 'b', 'c']))
+        utils.check_for_invalid_fields(['a', 'b'], ['a', 'b', 'c'])
         # 'd' is not a valid field
         self.assertRaises(exc.CommandError, utils.check_for_invalid_fields,
                           ['a', 'd'], ['a', 'b', 'c'])

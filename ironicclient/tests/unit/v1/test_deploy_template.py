@@ -270,14 +270,12 @@ class DeployTemplateManagerTest(testtools.TestCase):
         self.assertTrue(deploy_template)
 
     def test_delete(self) -> None:
-        deploy_template = self.mgr.delete(
-            template_id=DEPLOY_TEMPLATE['uuid'])
+        self.mgr.delete(template_id=DEPLOY_TEMPLATE['uuid'])
         expect = [
             ('DELETE', '/v1/deploy_templates/%s' % DEPLOY_TEMPLATE['uuid'], {},
              None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(deploy_template)
 
     def test_update(self) -> None:
         patch = {'op': 'replace',

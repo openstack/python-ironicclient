@@ -294,14 +294,12 @@ class RunbookManagerTest(testtools.TestCase):
         self.assertTrue(runbook)
 
     def test_delete(self) -> None:
-        runbook = self.mgr.delete(
-            runbook_id=RUNBOOK['uuid'])
+        self.mgr.delete(runbook_id=RUNBOOK['uuid'])
         expect = [
             ('DELETE', '/v1/runbooks/%s' % RUNBOOK['uuid'], {},
              None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(runbook)
 
     def test_update(self) -> None:
         patch = {'op': 'replace',

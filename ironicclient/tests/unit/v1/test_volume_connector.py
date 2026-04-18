@@ -276,14 +276,13 @@ class VolumeConnectorManagerTest(VolumeConnectorManagerTestBase):
                            volume_connector)
 
     def test_delete(self) -> None:
-        volume_connector = self.mgr.delete(CONNECTOR1['uuid'])
+        self.mgr.delete(CONNECTOR1['uuid'])
         expect = [
             ('DELETE',
              '/v1/volume/connectors/%s' % CONNECTOR1['uuid'],
              {}, None),
         ]
         self.assertEqual(expect, self.api.calls)
-        self.assertIsNone(volume_connector)
 
     def test_update(self) -> None:
         patch = {'op': 'replace',
