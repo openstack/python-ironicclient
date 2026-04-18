@@ -202,7 +202,6 @@ disable_error_code = [
     "call-arg",
     "dict-item",
     "func-returns-value",
-    "index",
     "list-item",
     "override",
     "union-attr",

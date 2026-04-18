@@ -16,6 +16,7 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 
+from ironicclient.v1.shard import Shard
 from ironicclient.v1.shard import ShardManager
 
 
@@ -23,18 +24,19 @@ class TestShardManager(unittest.TestCase):
 
     @patch('ironicclient.common.base.Manager._list')
     def test_list_shards(self, mock_list: mock.MagicMock) -> None:
+        # Initialize the ShardManager
+        shard_manager = ShardManager(api=None)  # `api=None` for simplicity
+
         # Mock response for the list of shards
         mock_response = [
-            {'name': 'example_shard1', 'count': 47},
-            {'name': 'example_shard2', 'count': 46},
-            {'name': None, 'count': 3}  # Nodes with no shard assigned
+            Shard(shard_manager, {'name': 'example_shard1', 'count': 47}),
+            Shard(shard_manager, {'name': 'example_shard2', 'count': 46}),
+            Shard(shard_manager, {'name': None, 'count': 3}),
+            # Nodes with no shard assigned
         ]
 
         # Configure mock to return the mocked response
         mock_list.return_value = mock_response
-
-        # Initialize the ShardManager
-        shard_manager = ShardManager(api=None)  # `api=None` for simplicity
 
         # Perform the test call
         result = shard_manager.list(os_ironic_api_version="1.82")
@@ -47,12 +49,12 @@ class TestShardManager(unittest.TestCase):
             global_request_id=None
         )
         self.assertEqual(len(result), 3)
-        self.assertEqual(result[0]['name'], 'example_shard1')
-        self.assertEqual(result[0]['count'], 47)
-        self.assertEqual(result[1]['name'], 'example_shard2')
-        self.assertEqual(result[1]['count'], 46)
-        self.assertIsNone(result[2]['name'])
-        self.assertEqual(result[2]['count'], 3)
+        self.assertEqual(result[0].name, 'example_shard1')
+        self.assertEqual(result[0].count, 47)
+        self.assertEqual(result[1].name, 'example_shard2')
+        self.assertEqual(result[1].count, 46)
+        self.assertIsNone(result[2].name)
+        self.assertEqual(result[2].count, 3)
 
     @patch('ironicclient.common.base.Manager._list')
     def test_list_shards_empty(self, mock_list: mock.MagicMock) -> None:
@@ -78,15 +80,15 @@ class TestShardManager(unittest.TestCase):
     def test_list_shards_with_global_request_id(
         self, mock_list: mock.MagicMock,
     ) -> None:
-        # Test with global request ID
-        mock_response = [
-            {'name': 'example_shard1', 'count': 47},
-            {'name': 'example_shard2', 'count': 46}
-        ]
-        mock_list.return_value = mock_response
-
         # Initialize the ShardManager
         shard_manager = ShardManager(api=None)
+
+        # Test with global request ID
+        mock_response = [
+            Shard(shard_manager, {'name': 'example_shard1', 'count': 47}),
+            Shard(shard_manager, {'name': 'example_shard2', 'count': 46}),
+        ]
+        mock_list.return_value = mock_response
 
         # Perform the test call with global_request_id
         result = shard_manager.list(
