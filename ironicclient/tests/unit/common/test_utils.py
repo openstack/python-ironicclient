@@ -21,6 +21,7 @@ import os
 import subprocess
 import sys
 import tempfile
+from typing import Any
 from unittest import mock
 
 
@@ -176,7 +177,7 @@ class CommonParamsForListTest(test_utils.BaseTestCase):
         self.args = mock.Mock(marker=None, limit=None, sort_key=None,
                               sort_dir=None, detail=False, fields=None,
                               spec=True)
-        self.expected_params = {'detail': False}
+        self.expected_params: dict[str, Any] = {'detail': False}
 
     def test_nothing_set(self) -> None:
         self.assertEqual(self.expected_params,

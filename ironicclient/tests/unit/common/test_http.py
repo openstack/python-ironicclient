@@ -41,13 +41,11 @@ def _get_error_body(
     description: str | None = None,
 ) -> str:
     if description:
-        error_body = {'description': description}
+        raw_error_body = json.dumps({'description': description})
     else:
-        error_body = {
-            'faultstring': faultstring,
-            'debuginfo': debuginfo
-        }
-    raw_error_body = json.dumps(error_body)
+        raw_error_body = json.dumps(
+            {'faultstring': faultstring, 'debuginfo': debuginfo}
+        )
     body = {'error_message': raw_error_body}
     return json.dumps(body)
 
