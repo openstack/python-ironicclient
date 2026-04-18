@@ -4784,10 +4784,6 @@ class TestListBIOSSetting(TestBaremetal):
         self.assertEqual(tuple(expected_data), tuple(data))
 
     def test_baremetal_list_bios_setting_long(self) -> None:
-        verifylist = [
-            ('long', True),
-        ]
-
         arglist = ['node_uuid', '--long']
         verifylist = [('node', 'node_uuid'), ('long', True)]
 

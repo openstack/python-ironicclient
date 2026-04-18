@@ -380,7 +380,7 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.client.chassis.create.assert_called_once_with()
 
     def test_create_ports(self) -> None:
-        port = {'address': 'fake-address'}
+        port: dict[str, object] = {'address': 'fake-address'}
         port_with_node_uuid = port.copy()
         port_with_node_uuid.update(node_uuid='fake-node-uuid')
         self.client.port.create.return_value = mock.Mock(uuid='uuid')
@@ -389,7 +389,8 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.client.port.create.assert_called_once_with(**port_with_node_uuid)
 
     def test_create_ports_two_node_uuids(self) -> None:
-        port = {'address': 'fake-address', 'node_uuid': 'node-uuid-1'}
+        port: dict[str, object] = {'address': 'fake-address',
+                                   'node_uuid': 'node-uuid-1'}
         errs = create_resources.create_ports(self.client, [port],
                                              'node-uuid-2')
         self.assertIsInstance(errs[0], exc.ClientException)
@@ -397,8 +398,9 @@ class CreateMethodsTest(utils.BaseTestCase):
         self.assertFalse(self.client.port.create.called)
 
     def test_create_ports_two_portgroup_uuids(self) -> None:
-        port = {'address': 'fake-address', 'node_uuid': 'node-uuid-1',
-                'portgroup_uuid': 'pg-uuid-1'}
+        port: dict[str, object] = {'address': 'fake-address',
+                                   'node_uuid': 'node-uuid-1',
+                                   'portgroup_uuid': 'pg-uuid-1'}
         errs = create_resources.create_ports(self.client, [port],
                                              'node-uuid-1', 'pg-uuid-2')
         self.assertEqual(1, len(errs))
@@ -413,8 +415,9 @@ class CreateMethodsTest(utils.BaseTestCase):
             mock_create_ports: mock.MagicMock,
             mock_create_portgroups: mock.MagicMock,
     ) -> None:
-        node = {'driver': 'fake', 'ports': ['list of ports'],
-                'portgroups': ['list of portgroups']}
+        node: dict[str, object] = {'driver': 'fake',
+                                   'ports': ['list of ports'],
+                                   'portgroups': ['list of portgroups']}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_nodes(self.client,
                                                            [node]))
@@ -431,8 +434,9 @@ class CreateMethodsTest(utils.BaseTestCase):
             mock_create_ports: mock.MagicMock,
             mock_create_portgroups: mock.MagicMock,
     ) -> None:
-        node = {'driver': 'fake', 'ports': ['list of ports'],
-                'portgroups': ['list of portgroups']}
+        node: dict[str, object] = {'driver': 'fake',
+                                   'ports': ['list of ports'],
+                                   'portgroups': ['list of portgroups']}
         self.client.node.create.side_effect = exc.ClientException('bar')
         errs = create_resources.create_nodes(self.client, [node])
         self.assertIsInstance(errs[0], exc.ClientException)
@@ -446,8 +450,9 @@ class CreateMethodsTest(utils.BaseTestCase):
             self,
             mock_create_ports: mock.MagicMock,
     ) -> None:
-        node = {'driver': 'fake', 'ports': ['list of ports'],
-                'chassis_uuid': 'chassis-uuid-1'}
+        node: dict[str, object] = {'driver': 'fake',
+                                   'ports': ['list of ports'],
+                                   'chassis_uuid': 'chassis-uuid-1'}
         errs = create_resources.create_nodes(self.client, [node],
                                              chassis_uuid='chassis-uuid-2')
         self.assertFalse(self.client.node.create.called)
@@ -462,7 +467,7 @@ class CreateMethodsTest(utils.BaseTestCase):
             mock_create_ports: mock.MagicMock,
             mock_create_portgroups: mock.MagicMock,
     ) -> None:
-        node = {'driver': 'fake'}
+        node: dict[str, object] = {'driver': 'fake'}
         self.client.node.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_nodes(self.client,
                                                            [node]))
@@ -472,7 +477,8 @@ class CreateMethodsTest(utils.BaseTestCase):
 
     @mock.patch.object(create_resources, 'create_nodes', autospec=True)
     def test_create_chassis(self, mock_create_nodes: mock.MagicMock) -> None:
-        chassis = {'description': 'fake', 'nodes': ['list of nodes']}
+        chassis: dict[str, object] = {'description': 'fake',
+                                      'nodes': ['list of nodes']}
         self.client.chassis.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_chassis(self.client,
                                                              [chassis]))
@@ -485,7 +491,8 @@ class CreateMethodsTest(utils.BaseTestCase):
             self,
             mock_create_nodes: mock.MagicMock,
     ) -> None:
-        chassis = {'description': 'fake', 'nodes': ['list of nodes']}
+        chassis: dict[str, object] = {'description': 'fake',
+                                      'nodes': ['list of nodes']}
         self.client.chassis.create.side_effect = exc.ClientException('bar')
         errs = create_resources.create_chassis(self.client, [chassis])
         self.client.chassis.create.assert_called_once_with(description='fake')
@@ -498,7 +505,7 @@ class CreateMethodsTest(utils.BaseTestCase):
             self,
             mock_create_nodes: mock.MagicMock,
     ) -> None:
-        chassis = {'description': 'fake'}
+        chassis: dict[str, object] = {'description': 'fake'}
         self.client.chassis.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_chassis(self.client,
                                                              [chassis]))
@@ -510,7 +517,8 @@ class CreateMethodsTest(utils.BaseTestCase):
             self,
             mock_create_ports: mock.MagicMock,
     ) -> None:
-        portgroup = {'name': 'fake', 'ports': ['list of ports']}
+        portgroup: dict[str, object] = {'name': 'fake',
+                                        'ports': ['list of ports']}
         portgroup_posted = {'name': 'fake', 'node_uuid': 'fake-node-uuid'}
         self.client.portgroup.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_portgroups(
@@ -526,7 +534,8 @@ class CreateMethodsTest(utils.BaseTestCase):
             self,
             mock_create_ports: mock.MagicMock,
     ) -> None:
-        portgroup = {'name': 'fake', 'ports': ['list of ports']}
+        portgroup: dict[str, object] = {'name': 'fake',
+                                        'ports': ['list of ports']}
         portgroup_posted = {'name': 'fake', 'node_uuid': 'fake-node-uuid'}
         self.client.portgroup.create.side_effect = exc.ClientException('bar')
         errs = create_resources.create_portgroups(
@@ -542,8 +551,9 @@ class CreateMethodsTest(utils.BaseTestCase):
             self,
             mock_create_ports: mock.MagicMock,
     ) -> None:
-        portgroup = {'name': 'fake', 'node_uuid': 'fake-node-uuid-1',
-                     'ports': ['list of ports']}
+        portgroup: dict[str, object] = {'name': 'fake',
+                                        'node_uuid': 'fake-node-uuid-1',
+                                        'ports': ['list of ports']}
         self.client.portgroup.create.side_effect = exc.ClientException('bar')
         errs = create_resources.create_portgroups(
             self.client, [portgroup], node_uuid='fake-node-uuid-2')
@@ -557,7 +567,7 @@ class CreateMethodsTest(utils.BaseTestCase):
             self,
             mock_create_ports: mock.MagicMock,
     ) -> None:
-        portgroup = {'name': 'fake'}
+        portgroup: dict[str, object] = {'name': 'fake'}
         portgroup_posted = {'name': 'fake', 'node_uuid': 'fake-node-uuid'}
         self.client.portgroup.create.return_value = mock.Mock(uuid='uuid')
         self.assertEqual([], create_resources.create_portgroups(
