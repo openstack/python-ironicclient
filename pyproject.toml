@@ -24,7 +24,11 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Typing :: Typed",
 ]
+
 [project.optional-dependencies]
 cli = [
   "python-openstackclient>=3.12.0", # Apache-2.0
