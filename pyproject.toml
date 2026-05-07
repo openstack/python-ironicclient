@@ -205,7 +205,6 @@ disable_error_code = [
     "func-returns-value",
     "index",
     "list-item",
-    "name-defined",
     "override",
     "union-attr",
     "var-annotated",
