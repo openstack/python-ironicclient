@@ -642,6 +642,8 @@ DEPLOY_TEMPLATE_RESOURCE = Resource(
 RUNBOOK_DETAILED_RESOURCE = Resource(
     ['uuid',
      'name',
+     'description',
+     'traits',
      'owner',
      'public',
      'steps',
@@ -649,7 +651,7 @@ RUNBOOK_DETAILED_RESOURCE = Resource(
      'created_at',
      'updated_at'
      ],
-    sort_excluded=['extra', 'steps']
+    sort_excluded=['extra', 'steps', 'traits']
 )
 
 RUNBOOK_RESOURCE = Resource(

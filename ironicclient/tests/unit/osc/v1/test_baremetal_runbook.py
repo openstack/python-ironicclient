@@ -31,6 +31,8 @@ class TestBaremetalRunbook(baremetal_fakes.TestBaremetal):
 
         self.baremetal_mock = self.app.client_manager.baremetal
         self.baremetal_mock.reset_mock()
+        # Set API version to support trait operations
+        self.baremetal_mock.current_api_version = "1.112"
 
 
 class TestCreateBaremetalRunbook(TestBaremetalRunbook):
@@ -179,20 +181,24 @@ class TestShowBaremetalRunbook(TestBaremetalRunbook):
             *args, fields=None)
 
         collist = (
+            'description',
             'extra',
             'name',
             'owner',
             'public',
             'steps',
+            'traits',
             'uuid')
         self.assertEqual(collist, columns)
 
         datalist = (
+            baremetal_fakes.baremetal_runbook_description,
             baremetal_fakes.baremetal_runbook_extra,
             baremetal_fakes.baremetal_runbook_name,
             baremetal_fakes.baremetal_runbook_owner,
             baremetal_fakes.baremetal_runbook_public,
             baremetal_fakes.baremetal_runbook_steps,
+            baremetal_fakes.baremetal_runbook_traits,
             baremetal_fakes.baremetal_runbook_uuid)
         self.assertEqual(datalist, tuple(data))
 
@@ -428,6 +434,8 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
 
         collist = ('uuid',
                    'name',
+                   'description',
+                   'traits',
                    'owner',
                    'public',
                    'steps',
@@ -439,6 +447,8 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
         datalist = ((
             baremetal_fakes.baremetal_runbook_uuid,
             baremetal_fakes.baremetal_runbook_name,
+            baremetal_fakes.baremetal_runbook_description,
+            baremetal_fakes.baremetal_runbook_traits,
             baremetal_fakes.baremetal_runbook_owner,
             baremetal_fakes.baremetal_runbook_public,
             baremetal_fakes.baremetal_runbook_steps,
@@ -484,3 +494,107 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
                           self.cmd, arglist, verifylist)
+
+
+class TestListTraitsRunbook(TestBaremetalRunbook):
+    def setUp(self) -> None:
+        super(TestListTraitsRunbook, self).setUp()
+
+        self.baremetal_mock.runbook.get_traits.return_value = (
+            baremetal_fakes.TRAITS)
+
+        # Get the command object to test
+        self.cmd = baremetal_runbook.ListTraitsBaremetalRunbook(self.app, None)
+
+    def test_baremetal_list_runbook_traits(self) -> None:
+        arglist = ['runbook_uuid']
+        verifylist = [('runbook', 'runbook_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        columns, data = self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.runbook.get_traits.assert_called_once_with(
+            'runbook_uuid')
+        self.assertEqual(('traits',), columns)
+        self.assertEqual([[trait] for trait in baremetal_fakes.TRAITS], data)
+
+
+class TestAddTraitRunbook(TestBaremetalRunbook):
+    def setUp(self) -> None:
+        super(TestAddTraitRunbook, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_runbook.AddTraitBaremetalRunbook(self.app, None)
+
+    def test_baremetal_runbook_add_trait(self) -> None:
+        arglist = ['runbook_uuid', 'CUSTOM_FOO']
+        verifylist = [('runbook', 'runbook_uuid'), ('traits', ['CUSTOM_FOO'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.runbook.add_trait.assert_called_once_with(
+            'runbook_uuid', 'CUSTOM_FOO')
+
+    def test_baremetal_runbook_add_multiple_traits(self) -> None:
+        arglist = ['runbook_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
+        verifylist = [('runbook', 'runbook_uuid'),
+                      ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        calls = [
+            mock.call('runbook_uuid', 'CUSTOM_FOO'),
+            mock.call('runbook_uuid', 'CUSTOM_BAR'),
+        ]
+        self.baremetal_mock.runbook.add_trait.assert_has_calls(calls)
+
+
+class TestRemoveTraitRunbook(TestBaremetalRunbook):
+    def setUp(self) -> None:
+        super(TestRemoveTraitRunbook, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_runbook.RemoveTraitBaremetalRunbook(
+            self.app, None)
+
+    def test_baremetal_runbook_remove_trait(self) -> None:
+        arglist = ['runbook_uuid', 'CUSTOM_FOO']
+        verifylist = [('runbook', 'runbook_uuid'), ('traits', ['CUSTOM_FOO'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.runbook.remove_trait.assert_called_once_with(
+            'runbook_uuid', 'CUSTOM_FOO')
+
+    def test_baremetal_runbook_remove_multiple_traits(self) -> None:
+        arglist = ['runbook_uuid', 'CUSTOM_FOO', 'CUSTOM_BAR']
+        verifylist = [('runbook', 'runbook_uuid'),
+                      ('traits', ['CUSTOM_FOO', 'CUSTOM_BAR'])]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        calls = [
+            mock.call('runbook_uuid', 'CUSTOM_FOO'),
+            mock.call('runbook_uuid', 'CUSTOM_BAR'),
+        ]
+        self.baremetal_mock.runbook.remove_trait.assert_has_calls(calls)
+
+    def test_baremetal_runbook_remove_all_traits(self) -> None:
+        arglist = ['--all', 'runbook_uuid']
+        verifylist = [('remove_all', True), ('runbook', 'runbook_uuid')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.runbook.remove_all_traits.assert_called_once_with(
+            'runbook_uuid')

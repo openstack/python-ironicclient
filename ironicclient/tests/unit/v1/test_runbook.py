@@ -90,6 +90,28 @@ fake_responses = {
             RUNBOOK,
         ),
     },
+    '/v1/runbooks/%s/traits' % RUNBOOK['uuid']:
+    {
+        'GET': (
+            {},
+            {'traits': ['CUSTOM_FOO', 'CUSTOM_BAR']},
+        ),
+        'DELETE': (
+            {},
+            None,
+        ),
+    },
+    '/v1/runbooks/%s/traits/CUSTOM_FOO' % RUNBOOK['uuid']:
+    {
+        'PUT': (
+            {},
+            None,
+        ),
+        'DELETE': (
+            {},
+            None,
+        ),
+    },
 }
 
 fake_responses_pagination = {
@@ -140,6 +162,8 @@ class RunbookManagerTest(testtools.TestCase):
     def setUp(self) -> None:
         super(RunbookManagerTest, self).setUp()
         self.api = utils.FakeAPI(fake_responses)
+        # Set API version to support trait operations
+        self.api.os_ironic_api_version = "1.112"
         self.mgr = ironicclient.v1.runbook.RunbookManager(
             self.api)
 
@@ -291,3 +315,69 @@ class RunbookManagerTest(testtools.TestCase):
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertEqual(NEW_NAME, runbook.name)
+
+    def test_runbook_get_traits(self) -> None:
+        traits = self.mgr.get_traits(RUNBOOK['uuid'])
+        expect = [
+            ('GET', '/v1/runbooks/%s/traits' % RUNBOOK['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(['CUSTOM_FOO', 'CUSTOM_BAR'], traits)
+
+    def test_runbook_add_trait(self) -> None:
+        trait = 'CUSTOM_FOO'
+        resp = self.mgr.add_trait(RUNBOOK['uuid'], trait)
+        expect = [
+            ('PUT', '/v1/runbooks/%s/traits/%s' % (RUNBOOK['uuid'], trait),
+                {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(resp)
+
+    def test_runbook_remove_all_traits(self) -> None:
+        resp = self.mgr.remove_all_traits(RUNBOOK['uuid'])
+        expect = [
+            ('DELETE', '/v1/runbooks/%s/traits' % RUNBOOK['uuid'], {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(resp)
+
+    def test_runbook_remove_trait(self) -> None:
+        trait = 'CUSTOM_FOO'
+        resp = self.mgr.remove_trait(RUNBOOK['uuid'], trait)
+        expect = [
+            ('DELETE', '/v1/runbooks/%s/traits/%s' % (RUNBOOK['uuid'], trait),
+                {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertIsNone(resp)
+
+    def test_runbook_get_traits_old_api_version(self) -> None:
+        # Test with API version that doesn't support traits
+        self.api.os_ironic_api_version = "1.111"
+        from ironicclient.common.apiclient.exceptions import UnsupportedVersion
+        self.assertRaises(UnsupportedVersion, self.mgr.get_traits,
+                          RUNBOOK['uuid'])
+
+    def test_runbook_add_trait_old_api_version(self) -> None:
+        # Test with API version that doesn't support traits
+        self.api.os_ironic_api_version = "1.111"
+        trait = 'CUSTOM_FOO'
+        from ironicclient.common.apiclient.exceptions import UnsupportedVersion
+        self.assertRaises(UnsupportedVersion, self.mgr.add_trait,
+                          RUNBOOK['uuid'], trait)
+
+    def test_runbook_remove_trait_old_api_version(self) -> None:
+        # Test with API version that doesn't support traits
+        self.api.os_ironic_api_version = "1.111"
+        trait = 'CUSTOM_FOO'
+        from ironicclient.common.apiclient.exceptions import UnsupportedVersion
+        self.assertRaises(UnsupportedVersion, self.mgr.remove_trait,
+                          RUNBOOK['uuid'], trait)
+
+    def test_runbook_remove_all_traits_old_api_version(self) -> None:
+        # Test with API version that doesn't support traits
+        self.api.os_ironic_api_version = "1.111"
+        from ironicclient.common.apiclient.exceptions import UnsupportedVersion
+        self.assertRaises(UnsupportedVersion, self.mgr.remove_all_traits,
+                          RUNBOOK['uuid'])
