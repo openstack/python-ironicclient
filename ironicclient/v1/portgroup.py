@@ -130,7 +130,7 @@ class PortgroupManager(base.CreateManager[Portgroup]):
         patch: list[dict[str, Any]],
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> Portgroup | None:
+    ) -> Portgroup:
         """Update the Portgroup.
 
         :param portgroup_id: The UUID or name of a portgroup.

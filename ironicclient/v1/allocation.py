@@ -151,7 +151,7 @@ class AllocationManager(base.CreateManager[Allocation]):
         patch: list[dict[str, Any]],
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> base.Resource | None:
+    ) -> base.Resource:
         """Updates the Allocation. Only 'name' and 'extra' field are allowed.
 
         :param allocation_id: The UUID or name of an allocation.

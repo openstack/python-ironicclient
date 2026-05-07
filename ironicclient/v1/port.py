@@ -96,7 +96,7 @@ class PortManager(base.CreateManager[Port]):
         patch: list[dict[str, Any]],
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> Port | None:
+    ) -> Port:
         return self._update(
             resource_id=port_id,
             patch=patch,

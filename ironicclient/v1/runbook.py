@@ -66,7 +66,7 @@ class RunbookManager(base.CreateManager[Runbook]):
         patch: list[dict[str, Any]],
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> base.Resource | None:
+    ) -> base.Resource:
         return self._update(
             resource_id=runbook_id,
             patch=patch,

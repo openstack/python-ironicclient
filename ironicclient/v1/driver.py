@@ -52,7 +52,7 @@ class DriverManager(base.Manager[Driver]):
         http_method: str = 'PATCH',
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> base.Resource | None:
+    ) -> base.Resource:
         return self._update(
             resource_id=driver_name,
             patch=patch,

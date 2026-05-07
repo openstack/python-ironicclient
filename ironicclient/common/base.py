@@ -371,6 +371,30 @@ class Manager(Generic[ResourceT], metaclass=abc.ABCMeta):
             global_request_id=global_request_id,
         )
 
+    @overload
+    def _update(
+        self,
+        resource_id: str,
+        patch: None,
+        method: str = 'PATCH',
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> None:
+        ...
+
+    @overload
+    def _update(
+        self,
+        resource_id: str,
+        patch: list[dict[str, Any]],
+        method: str = 'PATCH',
+        os_ironic_api_version: str | None = None,
+        global_request_id: str | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> ResourceT:
+        ...
+
     def _update(
         self,
         resource_id: str,
