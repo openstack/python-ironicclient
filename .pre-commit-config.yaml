@@ -1,0 +1,61 @@
+---
+default_language_version:
+  # force all unspecified python hooks to run python3
+  python: python3
+
+exclude: |
+  (?x)^(
+    venv/|
+    .venv/|
+    env/|
+    .tox/|
+    build/|
+    dist/
+  )
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: ['--fix', 'lf']
+      - id: fix-byte-order-marker
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-json
+        files: .*\.json$
+      - id: check-yaml
+        files: .*\.(yaml|yml)$
+        exclude: releasenotes/.*$
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: remove-tabs
+        exclude: '.*\.(svg)$'
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.6
+    hooks:
+      - id: ruff-check
+        args: ['--fix', '--unsafe-fixes']
+  - repo: https://opendev.org/openstack/hacking
+    rev: 8.0.0
+    hooks:
+      - id: hacking
+        additional_dependencies: []
+        exclude: '^(doc|releasenotes|tools)/.*$'
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+    - id: codespell
+      args: [--write-changes]
+  - repo: https://github.com/sphinx-contrib/sphinx-lint
+    rev: v1.0.2
+    hooks:
+      - id: sphinx-lint
+        args: [--enable=default-role]
+        files: ^doc/|releasenotes|api-ref
+  - repo: https://github.com/PyCQA/doc8
+    rev: v2.0.0
+    hooks:
+      - id: doc8
