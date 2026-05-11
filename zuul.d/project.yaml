@@ -9,5 +9,3 @@
     check:
       jobs:
         - ironicclient-tempest
-        - ironicclient-tox-codespell:
-            voting: false
