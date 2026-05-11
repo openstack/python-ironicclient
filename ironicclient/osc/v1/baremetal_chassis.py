@@ -72,7 +72,7 @@ class CreateBaremetalChassis(command.ShowOne):
 
         field_list: list[str] = ['description', 'extra', 'uuid']
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
-                      if k in field_list and not (v is None))
+                      if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'extra')
         chassis = baremetal_client.chassis.create(**fields)._info
 

@@ -674,7 +674,7 @@ class CreateBaremetalNode(command.ShowOne):
         ] + ['%s_interface' % iface
              for iface in SUPPORTED_INTERFACES]
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
-                      if k in field_list and not (v is None))
+                      if k in field_list and v is not None)
         fields = utils.args_array_to_dict(fields, 'driver_info')
         fields = utils.args_array_to_dict(fields, 'extra')
         if parsed_args.network_data:
