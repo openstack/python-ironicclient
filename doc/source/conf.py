@@ -77,7 +77,7 @@ latex_documents = [
         'index',
         'doc-python-ironicclient.tex',
         'Python Ironic Client Documentation',
-        'OpenStack LLC',
+        'OpenStack Ironic Project',
         'manual'
     ),
 ]
