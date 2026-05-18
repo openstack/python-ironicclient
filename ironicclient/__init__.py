@@ -15,14 +15,13 @@
 
 from __future__ import annotations
 
-import pbr.version
+import importlib.metadata
 
 from ironicclient import client
 from ironicclient import exc as exceptions
 
 
-__version__: str = pbr.version.VersionInfo(
-    'python-ironicclient').version_string()
+__version__ = importlib.metadata.version("python-ironicclient")
 
 __all__: tuple[str, ...] = (
     'client',

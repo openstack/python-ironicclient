@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.metadata
 import logging
 import sys
 
@@ -22,7 +23,6 @@ import openstack
 from openstack import config as os_config
 from openstack.config import cloud_region as os_cloud_region
 from osc_lib import utils
-import pbr.version
 
 from ironicclient.common import http
 from ironicclient.common.i18n import _
@@ -108,7 +108,7 @@ class CommandManager(commandmanager.CommandManager):
 class App(app.App):
 
     def __init__(self) -> None:
-        version_info = pbr.version.VersionInfo('python-ironicclient')
+        version_info = importlib.metadata.version('python-ironicclient')
         mgr = CommandManager(_NAMESPACE)
         self.config = os_config.OpenStackConfig(override_defaults=_DEFAULTS)
         super(App, self).__init__(description=_DESCRIPTION,
