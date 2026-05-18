@@ -1,0 +1,6 @@
+---
+other:
+  - |
+    Removed classes and helper functions from the apiclient module, which was
+    never a supported API of the ironicclient library but was likely developed
+    to mirror the API surface of some OSLO libraries.
