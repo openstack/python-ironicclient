@@ -9,14 +9,14 @@ authors = [
     {name = "OpenStack", email = "openstack-discuss@lists.openstack.org"},
 ]
 readme = {file = "README.rst", content-type = "text/x-rst"}
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 dynamic = ["version", "dependencies"]
 requires-python = ">=3.10"
 classifiers = [
+  "Development Status :: 5 - Production/Stable",
   "Environment :: OpenStack",
   "Intended Audience :: Information Technology",
   "Intended Audience :: System Administrators",
-  "License :: OSI Approved :: Apache Software License",
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
@@ -37,6 +37,7 @@ cli = [
 [project.urls]
 Homepage = "https://docs.openstack.org/python-ironicclient/"
 Repository = "https://opendev.org/openstack/python-ironicclient/"
+"Bug Tracker" = "https://bugs.launchpad.net/python-ironicclient"
 
 [project.scripts]
 baremetal = "ironicclient.shell:main"
@@ -167,7 +168,7 @@ baremetal_inspection_rule_unset = "ironicclient.osc.v1.baremetal_inspection_rule
 baremetal_inspection_rule_show = "ironicclient.osc.v1.baremetal_inspection_rule:ShowBaremetalInspectionRule"
 
 [tool.setuptools.packages.find]
-include = ["ironicclient"]
+include = ["ironicclient*"]
 
 [tool.codespell]
 quiet-level = 4
