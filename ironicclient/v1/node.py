@@ -25,6 +25,7 @@ from ironicclient.common import base
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
 from ironicclient import exc
+from ironicclient.v1 import port
 from ironicclient.v1 import volume_connector
 from ironicclient.v1 import volume_target
 
@@ -76,7 +77,7 @@ class NodeManager(base.CreateManager[Node]):
         fields: list[str] | None = None,
         os_ironic_api_version: str | None = None,
         global_request_id: str | None = None,
-    ) -> list[Node]:
+    ) -> list[port.Port]:
         """List all the ports for a given node.
 
         :param node_id: Name or UUID of the node.
@@ -132,12 +133,14 @@ class NodeManager(base.CreateManager[Node]):
         if limit is None:
             return self._list(
                 self._path(path), "ports",
+                obj_class=port.Port,
                 os_ironic_api_version=os_ironic_api_version,
                 global_request_id=global_request_id,
             )
         else:
             return self._list_pagination(
-                self._path(path), "ports", limit=limit,
+                self._path(path), "ports",
+                obj_class=port.Port, limit=limit,
                 os_ironic_api_version=os_ironic_api_version,
                 global_request_id=global_request_id,
             )
