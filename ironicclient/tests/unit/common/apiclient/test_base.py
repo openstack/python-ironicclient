@@ -15,8 +15,6 @@
 
 from __future__ import annotations
 
-from unittest import mock
-
 from oslotest import base as test_base
 
 from ironicclient.common.apiclient import base
@@ -26,54 +24,14 @@ class HumanResource(base.Resource):
     HUMAN_ID: bool = True
 
 
-class HumanResourceManager(base.ManagerWithFind):
-    resource_class = HumanResource
-
-    def list(self) -> list[base.Resource]:
-        return self._list("/human_resources", "human_resources")
-
-    def get(self, human_resource: base.Resource) -> base.Resource:
-        return self._get(
-            "/human_resources/%s" % base.getid(human_resource),
-            "human_resource")
-
-    def update(self, human_resource: base.Resource,
-               name: str) -> base.Resource | None:
-        body = {
-            "human_resource": {
-                "name": name,
-            },
-        }
-        return self._put(
-            "/human_resources/%s" % base.getid(human_resource),
-            body,
-            "human_resource")
-
-
 class CrudResource(base.Resource):
     pass
-
-
-class CrudResourceManager(base.CrudManager):
-    """Manager class for manipulating Identity crud_resources."""
-    resource_class = CrudResource
-    collection_key = 'crud_resources'
-    key = 'crud_resource'
-
-    def get(self, crud_resource: base.Resource) -> base.Resource:
-        return super(CrudResourceManager, self).get(
-            crud_resource_id=base.getid(crud_resource))
 
 
 class ResourceTest(test_base.BaseTestCase):
     def test_resource_repr(self) -> None:
         r = base.Resource(None, dict(foo="bar", baz="spam"))
         self.assertEqual("<Resource baz=spam, foo=bar>", repr(r))
-
-    def test_getid(self) -> None:
-        class TmpObject(base.Resource):
-            id = "4"
-        self.assertEqual("4", base.getid(TmpObject(None, {})))
 
     def test_human_id(self) -> None:
         r = base.Resource(None, {"name": "1"})
@@ -106,80 +64,3 @@ class ResourceTest(test_base.BaseTestCase):
         r1 = base.Resource(None, {'name': 'joe', 'age': 12})
         r2 = base.Resource(None, {'name': 'joe', 'age': 12})
         self.assertEqual(r1, r2)
-
-
-class BaseManagerTestCase(test_base.BaseTestCase):
-
-    def setUp(self) -> None:
-        super(BaseManagerTestCase, self).setUp()
-
-        self.response = mock.MagicMock()
-        self.http_client = mock.MagicMock()
-        self.http_client.get.return_value = self.response
-        self.http_client.post.return_value = self.response
-
-        self.manager = base.BaseManager(self.http_client)
-        self.manager.resource_class = HumanResource
-
-    def test_list(self) -> None:
-        self.response.json.return_value = {'human_resources': [{'id': 42}]}
-        expected = [HumanResource(self.manager, {'id': 42}, loaded=True)]
-        result = self.manager._list("/human_resources", "human_resources")
-        self.assertEqual(expected, result)
-
-    def test_list_no_response_key(self) -> None:
-        self.response.json.return_value = [{'id': 42}]
-        expected = [HumanResource(self.manager, {'id': 42}, loaded=True)]
-        result = self.manager._list("/human_resources")
-        self.assertEqual(expected, result)
-
-    def test_list_get(self) -> None:
-        self.manager._list("/human_resources", "human_resources")
-        self.manager.client.get.assert_called_with("/human_resources")
-
-    def test_list_post(self) -> None:
-        self.manager._list("/human_resources", "human_resources",
-                           json={'id': 42})
-        self.manager.client.post.assert_called_with("/human_resources",
-                                                    json={'id': 42})
-
-    def test_get(self) -> None:
-        self.response.json.return_value = {'human_resources': {'id': 42}}
-        expected = HumanResource(self.manager, {'id': 42}, loaded=True)
-        result = self.manager._get("/human_resources/42", "human_resources")
-        self.manager.client.get.assert_called_with("/human_resources/42")
-        self.assertEqual(expected, result)
-
-    def test_get_no_response_key(self) -> None:
-        self.response.json.return_value = {'id': 42}
-        expected = HumanResource(self.manager, {'id': 42}, loaded=True)
-        result = self.manager._get("/human_resources/42")
-        self.manager.client.get.assert_called_with("/human_resources/42")
-        self.assertEqual(expected, result)
-
-    def test_post(self) -> None:
-        self.response.json.return_value = {'human_resources': {'id': 42}}
-        expected = HumanResource(self.manager, {'id': 42}, loaded=True)
-        result = self.manager._post("/human_resources",
-                                    response_key="human_resources",
-                                    json={'id': 42})
-        self.manager.client.post.assert_called_with("/human_resources",
-                                                    json={'id': 42})
-        self.assertEqual(expected, result)
-
-    def test_post_return_raw(self) -> None:
-        self.response.json.return_value = {'human_resources': {'id': 42}}
-        result = self.manager._post("/human_resources",
-                                    response_key="human_resources",
-                                    json={'id': 42}, return_raw=True)
-        self.manager.client.post.assert_called_with("/human_resources",
-                                                    json={'id': 42})
-        self.assertEqual({'id': 42}, result)
-
-    def test_post_no_response_key(self) -> None:
-        self.response.json.return_value = {'id': 42}
-        expected = HumanResource(self.manager, {'id': 42}, loaded=True)
-        result = self.manager._post("/human_resources", json={'id': 42})
-        self.manager.client.post.assert_called_with("/human_resources",
-                                                    json={'id': 42})
-        self.assertEqual(expected, result)
