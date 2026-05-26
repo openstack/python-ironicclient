@@ -201,7 +201,6 @@ disable_error_code = [
     "arg-type",
     "attr-defined",
     "call-arg",
-    "override",
     "union-attr",
     "var-annotated",
 ]
