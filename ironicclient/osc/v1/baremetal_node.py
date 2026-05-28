@@ -2193,6 +2193,11 @@ class VifAttachBaremetalNode(command.Command):
             help=_("UUID of the baremetal port to attach the VIF to.")
         )
         parser.add_argument(
+            '--portgroup-uuid',
+            metavar='<portgroup-uuid>',
+            help=_("UUID of the baremetal portgroup to attach the VIF to.")
+        )
+        parser.add_argument(
             '--vif-info',
             metavar='<key=value>',
             action='append',
@@ -2209,6 +2214,8 @@ class VifAttachBaremetalNode(command.Command):
         fields = utils.key_value_pairs_to_dict(parsed_args.vif_info or [])
         if parsed_args.port_uuid:
             fields['port_uuid'] = parsed_args.port_uuid
+        if parsed_args.portgroup_uuid:
+            fields['portgroup_uuid'] = parsed_args.portgroup_uuid
         baremetal_client.node.vif_attach(parsed_args.node, parsed_args.vif_id,
                                          **fields)
 
