@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import dbm
 import logging
 import os
 from typing import cast
@@ -41,9 +42,10 @@ def _get_cache() -> dogpile.cache.CacheRegion:
     global CACHE
     if CACHE is None:
 
-        # Ensure cache directory present
+        # Ensure cache directory present; exist_ok tolerates a concurrent
+        # create by another client process.
         if not os.path.exists(CACHE_DIR):
-            os.makedirs(CACHE_DIR)
+            os.makedirs(CACHE_DIR, exist_ok=True)
 
         # Use the cache expiry if specified in an env var
         expiry_time = os.environ.get(CACHE_EXPIRY_ENV_VAR, DEFAULT_EXPIRY)
@@ -81,7 +83,11 @@ def save_data(host: str, port: str | int, data: str) -> None:
     param data: The data we want saved
     """
     key = _build_key(host, port)
-    _get_cache().set(key, data)
+    try:
+        _get_cache().set(key, data)
+    except dbm.error as e:
+        LOG.debug('Could not write API version to cache file %(cache)s: '
+                  '%(error)s', {'cache': CACHE_FILENAME, 'error': e})
 
 
 def retrieve_data(
@@ -101,7 +107,12 @@ def retrieve_data(
         return None
 
     key = _build_key(host, port)
-    data = _get_cache().get(key, expiration_time=expiry)
+    try:
+        data = _get_cache().get(key, expiration_time=expiry)
+    except dbm.error as e:
+        LOG.debug('Could not read API version from cache file %(cache)s: '
+                  '%(error)s', {'cache': CACHE_FILENAME, 'error': e})
+        return None
 
     if data == dogpile.cache.api.NO_VALUE:
         return None

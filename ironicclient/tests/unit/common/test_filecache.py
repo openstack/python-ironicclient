@@ -50,7 +50,8 @@ class FileCacheTest(utils.BaseTestCase):
         self.assertEqual(cache_val, filecache._get_cache())
         self.assertEqual(cache_val, filecache.CACHE)
         mock_exists.assert_called_once_with(filecache.CACHE_DIR)
-        mock_makedirs.assert_called_once_with(filecache.CACHE_DIR)
+        mock_makedirs.assert_called_once_with(filecache.CACHE_DIR,
+                                              exist_ok=True)
         mock_get.assert_called_once_with(filecache.CACHE_EXPIRY_ENV_VAR,
                                          mock.ANY)
         cache_region.configure.assert_called_once_with(
@@ -141,6 +142,35 @@ class FileCacheTest(utils.BaseTestCase):
         data = 'some random data'
         filecache.save_data(host, port, data)
         mock_cache.set.assert_called_once_with(hostport, data)
+
+    @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
+    @mock.patch.object(filecache, '_get_cache', autospec=True)
+    def test_save_data_cache_error_swallowed(self,
+                                             mock_get_cache: mock.MagicMock,
+                                             mock_cache: mock.MagicMock,
+                                             ) -> None:
+        # A dbm error (e.g. errno 11 under concurrency) must not propagate.
+        mock_cache.set.side_effect = OSError(
+            11, 'Resource temporarily unavailable')
+        mock_get_cache.return_value = mock_cache
+        filecache.save_data('fred', '1234', 'some random data')
+        mock_cache.set.assert_called_once_with('fred:1234', 'some random data')
+
+    @mock.patch.object(os.path, 'isfile', autospec=True)
+    @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)
+    @mock.patch.object(filecache, '_get_cache', autospec=True)
+    def test_retrieve_data_cache_error_swallowed(
+        self,
+        mock_get_cache: mock.MagicMock,
+        mock_cache: mock.MagicMock,
+        mock_isfile: mock.MagicMock,
+    ) -> None:
+        # A dbm error while reading is treated as a cache miss.
+        mock_isfile.return_value = True
+        mock_cache.get.side_effect = OSError(
+            11, 'Resource temporarily unavailable')
+        mock_get_cache.return_value = mock_cache
+        self.assertIsNone(filecache.retrieve_data('fred', '1234'))
 
     @mock.patch.object(os.path, 'isfile', autospec=True)
     @mock.patch.object(dogpile.cache.region, 'CacheRegion', autospec=True)

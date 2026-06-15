@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    Fixes a race condition where running multiple Bare Metal CLI commands
+    concurrently could fail with ``[Errno 11] Resource temporarily unavailable``
+    while accessing the cached API version. The on-disk version cache is now
+    best-effort: if it cannot be read or written, the client silently
+    re-negotiates the API version instead of raising an error.
