@@ -211,3 +211,14 @@ disallow_untyped_calls = true
 disallow_untyped_defs = true
 disallow_subclassing_any = false
 disable_error_code = ["import-untyped"]
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+select = [
+    "E",        # pycodestyle (error)
+    "F",        # pyflakes
+    "G",        # flake8-logging-format
+    "LOG",      # flake8-logging
+]

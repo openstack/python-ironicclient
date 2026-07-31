@@ -92,7 +92,7 @@ class CreateBaremetalVolumeTarget(command.ShowOne):
     def take_action(
         self, parsed_args: argparse.Namespace,
     ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
-        self.log.debug("take_action(%s)" % parsed_args)
+        self.log.debug("take_action(%s)", parsed_args)
         manager = self.app.client_manager
         baremetal_client = manager.baremetal
 
@@ -222,7 +222,7 @@ class ListBaremetalVolumeTarget(command.Lister):
     def take_action(
         self, parsed_args: argparse.Namespace,
     ) -> tuple[Sequence[str], Iterable[Any]]:
-        self.log.debug("take_action(%s)" % parsed_args)
+        self.log.debug("take_action(%s)", parsed_args)
         manager = self.app.client_manager
         client = manager.baremetal
 
@@ -248,7 +248,7 @@ class ListBaremetalVolumeTarget(command.Lister):
             columns = resource.fields
             params['fields'] = columns
 
-        self.log.debug("params(%s)" % params)
+        self.log.debug("params(%s)", params)
         data = client.volume_target.list(**params)
 
         data = oscutils.sort_items(data, parsed_args.sort)
