@@ -153,6 +153,28 @@ class TestCreateBaremetalRunbook(TestBaremetalRunbook):
         }
         self.baremetal_mock.runbook.create.assert_called_once_with(**expected)
 
+    def test_baremetal_runbook_create_disable_ramdisk(self) -> None:
+        arglist = [
+            '--name', baremetal_fakes.baremetal_runbook_name,
+            '--steps', baremetal_fakes.baremetal_runbook_steps,
+            '--disable-ramdisk',
+        ]
+        verifylist = [
+            ('name', baremetal_fakes.baremetal_runbook_name),
+            ('steps', baremetal_fakes.baremetal_runbook_steps),
+            ('disable_ramdisk', True),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+
+        expected = {
+            'name': baremetal_fakes.baremetal_runbook_name,
+            'steps': json.loads(baremetal_fakes.baremetal_runbook_steps),
+            'disable_ramdisk': True,
+        }
+        self.baremetal_mock.runbook.create.assert_called_once_with(**expected)
+
 
 class TestShowBaremetalRunbook(TestBaremetalRunbook):
     def setUp(self) -> None:
@@ -182,6 +204,7 @@ class TestShowBaremetalRunbook(TestBaremetalRunbook):
 
         collist = (
             'description',
+            'disable_ramdisk',
             'extra',
             'name',
             'owner',
@@ -193,6 +216,7 @@ class TestShowBaremetalRunbook(TestBaremetalRunbook):
 
         datalist = (
             baremetal_fakes.baremetal_runbook_description,
+            baremetal_fakes.baremetal_runbook_disable_ramdisk,
             baremetal_fakes.baremetal_runbook_extra,
             baremetal_fakes.baremetal_runbook_name,
             baremetal_fakes.baremetal_runbook_owner,
@@ -436,6 +460,7 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
                    'name',
                    'description',
                    'traits',
+                   'disable_ramdisk',
                    'owner',
                    'public',
                    'steps',
@@ -449,6 +474,7 @@ class TestBaremetalRunbookList(TestBaremetalRunbook):
             baremetal_fakes.baremetal_runbook_name,
             baremetal_fakes.baremetal_runbook_description,
             baremetal_fakes.baremetal_runbook_traits,
+            baremetal_fakes.baremetal_runbook_disable_ramdisk,
             baremetal_fakes.baremetal_runbook_owner,
             baremetal_fakes.baremetal_runbook_public,
             baremetal_fakes.baremetal_runbook_steps,

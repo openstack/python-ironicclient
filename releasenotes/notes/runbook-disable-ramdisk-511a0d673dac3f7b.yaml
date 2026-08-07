@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds ``--disable-ramdisk`` to ``openstack baremetal runbook create``,
+    matching the field ironic's runbook resource already supports. Also
+    shown by ``runbook show`` and ``runbook list --long``.

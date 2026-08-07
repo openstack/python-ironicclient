@@ -94,6 +94,15 @@ class CreateBaremetalRunbook(command.ShowOne):
             required=True,
             help=_RUNBOOK_STEPS_HELP
         )
+        parser.add_argument(
+            '--disable-ramdisk',
+            action='store_true',
+            default=None,
+            help=_("ironic-python-agent will not be booted when this "
+                   "runbook is used. Only steps explicitly marked as not "
+                   "requiring ironic-python-agent can be executed with "
+                   "this set.")
+        )
         return parser
 
     def take_action(
@@ -105,7 +114,9 @@ class CreateBaremetalRunbook(command.ShowOne):
 
         steps = utils.handle_json_arg(parsed_args.steps, 'runbook steps')
 
-        field_list: list[str] = ['name', 'uuid', 'owner', 'public', 'extra']
+        field_list: list[str] = [
+            'name', 'uuid', 'owner', 'public', 'extra', 'disable_ramdisk',
+        ]
 
         # Check if API version supports new fields (description and traits)
         if utils.check_api_version_support(

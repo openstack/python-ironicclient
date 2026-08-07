@@ -38,6 +38,9 @@ del CREATE_RUNBOOK['uuid']
 
 CREATE_RUNBOOK_WITH_UUID = copy.deepcopy(RUNBOOK)
 
+CREATE_RUNBOOK_WITH_DISABLE_RAMDISK = copy.deepcopy(CREATE_RUNBOOK)
+CREATE_RUNBOOK_WITH_DISABLE_RAMDISK['disable_ramdisk'] = True
+
 UPDATED_RUNBOOK = copy.deepcopy(RUNBOOK)
 NEW_NAME = 'CUSTOM_RUNBOOK3'
 UPDATED_RUNBOOK['name'] = NEW_NAME
@@ -289,6 +292,15 @@ class RunbookManagerTest(testtools.TestCase):
         expect = [
             ('POST', '/v1/runbooks', {},
              CREATE_RUNBOOK_WITH_UUID),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertTrue(runbook)
+
+    def test_create_with_disable_ramdisk(self) -> None:
+        runbook = self.mgr.create(**CREATE_RUNBOOK_WITH_DISABLE_RAMDISK)
+        expect = [
+            ('POST', '/v1/runbooks', {},
+             CREATE_RUNBOOK_WITH_DISABLE_RAMDISK),
         ]
         self.assertEqual(expect, self.api.calls)
         self.assertTrue(runbook)
