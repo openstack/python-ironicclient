@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Removes ``--traits`` from ``openstack baremetal runbook create``.
+    Ironic has never accepted traits in the create request body; use
+    ``openstack baremetal runbook trait add/remove`` instead. Passing
+    ``--traits`` to ``runbook create`` always resulted in a ``400``.

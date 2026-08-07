@@ -59,12 +59,6 @@ class CreateBaremetalRunbook(command.ShowOne):
             help=_('Description of the runbook.')
         )
         parser.add_argument(
-            '--traits',
-            metavar='<trait>',
-            action='append',
-            help=_('Trait for this runbook. Can be specified multiple times.')
-        )
-        parser.add_argument(
             '--uuid',
             dest='uuid',
             metavar='<uuid>',
@@ -118,17 +112,16 @@ class CreateBaremetalRunbook(command.ShowOne):
             'name', 'uuid', 'owner', 'public', 'extra', 'disable_ramdisk',
         ]
 
-        # Check if API version supports new fields (description and traits)
+        # Check if API version supports the description field. Note that
+        # traits cannot be set at creation time: the API only accepts them
+        # via the /runbooks/<ident>/traits sub-resource (see the
+        # AddTraitBaremetalRunbook/RemoveTraitBaremetalRunbook commands).
         if utils.check_api_version_support(
                 baremetal_client.current_api_version, "1.112"):
-            field_list.extend(['description', 'traits'])
-        else:
-            if parsed_args.description is not None:
-                raise exc.UnsupportedVersion(
-                    _("--description requires API version 1.112 or later"))
-            if parsed_args.traits is not None:
-                raise exc.UnsupportedVersion(
-                    _("--traits requires API version 1.112 or later"))
+            field_list.append('description')
+        elif parsed_args.description is not None:
+            raise exc.UnsupportedVersion(
+                _("--description requires API version 1.112 or later"))
 
         fields = dict((k, v) for (k, v) in vars(parsed_args).items()
                       if k in field_list and v is not None)

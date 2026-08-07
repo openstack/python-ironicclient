@@ -30,7 +30,7 @@ class RunbookManager(base.CreateManager[Runbook]):
     resource_class: type[Runbook] = Runbook
     _creation_attributes: list[str] = [
         'description', 'disable_ramdisk', 'extra', 'name', 'owner', 'public',
-        'steps', 'traits', 'uuid',
+        'steps', 'uuid',
     ]
     _resource_name: str = 'runbooks'
 

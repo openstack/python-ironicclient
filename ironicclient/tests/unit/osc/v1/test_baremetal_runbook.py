@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import copy
 import json
+from typing import Any
 from unittest import mock
 
 from osc_lib.tests import utils as osctestutils
@@ -125,6 +126,21 @@ class TestCreateBaremetalRunbook(TestBaremetalRunbook):
         verifylist = [
             ('name', baremetal_fakes.baremetal_runbook_name),
         ]
+
+        self.assertRaises(osctestutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+        self.assertFalse(self.baremetal_mock.runbook.create.called)
+
+    def test_baremetal_runbook_create_no_traits_option(self) -> None:
+        # Traits cannot be supplied at creation time; the API only accepts
+        # them via the /runbooks/<ident>/traits sub-resource.
+        arglist = [
+            '--name', baremetal_fakes.baremetal_runbook_name,
+            '--steps', baremetal_fakes.baremetal_runbook_steps,
+            '--traits', 'CUSTOM_FOO',
+        ]
+        verifylist: list[tuple[str, Any]] = []
 
         self.assertRaises(osctestutils.ParserException,
                           self.check_parser,
