@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    Removes ``--step`` from ``openstack baremetal runbook unset``. It
+    generated a patch path (``/step/<key>``) that ironic always
+    rejected: the allowed field is the plural ``steps`` list, not a
+    per-step key, and there's no way to remove a single step by name.
+    Use ``runbook set --steps`` to replace the full list instead.

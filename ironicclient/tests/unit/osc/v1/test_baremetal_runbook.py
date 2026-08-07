@@ -348,6 +348,17 @@ class TestBaremetalRunbookUnset(TestBaremetalRunbook):
             [{'path': '/extra/key1', 'op': 'remove'},
              {'path': '/extra/key2', 'op': 'remove'}])
 
+    def test_baremetal_runbook_unset_no_step_option(self) -> None:
+        # --step was removed: the API has no way to remove an individual
+        # step from a runbook, only to replace the whole 'steps' list.
+        arglist = [baremetal_fakes.baremetal_runbook_uuid, '--step', 'key1']
+        verifylist: list[tuple[str, Any]] = []
+
+        self.assertRaises(osctestutils.ParserException,
+                          self.check_parser,
+                          self.cmd, arglist, verifylist)
+        self.assertFalse(self.baremetal_mock.runbook.update.called)
+
     def test_baremetal_runbook_unset_no_options(self) -> None:
         arglist = []
         verifylist = []

@@ -316,13 +316,6 @@ class UnsetBaremetalRunbook(command.Command):
             help=_('Unset owner of a runbook.')
         )
         parser.add_argument(
-            "--step",
-            metavar="<key>",
-            action='append',
-            help=_('Step to unset on this baremetal runbook '
-                   '(repeat option to unset multiple steps).'),
-        )
-        parser.add_argument(
             "--extra",
             metavar="<key>",
             action='append',
@@ -358,9 +351,6 @@ class UnsetBaremetalRunbook(command.Command):
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch('remove',
                               ['extra/' + x for x in parsed_args.extra]))
-        if parsed_args.step:
-            properties.extend(utils.args_array_to_patch('remove',
-                              ['step/' + x for x in parsed_args.step]))
 
         if properties:
             baremetal_client.runbook.update(parsed_args.runbook,
