@@ -4898,9 +4898,12 @@ class TestNodeHistoryEventList(TestBaremetal):
             'node_uuid', True)
         expected_columns = ('uuid', 'created_at', 'severity',
                             'event_type', 'event',
-                            'conductor', 'user')
+                            'conductor', 'user',
+                            'project', 'state',
+                            'target_provision_state', 'duration_seconds')
         expected_data = (('abcdef1', 'time', 'info', 'purring', 'meow',
-                          'lap-conductor', '0191'),)
+                          'lap-conductor', '0191', 'test-project', 'active',
+                          'available', 300),)
         self.assertEqual(expected_columns, columns)
         self.assertEqual(expected_data, tuple(data))
 
@@ -4925,9 +4928,12 @@ class TestNodeHistoryEventGet(TestBaremetal):
         self.baremetal_mock.node.get_history_event.assert_called_once_with(
             'node_uuid', 'event_uuid')
         expected_columns = ('uuid', 'created_at', 'severity', 'event',
-                            'event_type', 'conductor', 'user')
+                            'event_type', 'conductor', 'user', 'project',
+                            'state', 'target_provision_state',
+                            'duration_seconds')
         expected_data = ('abcdef1', 'time', 'info', 'meow', 'purring',
-                         'lap-conductor', '0191')
+                         'lap-conductor', '0191', 'test-project', 'active',
+                         'available', 300)
 
         self.assertEqual(expected_columns, columns)
         self.assertEqual(expected_data, tuple(data))

@@ -71,6 +71,7 @@ class Resource(object):
         'driver': 'Driver',
         'driver_info': 'Driver Info',
         'driver_internal_info': 'Driver Internal Info',
+        'duration_seconds': 'Duration (seconds)',
         'drivers': 'Drivers',
         'enabled_bios_interfaces': 'Enabled BIOS Interfaces',
         'enabled_boot_interfaces': 'Enabled Boot Interfaces',
@@ -111,6 +112,7 @@ class Resource(object):
         'node_uuid': 'Node UUID',
         'owner': 'Owner',
         'power_state': 'Power State',
+        'project': 'Project',
         'properties': 'Properties',
         'protected': 'Protected',
         'protected_reason': 'Protected Reason',
@@ -676,7 +678,11 @@ NODE_HISTORY_DETAILED_RESOURCE = Resource(
      'event_type',
      'event',
      'conductor',
-     'user']
+     'user',
+     'project',
+     'state',
+     'target_provision_state',
+     'duration_seconds']
 )
 
 SHARD_RESOURCE = Resource(

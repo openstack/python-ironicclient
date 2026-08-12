@@ -283,6 +283,10 @@ NODE_HISTORY = [
         'event_type': 'purring',
         'conductor': 'lap-conductor',
         'user': '0191',
+        'project': 'test-project',
+        'state': 'active',
+        'target_provision_state': 'available',
+        'duration_seconds': 300,
         'links': {'href': 'url', 'rel': 'self'},
     }
 ]
