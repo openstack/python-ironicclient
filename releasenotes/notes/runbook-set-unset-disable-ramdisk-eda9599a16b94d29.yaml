@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adds ``--disable-ramdisk`` to ``openstack baremetal runbook set``
+    and ``runbook unset``, so the field can be changed after creation.
+    Requires an ironic fix allowing ``disable_ramdisk`` to be patched;
+    without it, these options fail server-side.

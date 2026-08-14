@@ -297,6 +297,36 @@ class TestBaremetalRunbookSet(TestBaremetalRunbook):
             baremetal_fakes.baremetal_runbook_uuid,
             [{'path': '/steps', 'value': expected_steps, 'op': 'add'}])
 
+    def test_baremetal_runbook_set_disable_ramdisk(self) -> None:
+        arglist = [
+            baremetal_fakes.baremetal_runbook_uuid,
+            '--disable-ramdisk']
+        verifylist = [
+            ('runbook', baremetal_fakes.baremetal_runbook_uuid),
+            ('disable_ramdisk', 'true')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.runbook.update.assert_called_once_with(
+            baremetal_fakes.baremetal_runbook_uuid,
+            [{'path': '/disable_ramdisk', 'value': True, 'op': 'add'}])
+
+    def test_baremetal_runbook_set_disable_ramdisk_false(self) -> None:
+        arglist = [
+            baremetal_fakes.baremetal_runbook_uuid,
+            '--disable-ramdisk', 'false']
+        verifylist = [
+            ('runbook', baremetal_fakes.baremetal_runbook_uuid),
+            ('disable_ramdisk', 'false')]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.runbook.update.assert_called_once_with(
+            baremetal_fakes.baremetal_runbook_uuid,
+            [{'path': '/disable_ramdisk', 'value': False, 'op': 'add'}])
+
     def test_baremetal_runbook_set_no_options(self) -> None:
         arglist = []
         verifylist = []
@@ -347,6 +377,20 @@ class TestBaremetalRunbookUnset(TestBaremetalRunbook):
             baremetal_fakes.baremetal_runbook_uuid,
             [{'path': '/extra/key1', 'op': 'remove'},
              {'path': '/extra/key2', 'op': 'remove'}])
+
+    def test_baremetal_runbook_unset_disable_ramdisk(self) -> None:
+        arglist = [
+            baremetal_fakes.baremetal_runbook_uuid, '--disable-ramdisk']
+        verifylist = [('runbook',
+                       baremetal_fakes.baremetal_runbook_uuid),
+                      ('disable_ramdisk', True)]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+        self.cmd.take_action(parsed_args)
+        self.baremetal_mock.runbook.update.assert_called_once_with(
+            baremetal_fakes.baremetal_runbook_uuid,
+            [{'path': '/disable_ramdisk', 'op': 'remove'}])
 
     def test_baremetal_runbook_unset_no_step_option(self) -> None:
         # --step was removed: the API has no way to remove an individual

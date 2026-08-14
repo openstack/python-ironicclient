@@ -234,6 +234,15 @@ class SetBaremetalRunbook(command.Command):
             help=_('Extra to set on this baremetal runbook '
                    '(repeat option to set multiple extras).'),
         )
+        parser.add_argument(
+            '--disable-ramdisk',
+            dest='disable_ramdisk',
+            nargs='?',
+            const='true',
+            metavar='<disable_ramdisk>',
+            help=_('Whether ironic-python-agent should not be booted when '
+                   'this runbook is used.')
+        )
         return parser
 
     def take_action(self, parsed_args: argparse.Namespace) -> None:
@@ -271,6 +280,14 @@ class SetBaremetalRunbook(command.Command):
         if parsed_args.extra:
             properties.extend(utils.args_array_to_patch(
                 'add', ['extra/' + x for x in parsed_args.extra]))
+        if parsed_args.disable_ramdisk is not None:
+            to_bool = utils.bool_argument_value(
+                '--disable-ramdisk', parsed_args.disable_ramdisk,
+                strict=True)
+            disable_ramdisk = [
+                "disable_ramdisk=%s" % json.dumps(to_bool)]
+            properties.extend(
+                utils.args_array_to_patch('add', disable_ramdisk))
 
         if properties:
             baremetal_client.runbook.update(parsed_args.runbook,
@@ -322,6 +339,12 @@ class UnsetBaremetalRunbook(command.Command):
             help=_('Extra to unset on this baremetal runbook '
                    '(repeat option to unset multiple extras).'),
         )
+        parser.add_argument(
+            '--disable-ramdisk',
+            dest='disable_ramdisk',
+            action='store_true',
+            help=_('Unset disable_ramdisk of a runbook.')
+        )
 
         return parser
 
@@ -336,7 +359,7 @@ class UnsetBaremetalRunbook(command.Command):
         supports_new_fields = utils.check_api_version_support(
             baremetal_client.current_api_version, "1.112")
 
-        for field in ['name', 'owner', 'public']:
+        for field in ['name', 'owner', 'public', 'disable_ramdisk']:
             if getattr(parsed_args, field):
                 properties.extend(utils.args_array_to_patch('remove', [field]))
 
