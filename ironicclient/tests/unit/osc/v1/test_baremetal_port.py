@@ -400,6 +400,7 @@ class TestShowBaremetalPort(TestBaremetalPort):
         collist = (
             'address',
             'extra',
+            'name',
             'node_uuid',
             'uuid')
         self.assertEqual(collist, columns)
@@ -407,6 +408,7 @@ class TestShowBaremetalPort(TestBaremetalPort):
         datalist = (
             baremetal_fakes.baremetal_port_address,
             baremetal_fakes.baremetal_port_extra,
+            baremetal_fakes.baremetal_port_name,
             baremetal_fakes.baremetal_uuid,
             baremetal_fakes.baremetal_port_uuid)
         self.assertEqual(datalist, tuple(data))
@@ -883,17 +885,22 @@ class TestBaremetalPortList(TestBaremetalPort):
 
         kwargs = {
             'marker': None,
-            'limit': None}
+            'limit': None,
+            'fields': ('uuid', 'address', 'node_uuid', 'name')}
         self.baremetal_mock.port.list.assert_called_with(**kwargs)
 
         collist = (
             "uuid",
-            "address")
+            "address",
+            "node_uuid",
+            "name")
         self.assertEqual(collist, columns)
 
         datalist = ((
             baremetal_fakes.baremetal_port_uuid,
-            baremetal_fakes.baremetal_port_address
+            baremetal_fakes.baremetal_port_address,
+            baremetal_fakes.baremetal_uuid,
+            baremetal_fakes.baremetal_port_name,
         ), )
         self.assertEqual(datalist, tuple(data))
 
@@ -908,6 +915,7 @@ class TestBaremetalPortList(TestBaremetalPort):
             'address': baremetal_fakes.baremetal_port_address,
             'marker': None,
             'limit': None,
+            'fields': ('uuid', 'address', 'node_uuid', 'name'),
         }
         self.baremetal_mock.port.list.assert_called_with(**kwargs)
 
@@ -922,6 +930,7 @@ class TestBaremetalPortList(TestBaremetalPort):
             'node': baremetal_fakes.baremetal_uuid,
             'marker': None,
             'limit': None,
+            'fields': ('uuid', 'address', 'node_uuid', 'name'),
         }
         self.baremetal_mock.port.list.assert_called_with(**kwargs)
 
@@ -937,6 +946,7 @@ class TestBaremetalPortList(TestBaremetalPort):
             'portgroup': baremetal_fakes.baremetal_portgroup_uuid,
             'marker': None,
             'limit': None,
+            'fields': ('uuid', 'address', 'node_uuid', 'name'),
         }
         self.baremetal_mock.port.list.assert_called_with(**kwargs)
 
@@ -977,7 +987,7 @@ class TestBaremetalPortList(TestBaremetalPort):
             '',
             '',
             '',
-            '',
+            baremetal_fakes.baremetal_port_name,
         ), )
         self.assertEqual(datalist, tuple(data))
 

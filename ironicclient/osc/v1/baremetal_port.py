@@ -636,6 +636,9 @@ class ListBaremetalPort(command.Lister):
             columns = resource.fields
             params['fields'] = columns
 
+        else:
+            params['fields'] = columns
+
         self.log.debug("params(%s)", params)
         data = client.port.list(**params)
 

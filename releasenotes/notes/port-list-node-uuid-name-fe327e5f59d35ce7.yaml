@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    The ``openstack baremetal port list`` command now includes the
+    ``node_uuid`` and ``name`` columns by default, without needing
+    ``--long`` or ``--fields``.

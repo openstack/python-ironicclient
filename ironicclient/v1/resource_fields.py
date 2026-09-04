@@ -394,6 +394,8 @@ PORT_DETAILED_RESOURCE = Resource(
 PORT_RESOURCE = Resource(
     ['uuid',
      'address',
+     'node_uuid',
+     'name',
      ])
 
 # Portgroups

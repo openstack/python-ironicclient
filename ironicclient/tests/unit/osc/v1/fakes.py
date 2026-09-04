@@ -58,12 +58,14 @@ baremetal_port_address = 'AA:BB:CC:DD:EE:FF'
 baremetal_port_extra = {'key1': 'value1',
                         'key2': 'value2'}
 baremetal_port_physical_network = 'physnet1'
+baremetal_port_name = 'fake port name'
 
 BAREMETAL_PORT = {
     'uuid': baremetal_port_uuid,
     'address': baremetal_port_address,
     'extra': baremetal_port_extra,
     'node_uuid': baremetal_uuid,
+    'name': baremetal_port_name,
 }
 
 baremetal_driver_hosts = ['fake-host1', 'fake-host2']
