@@ -301,6 +301,13 @@ fake_responses = {
             {"nodes": [NODE2]}
         )
     },
+    '/v1/nodes/?instance_uuid=abc':
+    {
+        'GET': (
+            {},
+            {"nodes": [NODE1]}
+        )
+    },
     '/v1/nodes/?description_contains=foo':
     {
         'GET': (
@@ -1087,6 +1094,13 @@ class NodeManagerTest(testtools.TestCase):
         self.assertThat(nodes, HasLength(1))
         self.assertEqual(NODE2['description'],
                          getattr(nodes[0], 'description'))
+
+    def test_node_list_by_instance_uuid(self) -> None:
+        self.mgr.list(instance_uuid='abc')
+        expect = [
+            ('GET', '/v1/nodes/?instance_uuid=abc', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
 
     def test_node_list_detail(self) -> None:
         nodes = self.mgr.list(detail=True)

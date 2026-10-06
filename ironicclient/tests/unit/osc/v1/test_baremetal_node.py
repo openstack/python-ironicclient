@@ -1672,6 +1672,19 @@ class TestBaremetalList(TestBaremetal):
             **kwargs
         )
 
+    def test_baremetal_list_by_instance_name_or_uuid(self) -> None:
+        for value, key in (('for-instance', 'instance_name'),
+                           ('1be26c0b-03f2-4d2e-ae87-c02d7f33c123',
+                            'instance_uuid')):
+            arglist = ['--instance', value]
+            verifylist = [('instance', value)]
+            parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+
+            self.cmd.take_action(parsed_args)
+
+            self.baremetal_mock.node.list.assert_called_with(
+                marker=None, limit=None, **{key: value})
+
     def test_baremetal_list_fields(self) -> None:
         arglist = [
             '--fields', 'uuid', 'name',

@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds an ``--instance`` option to ``baremetal node list`` which accepts
+    either an instance name or an instance UUID. A UUID-shaped value is
+    used to filter by ``instance_uuid``, anything else by ``instance_name``.

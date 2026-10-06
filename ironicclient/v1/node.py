@@ -1361,6 +1361,7 @@ class NodeManager(base.CreateManager[Node]):
         description_contains: str | None = None,
         global_request_id: str | None = None,
         instance_name: str | None = None,
+        instance_uuid: str | None = None,
     ) -> list[Node]:
         """Retrieve a list of nodes.
 
@@ -1444,6 +1445,8 @@ class NodeManager(base.CreateManager[Node]):
                                  with description contains specified value.
         :param instance_name: Optional. String value to get only nodes with
                                the given instance_name set.
+        :param instance_uuid: Optional. String value to get only nodes with
+                              the given instance_uuid set.
         :returns: A list of nodes.
 
         """
@@ -1493,6 +1496,8 @@ class NodeManager(base.CreateManager[Node]):
             filters.append('description_contains=%s' % description_contains)
         if instance_name is not None:
             filters.append('instance_name=%s' % instance_name)
+        if instance_uuid is not None:
+            filters.append('instance_uuid=%s' % instance_uuid)
 
         path = ''
         if detail:

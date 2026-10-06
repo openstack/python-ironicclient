@@ -25,6 +25,7 @@ import sys
 from typing import Any, cast
 
 from osc_lib import utils as oscutils
+from oslo_utils import uuidutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
@@ -897,6 +898,12 @@ class ListBaremetalNode(command.Lister):
             '--instance-name',
             metavar='<instance_name>',
             help=_("Filter the list of returned nodes by an instance name."))
+        parser.add_argument(
+            '--instance',
+            dest='instance',
+            metavar='<instance>',
+            help=_("Filter the list of returned nodes by an instance name "
+                   "or UUID."))
         sharded_group = parser.add_mutually_exclusive_group(required=False)
         sharded_group.add_argument(
             '--sharded',
@@ -976,6 +983,11 @@ class ListBaremetalNode(command.Lister):
                       'instance_name']:
             if getattr(parsed_args, field):
                 params[field] = getattr(parsed_args, field)
+        if parsed_args.instance:
+            if uuidutils.is_uuid_like(parsed_args.instance):
+                params['instance_uuid'] = parsed_args.instance
+            else:
+                params['instance_name'] = parsed_args.instance
         if parsed_args.include_children:
             params['include_children'] = True
         if parsed_args.long:
