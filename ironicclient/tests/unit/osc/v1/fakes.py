@@ -34,7 +34,7 @@ BAREMETAL_CHASSIS = {
     'extra': baremetal_chassis_extra,
 }
 
-baremetal_uuid = 'xxx-xxxxxx-xxxx'
+baremetal_uuid = '1be26c0b-03f2-4d2e-ae87-c02d7f33c123'
 baremetal_name = 'fake name'
 baremetal_owner = 'fake-owner'
 baremetal_instance_uuid = 'yyy-yyyyyy-yyyy'

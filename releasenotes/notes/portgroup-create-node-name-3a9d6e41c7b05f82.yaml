@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    ``baremetal port group create --node`` now accepts a node name in
+    addition to a node UUID. Previously a name was sent to the API as if it
+    were a UUID and the request failed.

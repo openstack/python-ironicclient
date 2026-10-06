@@ -70,6 +70,25 @@ class TestCreateBaremetalPortGroup(TestBaremetalPortGroup):
 
         self.baremetal_mock.portgroup.create.assert_called_once_with(**args)
 
+    def test_baremetal_portgroup_create_node_name(self) -> None:
+        self.baremetal_mock.node.get.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None, {'uuid': baremetal_fakes.baremetal_uuid}, loaded=True))
+        arglist = [
+            '--node', baremetal_fakes.baremetal_name,
+        ]
+        verifylist = [
+            ('node_uuid', baremetal_fakes.baremetal_name),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+        self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.get.assert_called_once_with(
+            baremetal_fakes.baremetal_name)
+        self.baremetal_mock.portgroup.create.assert_called_once_with(
+            node_uuid=baremetal_fakes.baremetal_uuid)
+
     def test_baremetal_portgroup_create_name_address_uuid(self) -> None:
         arglist = [
             '--address', baremetal_fakes.baremetal_portgroup_address,

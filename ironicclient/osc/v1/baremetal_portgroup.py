@@ -23,6 +23,7 @@ import logging
 from typing import Any, cast
 
 from osc_lib import utils as oscutils
+from oslo_utils import uuidutils
 
 from ironicclient.common.i18n import _
 from ironicclient.common import utils
@@ -44,9 +45,10 @@ class CreateBaremetalPortGroup(command.ShowOne):
         parser.add_argument(
             '--node',
             dest='node_uuid',
-            metavar='<uuid>',
+            metavar='<node>',
             required=True,
-            help=_('UUID of the node that this port group belongs to.'))
+            help=_('Name or UUID of the node that this port group belongs '
+                   'to.'))
         parser.add_argument(
             '--address',
             metavar='<mac-address>',
@@ -118,6 +120,10 @@ class CreateBaremetalPortGroup(command.ShowOne):
             fields['standalone_ports_supported'] = True
         if parsed_args.unsupport_standalone_ports:
             fields['standalone_ports_supported'] = False
+
+        if not uuidutils.is_uuid_like(fields['node_uuid']):
+            fields['node_uuid'] = baremetal_client.node.get(
+                fields['node_uuid']).uuid
 
         fields = utils.args_array_to_dict(fields, 'extra')
         fields = utils.args_array_to_dict(fields, 'properties')
