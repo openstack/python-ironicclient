@@ -28,4 +28,4 @@ Indices and tables
 * :ref:`search`
 
 
-.. _Ironic: https://wiki.openstack.org/wiki/Ironic
+.. _Ironic: https://docs.openstack.org/ironic/latest/
