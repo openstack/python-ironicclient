@@ -480,6 +480,45 @@ class ConsoleShowBaremetalNode(command.ShowOne):
         )
 
 
+class ConsoleUrlShowBaremetalNode(command.ShowOne):
+    """Show the console URL for a node
+
+    Like "openstack console url show", each item of the console information
+    is displayed as its own field.
+    """
+
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ConsoleUrlShowBaremetalNode")
+
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node")
+        )
+        return parser
+
+    def take_action(
+        self, parsed_args: argparse.Namespace,
+    ) -> tuple[tuple[str, ...], tuple[Any, ...]]:
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        info = baremetal_client.node.get_console(parsed_args.node)
+        console_info = info.get('console_info')
+        if not console_info:
+            raise exc.CommandError(
+                _("Console is not enabled or has no console information "
+                  "for node %s") % parsed_args.node)
+        return cast(
+            tuple[tuple[str, ...], tuple[Any, ...]],
+            tuple(zip(*sorted(console_info.items()))),
+        )
+
+
 class CreateBaremetalNode(command.ShowOne):
     """Register a new node with the baremetal service"""
 

@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adds the ``openstack baremetal node console url show <node>`` command, which
+    displays the console information of a node with each item (such as
+    ``type`` and ``url``) as its own field, similar to
+    ``openstack console url show``.

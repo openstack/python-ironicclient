@@ -684,6 +684,37 @@ class TestConsoleShow(TestBaremetal):
             'node_uuid')
 
 
+class TestConsoleUrlShow(TestBaremetal):
+    def setUp(self) -> None:
+        super(TestConsoleUrlShow, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ConsoleUrlShowBaremetalNode(self.app, None)
+
+    def test_console_url_show(self) -> None:
+        self.baremetal_mock.node.get_console.return_value = {
+            "console_enabled": True,
+            "console_info": {"type": "vnc", "url": "https://example/vnc"}}
+        parsed_args = self.check_parser(
+            self.cmd, ['node_uuid'], [('node', 'node_uuid')])
+
+        columns, data = self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.node.get_console.assert_called_once_with(
+            'node_uuid')
+        self.assertEqual(('type', 'url'), columns)
+        self.assertEqual(('vnc', 'https://example/vnc'), data)
+
+    def test_console_url_show_no_console_info(self) -> None:
+        self.baremetal_mock.node.get_console.return_value = {
+            "console_enabled": False, "console_info": None}
+        parsed_args = self.check_parser(
+            self.cmd, ['node_uuid'], [('node', 'node_uuid')])
+
+        self.assertRaises(exc.CommandError,
+                          self.cmd.take_action, parsed_args)
+
+
 class TestSecurebootOff(TestBaremetal):
     def setUp(self) -> None:
         super(TestSecurebootOff, self).setUp()
