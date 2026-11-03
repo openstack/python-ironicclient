@@ -85,6 +85,7 @@ baremetal_node_children_list = "ironicclient.osc.v1.baremetal_node:NodeChildrenL
 baremetal_node_console_disable = "ironicclient.osc.v1.baremetal_node:ConsoleDisableBaremetalNode"
 baremetal_node_console_enable = "ironicclient.osc.v1.baremetal_node:ConsoleEnableBaremetalNode"
 baremetal_node_console_show = "ironicclient.osc.v1.baremetal_node:ConsoleShowBaremetalNode"
+baremetal_node_console_url_open = "ironicclient.osc.v1.baremetal_node:ConsoleUrlOpenBaremetalNode"
 baremetal_node_console_url_show = "ironicclient.osc.v1.baremetal_node:ConsoleUrlShowBaremetalNode"
 baremetal_node_create = "ironicclient.osc.v1.baremetal_node:CreateBaremetalNode"
 baremetal_node_delete = "ironicclient.osc.v1.baremetal_node:DeleteBaremetalNode"

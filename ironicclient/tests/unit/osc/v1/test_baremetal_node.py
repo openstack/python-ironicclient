@@ -20,6 +20,7 @@ import copy
 import io
 import json
 import sys
+from typing import Any
 from unittest import mock
 
 from osc_lib.tests import utils as oscutils
@@ -713,6 +714,63 @@ class TestConsoleUrlShow(TestBaremetal):
 
         self.assertRaises(exc.CommandError,
                           self.cmd.take_action, parsed_args)
+
+
+class TestConsoleUrlOpen(TestBaremetal):
+    def setUp(self) -> None:
+        super(TestConsoleUrlOpen, self).setUp()
+
+        # Get the command object to test
+        self.cmd = baremetal_node.ConsoleUrlOpenBaremetalNode(self.app, None)
+
+    def _parse(self) -> Any:
+        return self.check_parser(
+            self.cmd, ['node_uuid'], [('node', 'node_uuid')])
+
+    @mock.patch.object(baremetal_node.webbrowser, 'open', autospec=True)
+    def test_console_url_open(self, mock_open: mock.Mock) -> None:
+        self.baremetal_mock.node.get_console.return_value = {
+            "console_enabled": True,
+            "console_info": {"type": "vnc", "url": "https://example/vnc"}}
+        mock_open.return_value = True
+
+        self.cmd.take_action(self._parse())
+
+        self.baremetal_mock.node.get_console.assert_called_once_with(
+            'node_uuid')
+        mock_open.assert_called_once_with('https://example/vnc')
+
+    @mock.patch.object(baremetal_node.webbrowser, 'open', autospec=True)
+    def test_console_url_open_no_console_info(
+            self, mock_open: mock.Mock) -> None:
+        self.baremetal_mock.node.get_console.return_value = {
+            "console_enabled": False, "console_info": None}
+
+        self.assertRaises(exc.CommandError,
+                          self.cmd.take_action, self._parse())
+        mock_open.assert_not_called()
+
+    @mock.patch.object(baremetal_node.webbrowser, 'open', autospec=True)
+    def test_console_url_open_not_web_url(
+            self, mock_open: mock.Mock) -> None:
+        self.baremetal_mock.node.get_console.return_value = {
+            "console_enabled": True,
+            "console_info": {"type": "shellinabox", "url": "file:///etc"}}
+
+        self.assertRaises(exc.CommandError,
+                          self.cmd.take_action, self._parse())
+        mock_open.assert_not_called()
+
+    @mock.patch.object(baremetal_node.webbrowser, 'open', autospec=True)
+    def test_console_url_open_browser_failure(
+            self, mock_open: mock.Mock) -> None:
+        self.baremetal_mock.node.get_console.return_value = {
+            "console_enabled": True,
+            "console_info": {"type": "vnc", "url": "https://example/vnc"}}
+        mock_open.return_value = False
+
+        self.assertRaises(exc.CommandError,
+                          self.cmd.take_action, self._parse())
 
 
 class TestSecurebootOff(TestBaremetal):

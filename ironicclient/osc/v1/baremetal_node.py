@@ -23,6 +23,8 @@ import json
 import logging
 import sys
 from typing import Any, cast
+import urllib.parse
+import webbrowser
 
 from osc_lib import utils as oscutils
 from oslo_utils import uuidutils
@@ -480,6 +482,16 @@ class ConsoleShowBaremetalNode(command.ShowOne):
         )
 
 
+def _get_console_info(baremetal_client: Any, node: str) -> dict[str, Any]:
+    info = baremetal_client.node.get_console(node)
+    console_info = info.get('console_info')
+    if not console_info:
+        raise exc.CommandError(
+            _("Console is not enabled or has no console information "
+              "for node %s") % node)
+    return cast(dict[str, Any], console_info)
+
+
 class ConsoleUrlShowBaremetalNode(command.ShowOne):
     """Show the console URL for a node
 
@@ -507,16 +519,44 @@ class ConsoleUrlShowBaremetalNode(command.ShowOne):
         self.log.debug("take_action(%s)", parsed_args)
 
         baremetal_client = self.app.client_manager.baremetal
-        info = baremetal_client.node.get_console(parsed_args.node)
-        console_info = info.get('console_info')
-        if not console_info:
-            raise exc.CommandError(
-                _("Console is not enabled or has no console information "
-                  "for node %s") % parsed_args.node)
+        console_info = _get_console_info(baremetal_client, parsed_args.node)
         return cast(
             tuple[tuple[str, ...], tuple[Any, ...]],
             tuple(zip(*sorted(console_info.items()))),
         )
+
+
+class ConsoleUrlOpenBaremetalNode(command.Command):
+    """Open the console URL for a node in a web browser"""
+
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".ConsoleUrlOpenBaremetalNode")
+
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
+
+        parser.add_argument(
+            'node',
+            metavar='<node>',
+            help=_("Name or UUID of the node")
+        )
+        return parser
+
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
+        self.log.debug("take_action(%s)", parsed_args)
+
+        baremetal_client = self.app.client_manager.baremetal
+        console_info = _get_console_info(baremetal_client, parsed_args.node)
+        url = console_info.get('url')
+        if not url or urllib.parse.urlparse(url).scheme != "https":
+            raise exc.CommandError(
+                _("Console for node %s does not have an https URL to open")
+                % parsed_args.node)
+        if not webbrowser.open(url):
+            raise exc.CommandError(
+                _("Could not open a web browser for the console URL of "
+                  "node %s") % parsed_args.node)
 
 
 class CreateBaremetalNode(command.ShowOne):

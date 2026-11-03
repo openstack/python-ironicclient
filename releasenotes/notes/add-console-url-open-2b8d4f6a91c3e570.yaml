@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Adds the ``openstack baremetal node console url open <node>`` command,
+    which opens the web console URL of a node in the default web browser.
