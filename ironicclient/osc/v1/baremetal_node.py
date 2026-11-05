@@ -2148,8 +2148,16 @@ class ValidateBaremetalNode(command.Lister):
                 (oscutils.get_dict_properties(s, fields) for s in data))
 
 
+_VIF_INTERNAL_INFO_SUFFIX = '_vif_port_id'
+_VIF_EXTRA_COLUMNS = ('purpose', 'attached_to', 'attached_uuid', 'address')
+
+
 class VifListBaremetalNode(command.Lister):
-    """Show attached VIFs for a node"""
+    """Show attached VIFs for a node
+
+    The port or port group each VIF is attached to is shown along with the
+    purpose (e.g. tenant, provisioning, cleaning) of the attachment.
+    """
 
     log: logging.Logger = logging.getLogger(
         __name__ + ".VifListBaremetalNode")
@@ -2170,13 +2178,36 @@ class VifListBaremetalNode(command.Lister):
     ) -> tuple[Sequence[str], Iterable[Any]]:
         self.log.debug("take_action(%s)", parsed_args)
 
-        columns = res_fields.VIF_RESOURCE.fields
+        columns = res_fields.VIF_RESOURCE.fields + _VIF_EXTRA_COLUMNS
 
         baremetal_client = self.app.client_manager.baremetal
         data = baremetal_client.node.vif_list(parsed_args.node)
 
-        return (columns,
-                (oscutils.get_item_properties(s, columns) for s in data))
+        # The VIF API only returns IDs. Which port or port group a VIF is
+        # attached to, and why, is recorded in their internal_info.
+        attachments: dict[str, dict[str, Any]] = {}
+        for attached_to, resources in (
+            ('port', baremetal_client.port.list(
+                node=parsed_args.node, detail=True, limit=0)),
+            ('portgroup', baremetal_client.portgroup.list(
+                node=parsed_args.node, detail=True, limit=0)),
+        ):
+            for res in resources:
+                for key, vif_id in (res.internal_info or {}).items():
+                    if not key.endswith(_VIF_INTERNAL_INFO_SUFFIX):
+                        continue
+                    attachments[vif_id] = {
+                        'purpose': key[:-len(_VIF_INTERNAL_INFO_SUFFIX)],
+                        'attached_to': attached_to,
+                        'attached_uuid': res.uuid,
+                        'address': res.address,
+                    }
+
+        rows = []
+        for vif in data:
+            row = dict(attachments.get(vif.id, {}), id=vif.id)
+            rows.append(tuple(row.get(c) for c in columns))
+        return columns, rows
 
 
 class VifAttachBaremetalNode(command.Command):

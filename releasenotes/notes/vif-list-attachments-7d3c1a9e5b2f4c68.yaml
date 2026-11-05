@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    The ``baremetal node vif list`` command now also shows the ``purpose``
+    (for example ``tenant`` or ``provisioning``), what the VIF is attached
+    to (``port`` or ``portgroup``), its UUID and its MAC ``address``. This
+    is gathered from the node's ports and port groups, so the command now
+    makes two additional API requests.

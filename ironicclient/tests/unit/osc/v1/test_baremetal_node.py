@@ -4474,10 +4474,12 @@ class TestVifList(TestBaremetal):
         self.baremetal_mock.node.vif_list.return_value = [
             baremetal_fakes.FakeBaremetalResource(
                 None,
-                copy.deepcopy(baremetal_fakes.VIFS),
+                copy.deepcopy(baremetal_fakes.VIFS['vifs'][0]),
                 loaded=True,
             ),
         ]
+        self.baremetal_mock.port.list.return_value = []
+        self.baremetal_mock.portgroup.list.return_value = []
 
         # Get the command object to test
         self.cmd = baremetal_node.VifListBaremetalNode(self.app, None)
@@ -4491,6 +4493,52 @@ class TestVifList(TestBaremetal):
         self.cmd.take_action(parsed_args)
 
         self.baremetal_mock.node.vif_list.assert_called_once_with('node_uuid')
+
+    def test_baremetal_vif_list_attachments(self) -> None:
+        self.baremetal_mock.node.vif_list.return_value = [
+            baremetal_fakes.FakeBaremetalResource(
+                None, {'id': vif_id}, loaded=True)
+            for vif_id in ('vif-pg', 'vif-port', 'vif-unattached')
+        ]
+        self.baremetal_mock.port.list.return_value = [
+            baremetal_fakes.FakeBaremetalResource(
+                None,
+                {'uuid': 'port-uuid', 'address': 'aa:aa:aa:aa:aa:aa',
+                 'internal_info': {'cleaning_vif_port_id': 'vif-port',
+                                   'unrelated': 'foo'}},
+                loaded=True),
+            baremetal_fakes.FakeBaremetalResource(
+                None,
+                {'uuid': 'port-uuid-2', 'address': 'bb:bb:bb:bb:bb:bb',
+                 'internal_info': {}},
+                loaded=True),
+        ]
+        self.baremetal_mock.portgroup.list.return_value = [
+            baremetal_fakes.FakeBaremetalResource(
+                None,
+                {'uuid': 'pg-uuid', 'address': 'cc:cc:cc:cc:cc:cc',
+                 'internal_info': {'tenant_vif_port_id': 'vif-pg'}},
+                loaded=True),
+        ]
+
+        parsed_args = self.check_parser(self.cmd, ['node_uuid'],
+                                        [('node', 'node_uuid')])
+        columns, data = self.cmd.take_action(parsed_args)
+
+        self.baremetal_mock.port.list.assert_called_once_with(
+            node='node_uuid', detail=True, limit=0)
+        self.baremetal_mock.portgroup.list.assert_called_once_with(
+            node='node_uuid', detail=True, limit=0)
+        self.assertEqual(
+            ('id', 'purpose', 'attached_to', 'attached_uuid', 'address'),
+            tuple(columns))
+        self.assertEqual([
+            ('vif-pg', 'tenant', 'portgroup', 'pg-uuid',
+             'cc:cc:cc:cc:cc:cc'),
+            ('vif-port', 'cleaning', 'port', 'port-uuid',
+             'aa:aa:aa:aa:aa:aa'),
+            ('vif-unattached', None, None, None, None),
+        ], list(data))
 
 
 class TestVifAttach(TestBaremetal):
