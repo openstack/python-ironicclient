@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Adds ``baremetal port group add <port group> <port> [<port> ...]`` and
+    ``baremetal port group remove <port group> <port> [<port> ...]`` as
+    convenience commands to add ports to, or remove ports from, a port
+    group. ``remove`` refuses to touch a port that is not a member of the
+    given port group.

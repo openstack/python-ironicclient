@@ -553,3 +553,82 @@ class UnsetBaremetalPortGroup(command.Command):
                                               properties)
         else:
             self.log.warning("Please specify what to unset.")
+
+
+class _PortGroupMembership(command.Command):
+    """Common base for adding/removing ports to/from a port group."""
+
+    log: logging.Logger = logging.getLogger(
+        __name__ + "._PortGroupMembership")
+
+    ports_help: str = ""
+
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
+        parser: argparse.ArgumentParser
+        parser = super().get_parser(prog_name)
+        parser.add_argument(
+            'portgroup',
+            metavar='<port group>',
+            help=_("Name or UUID of the port group."))
+        parser.add_argument(
+            'ports',
+            metavar='<port>',
+            nargs='+',
+            help=self.ports_help)
+        return parser
+
+    def _update_port(
+        self, client: Any, portgroup_uuid: str, port: str,
+    ) -> None:
+        raise NotImplementedError()
+
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
+        self.log.debug("take_action(%s)", parsed_args)
+
+        client = self.app.client_manager.baremetal
+        portgroup_uuid = client.portgroup.get(parsed_args.portgroup).uuid
+
+        failures: list[str] = []
+        for port in parsed_args.ports:
+            try:
+                self._update_port(client, portgroup_uuid, port)
+            except exc.ClientException as e:
+                failures.append(
+                    _("Failed to update port %(port)s: %(error)s")
+                    % {'port': port, 'error': e})
+
+        if failures:
+            raise exc.ClientException("\n".join(failures))
+
+
+class AddBaremetalPortGroup(_PortGroupMembership):
+    """Add ports to a baremetal port group."""
+
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".AddBaremetalPortGroup")
+
+    ports_help = _("UUID(s) of the port(s) to add to the port group.")
+
+    def _update_port(
+        self, client: Any, portgroup_uuid: str, port: str,
+    ) -> None:
+        client.port.update(port, utils.args_array_to_patch(
+            'add', ['portgroup_uuid=%s' % portgroup_uuid]))
+
+
+class RemoveBaremetalPortGroup(_PortGroupMembership):
+    """Remove ports from a baremetal port group."""
+
+    log: logging.Logger = logging.getLogger(
+        __name__ + ".RemoveBaremetalPortGroup")
+
+    ports_help = _("UUID(s) of the port(s) to remove from the port group.")
+
+    def _update_port(
+        self, client: Any, portgroup_uuid: str, port: str,
+    ) -> None:
+        if client.port.get(port).portgroup_uuid != portgroup_uuid:
+            raise exc.ClientException(
+                _("port is not a member of the port group"))
+        client.port.update(port, utils.args_array_to_patch(
+            'remove', ['portgroup_uuid']))

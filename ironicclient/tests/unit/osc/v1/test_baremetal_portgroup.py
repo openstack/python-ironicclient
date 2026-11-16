@@ -17,10 +17,12 @@
 from __future__ import annotations
 
 import copy
+from typing import Any
 from unittest import mock
 
 from osc_lib.tests import utils as osctestutils
 
+from ironicclient import exc
 from ironicclient.osc.v1 import baremetal_portgroup
 from ironicclient.tests.unit.osc.v1 import fakes as baremetal_fakes
 
@@ -929,3 +931,81 @@ class TestBaremetalPortGroupUnset(TestBaremetalPortGroup):
         self.baremetal_mock.portgroup.update.assert_called_once_with(
             'portgroup',
             [{'path': '/category', 'op': 'remove'}])
+
+
+class TestBaremetalPortGroupMembership(TestBaremetalPortGroup):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.baremetal_mock.portgroup.get.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None, copy.deepcopy(baremetal_fakes.PORTGROUP),
+                loaded=True))
+
+    def _run(self, cmd: Any, *ports: str) -> None:
+        arglist = [baremetal_fakes.baremetal_portgroup_name, *ports]
+        verifylist = [
+            ('portgroup', baremetal_fakes.baremetal_portgroup_name),
+            ('ports', list(ports)),
+        ]
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        cmd.take_action(parsed_args)
+        self.baremetal_mock.portgroup.get.assert_called_once_with(
+            baremetal_fakes.baremetal_portgroup_name)
+
+    def test_add(self) -> None:
+        cmd = baremetal_portgroup.AddBaremetalPortGroup(self.app, None)
+        self._run(cmd, 'port-1', 'port-2')
+
+        patch = [{'op': 'add', 'path': '/portgroup_uuid',
+                  'value': baremetal_fakes.baremetal_portgroup_uuid}]
+        self.baremetal_mock.port.update.assert_has_calls(
+            [mock.call('port-1', patch), mock.call('port-2', patch)])
+
+    def test_add_no_ports(self) -> None:
+        cmd = baremetal_portgroup.AddBaremetalPortGroup(self.app, None)
+        self.assertRaises(osctestutils.ParserException,
+                          self.check_parser, cmd,
+                          [baremetal_fakes.baremetal_portgroup_name], [])
+
+    def test_remove(self) -> None:
+        self.baremetal_mock.port.get.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None, {'portgroup_uuid':
+                       baremetal_fakes.baremetal_portgroup_uuid},
+                loaded=True))
+        cmd = baremetal_portgroup.RemoveBaremetalPortGroup(self.app, None)
+        self._run(cmd, 'port-1')
+
+        self.baremetal_mock.port.update.assert_called_once_with(
+            'port-1', [{'op': 'remove', 'path': '/portgroup_uuid'}])
+
+    def test_remove_no_ports(self) -> None:
+        cmd = baremetal_portgroup.RemoveBaremetalPortGroup(self.app, None)
+        self.assertRaises(osctestutils.ParserException,
+                          self.check_parser, cmd,
+                          [baremetal_fakes.baremetal_portgroup_name], [])
+
+    def test_remove_multiple(self) -> None:
+        self.baremetal_mock.port.get.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None, {'portgroup_uuid':
+                       baremetal_fakes.baremetal_portgroup_uuid},
+                loaded=True))
+        cmd = baremetal_portgroup.RemoveBaremetalPortGroup(self.app, None)
+        self._run(cmd, 'port-1', 'port-2')
+
+        self.baremetal_mock.port.get.assert_has_calls(
+            [mock.call('port-1'), mock.call('port-2')])
+        patch = [{'op': 'remove', 'path': '/portgroup_uuid'}]
+        self.baremetal_mock.port.update.assert_has_calls(
+            [mock.call('port-1', patch), mock.call('port-2', patch)])
+        self.assertEqual(2, self.baremetal_mock.port.update.call_count)
+
+    def test_remove_not_member(self) -> None:
+        self.baremetal_mock.port.get.return_value = (
+            baremetal_fakes.FakeBaremetalResource(
+                None, {'portgroup_uuid': 'other'}, loaded=True))
+        cmd = baremetal_portgroup.RemoveBaremetalPortGroup(self.app, None)
+        self.assertRaises(exc.ClientException, self._run, cmd, 'port-1')
+        self.baremetal_mock.port.update.assert_not_called()
